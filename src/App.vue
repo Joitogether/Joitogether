@@ -1,14 +1,10 @@
 <script setup>
-
+import BannerComponent from './components/BannerComponent.vue'
 </script>
 
 <template>
-  <h1 class="text-3xl font-bold underline">
-    Hello world!
-  </h1>
+  <BannerComponent />
   <RouterView />
 </template>
 
-<style scoped>
-
-</style>
+<style scoped></style>
