@@ -3,6 +3,7 @@ import Login from '../views/Login/LoginPage.vue'
 import Profile from '@/views/MyProfile/index.vue'
 import Home from '@/views/Home/index.vue'
 
+
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -21,6 +22,7 @@ const router = createRouter({
     name: 'home',
     component: Home
   }
+
 ],
 })
 
