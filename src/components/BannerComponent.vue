@@ -1,7 +1,7 @@
 <template>
   <div class="w-screen">
     <div class="banner flex flex-col">
-      <n-carousel autoplay :default-index="2">
+      <n-carousel autoplay>
         <img
           v-for="carouselImg in carouselData"
           :key="carouselImg.src"
@@ -77,8 +77,9 @@ const ariaData = [
 }
 a img {
   border-radius: 50%;
-  width: 100px;
-  height: 100px;
+  max-width: 100px;
+  height: auto;
+  margin: 0 auto;
 }
 a img:hover {
   transform: scale(1.05);
@@ -97,5 +98,20 @@ p {
   font-size: 20px;
   line-height: 29px;
   font-weight: bold;
+}
+@media (max-width: 768px) {
+  .flex.items-center.w-full.justify-evenly {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 50px;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1024px) {
+  .flex.items-center.w-full.justify-evenly {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 60px;
+  }
 }
 </style>
