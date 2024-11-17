@@ -1,2 +1,10 @@
 @import './base.css';
+<<<<<<< HEAD
 @import './carousel.css';
+=======
+
+#app {
+  width: 100vw;
+}
+
+>>>>>>> origin/layout-MyProfile
