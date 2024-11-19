@@ -20,12 +20,12 @@ const props = defineProps({
 })
 </script>
 <template>
-  <div class="rounded-2xl bg-transparent  overflow-hidden   mb-4">
+  <div class="rounded-2xl bg-transparent  overflow-hidden  ">
     <a href="#" :class="{ ['flex' ] : props.horizontal }">
       <div :class="{'flex-1' : props.horizontal}">
           <img :class="{ 'horizontal-layout-img' : true}" class="w-full h-48 object-cover" :src="props.actImgUrl" alt="死圖">
       </div>
-      <div :class="{ 'horizontal-layout-container' : props.horizontal}" class="flex flex-col pt-2 truncate">
+      <div :class="{ 'horizontal-layout-container' : props.horizontal}" class="flex flex-col py-[3%] truncate">
           <div class=" text-lg font-semibold mb-2 truncate 	">活動名稱:{{ props.title }}</div>
           <div class="text-sm  mb-2 truncate">地點:{{ props.location }}</div>
           <div class="text-sm text-gray-500 mb-2 truncate">地點/時間:{{ props.dateTime }}</div>
@@ -51,7 +51,7 @@ const props = defineProps({
 }
 
 .horizontal-layout-container{
-  padding:0 2%;
+  padding: 2%;
   flex: 2;
 }
 

@@ -1,6 +1,6 @@
 <script setup>
 import { computed, ref } from 'vue'
-import { Clock, CreditCard, MoneySquare, Group, MapPin } from '@iconoir/vue'
+import { Clock, CreditCard, MoneySquare, Group, MapPin, NavArrowLeft } from '@iconoir/vue'
 import dayjs from 'dayjs';
 import 'dayjs/locale/zh'
 import { NInput, NButton } from 'naive-ui';
@@ -9,7 +9,7 @@ import ActivityCard from '@/views/components/ActivityCard.vue';
 
 const activity = ref({
   id: 'unique-activity-id',
-  name: '一起去玩水sdsdsdsdsdsdsdsdssds', // 活動名稱
+  name: '一起去玩水', // 活動名稱
   imageUrl: 'https://www.welcometw.com/wp-content/uploads/2022/06/%E7%B6%B2%E7%BE%8E%E8%80%81%E6%9C%A8@sshihhan-850x638.jpg', // 活動照片網址
   location: '261宜蘭縣頭城鎮濱海路二段6號', 
   startDate: '2024-12-20', // 開始日期 
@@ -56,6 +56,19 @@ const userComment = ref('')
 <template>
   <div class="container max-w-3xl ">
     <div class="detail-container">
+      <div class="flex items-center mb-4 w-full">
+        <router-link :to="{ name: 'home' }">
+          <NavArrowLeft  stroke-width="2" class="w-8 h-8 "></NavArrowLeft>
+        </router-link>
+        <div class="flex h-full  justify-start ml-[5%] w-full">
+          <img class="w-14 aspect-square rounded-full" src="/src/assets/UserUpdata1.jpg" alt="">
+          <div class="ml-3 relative w-full h-14">
+            <p class="font-bold text-lg absolute top-0">Justin</p>
+            <p class="absolute bottom-0">新北市 • 45 • 員工</p>
+          </div>
+        </div>
+
+      </div>
       <div class=" aspect-square overflow-hidden rounded-md">
         <img class="w-full h-full object-cover" :src="activity.imageUrl" alt="">
       </div>
@@ -83,7 +96,7 @@ const userComment = ref('')
             <p class="mt-2">{{ `${activity.maxParticipants}人` }}</p>
           </li>
         </ul>
-        <div class="flex items-center mt-5">
+        <div class="flex items-center my-5">
           <MapPin height="32" width="32"></MapPin>
           <span class="text-lg ml-5">{{ activity.location }}</span>
         </div>
@@ -101,8 +114,8 @@ const userComment = ref('')
         </div>
       </div>
     </div>
-    <div class="cards-container  px-5">
-      <h2 class="text-2xl font-bold mb-[5%]">近期活動</h2>
+    <div class="cards-container  pl-[2%] ">
+      <h2 class="text-2xl font-bold mb-10">近期活動</h2>
       <ActivityCard 
         v-for="items in 5"
         horizontal="true"
@@ -112,6 +125,7 @@ const userComment = ref('')
         :date-time="activity.startDate"
         :participants="activity.participants.registered.length"
         :host="activity.hostId"
+        class="mb-[2%]"
       ></ActivityCard>
     </div>
   </div>
