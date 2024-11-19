@@ -4,15 +4,15 @@ import { Clock, CreditCard, MoneySquare, Group, MapPin } from '@iconoir/vue'
 import dayjs from 'dayjs';
 import 'dayjs/locale/zh'
 import { NInput, NButton } from 'naive-ui';
-dayjs.locale('zh') 
+dayjs.locale('zh')
 
 
 const activity = ref({
   id: 'unique-activity-id',
   name: '一起去玩水', // 活動名稱
   imageUrl: 'https://www.welcometw.com/wp-content/uploads/2022/06/%E7%B6%B2%E7%BE%8E%E8%80%81%E6%9C%A8@sshihhan-850x638.jpg', // 活動照片網址
-  location: '261宜蘭縣頭城鎮濱海路二段6號', 
-  startDate: '2024-12-20', // 開始日期 
+  location: '261宜蘭縣頭城鎮濱海路二段6號',
+  startDate: '2024-12-20', // 開始日期
   endDate: '2024-12-25', // 結束日期
   startTime: '14:00', // 開始時間
   endTime: '18:00', // 結束時間
@@ -66,7 +66,7 @@ const userComment = ref('')
       </div>
       <span class="text-sm text-red-500">{{ `最後審核時間 ${activity.approvalDeadline}` }}</span>
       <p class="font-bold text-lg text-end">{{ `${registerCount}人報名` }}</p>
-      <NButton class="w-full mt-3 font-bold text-lg py-5" round type="primary">報名</NButton> 
+      <NButton class="w-full mt-3 font-bold text-lg py-5" round type="primary">報名</NButton>
       <p class="py-8 leading-6">{{ activity.description }}</p>
       <ul class="flex justify-around text-md border border-gray-200/100 rounded-lg p-2">
         <li class="flex flex-col items-center">
@@ -78,7 +78,7 @@ const userComment = ref('')
           <p class="mt-2">{{`$${activity.price}`  }}</p>
         </li>
         <li class="flex flex-col items-center">
-          <Group height="35" width="35"></Group> 
+          <Group height="35" width="35"></Group>
           <p class="mt-2">{{ `${activity.maxParticipants}人` }}</p>
         </li>
       </ul>
@@ -95,11 +95,11 @@ const userComment = ref('')
         <NInput v-model:value="userComment" type="textarea" placeholder="留下你想說的話吧!"></NInput>
         <div class="text-end mt-2">
           <NButton secondary @click="clearComment">取消</NButton>
-          <NButton :disabled="userComment.length == 0" type="primary" class="ml-2">留言</NButton> 
+          <NButton :disabled="userComment.length == 0" type="primary" class="ml-2">留言</NButton>
         </div>
       </div>
     </div>
   </div>
 </template>
 <style scoped>
-</style>  
+</style>
