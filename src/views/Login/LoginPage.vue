@@ -28,7 +28,7 @@
               忘記密碼
             </button>
           </div>
-          <n-button class="bg-blue-400 shadow font-bold h-10 w-full rounded" type="button">
+          <n-button class="w-full mt-3 font-bold text-lg py-5" round type="primary">
             登入
           </n-button>
         </form>
@@ -38,18 +38,12 @@
           <div class="flex-grow border-t border-gray-300"></div>
         </div>
         <div class="flex justify-center flex-col gap-3 items-center">
-          <button
-            class="shadow bg-red-400 hover:bg-red-500 focus:shadow-outline focus:outline-none text-white font-bold h-10 w-full rounded"
-            type="button"
+          <n-button class="w-full mt-3 font-bold text-lg py-5" round type="primary"
+            >Google</n-button
           >
-            Google
-          </button>
-          <button
-            class="shadow bg-blue-400 hover:bg-blue-500 focus:shadow-outline focus:outline-none text-white font-bold h-10 w-full rounded"
-            type="button"
+          <n-button class="w-full mt-3 font-bold text-lg py-5" round type="primary"
+            >Facebook</n-button
           >
-            Facebook
-          </button>
         </div>
         <div class="flex items-center mb-7 mt-8">
           <div class="flex-grow border-t border-gray-300"></div>
@@ -57,17 +51,33 @@
           <div class="flex-grow border-t border-gray-300"></div>
         </div>
         <div class="flex justify-center flex-col gap-3 items-center">
-          <button
+          <n-button
             @click="toggleLoginSignup"
-            class="shadow bg-blue-400 hover:bg-blue-500 focus:shadow-outline focus:outline-none text-white font-bold h-10 w-full rounded"
-            type="button"
+            class="w-full mt-3 font-bold text-lg py-5"
+            round
+            type="primary"
           >
             註冊一個帳號吧
-          </button>
+          </n-button>
         </div>
       </div>
       <div v-else class="signup-box">
         <h2 class="text-blue-500">註冊</h2>
+        <n-form
+          ref="formRef"
+          inline
+          :label-width="80"
+          :model="formValue"
+          :rules="rules"
+          style="width: 100%"
+        >
+          <n-form-item label="姓名" path="user.name">
+            <n-input v-model:value="formValue.user.name" placeholder="輸入姓名" />
+          </n-form-item>
+          <n-form-item label="電話號碼" path="phone">
+            <n-input v-model:value="formValue.phone" placeholder="輸入電話號碼" />
+          </n-form-item>
+        </n-form>
         <form action="">
           <label for="fullname" class="text-gray-500 font-bold text-left text-sm self-start">
             姓名
@@ -109,56 +119,39 @@
             placeholder="請輸入手機號碼"
             class="bg-gray-100 appearance-none border-2 border-gray-100 rounded py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-500"
           />
-          <div class="forgot-block">
-            <div>
-              <input type="checkbox" id="remember" name="remember" class="remember" />
-              <label for="remember" class="checkbox-label">記住我</label>
-            </div>
-            <button class="bg-white text-gray-400 hover:text-blue-400 font-bold rounded text-base">
-              忘記密碼
-            </button>
-          </div>
-          <button
-            class="shadow bg-blue-400 hover:bg-blue-500 focus:shadow-outline focus:outline-none text-white font-bold h-10 w-full rounded"
-            type="button"
-          >
-            登入
-          </button>
+          <label for="date" class="text-gray-500 font-bold text-left text-sm self-start">
+            生日
+          </label>
+          <n-date-picker v-model:value="timestamp" type="date" class="w-full" />
+          <!-- <pre>{{ JSON.stringify(timestamp) }}</pre> -->
         </form>
         <div class="flex items-center mb-7 mt-8">
           <div class="flex-grow border-t border-gray-300"></div>
-
-          <span class="mx-4 text-gray-600">第三方平台登入</span>
-
-          <div class="flex-grow border-t border-gray-300"></div>
         </div>
-        <div class="flex justify-center flex-col gap-3 items-center">
-          <button
-            class="shadow bg-red-400 hover:bg-red-500 focus:shadow-outline focus:outline-none text-white font-bold h-10 w-full rounded"
-            type="button"
-          >
-            Google
-          </button>
-          <button
-            class="shadow bg-blue-400 hover:bg-blue-500 focus:shadow-outline focus:outline-none text-white font-bold h-10 w-full rounded"
-            type="button"
-          >
-            Facebook
-          </button>
-        </div>
+        <form action="">
+          <label for="password" class="text-gray-500 font-bold text-left text-sm self-start">
+            設定密碼
+          </label>
+          <input
+            type="password"
+            id="password"
+            name="password"
+            placeholder="請輸入密碼"
+            class="bg-gray-100 appearance-none border-2 border-gray-100 rounded py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-500"
+          />
+        </form>
         <div class="flex items-center mb-7 mt-8">
           <div class="flex-grow border-t border-gray-300"></div>
-          <span class="mx-4 text-gray-600">或是</span>
-          <div class="flex-grow border-t border-gray-300"></div>
         </div>
         <div class="flex justify-center flex-col gap-3 items-center">
-          <button
+          <n-button
             @click="toggleLoginSignup"
-            class="shadow bg-blue-400 hover:bg-blue-500 focus:shadow-outline focus:outline-none text-white font-bold h-10 w-full rounded"
-            type="button"
+            class="w-full mt-3 font-bold text-lg py-5"
+            round
+            type="primary"
           >
             回到登入頁
-          </button>
+          </n-button>
         </div>
       </div>
     </div>
@@ -166,10 +159,33 @@
 </template>
 
 <script setup>
-import { NButton } from 'naive-ui'
+import { NButton, NDatePicker, NFormItem, NInput, NForm } from 'naive-ui'
 import { ref } from 'vue'
 
 const isLogin = ref(true)
+const formRef = ref(null)
+const formValue = ref({
+  user: {
+    name: '',
+  },
+  phone: '',
+})
+const rules = {
+  user: {
+    name: {
+      required: true,
+      message: '請輸入姓名',
+      trigger: 'blur',
+    },
+  },
+  phone: {
+    required: true,
+    message: '請輸入電話號碼',
+    trigger: ['input'],
+  },
+}
+const timestamp = ref(Date.now())
+
 const toggleLoginSignup = () => {
   isLogin.value = !isLogin.value
 }
