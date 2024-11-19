@@ -28,12 +28,9 @@
               忘記密碼
             </button>
           </div>
-          <button
-            class="shadow bg-blue-400 hover:bg-blue-500 focus:shadow-outline focus:outline-none text-white font-bold h-10 w-full rounded"
-            type="button"
-          >
+          <n-button class="bg-blue-400 shadow font-bold h-10 w-full rounded" type="button">
             登入
-          </button>
+          </n-button>
         </form>
         <div class="flex items-center mb-7 mt-8">
           <div class="flex-grow border-t border-gray-300"></div>
@@ -169,6 +166,7 @@
 </template>
 
 <script setup>
+import { NButton } from 'naive-ui'
 import { ref } from 'vue'
 
 const isLogin = ref(true)
@@ -197,6 +195,7 @@ input {
   text-align: center;
   border-radius: 5px;
 }
+
 .login-wrapper {
   height: 100vh;
   width: 100%;
