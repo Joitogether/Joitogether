@@ -12,26 +12,30 @@ const props = defineProps({
   participants: Number,
   hostImgUrl: {
     default: '/src/assets/UserUpdata1.jpg'
+  },
+  horizontal: {
+    default: false
   }
+
 })
 </script>
 <template>
   <div class="rounded-2xl bg-transparent  overflow-hidden   mb-4">
-    <a href="#">
-      <div>
-          <img class="w-full h-48 object-cover" :src="props.actImgUrl" alt="死圖">
+    <a href="#" :class="{ ['flex' ] : props.horizontal }">
+      <div :class="{'flex-1' : props.horizontal}">
+          <img :class="{ 'horizontal-layout-img' : true}" class="w-full h-48 object-cover" :src="props.actImgUrl" alt="死圖">
       </div>
-      <div>
+      <div :class="{ 'horizontal-layout-container' : props.horizontal}" class="flex flex-col">
           <div class="mt-2 text-lg font-semibold mb-2 truncate ">活動名稱:{{ props.title }}</div>
           <div class="text-sm  mb-2 truncate">地點:{{ props.location }}</div>
           <div class="text-sm text-gray-500 mb-2 truncate">地點/時間:{{ props.dateTime }}</div>
-          <div class="flex items-center justify-between text-sm ">
+          <div class="flex items-center justify-between text-sm " :class="{ 'mt-auto' : props.horizontal}">
               <div class="flex items-center">
                   <img class="w-6 h-6 rounded-full mr-2" :src="props.hostImgUrl" alt="團主頭像">
                   <span>{{ props.host }}</span>
               </div>
               <div class="flex items-center">
-                      報名人數:{{ props.participants }}
+                報名人數:{{ props.participants }}
               </div>
           </div>                            
       </div>
@@ -40,4 +44,17 @@ const props = defineProps({
 
 </template>
 <style scoped>
+.horizontal-layout-img {
+  aspect-ratio: 4 / 3;
+  height: auto
+}
+
+.horizontal-layout-container{
+  padding:0 2%;
+  flex: 2;
+}
+
+
+
+
 </style>

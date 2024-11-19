@@ -101,6 +101,7 @@ const userComment = ref('')
     </div>
   </div>
   <ActivityCard 
+    horizontal="true"
     :title="activity.name"
     :actImgUrl="activity.imageUrl"
     :location="activity.location"
