@@ -3,7 +3,7 @@ import { computed, ref } from 'vue'
 import { Clock, CreditCard, MoneySquare, Group, MapPin, NavArrowLeft } from '@iconoir/vue'
 import dayjs from 'dayjs';
 import 'dayjs/locale/zh'
-import { NInput, NButton } from 'naive-ui';
+import { NInput, NButton, NModal, NCard } from 'naive-ui';
 dayjs.locale('zh') 
 import ActivityCard from '@/views/components/ActivityCard.vue';
 
@@ -51,6 +51,9 @@ const registerCount = computed(() => {
 const clearComment = () => {
   userComment.value = ''
 }
+
+const showModal = ref(true)
+
 const userComment = ref('')
 </script>
 <template>
@@ -128,6 +131,24 @@ const userComment = ref('')
         class="mb-[2%]"
       ></ActivityCard>
     </div>
+    <NModal v-model:show="showModal">
+      <n-card
+        style="width: 600px"
+        title="模态框"
+        :bordered="false"
+        size="huge"
+        role="dialog"
+        aria-modal="true"
+      >
+        <template #header-extra>
+          噢！
+        </template>
+        内容
+        <template #footer>
+          尾部
+        </template>
+      </n-card>
+    </NModal>
   </div>
 
 </template>
