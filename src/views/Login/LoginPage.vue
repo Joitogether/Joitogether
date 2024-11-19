@@ -1,14 +1,14 @@
 <template>
   <div class="login-wrapper">
-    <div class="block">
+    <div class="block shadow-md">
       <div class="event-image"></div>
       <div v-if="isLogin" class="login-box">
         <h2 class="text-blue-500">登入</h2>
         <form action="">
           <input
             type="email"
-            id="username"
-            name="username"
+            id="email"
+            name="email"
             placeholder="請輸入信箱"
             class="bg-gray-100 appearance-none border-2 border-gray-100 rounded py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-500"
           />
@@ -21,24 +21,16 @@
           />
           <div class="forgot-block">
             <div>
-              <input
-                type="checkbox"
-                id="remember"
-                name="remember"
-                class="remember"
-              />
+              <input type="checkbox" id="remember" name="remember" class="remember" />
               <label for="remember" class="checkbox-label">記住我</label>
             </div>
-            <button
-              class="bg-white text-gray-400 hover:text-blue-400 font-bold rounded text-base"
-            >
+            <button class="bg-white text-gray-400 hover:text-blue-400 font-bold rounded text-base">
               忘記密碼
             </button>
           </div>
           <button
-            class="shadow bg-blue-400 hover:bg-blue-500 focus:shadow-outline focus:outline-none text-white font-bold h-10 rounded"
+            class="shadow bg-blue-400 hover:bg-blue-500 focus:shadow-outline focus:outline-none text-white font-bold h-10 w-full rounded"
             type="button"
-            style="width: 90%"
           >
             登入
           </button>
@@ -50,16 +42,14 @@
         </div>
         <div class="flex justify-center flex-col gap-3 items-center">
           <button
-            class="shadow bg-red-400 hover:bg-red-500 focus:shadow-outline focus:outline-none text-white font-bold h-10 rounded"
+            class="shadow bg-red-400 hover:bg-red-500 focus:shadow-outline focus:outline-none text-white font-bold h-10 w-full rounded"
             type="button"
-            style="width: 90%"
           >
             Google
           </button>
           <button
-            class="shadow bg-blue-400 hover:bg-blue-500 focus:shadow-outline focus:outline-none text-white font-bold h-10 rounded"
+            class="shadow bg-blue-400 hover:bg-blue-500 focus:shadow-outline focus:outline-none text-white font-bold h-10 w-full rounded"
             type="button"
-            style="width: 90%"
           >
             Facebook
           </button>
@@ -72,9 +62,8 @@
         <div class="flex justify-center flex-col gap-3 items-center">
           <button
             @click="toggleLoginSignup"
-            class="shadow bg-blue-400 hover:bg-blue-500 focus:shadow-outline focus:outline-none text-white font-bold h-10 rounded"
+            class="shadow bg-blue-400 hover:bg-blue-500 focus:shadow-outline focus:outline-none text-white font-bold h-10 w-full rounded"
             type="button"
-            style="width: 90%"
           >
             註冊一個帳號吧
           </button>
@@ -83,40 +72,58 @@
       <div v-else class="signup-box">
         <h2 class="text-blue-500">註冊</h2>
         <form action="">
+          <label for="fullname" class="text-gray-500 font-bold text-left text-sm self-start">
+            姓名
+          </label>
           <input
-            type="email"
+            type="fullname"
+            id="fullname"
+            name="fullname"
+            placeholder="請輸入全名"
+            class="bg-gray-100 appearance-none border-2 border-gray-100 rounded py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-500"
+          />
+          <label for="username" class="text-gray-500 font-bold text-left text-sm self-start">
+            使用者名稱
+          </label>
+          <input
+            type="username"
             id="username"
             name="username"
+            placeholder="請輸入使用者名稱"
+            class="bg-gray-100 appearance-none border-2 border-gray-100 rounded py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-500"
+          />
+          <label for="email" class="text-gray-500 font-bold text-left text-sm self-start">
+            信箱
+          </label>
+          <input
+            type="email"
+            id="email"
+            name="email"
             placeholder="請輸入信箱"
             class="bg-gray-100 appearance-none border-2 border-gray-100 rounded py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-500"
           />
+          <label for="tel" class="text-gray-500 font-bold text-left text-sm self-start">
+            手機號碼
+          </label>
           <input
-            type="password"
-            id="password"
-            name="password"
-            placeholder="請輸入密碼"
+            type="tel"
+            id="tel"
+            name="tel"
+            placeholder="請輸入手機號碼"
             class="bg-gray-100 appearance-none border-2 border-gray-100 rounded py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-500"
           />
           <div class="forgot-block">
             <div>
-              <input
-                type="checkbox"
-                id="remember"
-                name="remember"
-                class="remember"
-              />
+              <input type="checkbox" id="remember" name="remember" class="remember" />
               <label for="remember" class="checkbox-label">記住我</label>
             </div>
-            <button
-              class="bg-white text-gray-400 hover:text-blue-400 font-bold rounded text-base"
-            >
+            <button class="bg-white text-gray-400 hover:text-blue-400 font-bold rounded text-base">
               忘記密碼
             </button>
           </div>
           <button
-            class="shadow bg-blue-400 hover:bg-blue-500 focus:shadow-outline focus:outline-none text-white font-bold h-10 rounded"
+            class="shadow bg-blue-400 hover:bg-blue-500 focus:shadow-outline focus:outline-none text-white font-bold h-10 w-full rounded"
             type="button"
-            style="width: 90%"
           >
             登入
           </button>
@@ -130,16 +137,14 @@
         </div>
         <div class="flex justify-center flex-col gap-3 items-center">
           <button
-            class="shadow bg-red-400 hover:bg-red-500 focus:shadow-outline focus:outline-none text-white font-bold h-10 rounded"
+            class="shadow bg-red-400 hover:bg-red-500 focus:shadow-outline focus:outline-none text-white font-bold h-10 w-full rounded"
             type="button"
-            style="width: 90%"
           >
             Google
           </button>
           <button
-            class="shadow bg-blue-400 hover:bg-blue-500 focus:shadow-outline focus:outline-none text-white font-bold h-10 rounded"
+            class="shadow bg-blue-400 hover:bg-blue-500 focus:shadow-outline focus:outline-none text-white font-bold h-10 w-full rounded"
             type="button"
-            style="width: 90%"
           >
             Facebook
           </button>
@@ -152,9 +157,8 @@
         <div class="flex justify-center flex-col gap-3 items-center">
           <button
             @click="toggleLoginSignup"
-            class="shadow bg-blue-400 hover:bg-blue-500 focus:shadow-outline focus:outline-none text-white font-bold h-10 rounded"
+            class="shadow bg-blue-400 hover:bg-blue-500 focus:shadow-outline focus:outline-none text-white font-bold h-10 w-full rounded"
             type="button"
-            style="width: 90%"
           >
             回到登入頁
           </button>
@@ -165,12 +169,12 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref } from 'vue'
 
-const isLogin = ref(true);
+const isLogin = ref(true)
 const toggleLoginSignup = () => {
-  isLogin.value = !isLogin.value;
-};
+  isLogin.value = !isLogin.value
+}
 </script>
 
 <style scoped>
@@ -186,7 +190,7 @@ form {
   gap: 10px;
 }
 input {
-  width: 90%;
+  width: 100%;
   height: 40px;
   /* border: 1px solid gray; */
   padding: 5px;
@@ -194,16 +198,16 @@ input {
   border-radius: 5px;
 }
 .login-wrapper {
-  height: 800px;
+  height: 100vh;
   width: 100%;
   background-color: #ebebeb;
   display: flex;
   justify-content: center;
-  align-items: center;
+  padding: 30px 0;
 }
 .block {
-  height: 600px;
-  width: 80%;
+  height: auto;
+  width: 90%;
   border-radius: 30px;
   overflow: hidden;
 }
@@ -212,12 +216,13 @@ input {
 .signup-box {
   width: 100%;
   height: 100%;
-  padding: 30px 20px;
+  padding: 30px 30px;
   background-color: rgb(255, 255, 255);
   box-sizing: border-box;
+  overflow-y: scroll;
 }
 .forgot-block {
-  width: 90%;
+  width: 100%;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -240,6 +245,7 @@ input {
   .block {
     display: flex;
     justify-content: space-between;
+    height: 600px;
   }
   .event-image {
     width: 50%;
@@ -249,12 +255,15 @@ input {
   .login-box,
   .signup-box {
     width: 50%;
+    padding-left: 6%;
+    padding-right: 6%;
   }
 }
 
 @media screen and (1024px <= width) {
   .block {
     height: 90%;
+    width: 65%;
     display: flex;
     justify-content: space-between;
   }
@@ -266,7 +275,7 @@ input {
   .login-box,
   .signup-box {
     width: 50%;
-    padding: 8% 5%;
+    padding: 6% 6%;
   }
 }
 </style>
