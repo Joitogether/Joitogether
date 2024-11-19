@@ -25,8 +25,8 @@ const props = defineProps({
       <div :class="{'flex-1' : props.horizontal}">
           <img :class="{ 'horizontal-layout-img' : true}" class="w-full h-48 object-cover" :src="props.actImgUrl" alt="死圖">
       </div>
-      <div :class="{ 'horizontal-layout-container' : props.horizontal}" class="flex flex-col">
-          <div class="mt-2 text-lg font-semibold mb-2 truncate ">活動名稱:{{ props.title }}</div>
+      <div :class="{ 'horizontal-layout-container' : props.horizontal}" class="flex flex-col pt-2 truncate">
+          <div class=" text-lg font-semibold mb-2 truncate 	">活動名稱:{{ props.title }}</div>
           <div class="text-sm  mb-2 truncate">地點:{{ props.location }}</div>
           <div class="text-sm text-gray-500 mb-2 truncate">地點/時間:{{ props.dateTime }}</div>
           <div class="flex items-center justify-between text-sm " :class="{ 'mt-auto' : props.horizontal}">
@@ -45,8 +45,9 @@ const props = defineProps({
 </template>
 <style scoped>
 .horizontal-layout-img {
-  aspect-ratio: 4 / 3;
-  height: auto
+  width: 100%;
+  height: 100%;
+
 }
 
 .horizontal-layout-container{
