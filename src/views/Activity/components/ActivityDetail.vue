@@ -5,7 +5,7 @@ import dayjs from 'dayjs';
 import 'dayjs/locale/zh'
 import { NInput, NButton } from 'naive-ui';
 dayjs.locale('zh') 
-
+import ActivityCard from '@/views/components/ActivityCard.vue';
 
 const activity = ref({
   id: 'unique-activity-id',
@@ -100,6 +100,14 @@ const userComment = ref('')
       </div>
     </div>
   </div>
+  <ActivityCard 
+    :title="activity.name"
+    :actImgUrl="activity.imageUrl"
+    :location="activity.location"
+    :date-time="activity.startDate"
+    :participants="activity.participants.registered.length"
+    :host="activity.hostId"
+  ></ActivityCard>
 </template>
 <style scoped>
 </style>  
