@@ -1,2 +1,7 @@
 @import './base.css';
+
 @import './carousel.css';
+
+#app {
+  width: 100vw;
+}
