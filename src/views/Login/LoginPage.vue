@@ -72,7 +72,7 @@
             <n-input v-model:value="formValue.user.username" placeholder="輸入使用者名稱" />
           </n-form-item>
           <n-form-item label="信箱" path="email">
-            <n-input v-model:value="formValue.phone" placeholder="輸入信箱" />
+            <n-input v-model:value="formValue.email" placeholder="輸入信箱" />
           </n-form-item>
           <n-form-item label="電話號碼" path="phone">
             <n-input v-model:value="formValue.phone" placeholder="輸入電話號碼" />
@@ -95,19 +95,24 @@
             設定密碼
           </label>
           <input
+            v-model="password"
             type="password"
             id="password"
             name="password"
             placeholder="請輸入密碼"
             class="bg-gray-100 appearance-none border-2 border-gray-100 rounded py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-500"
-            v-model="password"
           />
         </form>
         <div class="flex items-center mb-7 mt-8">
           <div class="flex-grow border-t border-gray-300"></div>
         </div>
         <div class="flex justify-center flex-col gap-3 items-center">
-          <n-button class="w-full mt-3 font-bold text-lg py-5" round type="primary">
+          <n-button
+            @click="registerRequired"
+            class="w-full mt-3 font-bold text-lg py-5"
+            round
+            type="primary"
+          >
             註冊
           </n-button>
           <n-button
@@ -125,30 +130,40 @@
 </template>
 
 <script setup>
-import { NButton, NDatePicker, NFormItem, NInput, NForm } from 'naive-ui'
+import { NButton, NDatePicker, NFormItem, NInput, NForm, useMessage } from 'naive-ui'
 import { ref } from 'vue'
-// feature
+// feature-register
 import registerUser from './services/registerService.js'
-const email = ref('')
-const password = ref('')
-const errorMessage = ref('')
+import { validateFormFields } from './utils/formValidation.js'
+
+const message = useMessage()
 
 const registerRequired = async () => {
-  if (password.value.length < 6) {
-    errorMessage.value = '密碼長度至少要 6 個字元'
+  const errors = validateFormFields(formValue.value, formValue.value.password)
+
+  if (errors.length > 0) {
+    message.error(errors[0])
     return
   }
+
   try {
-    const user = await registerUser(email.value, password.value)
-    console.log('用戶註冊成功:', user)
+    const userResponse = await registerUser(formValue.value.email, formValue.value.password)
+    console.log('用戶註冊成功:', userResponse)
+    message.success('註冊成功！歡迎您，' + formValue.value.user.username)
   } catch (error) {
-    errorMessage.value = error.message || '註冊失敗'
+    if (error.code === 'auth/email-already-in-use') {
+      message.error('此信箱已被註冊，請嘗試更換其他電子信箱')
+    } else if (error.code === 'auth/invalid-email') {
+      message.error('無效的電子郵件地址')
+    } else if (error.code === 'auth/weak-password') {
+      message.error('密碼長度至少要6個字符，並包含數字與字母')
+    } else {
+      message.error('註冊失敗，請稍後再嘗試：' + (error.message || '未知錯誤'))
+    }
   }
 }
 
-registerRequired()
-
-// console.log(registerUser(email.value, password.value))
+// feature-login
 
 const isLogin = ref(true)
 const formRef = ref(null)
@@ -159,6 +174,7 @@ const formValue = ref({
   },
   email: '',
   phone: '',
+  birthday: null,
 })
 const rules = {
   user: {
@@ -178,6 +194,12 @@ const rules = {
     message: '請輸入信箱',
     trigger: ['input', 'blur'],
   },
+  // password: {
+  //   required: true,
+  //   message: '請輸入密碼',
+  //   trigger: ['input', 'blur'],
+  //   validator: (value) => validatePassword(value),
+  // },
   phone: {
     required: true,
     message: '請輸入電話號碼',
