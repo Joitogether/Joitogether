@@ -78,11 +78,14 @@
           </n-form-item>
         </n-form>
 
-        <label for="date" class="text-gray-500 font-bold text-left text-sm self-start">
-          生日
-        </label>
-        <n-date-picker v-model:value="timestamp" type="date" class="w-full" />
-        <!-- <pre>{{ JSON.stringify(timestamp) }}</pre> -->
+        <n-form-item label="生日" path="birthday">
+          <n-date-picker
+            v-model:value="formValue.birthday"
+            type="date"
+            placeholder="選擇生日"
+            class="w-full"
+          />
+        </n-form-item>
 
         <div class="flex items-center mb-7 mt-8">
           <div class="flex-grow border-t border-gray-300"></div>
@@ -103,6 +106,9 @@
           <div class="flex-grow border-t border-gray-300"></div>
         </div>
         <div class="flex justify-center flex-col gap-3 items-center">
+          <n-button class="w-full mt-3 font-bold text-lg py-5" round type="primary">
+            註冊
+          </n-button>
           <n-button
             @click="toggleLoginSignup"
             class="w-full mt-3 font-bold text-lg py-5"
@@ -125,8 +131,10 @@ const isLogin = ref(true)
 const formRef = ref(null)
 const formValue = ref({
   user: {
-    name: '',
+    username: '',
+    fullname: '',
   },
+  email: '',
   phone: '',
 })
 const rules = {
@@ -152,8 +160,8 @@ const rules = {
     message: '請輸入電話號碼',
     trigger: ['input', 'blur'],
   },
+  birthday: [{ required: true, message: '請選擇生日', trigger: 'change' }],
 }
-const timestamp = ref(Date.now())
 
 const toggleLoginSignup = () => {
   isLogin.value = !isLogin.value
