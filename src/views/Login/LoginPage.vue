@@ -63,27 +63,27 @@
       </div>
       <div v-else class="signup-box">
         <h2 class="text-blue-500">註冊</h2>
-        <n-form ref="formRef" inline :label-width="80" :model="formValue" :rules="rules">
-          <n-form-item>
-            <n-input></n-input>
+        <n-form ref="formRef" :label-width="80" :model="formValue" :rules="rules">
+          <n-form-item label="姓名" path="user.fullname">
+            <n-input v-model:value="formValue.user.fullname" placeholder="輸入姓名" />
           </n-form-item>
-          <n-form-item label="姓名" path="user.name" size="large">
-            <n-input v-model:value="formValue.user.name" placeholder="輸入姓名" />
+          <n-form-item label="使用者名稱" path="user.username">
+            <n-input v-model:value="formValue.user.username" placeholder="輸入使用者名稱" />
+          </n-form-item>
+          <n-form-item label="信箱" path="email">
+            <n-input v-model:value="formValue.phone" placeholder="輸入信箱" />
           </n-form-item>
           <n-form-item label="電話號碼" path="phone">
             <n-input v-model:value="formValue.phone" placeholder="輸入電話號碼" />
           </n-form-item>
         </n-form>
-        <form action="">
-          <label for="fullname" class="text-gray-500 font-bold text-left text-sm self-start">
-            姓名
-          </label>
-          <input
-            type="fullname"
-            id="fullname"
-            name="fullname"
-            placeholder="請輸入全名"
-            class="bg-gray-100 appearance-none border-2 border-gray-100 rounded py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-500"
+
+        <n-form-item label="生日" path="birthday">
+          <n-date-picker
+            v-model:value="formValue.birthday"
+            type="date"
+            placeholder="選擇生日"
+            class="w-full"
           />
           <label for="username" class="text-gray-500 font-bold text-left text-sm self-start">
             使用者名稱
@@ -142,6 +142,9 @@
           <div class="flex-grow border-t border-gray-300"></div>
         </div>
         <div class="flex justify-center flex-col gap-3 items-center">
+          <n-button class="w-full mt-3 font-bold text-lg py-5" round type="primary">
+            註冊
+          </n-button>
           <n-button
             @click="toggleLoginSignup"
             class="w-full mt-3 font-bold text-lg py-5"
@@ -186,25 +189,37 @@ const isLogin = ref(true)
 const formRef = ref(null)
 const formValue = ref({
   user: {
-    name: '',
+    username: '',
+    fullname: '',
   },
+  email: '',
   phone: '',
 })
 const rules = {
   user: {
-    name: {
+    fullname: {
       required: true,
       message: '請輸入姓名',
       trigger: 'blur',
     },
+    username: {
+      required: true,
+      message: '請輸入使用者名稱',
+      trigger: 'blur',
+    },
+  },
+  email: {
+    required: true,
+    message: '請輸入信箱',
+    trigger: ['input', 'blur'],
   },
   phone: {
     required: true,
     message: '請輸入電話號碼',
-    trigger: ['input'],
+    trigger: ['input', 'blur'],
   },
+  birthday: [{ required: true, message: '請選擇生日', trigger: 'change' }],
 }
-const timestamp = ref(Date.now())
 
 const toggleLoginSignup = () => {
   isLogin.value = !isLogin.value
@@ -212,6 +227,10 @@ const toggleLoginSignup = () => {
 </script>
 
 <style scoped>
+.n-form-item {
+  width: 100%;
+}
+
 h2 {
   text-align: center;
   font-size: 25px;
