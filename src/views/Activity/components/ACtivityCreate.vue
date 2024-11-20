@@ -1,149 +1,246 @@
 <script setup>
-import { Search  } from '@iconoir/vue'
-import { computed,ref,onMounted } from 'vue'
-import axios from "axios";
-import { loadGoogleMapsAPI } from "@/views/Activity/components/googleMapsLoader"; // 根據檔案路徑引入
-
-
+import { Search } from "@iconoir/vue";
+import { computed, ref, onMounted } from "vue";
+import { loadGoogleMapsAPI } from "@/views/Activity/components/googleMapsLoader";
 
 // data
-const participants = ref(1)
-const participantsError = ref(false)
-const paymentMethod = ref("free")
-const eventCost = ref(0)
-
-const previewImage = ref(null)
-const uploadError =ref("")
-const maxFileSize = 5*1024*1024
-
+const participants = ref(1);
+const participantsError = ref(false);
+const paymentMethod = ref("free");
+const eventCost = ref(0);
+const previewImage = ref(null);
+const uploadError = ref("");
+const maxFileSize = 5 * 1024 * 1024;
 const searchQuery = ref("");
 const suggestions = ref([]);
 
+const inputValues = ref({
+  name: "",
+  describe: "",
+  price: "",
+  eventTime: "",
+  deadline: "",
+});
+const userNotEnter = ref({
+  name: false,
+  describe: false,
+  price: false,
+  eventTime: false,
+  deadline: false,
+});
 
-const inputValues =ref({
-  name:"",
-  describe:"",
-  price:"",
-  eventTime:"",
-  deadline:"",
+// 儲存與載入資料
+const saveToLocal = () => {
+  const activityData = {
+    ...inputValues.value,
+    participants: participants.value,
+    paymentMethod: paymentMethod.value,
+    eventCost: eventCost.value,
+    location: searchQuery.value || "",
+  };
 
-})
-const userNotEnter=ref({
-  name:false,
-  describe:false,
-  price:false,
-  eventTime:false,
-  deadline:false,
-})
+  try {
+    localStorage.setItem("activityData", JSON.stringify(activityData));
+    console.log("資料已成功儲存至 Local Storage:", activityData);
+  } catch (e) {
+    console.error("LocalStorage 儲存失敗：", e);
+  }
+};
 
+const loadFromLocal = () => {
+  const savedData = localStorage.getItem("activityData");
+  if (savedData) {
+    try {
+      const parsedData = JSON.parse(savedData);
+      inputValues.value = { ...parsedData };
+      participants.value = parsedData.participants || 1;
+      paymentMethod.value = parsedData.paymentMethod || "free";
+      eventCost.value = parsedData.eventCost || 0;
+      searchQuery.value = parsedData.location || "";
+      console.log("已成功載入資料：", parsedData);
+    } catch (e) {
+      console.error("資料解析失敗：", e);
+    }
+  } else {
+    console.log("無儲存的資料可載入");
+  }
+};
+
+onMounted(() => {
+  loadFromLocal();
+});
 
 // methods
+const updateParticipants = (value) => {
+  const newCount = participants.value + value;
 
-// 檢查人數是否低於 1
-  const updateParticipants = (value) => {
-        const newCount = participants.value + value;
+  if (newCount < 1) {
+    participantsError.value = true;
+  } else {
+    participants.value = newCount;
+    participantsError.value = false;
+  }
+};
 
-
-        if (newCount < 1) {
-          participantsError.value = true;
-        } else {
-          participants.value = newCount;
-          participantsError.value = false;
-        }
-      };
-
-// 檢查輸入
-const checkInput = (field) =>{
+const checkInput = (field) => {
   userNotEnter.value[field] = !inputValues.value[field].trim();
-}
+};
 
-// 檢查費用
+const checkTimeInput = (field) => {
+  const now = new Date();
+
+  if (field === "eventTime") {
+    const eventTime = new Date(inputValues.value.eventTime);
+    userNotEnter.value.eventTime = !inputValues.value.eventTime || eventTime < now;
+  } else if (field === "deadline") {
+    const eventTime = new Date(inputValues.value.eventTime);
+    const deadline = new Date(inputValues.value.deadline);
+    userNotEnter.value.deadline =
+      !inputValues.value.deadline || deadline > eventTime;
+  }
+};
+
 const showEventCost = computed(() => paymentMethod.value === "AA");
 
 const validateCost = () => {
-      if (eventCost.value < 0 || eventCost.value > 99999) {
-        userNotEnter.value.price = true;
-      } else {
-        userNotEnter.value.price = false;
-      }
-    }
+  userNotEnter.value.price = eventCost.value < 0 || eventCost.value > 99999;
+};
 
 const checkPaymentMethod = () => {
-      // 如果付款方式不是 "各付各的"，清空費用並隱藏錯誤提示
-      if (paymentMethod.value !== "AA") {
-        eventCost.value = 0;
-        userNotEnter.value.price = false;
-      }
-
-      if (paymentMethod.value ===  "AA"){
-        validateCost();
-      }
-    };
-
-  // 檢查圖片
-  const handleFileUpload =(event) => {
-    const file = event.target.files[0];
-
-    if (!file){
-      uploadError.value='請選擇一個圖片檔案'
-      return;
-    }
-
-    if (file.size > maxFileSize){
-      uploadError.value ="檔案大小不可超過 5 MB";
-      return;
-    }
-    // 清除錯誤資訊
-    uploadError.value ="";
-    // 預覽圖片
-    const reader = new FileReader();
-    reader.onload = () =>{
-      previewImage.value = reader.result;
-    };
-    reader.readAsDataURL(file);
+  if (paymentMethod.value !== "AA") {
+    eventCost.value = 0;
+    userNotEnter.value.price = false;
   }
 
-  //  地址搜尋
-  const apiKey = "AIzaSyBDkJrqUJIsu5kdtFYt24Gto9S3EC-zv0w"; // 請替換為您的 Google API Key
+  if (paymentMethod.value === "AA") {
+    validateCost();
+  }
+};
 
-  const autocompleteInstance = ref(null);
+const handleFileUpload = (event) => {
+  const file = event.target.files[0];
 
-  onMounted(async () => {
+  if (!file) {
+    uploadError.value = "請選擇一個圖片檔案";
+    return;
+  }
+
+  if (file.size > maxFileSize) {
+    uploadError.value = "檔案大小不可超過 5 MB";
+    return;
+  }
+
+  uploadError.value = "";
+  const reader = new FileReader();
+  reader.onload = () => {
+    previewImage.value = reader.result;
+  };
+  reader.readAsDataURL(file);
+};
+
+const apiKey = "AIzaSyBDkJrqUJIsu5kdtFYt24Gto9S3EC-zv0w"; // 替換為您的 Google API Key
+const autocompleteInstance = ref(null);
+
+onMounted(async () => {
   try {
-    // 載入 Google Maps API
-    const googleMaps = await loadGoogleMapsAPI("AIzaSyBDkJrqUJIsu5kdtFYt24Gto9S3EC-zv0w"); // 替換成你的 API Key
-
-    // 獲取輸入框的 DOM 元素
+    const googleMaps = await loadGoogleMapsAPI(apiKey);
     const inputElement = document.getElementById("autocomplete-input");
+    autocompleteInstance.value = new googleMaps.places.Autocomplete(
+      inputElement,
+      {
+        types: ["geocode"],
+        language: "zh-TW",
+      }
+    );
 
-    // 初始化 Autocomplete 實例
-    autocompleteInstance.value = new googleMaps.places.Autocomplete(inputElement, {
-      types: ["geocode"], // 限制輸入類型（可選）
-      language: "zh-TW", // 設定語言（可選）
-    });
-
-    // 監聽地點選擇事件
     autocompleteInstance.value.addListener("place_changed", () => {
       const place = autocompleteInstance.value.getPlace();
-      searchQuery.value = place.formatted_address || place.name; // 取得地點名稱或格式化地址
-      console.log("選擇的地點：", searchQuery.value);
+      searchQuery.value = place.formatted_address || place.name;
     });
   } catch (error) {
     console.error("Error loading Google Maps API:", error);
   }
 });
 
+const clearSearch = () => {
+  const inputElement = document.getElementById("autocomplete-input");
+  if (!searchQuery.value) {
+    inputElement.focus();
+  } else {
+    searchQuery.value = "";
+    suggestions.value = [];
+  }
+};
+
+const selectSuggestion = (suggestion) => {
+  searchQuery.value = suggestion.description;
+  suggestions.value = [];
+};
+
+const validateAllFields = () => {
+  const requiredFields = ["name", "describe", "eventTime", "deadline"];
+  let isValid = true;
+
+  requiredFields.forEach((field) => {
+    checkInput(field);
+    if (userNotEnter.value[field]) {
+      isValid = false;
+    }
+  });
+
+  checkTimeInput("eventTime");
+  checkTimeInput("deadline");
+
+  if (participants.value < 1) {
+    participantsError.value = true;
+    isValid = false;
+  }
+
+  if (paymentMethod.value === "AA") {
+    validateCost();
+    if (userNotEnter.value.price) {
+      isValid = false;
+    }
+  }
+
+  return isValid;
+};
+
+const previewActivity = () => {
+  if (!previewImage.value) {
+    uploadError.value = "請至少上傳一張圖片！";
+    return;
+  }
+
+  Object.keys(inputValues.value).forEach((key) => {
+    checkInput(key);
+  });
+  checkTimeInput("eventTime");
+  checkTimeInput("deadline");
+  validateCost();
+
+  if (
+    Object.values(userNotEnter.value).some((value) => value) ||
+    uploadError.value
+  ) {
+    alert("請填寫完整資料！");
+    return;
+  }
+
+  console.log("活動資料：", {
+    ...inputValues.value,
+    participants: participants.value,
+    paymentMethod: paymentMethod.value,
+    eventCost: eventCost.value,
+    image: previewImage.value,
+    location: searchQuery.value,
+  });
+
+  alert("活動已預覽，請檢查開發者工具中的資料");
+};
 
 
-    const clearSearch = () => {
-      searchQuery.value = "";
-      suggestions.value = [];
-    };
 
-    const selectSuggestion = (suggestion) => {
-      searchQuery.value = suggestion.description; // 設定選中的地址
-      suggestions.value = []; // 清空建議
-    };
 
 
 </script>
@@ -168,7 +265,11 @@ const checkPaymentMethod = () => {
               />
             </label>
           </div>
-           <p v-if="uploadError" class="text-sm text-red-600 mt-2">{{ uploadError }}</p>
+
+          <p v-if="uploadError" class="text-sm text-red-600 mt-2  flex items-center justify-center">{{ uploadError }}</p>
+
+
+           <!-- <p v-if="uploadError" class="text-sm text-red-600 mt-2">{{ uploadError }}</p> -->
         </div>
       </div>
 
@@ -236,26 +337,30 @@ const checkPaymentMethod = () => {
             <label class="block font-medium mb-2 p-2">活動時間
               <span class="text-red-600">*</span>
             </label>
-            <input type="datetime-local"  class="w-full p-3 border rounded-md focus:outline-none"
+            <input type="datetime-local"
+            class="w-full p-3 border rounded-md focus:outline-none"
             v-model="inputValues.eventTime"
-            @blur="checkInput('eventTime')"
+            @blur="checkTimeInput('eventTime')"
             />
             <p
             class="text-red-600 text-sm"
             v-if="userNotEnter.eventTime"
-            >請填選擇活動時間*</p>
-            <!-- <input type="datetime-local"   class="w-full p-3 border rounded-md focus:outline-none" /> -->
+            >活動時間不可低於當前時間**</p>
           </div>
           <div>
-            <label class="block font-medium mb-2 p-2">最晚審核時間 <span class="text-red-600">*</span></label>
-            <input type="datetime-local"  class="w-full p-3 border rounded-md"
+            <label class="block font-medium mb-2 p-2">
+              最晚審核時間 <span class="text-red-600">*</span>
+            </label>
+            <input
+            type="datetime-local"
+            class="w-full p-3 border rounded-md"
             v-model="inputValues.deadline"
-            @blur="checkInput('deadline')"
+            @blur="checkTimeInput('deadline')"
             />
             <p
             class="text-red-600 text-sm"
             v-if="userNotEnter.deadline"
-            >請填選擇最晚審核時間</p>
+            >審核時間不可小於活動時間 *</p>
 
           </div>
           <div class=" bg-gray-200 mt-2 p-6 flex items-center justify-center border rounded-md">
@@ -326,7 +431,9 @@ const checkPaymentMethod = () => {
             </div>
         </div>
         <div class="my-6 flex items-center justify-center ">
-          <button class=" bg-yellow-200 rounded-md  w-full mx-3 py-2 px-3">預覽</button>
+          <button class=" bg-yellow-200 rounded-md  w-full mx-3 py-2 px-3"
+          @click="previewActivity"
+          >預覽</button>
         </div>
       </div>
   </main>
@@ -334,7 +441,6 @@ const checkPaymentMethod = () => {
 </section>
 
 </template>
-
 <style scoped>
 /* 移除數字輸入框的上下滾動按鈕 */
 input[type='number']::-webkit-inner-spin-button,
