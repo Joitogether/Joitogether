@@ -1,6 +1,10 @@
 <script setup>
-import { Search  } from '@iconoir/vue';
-import { computed,ref } from 'vue'
+import { Search  } from '@iconoir/vue'
+import { computed,ref,onMounted } from 'vue'
+import axios from "axios";
+import { loadGoogleMapsAPI } from "@/views/Activity/components/googleMapsLoader"; // 根據檔案路徑引入
+
+
 
 // data
 const participants = ref(1)
@@ -8,15 +12,28 @@ const participantsError = ref(false)
 const paymentMethod = ref("free")
 const eventCost = ref(0)
 
+const previewImage = ref(null)
+const uploadError =ref("")
+const maxFileSize = 5*1024*1024
+
+const searchQuery = ref("");
+const suggestions = ref([]);
+
+
 const inputValues =ref({
   name:"",
   describe:"",
   price:"",
+  eventTime:"",
+  deadline:"",
+
 })
 const userNotEnter=ref({
   name:false,
   describe:false,
-  price:false
+  price:false,
+  eventTime:false,
+  deadline:false,
 })
 
 
@@ -55,11 +72,78 @@ const checkPaymentMethod = () => {
       // 如果付款方式不是 "各付各的"，清空費用並隱藏錯誤提示
       if (paymentMethod.value !== "AA") {
         eventCost.value = 0;
-        userNotEnter.value = false;
+        userNotEnter.value.price = false;
+      }
+
+      if (paymentMethod.value ===  "AA"){
+        validateCost();
       }
     };
 
+  // 檢查圖片
+  const handleFileUpload =(event) => {
+    const file = event.target.files[0];
 
+    if (!file){
+      uploadError.value='請選擇一個圖片檔案'
+      return;
+    }
+
+    if (file.size > maxFileSize){
+      uploadError.value ="檔案大小不可超過 5 MB";
+      return;
+    }
+    // 清除錯誤資訊
+    uploadError.value ="";
+    // 預覽圖片
+    const reader = new FileReader();
+    reader.onload = () =>{
+      previewImage.value = reader.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  //  地址搜尋
+  const apiKey = "AIzaSyBDkJrqUJIsu5kdtFYt24Gto9S3EC-zv0w"; // 請替換為您的 Google API Key
+
+  const autocompleteInstance = ref(null);
+
+  onMounted(async () => {
+  try {
+    // 載入 Google Maps API
+    const googleMaps = await loadGoogleMapsAPI("AIzaSyBDkJrqUJIsu5kdtFYt24Gto9S3EC-zv0w"); // 替換成你的 API Key
+
+    // 獲取輸入框的 DOM 元素
+    const inputElement = document.getElementById("autocomplete-input");
+
+    // 初始化 Autocomplete 實例
+    autocompleteInstance.value = new googleMaps.places.Autocomplete(inputElement, {
+      types: ["geocode"], // 限制輸入類型（可選）
+      language: "zh-TW", // 設定語言（可選）
+    });
+
+    // 監聽地點選擇事件
+    autocompleteInstance.value.addListener("place_changed", () => {
+      const place = autocompleteInstance.value.getPlace();
+      searchQuery.value = place.formatted_address || place.name; // 取得地點名稱或格式化地址
+      console.log("選擇的地點：", searchQuery.value);
+    });
+  } catch (error) {
+    console.error("Error loading Google Maps API:", error);
+  }
+});
+
+
+
+    const clearSearch = () => {
+      searchQuery.value = "";
+      suggestions.value = [];
+    };
+
+    const selectSuggestion = (suggestion) => {
+      searchQuery.value = suggestion.description; // 設定選中的地址
+      suggestions.value = []; // 清空建議
+    };
 
 
 </script>
@@ -72,11 +156,19 @@ const checkPaymentMethod = () => {
       <!-- 圖片上傳 -->
       <div class="bg-white p-5 mb-3 rounded-lg">
         <div class="mb-6">
-            <div class="rounded-lg p-6 flex justify-center items-center">
-                <button class="bg-gray-100  mt-6 rounded-md w-40 h-40 flex items-center justify-center">
-                    <img src="" alt="上傳圖片圖示" class="w-10 h-10">
-                </button>
-            </div>
+          <div class="rounded-lg p-6 flex justify-center items-center">
+            <label class="bg-gray-100 mt-6 rounded-md w-40 h-40 flex items-center justify-center cursor-pointer">
+              <img v-if="previewImage" :src="previewImage" alt="預覽圖片" class="w-full h-full object-cover rounded-md" />
+              <span v-else class="text-gray-500">點擊上傳圖片</span>
+              <input
+                type="file"
+                class="hidden"
+                @change="handleFileUpload"
+                accept="image/*"
+              />
+            </label>
+          </div>
+           <p v-if="uploadError" class="text-sm text-red-600 mt-2">{{ uploadError }}</p>
         </div>
       </div>
 
@@ -111,14 +203,29 @@ const checkPaymentMethod = () => {
       <!-- 地點 -->
       <div class="mt-6">
         <div class="mb-6">
-            <label class="block  font-medium mb-2 p-2">地點
-              <span class="text-red-600">*</span>
+            <label class="block  font-medium mb-2 p-2">
+              地點<span class="text-red-600">*</span>
             </label>
             <div class="flex items-center border rounded-md">
-              <input type="text"  placeholder="搜尋聚會地點" class="flex-grow p-3 border-none focus:outline-none" />
-              <button class="p-3  border-l-2">
+              <input
+              type="text"
+              placeholder="搜尋聚會地點"
+              class="flex-grow p-3 border-none focus:outline-none"
+              id="autocomplete-input"
+              />
+              <button class="p-3  border-l-2" @click="clearSearch">
                 <Search />
               </button>
+              <ul v-if="suggestions.length" class="border rounded-md mt-2 bg-white">
+                <li
+                  v-for="(suggestion, index) in suggestions"
+                  :key="index"
+                  class="p-2 cursor-pointer hover:bg-gray-100"
+                  @click="selectSuggestion(suggestion)"
+                >
+                  {{ suggestion.description }}
+                </li>
+              </ul>
             </div>
         </div>
       </div>
@@ -129,12 +236,27 @@ const checkPaymentMethod = () => {
             <label class="block font-medium mb-2 p-2">活動時間
               <span class="text-red-600">*</span>
             </label>
-            <input type="date"  class="w-full p-3 border rounded-md focus:outline-none" />
-            <input type="time"  class="w-full p-3 border rounded-md mt-2 focus:outline-none" />
+            <input type="datetime-local"  class="w-full p-3 border rounded-md focus:outline-none"
+            v-model="inputValues.eventTime"
+            @blur="checkInput('eventTime')"
+            />
+            <p
+            class="text-red-600 text-sm"
+            v-if="userNotEnter.eventTime"
+            >請填選擇活動時間*</p>
+            <!-- <input type="datetime-local"   class="w-full p-3 border rounded-md focus:outline-none" /> -->
           </div>
           <div>
             <label class="block font-medium mb-2 p-2">最晚審核時間 <span class="text-red-600">*</span></label>
-            <input type="date"  class="w-full p-3 border rounded-md" />
+            <input type="datetime-local"  class="w-full p-3 border rounded-md"
+            v-model="inputValues.deadline"
+            @blur="checkInput('deadline')"
+            />
+            <p
+            class="text-red-600 text-sm"
+            v-if="userNotEnter.deadline"
+            >請填選擇最晚審核時間</p>
+
           </div>
           <div class=" bg-gray-200 mt-2 p-6 flex items-center justify-center border rounded-md">
           <span>你的聚會將會刊登在列表上，直到時間截止。記得在最晚審核時間前勾選參加者。</span>
