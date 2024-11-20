@@ -63,6 +63,7 @@
       </div>
       <div v-else class="signup-box">
         <h2 class="text-blue-500">註冊</h2>
+
         <n-form ref="formRef" :label-width="80" :model="formValue" :rules="rules">
           <n-form-item label="姓名" path="user.fullname">
             <n-input v-model:value="formValue.user.fullname" placeholder="輸入姓名" />
