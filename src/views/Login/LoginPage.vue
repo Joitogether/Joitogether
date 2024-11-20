@@ -63,64 +63,27 @@
       </div>
       <div v-else class="signup-box">
         <h2 class="text-blue-500">註冊</h2>
-        <n-form ref="formRef" inline :label-width="80" :model="formValue" :rules="rules">
-          <n-form-item>
-            <n-input></n-input>
+        <n-form ref="formRef" :label-width="80" :model="formValue" :rules="rules">
+          <n-form-item label="姓名" path="user.fullname">
+            <n-input v-model:value="formValue.user.fullname" placeholder="輸入姓名" />
           </n-form-item>
-          <n-form-item label="姓名" path="user.name" size="large">
-            <n-input v-model:value="formValue.user.name" placeholder="輸入姓名" />
+          <n-form-item label="使用者名稱" path="user.username">
+            <n-input v-model:value="formValue.user.username" placeholder="輸入使用者名稱" />
+          </n-form-item>
+          <n-form-item label="信箱" path="email">
+            <n-input v-model:value="formValue.phone" placeholder="輸入信箱" />
           </n-form-item>
           <n-form-item label="電話號碼" path="phone">
             <n-input v-model:value="formValue.phone" placeholder="輸入電話號碼" />
           </n-form-item>
         </n-form>
-        <form action="">
-          <label for="fullname" class="text-gray-500 font-bold text-left text-sm self-start">
-            姓名
-          </label>
-          <input
-            type="fullname"
-            id="fullname"
-            name="fullname"
-            placeholder="請輸入全名"
-            class="bg-gray-100 appearance-none border-2 border-gray-100 rounded py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-500"
-          />
-          <label for="username" class="text-gray-500 font-bold text-left text-sm self-start">
-            使用者名稱
-          </label>
-          <input
-            type="username"
-            id="username"
-            name="username"
-            placeholder="請輸入使用者名稱"
-            class="bg-gray-100 appearance-none border-2 border-gray-100 rounded py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-500"
-          />
-          <label for="email" class="text-gray-500 font-bold text-left text-sm self-start">
-            信箱
-          </label>
-          <input
-            type="email"
-            id="email"
-            name="email"
-            placeholder="請輸入信箱"
-            class="bg-gray-100 appearance-none border-2 border-gray-100 rounded py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-500"
-          />
-          <label for="tel" class="text-gray-500 font-bold text-left text-sm self-start">
-            手機號碼
-          </label>
-          <input
-            type="tel"
-            id="tel"
-            name="tel"
-            placeholder="請輸入手機號碼"
-            class="bg-gray-100 appearance-none border-2 border-gray-100 rounded py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-500"
-          />
-          <label for="date" class="text-gray-500 font-bold text-left text-sm self-start">
-            生日
-          </label>
-          <n-date-picker v-model:value="timestamp" type="date" class="w-full" />
-          <!-- <pre>{{ JSON.stringify(timestamp) }}</pre> -->
-        </form>
+
+        <label for="date" class="text-gray-500 font-bold text-left text-sm self-start">
+          生日
+        </label>
+        <n-date-picker v-model:value="timestamp" type="date" class="w-full" />
+        <!-- <pre>{{ JSON.stringify(timestamp) }}</pre> -->
+
         <div class="flex items-center mb-7 mt-8">
           <div class="flex-grow border-t border-gray-300"></div>
         </div>
@@ -168,16 +131,26 @@ const formValue = ref({
 })
 const rules = {
   user: {
-    name: {
+    fullname: {
       required: true,
       message: '請輸入姓名',
       trigger: 'blur',
     },
+    username: {
+      required: true,
+      message: '請輸入使用者名稱',
+      trigger: 'blur',
+    },
+  },
+  email: {
+    required: true,
+    message: '請輸入信箱',
+    trigger: ['input', 'blur'],
   },
   phone: {
     required: true,
     message: '請輸入電話號碼',
-    trigger: ['input'],
+    trigger: ['input', 'blur'],
   },
 }
 const timestamp = ref(Date.now())
@@ -188,6 +161,10 @@ const toggleLoginSignup = () => {
 </script>
 
 <style scoped>
+.n-form-item {
+  width: 100%;
+}
+
 h2 {
   text-align: center;
   font-size: 25px;
