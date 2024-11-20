@@ -86,8 +86,43 @@
             placeholder="選擇生日"
             class="w-full"
           />
+          <label for="username" class="text-gray-500 font-bold text-left text-sm self-start">
+            使用者名稱
+          </label>
+          <input
+            type="username"
+            id="username"
+            name="username"
+            placeholder="請輸入使用者名稱"
+            class="bg-gray-100 appearance-none border-2 border-gray-100 rounded py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-500"
+          />
+          <label for="email" class="text-gray-500 font-bold text-left text-sm self-start">
+            信箱
+          </label>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            placeholder="請輸入信箱"
+            class="bg-gray-100 appearance-none border-2 border-gray-100 rounded py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-500"
+            v-model="email"
+          />
+          <label for="tel" class="text-gray-500 font-bold text-left text-sm self-start">
+            手機號碼
+          </label>
+          <input
+            type="tel"
+            id="tel"
+            name="tel"
+            placeholder="請輸入手機號碼"
+            class="bg-gray-100 appearance-none border-2 border-gray-100 rounded py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-500"
+          />
+          <label for="date" class="text-gray-500 font-bold text-left text-sm self-start">
+            生日
+          </label>
+          <n-date-picker v-model:value="timestamp" type="date" class="w-full" />
+          <!-- <pre>{{ JSON.stringify(timestamp) }}</pre> -->
         </n-form-item>
-
         <div class="flex items-center mb-7 mt-8">
           <div class="flex-grow border-t border-gray-300"></div>
         </div>
@@ -101,6 +136,7 @@
             name="password"
             placeholder="請輸入密碼"
             class="bg-gray-100 appearance-none border-2 border-gray-100 rounded py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-500"
+            v-model="password"
           />
         </form>
         <div class="flex items-center mb-7 mt-8">
@@ -127,6 +163,28 @@
 <script setup>
 import { NButton, NDatePicker, NFormItem, NInput, NForm } from 'naive-ui'
 import { ref } from 'vue'
+// feature
+import registerUser from './services/registerService.js'
+const email = ref('')
+const password = ref('')
+const errorMessage = ref('')
+
+const registerRequired = async () => {
+  if (password.value.length < 6) {
+    errorMessage.value = '密碼長度至少要 6 個字元'
+    return
+  }
+  try {
+    const user = await registerUser(email.value, password.value)
+    console.log('用戶註冊成功:', user)
+  } catch (error) {
+    errorMessage.value = error.message || '註冊失敗'
+  }
+}
+
+registerRequired()
+
+// console.log(registerUser(email.value, password.value))
 
 const isLogin = ref(true)
 const formRef = ref(null)
