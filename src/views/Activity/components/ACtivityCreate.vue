@@ -1,11 +1,21 @@
 <script setup>
 import { Search } from "@iconoir/vue";
-import { computed, ref, onMounted } from "vue";
+import { computed, watch, ref, onMounted } from "vue";
 import { loadGoogleMapsAPI } from "@/views/Activity/components/googleMapsLoader";
 
 // data
 const participants = ref(1);
 const participantsError = ref(false);
+
+watch(participants,(e)=> {
+  if(e > 30 ){
+    alert("人數不可以超過30!!")
+    participants.value = 30
+  } else if (e < 0) {
+  alert("人數不可以小於0!!")
+    participants.value =1}
+})
+
 const paymentMethod = ref("free");
 const eventCost = ref(0);
 const previewImage = ref(null);
@@ -13,6 +23,7 @@ const uploadError = ref("");
 const maxFileSize = 5 * 1024 * 1024;
 const searchQuery = ref("");
 const suggestions = ref([]);
+
 
 const inputValues = ref({
   name: "",
@@ -27,47 +38,6 @@ const userNotEnter = ref({
   price: false,
   eventTime: false,
   deadline: false,
-});
-
-// 儲存與載入資料
-const saveToLocal = () => {
-  const activityData = {
-    ...inputValues.value,
-    participants: participants.value,
-    paymentMethod: paymentMethod.value,
-    eventCost: eventCost.value,
-    location: searchQuery.value || "",
-  };
-
-  try {
-    localStorage.setItem("activityData", JSON.stringify(activityData));
-    console.log("資料已成功儲存至 Local Storage:", activityData);
-  } catch (e) {
-    console.error("LocalStorage 儲存失敗：", e);
-  }
-};
-
-const loadFromLocal = () => {
-  const savedData = localStorage.getItem("activityData");
-  if (savedData) {
-    try {
-      const parsedData = JSON.parse(savedData);
-      inputValues.value = { ...parsedData };
-      participants.value = parsedData.participants || 1;
-      paymentMethod.value = parsedData.paymentMethod || "free";
-      eventCost.value = parsedData.eventCost || 0;
-      searchQuery.value = parsedData.location || "";
-      console.log("已成功載入資料：", parsedData);
-    } catch (e) {
-      console.error("資料解析失敗：", e);
-    }
-  } else {
-    console.log("無儲存的資料可載入");
-  }
-};
-
-onMounted(() => {
-  loadFromLocal();
 });
 
 // methods
@@ -242,7 +212,6 @@ const previewActivity = () => {
 
 
 
-
 </script>
 
 <template>
@@ -345,7 +314,7 @@ const previewActivity = () => {
             <p
             class="text-red-600 text-sm"
             v-if="userNotEnter.eventTime"
-            >活動時間不可低於當前時間**</p>
+            >活動時間不可低於當前時間*</p>
           </div>
           <div>
             <label class="block font-medium mb-2 p-2">
@@ -378,9 +347,8 @@ const previewActivity = () => {
           <div>
             <div class="flex justify-end items-center">
               <button class=" w-10 px-3 py-3 rounded-md justify-end items-center hover:bg-gray-200"  @click="updateParticipants(-1)">-</button>
-              <input  type="number" min="1" class=" w-32 text-center p-3 mx-3 border rounded-md focus:outline-none "
+              <input  type="number" :min=1 :max=30 class=" w-32 text-center p-3 mx-3 border rounded-md focus:outline-none "
               v-model="participants"
-              readonly
               />
               <button class=" w-10 px-3 py-3 rounded-md justify-end items-center hover:bg-gray-200" @click="updateParticipants(1)">+</button>
             </div>
