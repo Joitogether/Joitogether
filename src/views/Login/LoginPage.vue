@@ -64,30 +64,33 @@
       <div v-else class="signup-box">
         <div v-if="step === 1">
           <h2 class="font-black text-6xl" style="color: #18a058">註冊</h2>
-          <div class="avatar-block flex flex-col items-center space-y-4">
-            <!-- 大頭貼預覽 -->
-            <div
-              class="w-40 h-40 rounded-full overflow-hidden border border-gray-300 bg-gray-100 flex items-center justify-center"
-            >
-              <img
-                v-if="imageSrc"
-                :src="imageSrc"
-                alt="Avatar Preview"
-                class="w-full h-full object-cover"
-              />
-              <span v-else class="text-gray-500">無圖片</span>
+          <div class="flex flex-col items-center space-y-4 mb-5">
+            <div class="relative w-36 h-36">
+              <!-- 大頭貼預覽 -->
+              <div
+                class="w-full h-full rounded-full overflow-hidden border border-gray-300 bg-gray-100 flex items-center justify-center"
+              >
+                <img
+                  v-if="formValue.avatar"
+                  :src="formValue.avatar"
+                  alt="Avatar Preview"
+                  class="w-full h-full object-cover"
+                />
+                <span v-else class="text-gray-500">無圖片</span>
+              </div>
+              <!-- 上傳按鈕 -->
+              <div class="absolute -bottom-1 -right-0">
+                <n-upload
+                  accept="image/*"
+                  :max="1"
+                  :file-list="[]"
+                  :on-update:file-list="handleFileChange"
+                  show-file-list="false"
+                >
+                  <n-button type="primary" round circle>+</n-button>
+                </n-upload>
+              </div>
             </div>
-
-            <!-- 上傳按鈕 -->
-            <n-upload
-              accept="image/*"
-              :max="1"
-              :on-update:file-list="handleFileChange"
-              show-file-list="false"
-              class="avatar-upload"
-            >
-              <n-button type="primary" round circle>+</n-button>
-            </n-upload>
           </div>
           <n-form ref="formRef" :label-width="80" :model="formValue" :rules="rules">
             <n-form-item label="姓名" path="user.fullname">
@@ -165,6 +168,21 @@
         </div>
         <div v-else-if="step === 2">
           <h2 class="font-black text-6xl" style="color: #18a058">確認您的電子郵件地址</h2>
+          <div class="flex flex-col items-center space-y-4 mb-5">
+            <div class="relative w-36 h-36">
+              <div
+                class="w-full h-full rounded-full overflow-hidden border border-gray-300 bg-gray-100 flex items-center justify-center"
+              >
+                <img
+                  v-if="formValue.avatar"
+                  :src="formValue.avatar"
+                  alt="Avatar Preview"
+                  class="w-full h-full object-cover"
+                />
+                <span v-else class="text-gray-500">無圖片</span>
+              </div>
+            </div>
+          </div>
           <p class="text-center leading-loose text-gray-600">
             為了確保您的帳戶安全<br />我們已向 example@mail.com 發送了一封驗證信<br />請打開您的信箱<br />並點擊信中的驗證連結以完成註冊流程
           </p>
@@ -194,6 +212,21 @@
         </div>
         <div v-else-if="step === 3">
           <h2 class="font-black text-6xl" style="color: #18a058">完成註冊</h2>
+          <div class="flex flex-col items-center space-y-4 mb-5">
+            <div class="relative w-36 h-36">
+              <div
+                class="w-full h-full rounded-full overflow-hidden border border-gray-300 bg-gray-100 flex items-center justify-center"
+              >
+                <img
+                  v-if="formValue.avatar"
+                  :src="formValue.avatar"
+                  alt="Avatar Preview"
+                  class="w-full h-full object-cover"
+                />
+                <span v-else class="text-gray-500">無圖片</span>
+              </div>
+            </div>
+          </div>
           <p class="text-center leading-loose text-gray-600">
             尋找感興趣的活動並與大家一起揪團，快來加入吧！
           </p>
@@ -243,8 +276,6 @@ import {
 } from 'naive-ui'
 import { ref, computed } from 'vue'
 
-const imageSrc = ref(null)
-
 const handleFileChange = (fileList) => {
   if (fileList.length > 0) {
     const file = fileList[0]?.file
@@ -253,13 +284,13 @@ const handleFileChange = (fileList) => {
       const reader = new FileReader()
 
       reader.onload = (e) => {
-        imageSrc.value = e.target.result // 將 Base64 URL 存入 imageSrc
+        formValue.value.avatar = e.target.result // 將 Base64 URL 存入 imageSrc
       }
 
       reader.readAsDataURL(file) // 讀取文件並生成 Base64 URL
     }
   } else {
-    imageSrc.value = null // 如果沒有文件，清空預覽
+    formValue.value = null // 如果沒有文件，清空預覽
   }
 }
 // feature
@@ -268,33 +299,6 @@ import { validateFormFields } from './utils/formValidation.js'
 import { useMessage } from 'naive-ui'
 
 const message = useMessage()
-
-// const registerRequired = async () => {
-//   const errors = validateFormFields(formValue.value, formValue.value.password)
-
-//   if (errors.length > 0) {
-//     message.error(errors[0])
-//     return
-//   }
-
-//   try {
-//     const userResponse = await registerUser(formValue.value.email, formValue.value.password)
-//     console.log('用戶註冊成功:', userResponse)
-//     message.success('註冊成功！歡迎您，' + formValue.value.user.username)
-//   } catch (error) {
-//     if (error.code === 'auth/email-already-in-use') {
-//       message.error('此信箱已被註冊，請嘗試更換其他電子信箱')
-//     } else if (error.code === 'auth/invalid-email') {
-//       message.error('無效的電子郵件地址')
-//     } else if (error.code === 'auth/weak-password') {
-//       message.error('密碼長度至少要6個字符，並包含數字與字母')
-//     } else {
-//       message.error('註冊失敗，請稍後再嘗試：' + (error.message || '未知錯誤'))
-//     }
-//   }
-// }
-
-// feature-login
 
 const isLogin = ref(true)
 const step = ref(1)
@@ -474,12 +478,6 @@ input {
 .forgot {
   width: 100px;
   height: 30px;
-}
-.avatar-block {
-  position: relative;
-}
-.avatar-upload {
-  position: absolute;
 }
 
 @media screen and (768px <= width <= 1024px) {
