@@ -264,26 +264,36 @@ const handleFileChange = (fileList) => {
 }
 // feature
 import registerUser from './services/registerService.js'
-const email = ref('')
-const password = ref('')
-const errorMessage = ref('')
+import { validateFormFields } from './utils/formValidation.js'
+
+const message = useMessage()
 
 const registerRequired = async () => {
-  if (password.value.length < 6) {
-    errorMessage.value = '密碼長度至少要 6 個字元'
+  const errors = validateFormFields(formValue.value, formValue.value.password)
+
+  if (errors.length > 0) {
+    message.error(errors[0])
     return
   }
+
   try {
-    const user = await registerUser(email.value, password.value)
-    console.log('用戶註冊成功:', user)
+    const userResponse = await registerUser(formValue.value.email, formValue.value.password)
+    console.log('用戶註冊成功:', userResponse)
+    message.success('註冊成功！歡迎您，' + formValue.value.user.username)
   } catch (error) {
-    errorMessage.value = error.message || '註冊失敗'
+    if (error.code === 'auth/email-already-in-use') {
+      message.error('此信箱已被註冊，請嘗試更換其他電子信箱')
+    } else if (error.code === 'auth/invalid-email') {
+      message.error('無效的電子郵件地址')
+    } else if (error.code === 'auth/weak-password') {
+      message.error('密碼長度至少要6個字符，並包含數字與字母')
+    } else {
+      message.error('註冊失敗，請稍後再嘗試：' + (error.message || '未知錯誤'))
+    }
   }
 }
 
-registerRequired()
-
-// console.log(registerUser(email.value, password.value))
+// feature-login
 
 const isLogin = ref(true)
 const step = ref(1)
@@ -313,6 +323,11 @@ const rules = {
   email: {
     required: true,
     message: '請輸入信箱',
+    trigger: ['input', 'blur'],
+  },
+  password: {
+    required: true,
+    message: '請輸入密碼',
     trigger: ['input', 'blur'],
   },
   phone: {
