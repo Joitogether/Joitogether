@@ -51,7 +51,7 @@
 
 // export default registerUser
 
-// 註冊功能-不含密碼驗證
+// 註冊功能-不含密碼唯一性驗證
 import { auth } from './firebaseConfig.js'
 import { createUserWithEmailAndPassword } from 'firebase/auth'
 
