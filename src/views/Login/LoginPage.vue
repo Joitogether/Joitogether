@@ -265,33 +265,34 @@ const handleFileChange = (fileList) => {
 // feature
 import registerUser from './services/registerService.js'
 import { validateFormFields } from './utils/formValidation.js'
+import { useMessage } from 'naive-ui'
 
 const message = useMessage()
 
-const registerRequired = async () => {
-  const errors = validateFormFields(formValue.value, formValue.value.password)
+// const registerRequired = async () => {
+//   const errors = validateFormFields(formValue.value, formValue.value.password)
 
-  if (errors.length > 0) {
-    message.error(errors[0])
-    return
-  }
+//   if (errors.length > 0) {
+//     message.error(errors[0])
+//     return
+//   }
 
-  try {
-    const userResponse = await registerUser(formValue.value.email, formValue.value.password)
-    console.log('用戶註冊成功:', userResponse)
-    message.success('註冊成功！歡迎您，' + formValue.value.user.username)
-  } catch (error) {
-    if (error.code === 'auth/email-already-in-use') {
-      message.error('此信箱已被註冊，請嘗試更換其他電子信箱')
-    } else if (error.code === 'auth/invalid-email') {
-      message.error('無效的電子郵件地址')
-    } else if (error.code === 'auth/weak-password') {
-      message.error('密碼長度至少要6個字符，並包含數字與字母')
-    } else {
-      message.error('註冊失敗，請稍後再嘗試：' + (error.message || '未知錯誤'))
-    }
-  }
-}
+//   try {
+//     const userResponse = await registerUser(formValue.value.email, formValue.value.password)
+//     console.log('用戶註冊成功:', userResponse)
+//     message.success('註冊成功！歡迎您，' + formValue.value.user.username)
+//   } catch (error) {
+//     if (error.code === 'auth/email-already-in-use') {
+//       message.error('此信箱已被註冊，請嘗試更換其他電子信箱')
+//     } else if (error.code === 'auth/invalid-email') {
+//       message.error('無效的電子郵件地址')
+//     } else if (error.code === 'auth/weak-password') {
+//       message.error('密碼長度至少要6個字符，並包含數字與字母')
+//     } else {
+//       message.error('註冊失敗，請稍後再嘗試：' + (error.message || '未知錯誤'))
+//     }
+//   }
+// }
 
 // feature-login
 
@@ -368,8 +369,36 @@ const toggleLoginSignup = () => {
 const goToStep3 = () => {
   step.value = 3
 }
-const goToStep2 = () => {
-  step.value = 2
+const goToStep2 = async () => {
+  if (step.value === 1) {
+    const errors = validateFormFields(formValue.value, model.value.password)
+    if (errors.length > 0) {
+      message.error(errors[0])
+      return
+    }
+
+    try {
+      // 註冊功能
+      const userResponse = await registerUser(formValue.value.email, model.value.password)
+      console.log('用戶註冊成功！', userResponse)
+      message.success('註冊成功！歡迎您，' + formValue.value.user.username)
+
+      // 切換到 Step 2
+      step.value = 2
+    } catch (error) {
+      if (error.code === 'auth/email-already-in-use') {
+        message.error('此信箱已被註冊，請嘗試更換其他電子信箱')
+      } else if (error.code === 'auth/invalid-email') {
+        message.error('無效的電子郵件地址')
+      } else if (error.code === 'auth/weak-password') {
+        message.error('密碼長度至少要6個字符，並包含數字與字母')
+      } else {
+        message.error('註冊失敗，請稍後再嘗試：' + (error.message || '未知錯誤'))
+      }
+    }
+  } else {
+    step.value = 2
+  }
 }
 
 // 上一步：回到 Step 1
