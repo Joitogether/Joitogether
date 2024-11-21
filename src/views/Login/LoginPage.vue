@@ -64,6 +64,31 @@
       <div v-else class="signup-box">
         <div v-if="step === 1">
           <h2 class="font-black text-6xl" style="color: #18a058">註冊</h2>
+          <div class="avatar-block flex flex-col items-center space-y-4">
+            <!-- 大頭貼預覽 -->
+            <div
+              class="w-40 h-40 rounded-full overflow-hidden border border-gray-300 bg-gray-100 flex items-center justify-center"
+            >
+              <img
+                v-if="imageSrc"
+                :src="imageSrc"
+                alt="Avatar Preview"
+                class="w-full h-full object-cover"
+              />
+              <span v-else class="text-gray-500">無圖片</span>
+            </div>
+
+            <!-- 上傳按鈕 -->
+            <n-upload
+              accept="image/*"
+              :max="1"
+              :on-update:file-list="handleFileChange"
+              show-file-list="false"
+              class="avatar-upload"
+            >
+              <n-button type="primary" round circle>+</n-button>
+            </n-upload>
+          </div>
           <n-form ref="formRef" :label-width="80" :model="formValue" :rules="rules">
             <n-form-item label="姓名" path="user.fullname">
               <n-input v-model:value="formValue.user.fullname" placeholder="輸入姓名" />
@@ -206,8 +231,37 @@
 </template>
 
 <script setup>
-import { NButton, NDatePicker, NFormItem, NInput, NForm, NCheckbox, NCheckboxGroup } from 'naive-ui'
+import {
+  NButton,
+  NDatePicker,
+  NFormItem,
+  NInput,
+  NForm,
+  NCheckbox,
+  NCheckboxGroup,
+  NUpload,
+} from 'naive-ui'
 import { ref, computed } from 'vue'
+
+const imageSrc = ref(null)
+
+const handleFileChange = (fileList) => {
+  if (fileList.length > 0) {
+    const file = fileList[0]?.file
+
+    if (file) {
+      const reader = new FileReader()
+
+      reader.onload = (e) => {
+        imageSrc.value = e.target.result // 將 Base64 URL 存入 imageSrc
+      }
+
+      reader.readAsDataURL(file) // 讀取文件並生成 Base64 URL
+    }
+  } else {
+    imageSrc.value = null // 如果沒有文件，清空預覽
+  }
+}
 // feature
 import registerUser from './services/registerService.js'
 const email = ref('')
@@ -376,6 +430,12 @@ input {
 .forgot {
   width: 100px;
   height: 30px;
+}
+.avatar-block {
+  position: relative;
+}
+.avatar-upload {
+  position: absolute;
 }
 
 @media screen and (768px <= width <= 1024px) {
