@@ -94,14 +94,14 @@
           <label for="password" class="text-gray-500 font-bold text-left text-sm self-start">
             設定密碼
           </label>
-          <input
-            v-model="password"
-            type="password"
-            id="password"
-            name="password"
-            placeholder="請輸入密碼"
-            class="bg-gray-100 appearance-none border-2 border-gray-100 rounded py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-500"
-          />
+          <n-form-item label="密碼" path="password">
+            <n-input
+              v-model:value="formValue.password"
+              type="password"
+              placeholder="請輸入密碼"
+              class="bg-gray-100 appearance-none border-2 border-gray-100 rounded py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-500"
+            />
+          </n-form-item>
         </form>
         <div class="flex items-center mb-7 mt-8">
           <div class="flex-grow border-t border-gray-300"></div>
@@ -194,12 +194,11 @@ const rules = {
     message: '請輸入信箱',
     trigger: ['input', 'blur'],
   },
-  // password: {
-  //   required: true,
-  //   message: '請輸入密碼',
-  //   trigger: ['input', 'blur'],
-  //   validator: (value) => validatePassword(value),
-  // },
+  password: {
+    required: true,
+    message: '請輸入密碼',
+    trigger: ['input', 'blur'],
+  },
   phone: {
     required: true,
     message: '請輸入電話號碼',
