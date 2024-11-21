@@ -138,7 +138,7 @@ const handleFileUpload = (event) => {
   reader.readAsDataURL(file);
 };
 
-const apiKey = "AIzaSyBDkJrqUJIsu5kdtFYt24Gto9S3EC-zv0w"; // 替換為您的 Google API Key
+const apiKey = "Google API Key"; // 替換為您的 Google API Key
 const autocompleteInstance = ref(null);
 
 onMounted(async () => {
