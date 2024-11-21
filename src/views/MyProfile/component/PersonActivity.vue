@@ -12,7 +12,6 @@ const activityList = reactive([
     location: "臺北市大安區忠孝東路四段178號8樓",
     startDate: "2024-12-16",
     startTime: "19:40",
-    // dateTime:"2024-12-16T19:40",
     imageUrl: "https://www.lifetoutiao.news/wp-content/uploads/2022/10/%E5%9C%963.jpg"
   },
   {
@@ -21,7 +20,6 @@ const activityList = reactive([
     location: "臺北市大安區忠孝東路四段178號8樓",
     startDate: "2024-11-10",
     startTime: "10:00",
-    // dateTime:"2024-11-10T10:00",
     imageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcReUu0_Pm778GeJv1D5MmDBiY5EMY2M_9wzNw&s"
   },
   {
@@ -30,7 +28,6 @@ const activityList = reactive([
     location: "臺北市大安區忠孝東路四段178號8樓",
     startDate: "2024-11-15",
     startTime: "08:30",
-    // dateTime:"2024-11-15T08:30",
     imageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQI6JPRunS3CpvVKggiR9PjqG3SS-qpqANw_g&s"
   },
   {
@@ -39,10 +36,10 @@ const activityList = reactive([
     location: "板橋區新北市政府",
     startDate: "2024-12-25",
     startTime: "18:00",
-    // dateTime:"2024-12-25T18:00",
     imageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRr-DCWj5LTt1sMyo1R-m3P7T36oQoKU1a-lQ&s"
   }
 ])
+activityList.sort((a, b) => new Date(b.startDate) - new Date(a.startDate));
 
 const beforeToday = activityList.filter(item => {
   const itemDate = new Date(item.startDate);
@@ -57,7 +54,7 @@ const afterToday = ref(activityList.filter(item => {
 
 <template>
 <div class="partyArea pb-10">
-  <div class="h-20 content-center text-center bg-slate-100 text-lg">即將參加(5)</div>
+  <div class="h-20 content-center text-center bg-slate-100 text-lg">即將參加</div>
   <div v-for="item in afterToday" :key="item.id" class="future-party grid grid-cols-3 gap-10 mt-10 sm:px-14 px-9">
     <div class="future-party-photo overflow-hidden flex max-h-40">
       <img :src="item.imageUrl" alt="future-party-photo" class="object-contain">
@@ -78,7 +75,7 @@ const afterToday = ref(activityList.filter(item => {
     </div>
   </div>
 
-  <div class="h-20 content-center text-center bg-slate-100 text-lg mt-10">聚會紀錄(99)</div>
+  <div class="h-20 content-center text-center bg-slate-100 text-lg mt-10">聚會紀錄</div>
   <div v-for="item in beforeToday" :key="item.id" class="past-party grid grid-cols-3 gap-10 mt-10 sm:px-14 px-9 overflow-hidden">
     <div class="past-party-photo overflow-hidden flex max-h-40">
       <img :src="item.imageUrl" alt="past-party-photo" class="object-contain">
