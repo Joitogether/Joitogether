@@ -64,9 +64,9 @@
       <div v-else class="signup-box">
         <div v-if="step === 1">
           <h2 class="font-black text-6xl" style="color: #18a058">註冊</h2>
+          <!-- 大頭貼 -->
           <div class="flex flex-col items-center space-y-4 mb-5">
             <div class="relative w-36 h-36">
-              <!-- 大頭貼預覽 -->
               <div
                 class="w-full h-full rounded-full overflow-hidden border border-gray-300 bg-gray-100 flex items-center justify-center"
               >
@@ -78,20 +78,20 @@
                 />
                 <span v-else class="text-gray-500">無圖片</span>
               </div>
-              <!-- 上傳按鈕 -->
               <div class="absolute -bottom-1 -right-0">
                 <n-upload
                   accept="image/*"
                   :max="1"
                   :file-list="[]"
                   :on-update:file-list="handleFileChange"
-                  show-file-list="false"
+                  :show-file-list="false"
                 >
                   <n-button type="primary" round circle>+</n-button>
                 </n-upload>
               </div>
             </div>
           </div>
+          <!--一般註冊表單-->
           <n-form ref="formRef" :label-width="80" :model="formValue" :rules="rules">
             <n-form-item label="姓名" path="user.fullname">
               <n-input v-model:value="formValue.user.fullname" placeholder="輸入姓名" />
@@ -117,6 +117,7 @@
           <div class="flex items-center mb-7 mt-8">
             <div class="flex-grow border-t border-gray-300"></div>
           </div>
+          <!--密碼表單-->
           <n-form :model="model">
             <n-form-item label="密碼">
               <n-input
@@ -140,10 +141,42 @@
           <div class="flex items-center mb-7 mt-8">
             <div class="flex-grow border-t border-gray-300"></div>
           </div>
-          <n-checkbox-group class="flex flex-col gap-3">
+          <!-- 隱私權政策勾選框 -->
+          <div class="flex w-auto flex-col gap-3">
+            <n-checkbox
+              v-model:checked="isCheckedPrivacy"
+              @update:checked="onCheckboxChangePrivacy"
+            >
+              我已閱讀並同意隱私權政策
+            </n-checkbox>
+            <n-modal
+              v-model:show="showModalPrivacy"
+              preset="dialog"
+              title="隱私權政策"
+              content="這裡是隱私權政策的詳細內容"
+              positive-text="同意"
+              negative-text="不同意"
+              @positive-click="onAgreePrivacy"
+              @negative-click="onDisagreePrivacy"
+            />
+            <n-checkbox v-model:checked="isCheckedTerms" @update:checked="onCheckboxChangeTerms">
+              我已閱讀並同意服務條款
+            </n-checkbox>
+            <n-modal
+              v-model:show="showModalTerms"
+              preset="dialog"
+              title="服務條款"
+              content="這裡是服務條款的詳細內容"
+              positive-text="同意"
+              negative-text="不同意"
+              @positive-click="onAgreeTerms"
+              @negative-click="onDisagreeTerms"
+            />
+          </div>
+          <!-- <n-checkbox-group class="flex flex-col gap-3">
             <n-checkbox value="PrivacyPolicy" label="隱私權政策" />
             <n-checkbox value="TermsService" label="服務條款" />
-          </n-checkbox-group>
+          </n-checkbox-group> -->
           <div class="flex items-center mb-7 mt-8">
             <div class="flex-grow border-t border-gray-300"></div>
           </div>
@@ -271,32 +304,67 @@ import {
   NInput,
   NForm,
   NCheckbox,
-  NCheckboxGroup,
   NUpload,
+  useMessage,
+  NModal,
 } from 'naive-ui'
 import { ref, computed } from 'vue'
 
+// 隱私權政策-控制 checkbox 是否被選中
+const showModalPrivacy = ref(false)
+const isCheckedPrivacy = ref(false)
+const showModalTerms = ref(false)
+const isCheckedTerms = ref(false)
+
+function onCheckboxChangePrivacy() {
+  showModalPrivacy.value = true
+}
+
+// 同意
+const onAgreePrivacy = () => {
+  isCheckedPrivacy.value = true
+  showModalPrivacy.value = false
+}
+
+// 不同意
+const onDisagreePrivacy = () => {
+  isCheckedPrivacy.value = false
+  showModalPrivacy.value = false
+}
+function onCheckboxChangeTerms() {
+  showModalTerms.value = true
+}
+
+// 同意
+const onAgreeTerms = () => {
+  isCheckedTerms.value = true
+  showModalTerms.value = false
+}
+
+// 不同意
+const onDisagreeTerms = () => {
+  isCheckedTerms.value = false
+  showModalTerms.value = false
+}
+// 大頭貼的邏輯
 const handleFileChange = (fileList) => {
   if (fileList.length > 0) {
     const file = fileList[0]?.file
 
     if (file) {
       const reader = new FileReader()
-
       reader.onload = (e) => {
-        formValue.value.avatar = e.target.result // 將 Base64 URL 存入 imageSrc
+        formValue.value.avatar = e.target.result
       }
-
-      reader.readAsDataURL(file) // 讀取文件並生成 Base64 URL
+      reader.readAsDataURL(file)
+    } else {
+      formValue.value = null
     }
-  } else {
-    formValue.value = null // 如果沒有文件，清空預覽
   }
 }
 // feature
 import registerUser from './services/registerService.js'
 import { validateFormFields } from './utils/formValidation.js'
-import { useMessage } from 'naive-ui'
 
 const message = useMessage()
 
@@ -353,13 +421,12 @@ const model = ref({
   reenteredPassword: '',
 })
 
-// 計算重複密碼欄位是否可以輸入
+// 重複密碼欄位是否可以輸入
 const canEnterReenteredPassword = computed(() => {
   return model.value.password && model.value.password.length >= 6
 })
 
 function handlePasswordInput() {
-  // 密碼未滿 6 個字元時清空重複密碼
   if (!canEnterReenteredPassword.value) {
     model.value.reenteredPassword = ''
   }
@@ -369,7 +436,7 @@ const toggleLoginSignup = () => {
   step.value = 1 // 確保進入註冊時從第一步開始
 }
 
-// 下一步：切換到 Step 2
+// 註冊流程換頁的邏輯
 const goToStep3 = () => {
   step.value = 3
 }
@@ -405,7 +472,6 @@ const goToStep2 = async () => {
   }
 }
 
-// 上一步：回到 Step 1
 const goToStep1 = () => {
   step.value = 1
 }
