@@ -1,42 +1,10 @@
 <script setup>
 // import { ref } from 'vue'
-import { NButton, NCard, NTabs, NTabPane } from 'naive-ui';
+import { NButton } from 'naive-ui';
 import { ProfileCircle, BrightStar, Heart, Post, Group} from '@iconoir/vue';
-import { RouterLink, RouterView, useRoute } from 'vue-router'
+import { RouterLink, RouterView } from 'vue-router'
 import userInfo from '@/views/MyProfile/component/person'
-import { ref, computed, watch } from 'vue';
 
-const PostIcon = Post;
-
-// const activeIndex = ref(0); // 記錄當前選中的索引
-//     const route = useRoute();   // 獲取當前的路由信息
-
-//     // 根據 activeIndex 動態設置底線的樣式
-//     const lineStyle = computed(() => {
-//       const xOffset = activeIndex.value * 176; // 每個 li 寬度為 100px
-//       return {
-//         width: '100px', // 設置底線寬度
-//         transform: `translateX(${xOffset}px)`, // 根據 activeIndex 移動底線
-//       };
-//     });
-// const setActiveIndex = (index) => {
-//       activeIndex.value = index;
-//     };
-// watch(
-//       () => route.path,
-//       (newPath) => {
-//         if (newPath === '/profile/personInfo') {
-//           activeIndex.value = 0;
-//         } else if (newPath === '/profile/personpost') {
-//           activeIndex.value = 3;
-//         } else if (newPath === '/profile/personActivity') {
-//           activeIndex.value = 4;
-//         } else {
-//           activeIndex.value = -1;
-//         }
-//       },
-//       { immediate: true } // 當組件加載時立即觸發
-//     );
 
 </script>
 
@@ -56,7 +24,7 @@ const PostIcon = Post;
         </div>
         <p class="user-description text-2xl font-bold mt-1 md:mb-5">: {{ userInfo.shortDescription}}</p>
         <div class="btn-container flex gap-2 mt-8 mb-8">
-          <n-button round type="primary" class="flex-[3_3_0%]">打招呼</n-button><n-button type="primary" ghost class="flex-[2_2_0%]" round >編輯檔案</n-button>
+          <n-button type="primary" ghost class="flex-[2_2_0%]" round >編輯檔案</n-button>
         </div>
         <div class="tag-container flex gap-3 flex-wrap">
           <span v-for="item in userInfo.tags" :key="item.tags" class="border-2 px-3 py-1 rounded"># {{ item }}</span>
