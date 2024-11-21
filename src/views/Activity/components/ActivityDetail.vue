@@ -62,7 +62,7 @@ const toggleModal = () => {
 const userComment = ref('')
 </script>
 <template>
-  <div class="container max-w-3xl ">
+  <div class="container ">
     <div class="detail-container">
       <div class="flex items-center mb-4 w-full">
         <router-link :to="{ name: 'home' }">
@@ -122,7 +122,7 @@ const userComment = ref('')
         </div>
       </div>
     </div>
-    <div class="cards-container  pl-[2%] ">
+    <div class="cards-container  px-[2%] ">
       <h2 class="text-2xl font-bold mb-10">近期活動</h2>
       <ActivityCard 
         v-for="(items, index) in 5"
@@ -180,7 +180,7 @@ const userComment = ref('')
 
 @media screen and (width >= 1024px) {
   .container {
-    max-width: 1300px; 
+    max-width: 1200px; 
   }
 
   .detail-container {
@@ -191,6 +191,7 @@ const userComment = ref('')
     flex: 1;
     max-width: 500px;
     padding-left: 5%;
+    padding-right: 2%; 
   }
 }
 

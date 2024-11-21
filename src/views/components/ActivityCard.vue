@@ -21,7 +21,11 @@ const props = defineProps({
 </script>
 <template>
   <div class="rounded-2xl bg-transparent  overflow-hidden  ">
-    <a href="#" :class="{ ['flex' ] : props.horizontal }">
+    <router-link :to="{ 
+      name: 'activityDetail', 
+      params: {
+        id: '123'
+    }}" :class="{ ['flex' ] : props.horizontal }">
       <div :class="{'flex-1' : props.horizontal}">
           <img :class="{ 'horizontal-layout-img' : true}" class="w-full h-48 object-cover" :src="props.actImgUrl" alt="死圖">
       </div>
@@ -39,7 +43,7 @@ const props = defineProps({
               </div>
           </div>                            
       </div>
-    </a>
+    </router-link>
   </div>
 
 </template>
