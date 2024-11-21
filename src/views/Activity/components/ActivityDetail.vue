@@ -41,6 +41,8 @@ const payment = computed(() => {
       return '各付各的'
     case 'host':
       return '團主請客'
+    default:
+      return 'null'
   }
 })
 
@@ -120,7 +122,8 @@ const userComment = ref('')
     <div class="cards-container  pl-[2%] ">
       <h2 class="text-2xl font-bold mb-10">近期活動</h2>
       <ActivityCard 
-        v-for="items in 5"
+        v-for="(items, index) in 5"
+        :key="index"
         horizontal="true"
         :title="activity.name"
         :actImgUrl="activity.imageUrl"
