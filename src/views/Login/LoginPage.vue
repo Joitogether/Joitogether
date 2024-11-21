@@ -275,25 +275,46 @@ import {
   NUpload,
 } from 'naive-ui'
 import { ref, computed } from 'vue'
+import { storage } from './services/firebaseConfig.js'
+import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage'
 
-const handleFileChange = (fileList) => {
-  if (fileList.length > 0) {
-    const file = fileList[0]?.file
+// 上傳頭貼
+const handleFileChange = async (fileList) => {
+  // 無選擇文件時直接返回
+  if (fileList.length === 0) return
+  const file = fileList[0]?.file
+  if (!file) return
 
-    if (file) {
-      const reader = new FileReader()
+  // 預覽圖片
+  const reader = new FileReader()
+  reader.onload = (event) => {
+    // 本地圖片預覽
+    formValue.value.avatar = event.target.result
+  }
+  reader.readAsDataURL(file)
 
-      reader.onload = (e) => {
-        formValue.value.avatar = e.target.result // 將 Base64 URL 存入 imageSrc
-      }
+  try {
+    // 設定圖片文件的存儲路徑
+    const filePath = `avatars/${Date.now()}_${file.name}`
+    const fileRef = storageRef(storage, filePath)
 
-      reader.readAsDataURL(file) // 讀取文件並生成 Base64 URL
-    }
-  } else {
-    formValue.value = null // 如果沒有文件，清空預覽
+    // 上傳文件至 Firebase Storage
+    const snapshot = await uploadBytes(fileRef, file)
+
+    // 獲取下載 URL
+    const downloadURL = await getDownloadURL(snapshot.ref)
+
+    // 更新圖片 URL 到用戶的表單數據
+    formValue.value.avatar = downloadURL
+
+    console.log('圖片上傳成功，URL:', downloadURL)
+    message.success('圖片上傳成功！')
+  } catch (error) {
+    console.error('圖片上傳失敗:', error)
+    message.error('圖片上傳失敗，請稍後再試：' + (error.message || '未知錯誤'))
   }
 }
-// feature
+
 import registerUser from './services/registerService.js'
 import { validateFormFields } from './utils/formValidation.js'
 import { useMessage } from 'naive-ui'
@@ -304,6 +325,7 @@ const isLogin = ref(true)
 const step = ref(1)
 const formRef = ref(null)
 const formValue = ref({
+  avatar: '',
   user: {
     username: '',
     fullname: '',
@@ -378,6 +400,11 @@ const goToStep2 = async () => {
     const errors = validateFormFields(formValue.value, model.value.password)
     if (errors.length > 0) {
       message.error(errors[0])
+      return
+    }
+
+    if (model.value.password !== model.value.reenteredPassword) {
+      message.error('密碼不一致，請重新確認')
       return
     }
 
