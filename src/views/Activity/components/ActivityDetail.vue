@@ -54,7 +54,10 @@ const clearComment = () => {
   userComment.value = ''
 }
 
-const showModal = ref(true)
+const showModal = ref(false)
+const toggleModal = () => {
+  showModal.value = !showModal.value
+}
 
 const userComment = ref('')
 </script>
@@ -85,7 +88,7 @@ const userComment = ref('')
         </div>
         <span class="text-sm text-red-500">{{ `最後審核時間 ${activity.approvalDeadline}` }}</span>
         <p class="font-bold text-lg text-end">{{ `${registerCount}人報名` }}</p>
-        <NButton class="w-full mt-3 font-bold text-lg py-5" round type="primary">報名</NButton> 
+        <NButton class="w-full mt-3 font-bold text-lg py-5" round type="primary" @click="toggleModal">報名</NButton> 
         <p class="py-8 leading-6">{{ activity.description }}</p>
         <ul class="flex justify-around text-md border border-gray-200/100 rounded-lg p-2">
           <li class="flex flex-col items-center">
@@ -124,6 +127,7 @@ const userComment = ref('')
       <ActivityCard 
         v-for="(items, index) in 5"
         :key="index"
+
         horizontal="true"
         :title="activity.name"
         :actImgUrl="activity.imageUrl"
@@ -131,24 +135,29 @@ const userComment = ref('')
         :date-time="activity.startDate"
         :participants="activity.participants.registered.length"
         :host="activity.hostId"
-        class="mb-[2%]"
+        class="mb-[3%]"
       ></ActivityCard>
     </div>
-    <NModal v-model:show="showModal">
+    <NModal 
+      class="rounded-lg"
+      v-model:show="showModal"
+      :auto-focus="false"
+    >
       <n-card
-        style="width: 600px"
-        title="模态框"
+        style="width: 500px"
+        title="報名活動"
         :bordered="false"
         size="huge"
         role="dialog"
         aria-modal="true"
       >
         <template #header-extra>
-          噢！
+          這裡還可以放東西
         </template>
-        内容
+        <NInput :show-count="true" :maxlength="50" :clearable="true" type="textarea" placeholder="告訴團主你為什麼想參加吧！"></NInput>
         <template #footer>
-          尾部
+          <NButton type="primary" round class="font-bold w-full">報名</NButton>
+          <NButton type="secondary" round class="font-bold mt-2 w-full" @click="toggleModal">取消</NButton> 
         </template>
       </n-card>
     </NModal>
@@ -167,6 +176,12 @@ const userComment = ref('')
     max-width: 990px; 
     flex-wrap: wrap;
   }
+}
+
+@media screen and (width >= 1024px) {
+  .container {
+    max-width: 1300px; 
+  }
 
   .detail-container {
     flex: 1;
@@ -174,9 +189,9 @@ const userComment = ref('')
 
   .cards-container {
     flex: 1;
+    max-width: 500px;
+    padding-left: 5%;
   }
 }
-
-
 
 </style>  
