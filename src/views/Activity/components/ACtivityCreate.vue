@@ -1,23 +1,15 @@
 <script setup>
-import { Search } from "@iconoir/vue";
-import { computed, watch, ref, onMounted } from "vue";
-import { loadGoogleMapsAPI } from "@/views/Activity/components/googleMapsLoader";
+import { Search } from "@iconoir/vue"
+import { computed, ref, onMounted,watch } from "vue"
+import { loadGoogleMapsAPI } from "@/views/Activity/components/googleMapsLoader"
+import  debounce from "lodash/debounce"
 
 // data
 const participants = ref(1);
-const participantsError = ref(false);
-
-watch(participants,(e)=> {
-  if(e > 30 ){
-    alert("人數不可以超過30!!")
-    participants.value = 30
-  } else if (e < 0) {
-  alert("人數不可以小於0!!")
-    participants.value =1}
-})
-
+const participantsError = ref("");
 const paymentMethod = ref("free");
 const eventCost = ref(0);
+const eventCostError = ref("")
 
 
 const previewImage = ref(null);
@@ -25,7 +17,6 @@ const uploadError = ref("");
 const maxFileSize = 5 * 1024 * 1024;
 const searchQuery = ref("");
 const suggestions = ref([]);
-
 
 const inputValues = ref({
   name: "",
@@ -42,6 +33,12 @@ const userNotEnter = ref({
   deadline: false,
 
 });
+
+const timeRange = ref({
+  minTime: '',
+  maxTime: '',
+});
+
 
 // methods
 
@@ -60,7 +57,6 @@ const updateParticipants = (value) => {
   }
 }
 
-
 //  監視人數 輸入
 watch(participants, (newValue) => {
   if (isNaN(newValue) || newValue === "" || newValue <= 0 ) {
@@ -76,6 +72,7 @@ watch(participants, (newValue) => {
   }
 });
 
+//  限制人數輸入
 const validateInput = (event) => {
   let value = event.target.value;
 
@@ -87,6 +84,36 @@ const validateInput = (event) => {
   }
   event.target.value = value;
 };
+
+//  監視費用輸入
+watch(eventCost,(newValue) => {
+  if (isNaN(newValue) || newValue === "" || newValue <= 0 ) {
+    eventCostError.value = "請輸入有效數字";
+    eventCost.value ="";
+  } else if (newValue >= 99999) {
+    eventCostError.value = "活動費用不得超過 99999 元";
+    eventCost.value = 99999;
+  } else {
+    eventCostError.value = "";
+  }
+})
+
+//  限制費用輸入
+const eventCostInput = (event) => {
+  let value = event.target.value;
+
+  value = value.replace(/[^0-9]/g, "");
+  value = value.replace(/^0+/, "");
+  if (value > 99999) {
+    value = 99999;
+  }
+  event.target.value = value;
+};
+
+
+
+
+
 
 
 const checkInput = (field) => {
@@ -111,7 +138,10 @@ const showEventCost = computed(() => paymentMethod.value === "AA");
 
 const validateCost = () => {
   userNotEnter.value.price = eventCost.value < 0 || eventCost.value > 99999;
+
 };
+
+
 
 const checkPaymentMethod = () => {
   if (paymentMethod.value !== "AA") {
@@ -146,7 +176,7 @@ const handleFileUpload = (event) => {
 };
 
 
-const apiKey = "替換為您的 Google API Key"; // 替換為您的 Google API Key
+const apiKey = "AIzaSyBETfml-zNAfzOxcFQyIALuoq9b7BV25UM"; // 替換為您的 Google API Key
 const autocompleteInstance = ref(null);
 
 onMounted(async () => {
@@ -160,6 +190,7 @@ onMounted(async () => {
       {
         types: ["geocode"],
         language: "zh-TW",
+        componentRestrictions: { country: "TW" },
       }
     );
 
@@ -186,6 +217,7 @@ const clearSearch = () => {
   }
 };
 
+
 onMounted(() => {
   // 取得台灣的時區偏移量（台灣 UTC+8）
   const taiwanTimeOffset = 8 * 60; // 台灣時區偏移量為 8 小時（480 分鐘）
@@ -196,8 +228,8 @@ onMounted(() => {
   // 計算台灣時間
   const taiwanNow = new Date(now.getTime() + taiwanTimeOffset * 60 * 1000);
 
-  // 計算台灣時間 - 7 天
-  const minDate = new Date(taiwanNow.getTime() - 1 * 24 * 60 * 60 * 1000); // 7 天前
+  // 計算當前時間
+  const minDate = taiwanNow 
   const minTime = minDate.toISOString().slice(0, 16); // 轉換為 yyyy-mm-ddThh:mm 格式
 
   // 計算台灣時間 + 90 天
@@ -276,10 +308,7 @@ const previewActivity = () => {
     location: searchQuery.value,
   });
 
-  alert("活動已預覽，請檢查開發者工具中的資料");
 };
-
-
 
 
 </script>
@@ -287,12 +316,12 @@ const previewActivity = () => {
 <template>
 <section>
 <div class=" bg-gray-300">
-  <main class="max-w-xl mx-auto items-center justify-center min-h-screen px-6">
-      <h3 class="font-semibold  mb-2 p-3 text-lg">活動建立</h3>
+  <main class="max-w-xl mx-auto min-h-screen px-6 items-center justify-center">
+      <h3 class="font-semibold text-lg mb-2 p-3">活動建立</h3>
       <!-- 圖片上傳 -->
-      <div class="bg-white p-5 mb-3 rounded-lg">
+      <div class="bg-white rounded-lg p-5 mb-3 ">
         <div class="mb-6">
-          <div class="rounded-lg p-6 flex justify-center items-center">
+          <div class="rounded-lg flex justify-center items-center p-6">
             <label class="bg-gray-100 mt-6 rounded-md w-40 h-40 flex items-center justify-center cursor-pointer">
               <img v-if="previewImage" :src="previewImage" alt="預覽圖片" class="w-full h-full object-cover rounded-md" />
               <span v-else class="text-gray-500">點擊上傳圖片</span>
@@ -419,8 +448,9 @@ const previewActivity = () => {
           <div>
             <div class="flex justify-end items-center">
               <button class=" w-10 px-3 py-3 rounded-md justify-end items-center hover:bg-gray-200"  @click="updateParticipants(-1)">-</button>
-              <input  type="number" :min=1 :max=30 class=" w-32 text-center p-3 mx-3 border rounded-md focus:outline-none "
+              <input  type="number" min="1" max="30" class=" w-32 text-center p-3 mx-3 border rounded-md focus:outline-none "
               v-model="participants"
+              @input="validateInput"
               />
               <button class=" w-10 px-3 py-3 rounded-md justify-end items-center hover:bg-gray-200" @click="updateParticipants(1)">+</button>
             </div>
@@ -461,13 +491,13 @@ const previewActivity = () => {
               <label class="block  font-medium mb-2 p-2">活動費用<span class="text-red-600">*</span></label>
               <input type="number"  class="w-full p-3  border-b border-solid rounded-md  focus:outline-none"
               v-model="eventCost"
-              @input="validateCost"
+              @input="eventCostInput"
               min="0"
               max="99999"
               />
               <p class="text-sm text-red-600"
-              v-if="userNotEnter.price"
-              >預算最高限制為99999元 *</p>
+              v-if="eventCostError"
+              >{{ eventCostError }} *</p>
             </div>
         </div>
         <div class="my-6 flex items-center justify-center ">
