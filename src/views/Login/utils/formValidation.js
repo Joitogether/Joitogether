@@ -21,23 +21,23 @@ export const validateFormFields = (formValue, password) => {
   const errors = []
 
   if (!formValue.user.fullname) {
-    errors.push('請輸入姓名')
+    errors.push('👤 請輸入姓名！名字是很重要的呢～ 📝')
   }
 
   if (!formValue.user.username) {
-    errors.push('請輸入使用者名稱')
+    errors.push('🏷️ 請輸入使用者名稱～這可是你的專屬代號呢！✨')
   }
 
   if (!validateEmail(formValue.email)) {
-    errors.push('請輸入有效的電子郵件地址')
+    errors.push('📧 信箱格式不對哦～請再確認一下！🔍')
   }
 
   if (!validatePhoneNumber(formValue.phone)) {
-    errors.push('請輸入有效的電話號碼')
+    errors.push('📱 電話號碼格式好像怪怪的～再檢查一下吧！💡')
   }
 
   if (!validatePassword(password)) {
-    errors.push('密碼必須至少包含6個字符，並包含字母與數字')
+    errors.push('🔑 密碼太簡單了啦！至少6字符，還要有數字和字母喔～ 💪')
   }
 
   return errors

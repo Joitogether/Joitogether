@@ -385,11 +385,11 @@ const handleFileChange = async (fileList) => {
     // 更新圖片 URL 到用戶的表單數據
     formValue.value.avatar = downloadURL
 
-    console.log('圖片上傳成功，URL:', downloadURL)
-    message.success('圖片上傳成功！')
+    console.log('📸 圖片上傳成功，URL:', downloadURL)
+    message.success('🎉 圖片上傳成功啦！太棒了呢～ ✨')
   } catch (error) {
-    console.error('圖片上傳失敗:', error)
-    message.error('圖片上傳失敗，請稍後再試：' + (error.message || '未知錯誤'))
+    console.error('⚠️ 圖片上傳失敗:', error)
+    message.error(`😭 哎呀！圖片上傳失敗了～ 請稍後再試看看吧 💔`)
   }
 }
 
@@ -479,33 +479,35 @@ const goToStep2 = async () => {
       message.error(errors[0])
       return
     }
-
+    // 再次確認密碼是否一致
     if (model.value.password !== model.value.reenteredPassword) {
-      message.error('密碼不一致，請重新確認')
+      message.error('😰 密碼不一致哦！請再確認一下吧～ 🔐')
       return
     }
-
+    // 同意條款才能進到下一步
     if (!canProceedToNextStep.value) {
-      message.error('請同意隱私權政策和服務條款')
+      message.error('📝 請先同意隱私權政策和服務條款才能繼續唷！拜託啦看一下就好🙏')
       return
     }
     try {
       // 註冊功能
       const userResponse = await registerUser(formValue.value.email, model.value.password)
-      console.log('用戶註冊成功！', userResponse)
-      message.success('註冊成功！歡迎您，' + formValue.value.user.username)
+      message.success(userResponse.message)
+      console.log('用戶註冊成功！', userResponse.user)
+      message.success(`🎉 註冊成功！歡迎加入，${formValue.value.user.username}！✨`)
 
+      // 發送驗證信件
       // 切換到 Step 2
       step.value = 2
     } catch (error) {
       if (error.code === 'auth/email-already-in-use') {
-        message.error('此信箱已被註冊，請嘗試更換其他電子信箱')
+        message.error('📧 這個信箱已被註冊了唷～試試其他的吧！💡')
       } else if (error.code === 'auth/invalid-email') {
-        message.error('無效的電子郵件地址')
+        message.error('✉️ 嗯…這個信箱格式不對哦！請再檢查一下吧～ 🔍')
       } else if (error.code === 'auth/weak-password') {
-        message.error('密碼長度至少要6個字符，並包含數字與字母')
+        message.error('🔑 密碼太簡單了啦！至少6字符，還要有數字和字母喔～ 💪')
       } else {
-        message.error('註冊失敗，請稍後再嘗試：' + (error.message || '未知錯誤'))
+        message.error(`😵 註冊失敗了！稍後再試一次吧 💔`)
       }
     }
   } else {
