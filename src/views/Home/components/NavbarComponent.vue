@@ -1,11 +1,14 @@
 <script setup>
 import { Search, User, Menu, Sweep3d } from '@iconoir/vue'
+import { NButton, NDivider } from 'naive-ui'
+import userInfo from '../../MyProfile/component/person'
+import { RouterLink } from 'vue-router'
 </script>
 
 <template>
   <div id="navbar" class="flex items-center space-x-2 justify-evenly">
     <div>
-      <a href=""><Sweep3d /></a>
+      <a href="#"><Sweep3d /></a>
     </div>
     <div class="flex items-center space-x-6">
       <div class="hidden md:flex min-w-12">找聚會</div>
@@ -13,7 +16,7 @@ import { Search, User, Menu, Sweep3d } from '@iconoir/vue'
         <input type="text" placeholder="運動、美食、唱歌..." />
       </div>
       <div>
-        <a href=""><Search /></a>
+        <a href="#"><Search /></a>
       </div>
     </div>
 
@@ -112,24 +115,57 @@ import { Search, User, Menu, Sweep3d } from '@iconoir/vue'
       </label>
       <div
         id="login-menu"
-        class="hidden md:hidden w-full bg-gray-200 text-white p-6 space-y-4 absolute top-10 inset-x-0"
+        class="hidden md:hidden w-1/4 bg-gray-50 text-black p-6 space-y-4 absolute top-10 right-0"
       >
-        <ul>
+        <div class="w-1/2 rounded-full overflow-hidden flex justify-self-center">
+          <img :src="userInfo.photoURL" alt="userPhoto" />
+        </div>
+        <div class="text-center font-bold text-xl">{{ userInfo.name }}</div>
+        <div class="text-md font-bold text-center">
+          <span>{{ userInfo.city }}</span>
+          <span> • {{ userInfo.age }}</span>
+          <span> • {{ userInfo.job }}</span>
+        </div>
+        <div class="flex justify-center">
+          <RouterLink to="/profile/personInfo">
+            <n-button type="primary" ghost round> 查看個人頁面 </n-button>
+          </RouterLink>
+        </div>
+
+        <div class="flex justify-center gap-10">
+          <div class="grid text-center">
+            <span>0</span>
+            <span>聚會</span>
+          </div>
+          <div class="grid text-center">
+            <span>0</span>
+            <span>收藏</span>
+          </div>
+          <div class="grid text-center">
+            <span>0</span>
+            <span>文章</span>
+          </div>
+        </div>
+        <n-divider />
+        <div class="flex justify-center">
+          <n-button strong secondary type="tertiary"> 登出 </n-button>
+        </div>
+        <!-- <ul>
           <li>
             <a
               href="#"
-              class="block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-black dark:hover:text-white"
-              >登入</a
-            >
+              class="block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-black dark:hover:text-white">
+              登入
+            </a>
           </li>
           <li>
             <a
               href="#"
-              class="block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-black dark:hover:text-white"
-              >註冊</a
-            >
+              class="block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-black dark:hover:text-white">
+              註冊
+            </a>
           </li>
-        </ul>
+        </ul> -->
       </div>
     </div>
   </div>
