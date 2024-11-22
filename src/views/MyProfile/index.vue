@@ -1,10 +1,8 @@
 <script setup>
-// import { ref } from 'vue'
 import { NButton } from 'naive-ui';
 import { ProfileCircle, BrightStar, Heart, Post, Group} from '@iconoir/vue';
 import { RouterLink, RouterView } from 'vue-router'
 import userInfo from '@/views/MyProfile/component/person'
-
 
 </script>
 
@@ -12,8 +10,7 @@ import userInfo from '@/views/MyProfile/component/person'
   <div class="container mx-auto ">
     <div class=" card-container border rounded-lg overflow-hidden bg-white">
       <div class="img-container w-full">
-        <!-- <img class="card-img w-full h-full object-cover" src="@/assets/jun.jpg" alt=""> -->
-        <img class="card-img w-full h-full object-cover" src="https://shoplineimg.com/5ab875018d1db9e3db00025b/5e15c900fe2d2b002db19bfb/800x.jpg?" alt="">
+        <img class="card-img w-full h-full object-cover" :src="userInfo.photoURL" alt="userPhoto"/>
       </div>
       <div class="card-content-container   p-5">
         <h3 class="user-name text-2xl text-center font-bold">{{ userInfo.name }}</h3>
