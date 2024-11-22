@@ -314,7 +314,6 @@ import { ref, computed } from 'vue'
 import { storage } from './services/firebaseConfig.js'
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage'
 
-// 上傳頭貼
 // 隱私權政策-控制 checkbox 是否被選中
 const showModalPrivacy = ref(false)
 const isCheckedPrivacy = ref(false)
@@ -351,6 +350,12 @@ const onDisagreeTerms = () => {
   isCheckedTerms.value = false
   showModalTerms.value = false
 }
+
+// 同意條款才能進到下一步
+const canProceedToNextStep = computed(() => {
+  return isCheckedPrivacy.value && isCheckedTerms.value
+})
+
 // 大頭貼的邏輯
 const handleFileChange = async (fileList) => {
   // 無選擇文件時直接返回
@@ -468,6 +473,7 @@ const goToStep3 = () => {
 }
 const goToStep2 = async () => {
   if (step.value === 1) {
+    // 引入表單驗證的錯誤訊息
     const errors = validateFormFields(formValue.value, model.value.password)
     if (errors.length > 0) {
       message.error(errors[0])
@@ -479,6 +485,10 @@ const goToStep2 = async () => {
       return
     }
 
+    if (!canProceedToNextStep.value) {
+      message.error('請同意隱私權政策和服務條款')
+      return
+    }
     try {
       // 註冊功能
       const userResponse = await registerUser(formValue.value.email, model.value.password)

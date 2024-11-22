@@ -20,26 +20,24 @@ export const validatePhoneNumber = (phone) => {
 export const validateFormFields = (formValue, password) => {
   const errors = []
 
-  if (!validateEmail(formValue.email)) {
-    errors.push('請輸入有效的電子郵件地址')
-  }
-
-  if (!validatePassword(password)) {
-    errors.push('密碼必須至少包含6個字符，並包含字母與數字')
-  }
-  if (!validatePhoneNumber(formValue.phone)) {
-    errors.push('請輸入有效的電話號碼')
-  }
-  if (!formValue.user.username) {
-    errors.push('請輸入使用者名稱')
-  }
-
   if (!formValue.user.fullname) {
     errors.push('請輸入姓名')
   }
 
-  if (!formValue.phone) {
-    errors.push('請輸入電話號碼')
+  if (!formValue.user.username) {
+    errors.push('請輸入使用者名稱')
+  }
+
+  if (!validateEmail(formValue.email)) {
+    errors.push('請輸入有效的電子郵件地址')
+  }
+
+  if (!validatePhoneNumber(formValue.phone)) {
+    errors.push('請輸入有效的電話號碼')
+  }
+
+  if (!validatePassword(password)) {
+    errors.push('密碼必須至少包含6個字符，並包含字母與數字')
   }
 
   return errors
