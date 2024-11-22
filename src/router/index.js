@@ -4,6 +4,7 @@ import Profile from '@/views/MyProfile/index.vue'
 import Home from '@/views/Home/index.vue'
 import Activity from '@/views/Activity/index.vue'
 import ActivityDetail from '@/views/Activity/components/ActivityDetail.vue'
+import ActivityReview from '@/views/Activity/components/ActivityReview.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -33,6 +34,11 @@ const router = createRouter({
         name: 'activityDetail',
         component: ActivityDetail
       },
+      {
+        path: 'review',
+        name: 'activityReview',
+        component: ActivityReview                
+      }
     ]
   }
 
