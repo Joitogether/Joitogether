@@ -4,6 +4,7 @@ const userInfo = ref({
   city: '新北市',
   age: 26,
   job: '工程師',
+  photoURL:"https://shoplineimg.com/5ab875018d1db9e3db00025b/5e15c900fe2d2b002db19bfb/800x.jpg?",
   shortDescription: '當上帝給你檸檬時，把他們榨成汁',
   tags: ['愛運動', '遊山玩水', '聽音樂', '玩遊戲', '睡覺', '寫程式'],
   selfintroduction: '大家好我喜歡交朋友大家好我喜歡交朋友大家好我喜歡交朋友',
