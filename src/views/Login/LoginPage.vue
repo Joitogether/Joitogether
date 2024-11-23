@@ -25,8 +25,12 @@
           <div class="flex-grow border-t border-gray-300"></div>
         </div>
         <div class="flex justify-center flex-col gap-3 items-center">
-          <n-button class="w-full mt-3 font-bold text-lg py-5" round type="primary"
-            >Google</n-button
+          <n-button
+            @click="handleLogin"
+            class="w-full mt-3 font-bold text-lg py-5"
+            round
+            type="primary"
+            >Google(暫時登入鈕)</n-button
           >
           <n-button class="w-full mt-3 font-bold text-lg py-5" round type="primary"
             >Facebook</n-button
@@ -286,6 +290,7 @@
 </template>
 
 <script setup>
+// 引入區域
 import {
   NButton,
   NDatePicker,
@@ -298,8 +303,45 @@ import {
   NModal,
 } from 'naive-ui'
 import { ref, computed } from 'vue'
+import { useRouter } from 'vue-router'
 import { storage } from './services/firebaseConfig.js'
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage'
+import registerUser from './services/registerService.js'
+import { validateFormFields } from './utils/formValidation.js'
+import loginUser from './services/loginService.js'
+
+// 初始化區域
+const message = useMessage()
+const router = useRouter()
+
+// 登入功能
+const handleLogin = async () => {
+  const email = loginForm.value.email
+  const password = loginForm.value.password
+
+  // 處理用戶未輸入資訊
+  if (!email || !password) {
+    message.error('咦？你忘了輸入信箱和密碼嗎？快填一下吧～不然可要吃閉門羹啦！😜')
+    return
+  }
+  try {
+    const loginUserResponse = await loginUser(email, password)
+    if (loginUserResponse.success) {
+      message.success('🎉 登入成功！歡迎回來！✨')
+      console.log('用戶登入成功：', loginUserResponse.user)
+      // 跳轉首頁
+      router.push({ name: 'home' })
+    }
+  } catch (error) {
+    console.error('完整錯誤物件：', error)
+
+    if (error.message) {
+      message.error(error.message)
+    } else {
+      message.error('登入失敗，請稍後再試！😞')
+    }
+  }
+}
 
 // 登入表單
 const loginForm = ref({
@@ -400,11 +442,6 @@ const handleFileChange = async (fileList) => {
   }
 }
 
-import registerUser from './services/registerService.js'
-import { validateFormFields } from './utils/formValidation.js'
-
-const message = useMessage()
-
 const isLogin = ref(true)
 const step = ref(1)
 const formRef = ref(null)
@@ -500,25 +537,14 @@ const goToStep2 = async () => {
       // 註冊功能
       const userResponse = await registerUser(formValue.value.email, model.value.password)
       message.success(userResponse.message)
-      console.log('用戶註冊成功！', userResponse.user)
-      message.success(`🎉 註冊成功！歡迎加入，${formValue.value.user.username}！✨`)
+      console.log('用戶註冊成功！', userResponse.RegisterUserData)
+      message.success(`🎉 註冊成功！歡迎加入，${formValue.value.user.username} ✨`)
 
-      // 發送驗證信件
       // 切換到 Step 2
       step.value = 2
     } catch (error) {
-      if (error.code === 'auth/email-already-in-use') {
-        message.error('📧 這個信箱已被註冊了唷～試試其他的吧！💡')
-      } else if (error.code === 'auth/invalid-email') {
-        message.error('✉️ 嗯…這個信箱格式不對哦！請再檢查一下吧～ 🔍')
-      } else if (error.code === 'auth/weak-password') {
-        message.error('🔑 密碼太簡單了啦！至少6字符，還要有數字和字母喔～ 💪')
-      } else {
-        message.error(`😵 註冊失敗了！稍後再試一次吧 💔`)
-      }
+      message.error(error.message)
     }
-  } else {
-    step.value = 2
   }
 }
 

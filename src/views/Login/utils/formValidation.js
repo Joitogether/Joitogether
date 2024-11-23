@@ -1,5 +1,6 @@
 // 表單驗證邏輯
 
+// 註冊表單驗證
 // email格式限制
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
 export const validateEmail = (email) => {
