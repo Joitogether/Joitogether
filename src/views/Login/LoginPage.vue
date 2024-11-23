@@ -2,37 +2,24 @@
   <div class="login-wrapper">
     <div class="block shadow-md">
       <div class="event-image bg-green-100"></div>
+      <div></div>
       <div v-if="isLogin" class="login-box">
         <h2 class="font-black text-6xl" style="color: #18a058">登入</h2>
-        <form action="">
-          <input
-            type="email"
-            id="email"
-            name="email"
-            placeholder="請輸入信箱"
-            class="bg-gray-100 appearance-none border-2 border-gray-100 rounded py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-500"
-          />
-          <input
-            type="password"
-            id="password"
-            name="password"
-            placeholder="請輸入密碼"
-            class="bg-gray-100 appearance-none border-2 border-gray-100 rounded py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-500"
-          />
-          <div class="forgot-block">
-            <div>
-              <input type="checkbox" id="remember" name="remember" class="remember" />
-              <label for="remember" class="checkbox-label">記住我</label>
-            </div>
-            <button class="bg-white text-gray-400 hover:text-blue-400 font-bold rounded text-base">
-              忘記密碼
-            </button>
-          </div>
-          <n-button class="w-full mt-3 font-bold text-lg py-5" round type="primary">
-            登入
-          </n-button>
-        </form>
-        <div class="flex items-center mb-7 mt-8">
+
+        <n-form ref="loginFormRef" :label-width="80" :model="loginForm" :rules="loginRules">
+          <n-form-item path="email">
+            <n-input v-model:value="loginForm.email" placeholder="輸入信箱" />
+          </n-form-item>
+          <n-form-item path="password" style="--n-label-height: 15px">
+            <n-input type="password" v-model:value="loginForm.password" placeholder="輸入密碼" />
+          </n-form-item>
+        </n-form>
+        <div class="flex justify-between items-center mt-3">
+          <n-checkbox size="large" label="記住我" />
+          <n-button text style="--n-font-size: 15px"> 忘記密碼 </n-button>
+        </div>
+
+        <div class="flex items-center mb-6 mt-6">
           <div class="flex-grow border-t border-gray-300"></div>
           <span class="mx-4 text-gray-600">第三方平台登入</span>
           <div class="flex-grow border-t border-gray-300"></div>
@@ -314,6 +301,26 @@ import { ref, computed } from 'vue'
 import { storage } from './services/firebaseConfig.js'
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage'
 
+// 登入表單
+const loginForm = ref({
+  email: '',
+  password: '',
+})
+
+// 登入表單的驗證規則
+const loginRules = {
+  email: {
+    required: true,
+    message: '請輸入信箱',
+    trigger: ['input', 'blur'],
+  },
+  password: {
+    required: true,
+    message: '請輸入密碼',
+    trigger: ['input', 'blur'],
+  },
+}
+
 // 隱私權政策-控制 checkbox 是否被選中
 const showModalPrivacy = ref(false)
 const isCheckedPrivacy = ref(false)
@@ -530,7 +537,7 @@ h2 {
   font-size: 25px;
   margin-bottom: 20px;
 }
-form {
+/* form {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -539,11 +546,10 @@ form {
 input {
   width: 100%;
   height: 40px;
-  /* border: 1px solid gray; */
   padding: 5px;
   text-align: center;
   border-radius: 5px;
-}
+} */
 
 .login-wrapper {
   height: 100vh;
@@ -569,6 +575,7 @@ input {
   box-sizing: border-box;
   overflow-y: scroll;
 }
+
 .forgot-block {
   width: 100%;
   display: flex;
