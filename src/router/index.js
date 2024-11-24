@@ -5,6 +5,7 @@ import Home from '@/views/Home/index.vue'
 import Activity from '@/views/Activity/index.vue'
 import ActivityDetail from '@/views/Activity/components/ActivityDetail.vue'
 import ActivityCreate from '@/views/Activity/components/ActivityCreate.vue'
+import ActivityReview from '@/views/Activity/components/ActivityReview.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -39,6 +40,11 @@ const router = createRouter({
         component: ActivityCreate
       },
 
+      {
+        path: 'review',
+        name: 'activityReview',
+        component: ActivityReview                
+      }
     ]
   }
 
