@@ -11,8 +11,8 @@ const activity = ref({
   id: 'unique-activity-id',
   name: '一起去玩水', // 活動名稱
   imageUrl: 'https://www.welcometw.com/wp-content/uploads/2022/06/%E7%B6%B2%E7%BE%8E%E8%80%81%E6%9C%A8@sshihhan-850x638.jpg', // 活動照片網址
-  location: '261宜蘭縣頭城鎮濱海路二段6號', 
-  startDate: '2024-12-20', // 開始日期 
+  location: '261宜蘭縣頭城鎮濱海路二段6號',
+  startDate: '2024-12-20', // 開始日期
   endDate: '2024-12-25', // 結束日期
   startTime: '14:00', // 開始時間
   endTime: '18:00', // 結束時間
