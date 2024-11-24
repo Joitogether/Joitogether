@@ -8,8 +8,14 @@ const registerUser = async (email, password) => {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password)
     const user = userCredential.user
 
+    // 設定驗證信的跳轉連結
+    const actionCodeSettings = {
+      url: `${window.location.origin}/signup-success`, // 前面那段是localhost
+      handleCodeInApp: true,
+    }
+
     // 發送驗證信件
-    await sendEmailVerification(user)
+    await sendEmailVerification(user, actionCodeSettings)
     console.log('驗證信已發送 📧', user)
 
     return {
