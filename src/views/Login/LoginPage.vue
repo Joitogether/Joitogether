@@ -310,6 +310,7 @@ import { ref, computed } from 'vue'
 import { storage } from './services/firebaseConfig.js'
 import { loginWithGoogle, loginWithFacebook } from './services/authService.js'
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage'
+import { useRouter } from 'vue-router'
 
 // 登入表單
 const loginForm = ref({
@@ -332,25 +333,26 @@ const loginRules = {
 }
 
 // 第三方登入
-async function loginGoogle() {
+const router = useRouter()
+const loginGoogle = async () => {
   try {
     const user = await loginWithGoogle()
     message.success(`🎉 Google 登入成功！歡迎，${user.displayName}`)
-    console.log('登入的用戶資料：', user)
-
-    this.$router.push('/')
+    console.log('Google 登入成功：', user)
+    router.push('/')
   } catch (error) {
-    message.error(`😭 Google 登入失敗：${error}`)
+    console.error(error)
   }
 }
 
-async function loginFacebook() {
+const loginFacebook = async () => {
   try {
     const user = await loginWithFacebook()
     message.success(`🎉 Facebook 登入成功！歡迎，${user.displayName}`)
-    console.log('登入的用戶資料：', user)
+    console.log('Facebook 登入成功：', user)
+    router.push('/')
   } catch (error) {
-    message.error(`😭 Facebook 登入失敗：${error}`)
+    console.error(error)
   }
 }
 
