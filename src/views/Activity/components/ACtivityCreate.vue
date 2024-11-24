@@ -10,11 +10,17 @@ const participantsError = ref("");
 const paymentMethod = ref("free");
 const eventCost = ref(0);
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 const eventCostError = ref("")
 
 
 >>>>>>> 4a059d0 (feat:TaiwanTimeOffsettime and updateParticipant)
+=======
+const eventCostError = ref("")
+
+
+>>>>>>> 5895295123c730d258f5d48eaa888989e620ec71
 const previewImage = ref(null);
 const uploadError = ref("");
 const maxFileSize = 5 * 1024 * 1024;
@@ -34,6 +40,7 @@ const userNotEnter = ref({
   price: false,
   eventTime: false,
   deadline: false,
+
 });
 
 const timeRange = ref({
@@ -43,15 +50,21 @@ const timeRange = ref({
 
 
 // methods
+
+//  監視人數 按鈕
 const updateParticipants = (value) => {
   const newCount = participants.value + value;
-
   if (newCount < 1) {
-    participantsError.value = true;
+    participantsError.value = "人數不得低於 1 人";
+    participants.value = 1;
+  } else if (newCount > 30) {
+    participantsError.value = "人數不得超過 30 人";
+    participants.value = 30;
   } else {
+    participantsError.value = "";
     participants.value = newCount;
-    participantsError.value = false;
   }
+<<<<<<< HEAD
 <<<<<<< HEAD
 };
 
@@ -86,6 +99,38 @@ const validateInput = (event) => {
   event.target.value = value;
 };
 
+=======
+}
+
+//  監視人數 輸入
+watch(participants, (newValue) => {
+  if (isNaN(newValue) || newValue === "" || newValue <= 0 ) {
+    alert("請輸入有效數字")
+    participantsError.value = "請輸入有效數字";
+    participants.value = 1;
+  } else if (newValue > 30) {
+    alert("人數不得超過 30 人")
+    participantsError.value = "人數不得超過 30 人";
+    participants.value = 30;
+  }  else {
+    participantsError.value = "";
+  }
+});
+
+//  限制人數輸入
+const validateInput = (event) => {
+  let value = event.target.value;
+
+  value = value.replace(/[^0-9]/g, "");
+  value = value.replace(/^0+/, "");
+  // 如果數字超過 30，限制為 30
+  if (value > 30) {
+    value = 30;
+  }
+  event.target.value = value;
+};
+
+>>>>>>> 5895295123c730d258f5d48eaa888989e620ec71
 //  監視費用輸入
 watch(eventCost,(newValue) => {
   if (isNaN(newValue) || newValue === "" || newValue <= 0 ) {
@@ -117,7 +162,10 @@ const eventCostInput = (event) => {
 
 
 
+<<<<<<< HEAD
 >>>>>>> 4a059d0 (feat:TaiwanTimeOffsettime and updateParticipant)
+=======
+>>>>>>> 5895295123c730d258f5d48eaa888989e620ec71
 const checkInput = (field) => {
   userNotEnter.value[field] = !inputValues.value[field].trim();
 };
@@ -178,17 +226,23 @@ const handleFileUpload = (event) => {
 };
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 const apiKey = "Google API Key"; // 替換為您的 Google API Key
 =======
 
 const apiKey = "AIzaSyBETfml-zNAfzOxcFQyIALuoq9b7BV25UM"; // 替換為您的 Google API Key
 >>>>>>> 4a059d0 (feat:TaiwanTimeOffsettime and updateParticipant)
+=======
+
+const apiKey = "AIzaSyBETfml-zNAfzOxcFQyIALuoq9b7BV25UM"; // 替換為您的 Google API Key
+>>>>>>> 5895295123c730d258f5d48eaa888989e620ec71
 const autocompleteInstance = ref(null);
 
 onMounted(async () => {
   try {
     const googleMaps = await loadGoogleMapsAPI(apiKey);
     const inputElement = document.getElementById("autocomplete-input");
+
     autocompleteInstance.value = new googleMaps.places.Autocomplete(
       inputElement,
       {
@@ -198,10 +252,14 @@ onMounted(async () => {
       }
     );
 
-    autocompleteInstance.value.addListener("place_changed", () => {
+
+    autocompleteInstance.value.addListener("place_changed",
+    debounce (() => {
       const place = autocompleteInstance.value.getPlace();
       searchQuery.value = place.formatted_address || place.name;
-    });
+    },300)
+  );
+
   } catch (error) {
     console.error("Error loading Google Maps API:", error);
   }
@@ -218,7 +276,10 @@ const clearSearch = () => {
 };
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> 5895295123c730d258f5d48eaa888989e620ec71
 
 onMounted(() => {
   // 取得台灣的時區偏移量（台灣 UTC+8）
@@ -246,7 +307,10 @@ onMounted(() => {
 
 
 
+<<<<<<< HEAD
 >>>>>>> 4a059d0 (feat:TaiwanTimeOffsettime and updateParticipant)
+=======
+>>>>>>> 5895295123c730d258f5d48eaa888989e620ec71
 const selectSuggestion = (suggestion) => {
   searchQuery.value = suggestion.description;
   suggestions.value = [];
@@ -339,8 +403,6 @@ const previewActivity = () => {
 
           <p v-if="uploadError" class="text-sm text-red-600 mt-2  flex items-center justify-center">{{ uploadError }}</p>
 
-
-           <!-- <p v-if="uploadError" class="text-sm text-red-600 mt-2">{{ uploadError }}</p> -->
         </div>
       </div>
 
@@ -384,6 +446,7 @@ const previewActivity = () => {
               placeholder="搜尋聚會地點"
               class="flex-grow p-3 border-none focus:outline-none"
               id="autocomplete-input"
+              ref="autocompleteInstance"
               />
               <button class="p-3  border-l-2" @click="clearSearch">
                 <Search />
@@ -409,6 +472,8 @@ const previewActivity = () => {
               <span class="text-red-600">*</span>
             </label>
             <input type="datetime-local"
+            :min="timeRange.minTime"
+            :max="timeRange.maxTime"
             class="w-full p-3 border rounded-md focus:outline-none"
             v-model="inputValues.eventTime"
             @blur="checkTimeInput('eventTime')"
@@ -424,6 +489,8 @@ const previewActivity = () => {
             </label>
             <input
             type="datetime-local"
+            :min="timeRange.minTime"
+            :max="timeRange.maxTime"
             class="w-full p-3 border rounded-md"
             v-model="inputValues.deadline"
             @blur="checkTimeInput('deadline')"
@@ -431,7 +498,7 @@ const previewActivity = () => {
             <p
             class="text-red-600 text-sm"
             v-if="userNotEnter.deadline"
-            >審核時間不可小於活動時間 *</p>
+            >審核時間不可晚於活動時間 *</p>
 
           </div>
           <div class=" bg-gray-200 mt-2 p-6 flex items-center justify-center border rounded-md">
@@ -458,7 +525,7 @@ const previewActivity = () => {
           </div>
           <p class="text-sm text-red-600"
           v-if="participantsError"
-          >人數不得低於1人*</p>
+          > {{ participantsError }}*</p>
       </div>
 
         <!-- 類型與費用 -->
@@ -505,6 +572,7 @@ const previewActivity = () => {
           <button class=" bg-yellow-200 rounded-md  w-full mx-3 py-2 px-3"
           @click="previewActivity"
           >預覽</button>
+
         </div>
       </div>
   </main>
@@ -512,6 +580,7 @@ const previewActivity = () => {
 </section>
 
 </template>
+
 <style scoped>
 /* 移除數字輸入框的上下滾動按鈕 */
 input[type='number']::-webkit-inner-spin-button,
