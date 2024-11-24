@@ -184,7 +184,6 @@ onMounted(async () => {
     const googleMaps = await loadGoogleMapsAPI(apiKey);
     const inputElement = document.getElementById("autocomplete-input");
 
-
     autocompleteInstance.value = new googleMaps.places.Autocomplete(
       inputElement,
       {
@@ -379,6 +378,7 @@ const previewActivity = () => {
               placeholder="搜尋聚會地點"
               class="flex-grow p-3 border-none focus:outline-none"
               id="autocomplete-input"
+              ref="autocompleteInstance"
               />
               <button class="p-3  border-l-2" @click="clearSearch">
                 <Search />
