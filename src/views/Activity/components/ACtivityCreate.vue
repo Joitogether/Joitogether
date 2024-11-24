@@ -9,18 +9,9 @@ const participants = ref(1);
 const participantsError = ref("");
 const paymentMethod = ref("free");
 const eventCost = ref(0);
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
 const eventCostError = ref("")
 
 
->>>>>>> 4a059d0 (feat:TaiwanTimeOffsettime and updateParticipant)
-=======
-const eventCostError = ref("")
-
-
->>>>>>> 5895295123c730d258f5d48eaa888989e620ec71
 const previewImage = ref(null);
 const uploadError = ref("");
 const maxFileSize = 5 * 1024 * 1024;
@@ -64,11 +55,6 @@ const updateParticipants = (value) => {
     participantsError.value = "";
     participants.value = newCount;
   }
-<<<<<<< HEAD
-<<<<<<< HEAD
-};
-
-=======
 }
 
 //  監視人數 輸入
@@ -99,38 +85,6 @@ const validateInput = (event) => {
   event.target.value = value;
 };
 
-=======
-}
-
-//  監視人數 輸入
-watch(participants, (newValue) => {
-  if (isNaN(newValue) || newValue === "" || newValue <= 0 ) {
-    alert("請輸入有效數字")
-    participantsError.value = "請輸入有效數字";
-    participants.value = 1;
-  } else if (newValue > 30) {
-    alert("人數不得超過 30 人")
-    participantsError.value = "人數不得超過 30 人";
-    participants.value = 30;
-  }  else {
-    participantsError.value = "";
-  }
-});
-
-//  限制人數輸入
-const validateInput = (event) => {
-  let value = event.target.value;
-
-  value = value.replace(/[^0-9]/g, "");
-  value = value.replace(/^0+/, "");
-  // 如果數字超過 30，限制為 30
-  if (value > 30) {
-    value = 30;
-  }
-  event.target.value = value;
-};
-
->>>>>>> 5895295123c730d258f5d48eaa888989e620ec71
 //  監視費用輸入
 watch(eventCost,(newValue) => {
   if (isNaN(newValue) || newValue === "" || newValue <= 0 ) {
@@ -162,10 +116,6 @@ const eventCostInput = (event) => {
 
 
 
-<<<<<<< HEAD
->>>>>>> 4a059d0 (feat:TaiwanTimeOffsettime and updateParticipant)
-=======
->>>>>>> 5895295123c730d258f5d48eaa888989e620ec71
 const checkInput = (field) => {
   userNotEnter.value[field] = !inputValues.value[field].trim();
 };
@@ -225,23 +175,15 @@ const handleFileUpload = (event) => {
   reader.readAsDataURL(file);
 };
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-const apiKey = "Google API Key"; // 替換為您的 Google API Key
-=======
 
 const apiKey = "AIzaSyBETfml-zNAfzOxcFQyIALuoq9b7BV25UM"; // 替換為您的 Google API Key
->>>>>>> 4a059d0 (feat:TaiwanTimeOffsettime and updateParticipant)
-=======
-
-const apiKey = "AIzaSyBETfml-zNAfzOxcFQyIALuoq9b7BV25UM"; // 替換為您的 Google API Key
->>>>>>> 5895295123c730d258f5d48eaa888989e620ec71
 const autocompleteInstance = ref(null);
 
 onMounted(async () => {
   try {
     const googleMaps = await loadGoogleMapsAPI(apiKey);
     const inputElement = document.getElementById("autocomplete-input");
+
 
     autocompleteInstance.value = new googleMaps.places.Autocomplete(
       inputElement,
@@ -275,11 +217,6 @@ const clearSearch = () => {
   }
 };
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-=======
->>>>>>> 5895295123c730d258f5d48eaa888989e620ec71
 
 onMounted(() => {
   // 取得台灣的時區偏移量（台灣 UTC+8）
@@ -292,7 +229,7 @@ onMounted(() => {
   const taiwanNow = new Date(now.getTime() + taiwanTimeOffset * 60 * 1000);
 
   // 計算當前時間
-  const minDate = taiwanNow 
+  const minDate = taiwanNow
   const minTime = minDate.toISOString().slice(0, 16); // 轉換為 yyyy-mm-ddThh:mm 格式
 
   // 計算台灣時間 + 90 天
@@ -307,10 +244,6 @@ onMounted(() => {
 
 
 
-<<<<<<< HEAD
->>>>>>> 4a059d0 (feat:TaiwanTimeOffsettime and updateParticipant)
-=======
->>>>>>> 5895295123c730d258f5d48eaa888989e620ec71
 const selectSuggestion = (suggestion) => {
   searchQuery.value = suggestion.description;
   suggestions.value = [];
@@ -446,7 +379,6 @@ const previewActivity = () => {
               placeholder="搜尋聚會地點"
               class="flex-grow p-3 border-none focus:outline-none"
               id="autocomplete-input"
-              ref="autocompleteInstance"
               />
               <button class="p-3  border-l-2" @click="clearSearch">
                 <Search />
