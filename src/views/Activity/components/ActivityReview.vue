@@ -161,7 +161,7 @@ const sendReplies = () => {
 </script>
 
 <template>
- 
+
     <div class="flex justify-center min-w-[400px] items-center min-h-screen bg-gray-200 shadow-2xl">
       <div
         class="m-auto p-2 rounded-xl bg-gray-50 border-gray-300 border-solid border-2 w-full max-w-[768px] sm:w-full"
@@ -274,9 +274,9 @@ const sendReplies = () => {
               </div>
 
               <div class="flex flex-col justify-center items-center w-52 px-4 ">
-				<p v-if="item.rejected" class="flex items-center justify-center text-xs text-red-400 my-1 w-32">
+				<div v-if="item.rejected" class="flex items-center justify-center text-xs text-red-400 my-1 w-32">
                   <div class="mr-1">團主已拒絕用戶參加</div><XmarkCircle width="12" height="12"/>
-                </p>
+              </div>
 				<p v-else-if="item.approved" class="flex justify-center items-center w-24 text-xs text-green-600 my-1">
 				  審核已通過<CheckCircleSolid width="14" height="14" />
 				</p>

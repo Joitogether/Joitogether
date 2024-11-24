@@ -8,13 +8,14 @@ import  debounce from "lodash/debounce"
 const participants = ref(1);
 const participantsError = ref("");
 const paymentMethod = ref("free");
+const category =ref("");
 const eventCost = ref(0);
 const eventCostError = ref("")
 
-
-const previewImage = ref(null);
+const uploadedImage = ref(null);
 const uploadError = ref("");
 const maxFileSize = 5 * 1024 * 1024;
+
 const searchQuery = ref("");
 const suggestions = ref([]);
 
@@ -48,9 +49,9 @@ const updateParticipants = (value) => {
   if (newCount < 1) {
     participantsError.value = "人數不得低於 1 人";
     participants.value = 1;
-  } else if (newCount > 30) {
-    participantsError.value = "人數不得超過 30 人";
-    participants.value = 30;
+  } else if (newCount > 999) {
+    participantsError.value = "人數不得超過 999 人";
+    participants.value = 999;
   } else {
     participantsError.value = "";
     participants.value = newCount;
@@ -63,10 +64,10 @@ watch(participants, (newValue) => {
     alert("請輸入有效數字")
     participantsError.value = "請輸入有效數字";
     participants.value = 1;
-  } else if (newValue > 30) {
-    alert("人數不得超過 30 人")
-    participantsError.value = "人數不得超過 30 人";
-    participants.value = 30;
+  } else if (newValue > 999) {
+    alert("人數不得超過 999 人")
+    participantsError.value = "人數不得超過 999 人";
+    participants.value = 999;
   }  else {
     participantsError.value = "";
   }
@@ -78,9 +79,9 @@ const validateInput = (event) => {
 
   value = value.replace(/[^0-9]/g, "");
   value = value.replace(/^0+/, "");
-  // 如果數字超過 30，限制為 30
-  if (value > 30) {
-    value = 30;
+
+  if (value > 999) {
+    value = 999;
   }
   event.target.value = value;
 };
@@ -90,7 +91,7 @@ watch(eventCost,(newValue) => {
   if (isNaN(newValue) || newValue === "" || newValue <= 0 ) {
     eventCostError.value = "請輸入有效數字";
     eventCost.value ="";
-  } else if (newValue >= 99999) {
+  } else if (newValue  > 99999) {
     eventCostError.value = "活動費用不得超過 99999 元";
     eventCost.value = 99999;
   } else {
@@ -112,10 +113,6 @@ const eventCostInput = (event) => {
 
 
 
-
-
-
-
 const checkInput = (field) => {
   userNotEnter.value[field] = !inputValues.value[field].trim();
 };
@@ -130,7 +127,7 @@ const checkTimeInput = (field) => {
     const eventTime = new Date(inputValues.value.eventTime);
     const deadline = new Date(inputValues.value.deadline);
     userNotEnter.value.deadline =
-      !inputValues.value.deadline || deadline > eventTime;
+    !inputValues.value.deadline || deadline > eventTime;
   }
 };
 
@@ -140,7 +137,6 @@ const validateCost = () => {
   userNotEnter.value.price = eventCost.value < 0 || eventCost.value > 99999;
 
 };
-
 
 
 const checkPaymentMethod = () => {
@@ -157,11 +153,6 @@ const checkPaymentMethod = () => {
 const handleFileUpload = (event) => {
   const file = event.target.files[0];
 
-  if (!file) {
-    uploadError.value = "請選擇一個圖片檔案";
-    return;
-  }
-
   if (file.size > maxFileSize) {
     uploadError.value = "檔案大小不可超過 5 MB";
     return;
@@ -170,13 +161,21 @@ const handleFileUpload = (event) => {
   uploadError.value = "";
   const reader = new FileReader();
   reader.onload = () => {
-    previewImage.value = reader.result;
+    uploadedImage.value = reader.result;
   };
   reader.readAsDataURL(file);
+
+  event.target.value = "";
 };
 
+const removeImage = () => {
+  uploadedImage.value = null;
+}
 
-const apiKey = "AIzaSyBETfml-zNAfzOxcFQyIALuoq9b7BV25UM"; // 替換為您的 Google API Key
+
+
+
+const apiKey = import.meta.env.VITE_GOOGLE_KEY; // 替換為您的 Google API Key
 const autocompleteInstance = ref(null);
 
 onMounted(async () => {
@@ -233,7 +232,7 @@ onMounted(() => {
   const minTime = minDate.toISOString().slice(0, 16); // 轉換為 yyyy-mm-ddThh:mm 格式
 
   // 計算台灣時間 + 90 天
-  const maxDate = new Date(taiwanNow.getTime() + 60 * 24 * 60 * 60 * 1000); // 90 天後
+  const maxDate = new Date(taiwanNow.getTime() + 60 * 24 * 60 * 60 * 1000);
   const maxTime = maxDate.toISOString().slice(0, 16); // 轉換為 yyyy-mm-ddThh:mm 格式
 
   // 更新動態的 min 和 max 時間
@@ -249,40 +248,9 @@ const selectSuggestion = (suggestion) => {
   suggestions.value = [];
 };
 
-const validateAllFields = () => {
-  const requiredFields = ["name", "describe", "eventTime", "deadline"];
-  let isValid = true;
 
-  requiredFields.forEach((field) => {
-    checkInput(field);
-    if (userNotEnter.value[field]) {
-      isValid = false;
-    }
-  });
-
-  checkTimeInput("eventTime");
-  checkTimeInput("deadline");
-
-  if (participants.value < 1) {
-    participantsError.value = true;
-    isValid = false;
-  }
-
-  if (paymentMethod.value === "AA") {
-    validateCost();
-    if (userNotEnter.value.price) {
-      isValid = false;
-    }
-  }
-
-  return isValid;
-};
 
 const previewActivity = () => {
-  if (!previewImage.value) {
-    uploadError.value = "請至少上傳一張圖片！";
-    return;
-  }
 
   Object.keys(inputValues.value).forEach((key) => {
     checkInput(key);
@@ -300,12 +268,16 @@ const previewActivity = () => {
   }
 
   console.log("活動資料：", {
-    ...inputValues.value,
-    participants: participants.value,
-    paymentMethod: paymentMethod.value,
-    eventCost: eventCost.value,
-    image: previewImage.value,
-    location: searchQuery.value,
+  name: inputValues.value.name,
+  description: inputValues.value.describe,
+  event_time: inputValues.value.eventTime,
+  deadline: inputValues.value.deadline,
+  max_participants: participants.value,
+  pay_type: paymentMethod.value,
+  price: eventCost.value,
+  img_url: uploadedImage.value,
+  location: searchQuery.value,
+  category:category.value
   });
 
 };
@@ -321,22 +293,38 @@ const previewActivity = () => {
       <!-- 圖片上傳 -->
       <div class="bg-white rounded-lg p-5 mb-3 ">
         <div class="mb-6">
-          <div class="rounded-lg flex justify-center items-center p-6">
-            <label class="bg-gray-100 mt-6 rounded-md w-40 h-40 flex items-center justify-center cursor-pointer">
-              <img v-if="previewImage" :src="previewImage" alt="預覽圖片" class="w-full h-full object-cover rounded-md" />
+          <div class="relative rounded-lg flex justify-center items-center p-6">
+
+            <label
+            class="bg-gray-100 mt-6 rounded-md w-40 h-40 flex items-center justify-center "
+            :class="{ ' cursor-auto' : !!uploadedImage,'cursor-pointer': !uploadedImage }"
+            >
+              <img
+              v-if="uploadedImage"
+              :src="uploadedImage"
+              alt="預覽圖片"
+              class="w-full h-full object-cover rounded-md"
+              />
               <span v-else class="text-gray-500">點擊上傳圖片</span>
               <input
                 type="file"
                 class="hidden"
                 @change="handleFileUpload"
                 accept="image/*"
+                :disabled="!!uploadedImage"
+
               />
             </label>
+            <span
+              v-if="uploadedImage"
+              class="absolute top-0 right-0  bg-gray-300 text-white rounded-full px-2 py-1 text-xs cursor-pointer"
+              @click="removeImage">X
+            </span>
           </div>
-
           <p v-if="uploadError" class="text-sm text-red-600 mt-2  flex items-center justify-center">{{ uploadError }}</p>
-
+          <p class="text-sm text-gray-600 mt-2 flex items-center justify-center">請至少上傳一張圖片，若未上傳圖片將會使用預設圖片</p>
         </div>
+
       </div>
 
       <!-- 活動名稱和描述 -->
@@ -415,6 +403,9 @@ const previewActivity = () => {
             v-if="userNotEnter.eventTime"
             >活動時間不可低於當前時間*</p>
           </div>
+
+          <div class="block font-medium mb-2 p-2">是否需要審核</div>
+
           <div>
             <label class="block font-medium mb-2 p-2">
               最晚審核時間 <span class="text-red-600">*</span>
@@ -464,7 +455,9 @@ const previewActivity = () => {
       <div class="grid grid-cols-1 gap-4">
           <div>
           <label class="block  font-medium mb-2">活動類型 <span class="text-red-600">*</span></label>
-          <select  class="w-full p-3 border rounded-md">
+          <select  class="w-full p-3 border rounded-md"
+          v-model="category"
+          >
               <option value="" disabled selected>請選擇聚會類型</option>
               <option value="food">美食</option>
               <option value="shopping">購物</option>
