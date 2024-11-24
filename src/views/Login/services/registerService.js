@@ -15,13 +15,8 @@ const registerUser = async (email, password) => {
     }
 
     // 發送驗證信件
-<<<<<<< HEAD
-    await sendEmailVerification(RegisterUserData)
+    await sendEmailVerification(RegisterUserData, actionCodeSettings)
     console.log('驗證信已發送 📧')
-=======
-    await sendEmailVerification(user, actionCodeSettings)
-    console.log('驗證信已發送 📧', user)
->>>>>>> yuka
 
     return {
       success: true,
