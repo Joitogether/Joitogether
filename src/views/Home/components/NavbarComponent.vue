@@ -1,5 +1,48 @@
 <script setup>
 import { Search, User, Menu, Sweep3d } from '@iconoir/vue'
+import { useMessage } from 'naive-ui'
+import { logoutUser } from '@/views/Login/services/loginService'
+import { useUserStore } from '/src/stores/userStore.js'
+import { auth } from '@/views/Login/services/firebaseConfig.js'
+import { useRouter } from 'vue-router'
+
+const message = useMessage()
+const userStore = useUserStore()
+const router = useRouter()
+
+// 註冊/登入按鈕跳轉
+const navigateToLogin = () => {
+  router.push({ name: 'login' })
+}
+
+// 登出功能
+const handleLogout = async () => {
+  const currentUser = auth.currentUser
+  if (!currentUser) {
+    // 如果用戶未登入，顯示未登入提示
+    message.warning('🚫 尚未登入，無法執行登出操作喔！💡')
+    return
+  }
+
+  try {
+    // 調用登出邏輯
+    const result = await logoutUser()
+    if (result.success) {
+      // 更新狀態為未登入
+      userStore.logout()
+      // 顯示成功訊息
+      message.success(result.message)
+      // 關鍵：在成功登出後停止執行剩餘邏輯**
+      return
+    } else {
+      // 顯示失敗訊息
+      message.error(result.message)
+    }
+  } catch (error) {
+    message.error('😵 登出時發生錯誤啦！請稍後再試一次吧 💔')
+    console.error('登出錯誤：', error)
+  }
+}
 </script>
 
 <template>
@@ -117,6 +160,7 @@ import { Search, User, Menu, Sweep3d } from '@iconoir/vue'
         <ul>
           <li>
             <a
+              @click="navigateToLogin"
               href="#"
               class="block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-black dark:hover:text-white"
               >登入</a
@@ -124,9 +168,18 @@ import { Search, User, Menu, Sweep3d } from '@iconoir/vue'
           </li>
           <li>
             <a
+              @click="navigateToLogin"
               href="#"
               class="block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-black dark:hover:text-white"
               >註冊</a
+            >
+          </li>
+          <li>
+            <a
+              @click="handleLogout"
+              href="#"
+              class="block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-black dark:hover:text-white"
+              >登出</a
             >
           </li>
         </ul>

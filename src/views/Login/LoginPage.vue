@@ -15,7 +15,7 @@
           </n-form-item>
         </n-form>
         <div class="flex justify-between items-center mb-3">
-          <n-checkbox size="large" label="記住我" />
+          <n-checkbox v-model:checked="isRememberMe" size="large" label="記住我" />
           <n-button text style="--n-font-size: 15px"> 忘記密碼 </n-button>
         </div>
         <div class="flex justify-center flex-col gap-3 items-center">
@@ -315,8 +315,8 @@ import {
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { storage } from './services/firebaseConfig.js'
-import { loginWithGoogle, loginWithFacebook } from './services/authService.js'
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage'
+import { loginWithGoogle, loginWithFacebook } from './services/authService.js'
 import registerUser from './services/registerService.js'
 import { validateFormFields } from './utils/formValidation.js'
 import loginUser from './services/loginService.js'
@@ -325,6 +325,7 @@ import loginUser from './services/loginService.js'
 const message = useMessage()
 const router = useRouter()
 
+const isRememberMe = ref(false)
 // 登入功能
 const handleLogin = async () => {
   const email = loginForm.value.email
@@ -335,10 +336,12 @@ const handleLogin = async () => {
     message.error('咦？你忘了輸入信箱和密碼嗎？快填一下吧～不然可要吃閉門羹啦！😜')
     return
   }
+
   try {
-    const loginUserResponse = await loginUser(email, password)
+    // 用戶登入成功
+    const loginUserResponse = await loginUser(email, password, isRememberMe.value)
     if (loginUserResponse.success) {
-      message.success('🎉 登入成功！歡迎回來！✨')
+      message.success(loginUserResponse.message)
       console.log('用戶登入成功：', loginUserResponse.user)
       // 跳轉首頁
       router.push({ name: 'home' })
@@ -351,6 +354,21 @@ const handleLogin = async () => {
     } else {
       message.error('登入失敗，請稍後再試！😞')
     }
+
+    // 傳遞用戶資料
+    try {
+      const result = await loginUser(
+        loginForm.value.email,
+        model.value.password,
+        isRememberMe.value,
+        formValue.value.username, // 確保傳遞 username
+      )
+      if (result.success) {
+        message.success(result.message)
+      }
+    } catch (error) {
+      message.error(error.message)
+    }
   }
 }
 
@@ -358,6 +376,7 @@ const handleLogin = async () => {
 const loginForm = ref({
   email: '',
   password: '',
+  username: '',
 })
 
 // 登入表單的驗證規則
@@ -571,7 +590,7 @@ const goToStep2 = async () => {
       // 註冊功能
       const userResponse = await registerUser(formValue.value.email, model.value.password)
       message.success(userResponse.message)
-      console.log('用戶註冊成功！', userResponse.RegisterUserData)
+      console.log('用戶註冊成功！', userResponse.user)
       message.success(`🎉 註冊成功！歡迎加入，${formValue.value.user.username} ✨`)
 
       // 切換到 Step 2

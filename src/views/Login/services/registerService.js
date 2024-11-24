@@ -1,12 +1,18 @@
 // 註冊功能
 import { auth } from './firebaseConfig.js'
-import { createUserWithEmailAndPassword, sendEmailVerification } from 'firebase/auth'
+import { createUserWithEmailAndPassword, sendEmailVerification, updateProfile } from 'firebase/auth'
 
-const registerUser = async (email, password) => {
+const registerUser = async (email, password, username) => {
   try {
     // 註冊用戶
     const userCredential = await createUserWithEmailAndPassword(auth, email, password)
-    const RegisterUserData = userCredential.user
+    const user = userCredential.user
+
+    // 更新 displayName
+    await updateProfile(user, {
+      displayName: username, // 設置為使用者名稱
+    })
+    console.log('用戶註冊並更新 displayName 成功:', user)
 
     // 設定驗證信的跳轉連結
     const actionCodeSettings = {
@@ -15,13 +21,13 @@ const registerUser = async (email, password) => {
     }
 
     // 發送驗證信件
-    await sendEmailVerification(RegisterUserData, actionCodeSettings)
+    await sendEmailVerification(user, actionCodeSettings)
     console.log('驗證信已發送 📧')
 
     return {
       success: true,
       message: '快去檢查信箱，完成驗證吧！📧',
-      RegisterUserData,
+      user,
     }
   } catch (error) {
     console.log('用戶註冊失敗：' + error.message, '錯誤物件：' + error)
