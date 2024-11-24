@@ -14,9 +14,19 @@
             <n-input type="password" v-model:value="loginForm.password" placeholder="輸入密碼" />
           </n-form-item>
         </n-form>
-        <div class="flex justify-between items-center mt-3">
+        <div class="flex justify-between items-center mb-3">
           <n-checkbox size="large" label="記住我" />
           <n-button text style="--n-font-size: 15px"> 忘記密碼 </n-button>
+        </div>
+        <div class="flex justify-center flex-col gap-3 items-center">
+          <n-button
+            @click="handleLogin"
+            class="w-full mt-3 font-bold text-lg py-5"
+            round
+            type="primary"
+          >
+            登入
+          </n-button>
         </div>
 
         <div class="flex items-center mb-6 mt-6">
@@ -26,13 +36,17 @@
         </div>
         <div class="flex justify-center flex-col gap-3 items-center">
           <n-button
-            @click="handleLogin"
             class="w-full mt-3 font-bold text-lg py-5"
             round
             type="primary"
-            >Google(暫時登入鈕)</n-button
+            @click="loginGoogle"
+            >Google</n-button
           >
-          <n-button class="w-full mt-3 font-bold text-lg py-5" round type="primary"
+          <n-button
+            class="w-full mt-3 font-bold text-lg py-5"
+            round
+            type="primary"
+            @click="loginFacebook"
             >Facebook</n-button
           >
         </div>
@@ -166,10 +180,6 @@
               @negative-click="onDisagreeTerms"
             />
           </div>
-          <!-- <n-checkbox-group class="flex flex-col gap-3">
-            <n-checkbox value="PrivacyPolicy" label="隱私權政策" />
-            <n-checkbox value="TermsService" label="服務條款" />
-          </n-checkbox-group> -->
           <div class="flex items-center mb-7 mt-8">
             <div class="flex-grow border-t border-gray-300"></div>
           </div>
@@ -305,6 +315,7 @@ import {
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { storage } from './services/firebaseConfig.js'
+import { loginWithGoogle, loginWithFacebook } from './services/authService.js'
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage'
 import registerUser from './services/registerService.js'
 import { validateFormFields } from './utils/formValidation.js'
@@ -361,6 +372,29 @@ const loginRules = {
     message: '請輸入密碼',
     trigger: ['input', 'blur'],
   },
+}
+
+// 第三方登入
+const loginGoogle = async () => {
+  try {
+    const user = await loginWithGoogle()
+    message.success(`🎉 Google 登入成功！歡迎，${user.displayName}`)
+    console.log('Google 登入成功：', user)
+    router.push('/')
+  } catch (error) {
+    console.error(error)
+  }
+}
+
+const loginFacebook = async () => {
+  try {
+    const user = await loginWithFacebook()
+    message.success(`🎉 Facebook 登入成功！歡迎，${user.displayName}`)
+    console.log('Facebook 登入成功：', user)
+    router.push('/')
+  } catch (error) {
+    console.error(error)
+  }
 }
 
 // 隱私權政策-控制 checkbox 是否被選中
@@ -563,19 +597,6 @@ h2 {
   font-size: 25px;
   margin-bottom: 20px;
 }
-/* form {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-}
-input {
-  width: 100%;
-  height: 40px;
-  padding: 5px;
-  text-align: center;
-  border-radius: 5px;
-} */
 
 .login-wrapper {
   height: 100vh;
@@ -602,17 +623,6 @@ input {
   overflow-y: scroll;
 }
 
-.forgot-block {
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-.remember {
-  width: 20px;
-  vertical-align: middle;
-  margin-right: 5px;
-}
 .checkbox-label {
   font-size: 15px;
   vertical-align: middle;
