@@ -167,6 +167,7 @@ const userComment = ref('')
 <style scoped>
 .container {
   margin: 0 auto;
+  width: 85%;
 }
 
 
@@ -180,7 +181,7 @@ const userComment = ref('')
 
 @media screen and (width >= 1024px) {
   .container {
-    max-width: 1200px; 
+    max-width: 70%; 
   }
 
   .detail-container {
@@ -189,7 +190,7 @@ const userComment = ref('')
 
   .cards-container {
     flex: 1;
-    max-width: 500px;
+    max-width: 50%;
     padding-left: 5%;
     padding-right: 2%; 
   }
