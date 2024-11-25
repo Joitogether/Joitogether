@@ -1,7 +1,6 @@
 <script setup>
 import { Search, User, Menu, Sweep3d } from '@iconoir/vue'
 import { useMessage } from 'naive-ui'
-import { logoutUser } from '@/views/Login/services/loginService'
 import { useUserStore } from '/src/stores/userStore.js'
 import { auth } from '@/views/Login/services/firebaseConfig.js'
 import { useRouter } from 'vue-router'
@@ -25,19 +24,14 @@ const handleLogout = async () => {
   }
 
   try {
-    // 調用登出邏輯
-    const result = await logoutUser()
-    if (result.success) {
-      // 更新狀態為未登入
-      userStore.logout()
-      // 顯示成功訊息
-      message.success(result.message)
-      // 關鍵：在成功登出後停止執行剩餘邏輯**
-      return
-    } else {
-      // 顯示失敗訊息
-      message.error(result.message)
-    }
+    // 調用 Firebase 登出邏輯
+    await auth.signOut()
+
+    // 更新 userStore 狀態為未登入
+    userStore.clearAuth() // 清空使用者狀態，方法來自 userStore.js
+
+    // 顯示成功訊息
+    message.success('🎉 成功登出！期待下次見到你～ 👋')
   } catch (error) {
     message.error('😵 登出時發生錯誤啦！請稍後再試一次吧 💔')
     console.error('登出錯誤：', error)

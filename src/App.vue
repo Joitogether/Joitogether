@@ -1,12 +1,11 @@
 <script setup>
 import { useUserStore } from './stores/userStore'
-import { onMounted } from 'vue'
 
 const userStore = useUserStore()
 
 // 「記住我」功能--初始化 Firebase 狀態
-onMounted(() => {
-  userStore.initAuthState()
+userStore.initAuthState(() => {
+  // console.log('Firebase 狀態監聽已完成')
 })
 </script>
 

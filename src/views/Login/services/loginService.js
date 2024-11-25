@@ -4,40 +4,19 @@ import {
   signInWithEmailAndPassword,
   browserLocalPersistence,
   browserSessionPersistence,
-  signOut,
+  // signOut,
 } from 'firebase/auth'
-
-// // 檢查持久性狀態
-// export const checkPersistence = async () => {
-//   try {
-//     const currentPersistence = await auth.getPersistence()
-//     console.log('當前持久性為：', currentPersistence)
-
-//     // 比對當前持久性
-//     if (currentPersistence === browserSessionPersistence.type) {
-//       console.log('使用會話持久性')
-//     } else if (currentPersistence === browserLocalPersistence.type) {
-//       console.log('使用本地持久性')
-//     } else {
-//       console.log('持久性類型未知')
-//     }
-//   } catch (error) {
-//     console.error('檢查持久性失敗：', error)
-//   }
-// }
+// import axios from 'axios'
 
 // 登入
 const loginUser = async (email, password, rememberMe) => {
   try {
-    // 檢查是否記住我
-    // console.log('rememberMe 的值是：', rememberMe)
-
     // 根據是否記住我設置持久性
     const persistence = rememberMe ? browserLocalPersistence : browserSessionPersistence
     await auth.setPersistence(persistence)
     // console.log(`持久性已設置為: ${rememberMe ? '本地持久性' : '會話持久性'}`)
 
-    // 用戶登入
+    // 使用 Firebase 驗證用戶登入
     const userCredential = await signInWithEmailAndPassword(auth, email, password)
     const user = userCredential.user
     console.log('用戶登入成功：', user)
@@ -49,6 +28,14 @@ const loginUser = async (email, password, rememberMe) => {
         message: '😵‍💫 這個帳號還沒被驗證哦！請前往信箱進行驗證！📧',
       }
     }
+
+    // 傳遞用戶資料給後端以獲取 accessToken
+    // const response = await axios.post('http://172.20.10.8:3030', { email, password })
+    // console.log('後端接收成功，回應資料：', response.data, response.data.accessToken)
+
+    // // 儲存 accessToken -> 儲存至 localStorage
+    // localStorage.setItem('accessToken', response.data.accessToken)
+
     return {
       success: true,
       message: `🎉 登入成功 ${user.displayName || '使用者'}！✨`,
@@ -83,15 +70,17 @@ const loginUser = async (email, password, rememberMe) => {
 
 export default loginUser
 
-// 登出
-export const logoutUser = async () => {
-  try {
-    // 執行 Firebase 登出
-    await signOut(auth)
-    console.log('登出成功')
-    return { success: true, message: '👋 已成功登出！期待下次見面喔！🌟' } // 返回正確的成功訊息
-  } catch (error) {
-    console.error('登出失敗：', error)
-    return { success: false, message: '😵 登出失敗了！稍後再試一次吧 💔' } // 返回失敗訊息
-  }
-}
+// 登出 -> 在 NavbarComponent.vue 已寫好登出邏輯
+// 但未來如有重複登出的需求可用
+
+// export const logoutUser = async () => {
+//   try {
+//     // 執行 Firebase 登出
+//     await signOut(auth)
+//     console.log('登出成功')
+//     return { success: true, message: '👋 已成功登出！期待下次見面喔！🌟' } // 返回正確的成功訊息
+//   } catch (error) {
+//     console.error('登出失敗：', error)
+//     return { success: false, message: '😵 登出失敗了！稍後再試一次吧 💔' } // 返回失敗訊息
+//   }
+// }
