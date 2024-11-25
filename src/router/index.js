@@ -31,7 +31,7 @@ const router = createRouter({
     component: Activity,
     children: [
       {
-        path: 'detail:id',
+        path: 'detail/:id',
         name: 'activityDetail',
         component: ActivityDetail
       }, {

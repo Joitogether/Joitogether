@@ -32,7 +32,7 @@ const props = defineProps({
       <div :class="{ 'horizontal-layout-container' : props.horizontal}" class="flex flex-col py-[3%] truncate">
           <div class=" text-lg font-semibold mb-2 truncate 	">活動名稱:{{ props.title }}</div>
           <div class="text-sm  mb-2 truncate">地點:{{ props.location }}</div>
-          <div class="text-sm text-gray-500 mb-2 truncate">地點/時間:{{ props.dateTime }}</div>
+          <div class="text-sm text-gray-500 mb-2 truncate">時間:{{ props.dateTime }}</div>
           <div class="flex items-center justify-between text-sm " :class="{ 'mt-auto' : props.horizontal}">
               <div class="flex items-center">
                   <img class="w-6 h-6 rounded-full mr-2" :src="props.hostImgUrl" alt="團主頭像">
