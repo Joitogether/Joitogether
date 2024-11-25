@@ -52,7 +52,7 @@ const registerUser = async ({ email, password, fullName, displayName, phoneNumbe
     const userData = {
       uid: user.uid,
       email: user.email,
-      email_verified: 0, // 初始值：未驗證
+      email_verified: false,
       full_name: fullName,
       display_name: displayName,
       phone_number: phoneNumber,
