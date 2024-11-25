@@ -6,6 +6,7 @@ import 'dayjs/locale/zh'
 import { NInput, NButton, NModal, NCard } from 'naive-ui';
 dayjs.locale('zh') 
 import ActivityCard from '@/views/components/ActivityCard.vue';
+import router from '@/router';
 
 const activity = ref({
   id: 'unique-activity-id',
@@ -13,7 +14,7 @@ const activity = ref({
   img_url: 'https://www.welcometw.com/wp-content/uploads/2022/06/%E7%B6%B2%E7%BE%8E%E8%80%81%E6%9C%A8@sshihhan-850x638.jpg', // 活動照片網址
   location: '261宜蘭縣頭城鎮濱海路二段6號',
   event_time: '2024-11-25 10:00:00',
-  hostId: 'uid', // 團主 ID
+  host_id: 'uid', // 團主 ID
   description: '新竹尖石鄉最美的「尖石薰衣草森林」介紹分享，新竹薰衣草森林是台灣首家以香草植物為主題的景觀餐廳，園區內有薰衣草希望之丘、鄉村祕密花園、四月繡球花季，與五月的薰衣草、鼠尾草小徑是來薰衣草森林必拍場景，尖石薰衣草森林美麗的仙境景色，怎麼看都不會膩，精選尖石薰衣草森林順遊景點、交通方式、園區介紹等等，一起出發到薰衣草森林走走 ...🌲🌳🌲🏕⛰️', // 活動描述
   max_participants: 5, // 最大人數
   min_participants: 2, // 最小人數
@@ -28,6 +29,16 @@ const activity = ref({
   status: 'ongoing', // 活動狀態    registrationOpen|onGoing|completed|cancelled
   price: 100, // 活動費用，0 表示免費
   pay_type: 'free', // 付款方式 free|AA|host
+})
+
+const user = ref({
+  uid: '7P6ocyCefPc8oTzjfAEs16RZThR2',
+  email: 'mbg@dghuifr.voh',
+  email_verified: false,
+  full_name: '張曉明',
+  display_name: '小明123',
+  phone_number: 1232312312,
+  photo_url: 'https://via.placeholder.com/150',
 })
 
 const payment = computed(() => {
@@ -51,10 +62,24 @@ const clearComment = () => {
   userComment.value = ''
 }
 
-const showModal = ref(false)
+const showRegisterModal = ref(false)
 const toggleModal = () => {
-  showModal.value = !showModal.value
+  showRegisterModal.value = !showRegisterModal.value
 }
+
+const registerActivity = () => {
+  const data = {
+    activity_id: activity.value.id,
+    participant_id: '12313',
+    status: 'registered',
+    comment: userComment.value
+  }
+  console.log(data);
+}
+
+const isHost = computed(() => {
+  return activity.value.host_id === user.value.uid
+})
 
 const userComment = ref('')
 </script>
@@ -85,7 +110,8 @@ const userComment = ref('')
         </div>
         <span class="text-sm text-red-500">{{ `最後審核時間 ${dayjs(activity.approval_deadline).format('YYYY年MM月DD日dddd HH:mm')}` }}</span>
         <p class="font-bold text-lg text-end">{{ `${registerCount}人報名` }}</p>
-        <NButton class="w-full mt-3 font-bold text-lg py-5" round type="primary" @click="toggleModal">報名</NButton> 
+        <NButton v-if="isHost" class="w-full mt-3 font-bold text-lg py-5" round type="primary" @click="router.push({ name: 'activityReview'})">審核</NButton>
+        <NButton v-else class="w-full mt-3 font-bold text-lg py-5" round type="primary" @click="toggleModal">報名</NButton> 
         <p class="py-8 leading-6">{{ activity.description }}</p>
         <ul class="flex justify-around text-md border border-gray-200/100 rounded-lg p-2">
           <li class="flex flex-col items-center">
@@ -137,7 +163,7 @@ const userComment = ref('')
     </div>
     <NModal 
       class="rounded-lg"
-      v-model:show="showModal"
+      v-model:show="showRegisterModal"
       :auto-focus="false"
     >
       <n-card
@@ -153,11 +179,12 @@ const userComment = ref('')
         </template>
         <NInput :show-count="true" :maxlength="50" :clearable="true" type="textarea" placeholder="告訴團主你為什麼想參加吧！"></NInput>
         <template #footer>
-          <NButton type="primary" round class="font-bold w-full">報名</NButton>
+          <NButton @click="registerActivity" type="primary" round class="font-bold w-full">報名</NButton>
           <NButton type="secondary" round class="font-bold mt-2 w-full" @click="toggleModal">取消</NButton> 
         </template>
       </n-card>
     </NModal>
+
   </div>
 
 </template>
