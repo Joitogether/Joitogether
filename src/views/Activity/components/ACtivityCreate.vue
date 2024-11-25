@@ -20,12 +20,11 @@ const userNotEnter = ref({
   price: false,
   eventTime: false,
   deadline: false,
-  requireApproval:false
+  requireApproval:false,
+  category:false,
 });
 
-const checkInput = (field) => {
-  userNotEnter.value[field] = !inputValues.value[field];
-};
+
 
 const timeRange = ref({
   minTime: '',
@@ -99,16 +98,23 @@ const eventCostInput = (event) => {
 };
 
 
-
 const checkTimeInput = (field) => {
   const now = new Date();
 
   if (field === "eventTime") {
     const eventTime = new Date(inputValues.value.eventTime);
     userNotEnter.value.eventTime = !inputValues.value.eventTime || eventTime < now;
-  } else if (field === "deadline") {
+  }
+
+    if (field === "deadline") {
+    if (!userNotEnter.value.requireApproval) {
+      userNotEnter.value.deadline = false;
+      return;
+    }
+
     const eventTime = new Date(inputValues.value.eventTime);
     const deadline = new Date(inputValues.value.deadline);
+
     if (!inputValues.value.deadline) {
       userNotEnter.value.deadline = true;
     } else if (deadline > eventTime) {
@@ -125,9 +131,7 @@ const showEventCost = computed(() => paymentMethod.value === "AA");
 
 const validateCost = () => {
   userNotEnter.value.price = eventCost.value < 0 || eventCost.value > 99999;
-
 };
-
 
 const checkPaymentMethod = () => {
   if (paymentMethod.value !== "AA") {
@@ -173,6 +177,7 @@ const suggestions = ref([])
 const inputElement = ref(null);
 const autocompleteInstance = ref(null);
 const isLoading = ref(false);
+const isLoadOK =ref(false);
 
 
 // 初始化 Autocomplete
@@ -187,7 +192,7 @@ const initializeAutocomplete = async () => {
 const onInputChange = debounce(async () => {
   if (!autocompleteInstance.value || !searchQuery.value) {
     suggestions.value = [];
-    isLoading.value = false; 
+    isLoading.value = false;
     return;
   }
 
@@ -202,12 +207,14 @@ const onInputChange = debounce(async () => {
       componentRestrictions: { country: "TW" },
     },
     (predictions, status) => {
-      isLoading.value = false; // 停止載入狀態
+      isLoading.value = false;
       if (status === google.maps.places.PlacesServiceStatus.OK) {
         suggestions.value = predictions || [];
+        isLoadOK.value =true
       } else {
         suggestions.value = [];
-        console.warn("No predictions found:", status);
+        isLoadOK.value =true
+        alert('未搜尋到地址，請重新輸入')
       }
     }
   );
@@ -227,6 +234,7 @@ const selectSuggestion = (suggestion) => {
 // 清除輸入框
 const clearSearch = () => {
   searchQuery.value = "";
+  isLoadOK.value=false;
   suggestions.value = [];
   if (inputElement.value) {
     inputElement.value.focus();
@@ -246,21 +254,21 @@ onMounted(()=>{
   const now = new Date();
   const taiwanNow = new Date(now.getTime() + taiwanTimeOffset);
 
-  const minDate = new Date(taiwanNow); 
+  const minDate = new Date(taiwanNow);
   minDate.setHours(minDate.getHours() + 12);
-  const minTime = minDate.toISOString().slice(0, 16); 
+  const minTime = minDate.toISOString().slice(0, 16);
 
   const maxDate = new Date(taiwanNow);
   maxDate.setDate(maxDate.getDate() + 90);
-  const maxTime = maxDate.toISOString().slice(0, 16); 
+  const maxTime = maxDate.toISOString().slice(0, 16);
 
   timeRange.value.minTime = minTime;
   timeRange.value.maxTime = maxTime;
 });
 
 
-
-const formatToCustom = (date) => {
+  // 轉資料型態
+  const formatToCustom = (date) => {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, "0");
     const day = String(date.getDate()).padStart(2, "0");
@@ -272,46 +280,66 @@ const formatToCustom = (date) => {
 
   watch(() => inputValues.value.requireApproval,(newVal) => {
     if (!newVal) {
-      inputValues.value.deadline = ""; // 清空 deadline
-
+      inputValues.value.deadline = "";
     }
   }
 );
 
-
-
-
+const checkInput = (field) => {
+  if (field === "deadline" && !userNotEnter.value.requireApproval) {
+    userNotEnter.value.deadline = false;
+    return;
+  }
+  userNotEnter.value[field] = !inputValues.value[field];
+};
 
 const previewActivity = () => {
+  Object.keys(inputValues.value).forEach((key) => {
+    checkInput(key);
+  });
 
-  // Object.keys(inputValues.value).forEach((key) => {
-  //   checkInput(key);
-  // });
-  // checkTimeInput("eventTime");
-  // checkTimeInput("deadline");
-  // validateCost();
+  checkTimeInput("eventTime");
 
-  // if (
-  //   Object.values(userNotEnter.value).some((value) => value) ||
-  //   uploadError.value
-  // ) {
-  //   alert("請填寫完整資料！");
-  //   return;
-  // }
+  if (inputValues.value.requireApproval) {
+    checkTimeInput("deadline");
+  }
+
+  validateCost()
+
+  const fieldsToCheck = ["name", "describe", "price", "eventTime", "category"];
+
+  if (inputValues.value.requireApproval) {
+  fieldsToCheck.push("deadline");
+}
+
+if (
+  Object.values({
+    ...userNotEnter.value,
+    ...fieldsToCheck.reduce((acc, field) => {
+      acc[field] = userNotEnter.value[field];
+      return acc;
+    }, {}),
+  }).some((value) => value) ||
+  uploadError.value
+) {
+  alert("請填寫完整資料！");
+  return;
+}
+
 
 //之後可以改成預覽圖
   if (!uploadedImage.value){
-    uploadedImage.value = '@/UserUpdata1.jpg' 
+    uploadedImage.value = '@/UserUpdata1.jpg'
   }
- 
+
 
   const formattedEventTime = inputValues.value.eventTime
    ?formatToCustom(new Date(inputValues.value.eventTime))
    :""
-  
+
   const formattedApprovalDeadline = inputValues.value.deadline
-  ? formatToCustom(new Date(inputValues.value.deadline)) 
-  : "";  
+  ? formatToCustom(new Date(inputValues.value.deadline))
+  : "";
 
 
   // 之後要submit出去的資料
@@ -330,6 +358,7 @@ const previewActivity = () => {
   });
 
 };
+
 </script>
 
 <template>
@@ -418,15 +447,15 @@ const previewActivity = () => {
               @input="triggerInputChange"
               @focus="initializeAutocomplete"
               />
-              <button v-if="searchQuery" 
+              <button v-if="isLoadOK"
               class="p-3" @click="clearSearch">
                 <XmarkCircle />
               </button>
               <button class="p-3  border-l-2" @click="focusInput">
-                <Search /> 
+                <Search />
               </button>
             </div>
-            <div> 
+            <div>
               <ul v-if="isLoading || suggestions.length" class="border rounded-md mt-2 bg-white">
                 <li v-if="isLoading" class="p-2 text-gray-500">正在搜尋中...</li>
                 <li
@@ -458,10 +487,10 @@ const previewActivity = () => {
             <p
             class="text-red-600 text-sm"
             v-if="userNotEnter.eventTime"
-            >活動時間不可低於當前時間*</p>
+            >請選擇活動時間*</p>
           </div>
 
-          
+
           <div class=" flex font-medium mb-2 p-2">是否需要審核
             <div>
               <input type="checkbox"
@@ -482,13 +511,13 @@ const previewActivity = () => {
             v-model="inputValues.deadline"
             @blur="checkTimeInput('deadline')"
             />
+
             <p
             class="text-red-600 text-sm"
             v-if="userNotEnter.deadline"
-            >審核時間不可晚於活動時間 *</p>
-
-          </div>
-          <div class=" bg-gray-200 mt-2 p-6 flex items-center justify-center border rounded-md">
+            >審核時間不可晚於活動時間 * {{  }}</p>
+          </div >
+          <div  class=" bg-gray-200 mt-2 p-6 flex items-center justify-center border rounded-md">
           <span>你的聚會將會刊登在列表上，直到時間截止。記得在最晚審核時間前勾選參加者。</span>
           </div>
       </div>
@@ -520,7 +549,9 @@ const previewActivity = () => {
           <div>
           <label class="block  font-medium mb-2">活動類型 <span class="text-red-600">*</span></label>
           <select  class="w-full p-3 border rounded-md"
-          v-model="inputValues.category">
+              v-model="inputValues.category"
+              @blur="checkInput('category')"
+              >
               <option value="" disabled selected>請選擇聚會類型</option>
               <option value="food">美食</option>
               <option value="shopping">購物</option>
@@ -529,6 +560,9 @@ const previewActivity = () => {
               <option value="education">教育</option>
               <option value="others">其他</option>
           </select>
+          <p class="text-sm text-red-600"
+          v-if="userNotEnter.category"
+          >請選擇活動類型*</p>
           </div>
           <div>
           <label class="block  font-medium mb-2">付款方式 <span class="text-red-600">*</span></label>
@@ -561,6 +595,7 @@ const previewActivity = () => {
           @click="previewActivity"
           >預覽</button>
         </div>
+
       </div>
   </main>
 </div>
