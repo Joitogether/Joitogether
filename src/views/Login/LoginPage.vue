@@ -434,6 +434,15 @@ const handleFileChange = async (fileList) => {
   const file = fileList[0]?.file
   if (!file) return
 
+  if (file.size > 2 * 1024 * 1024) {
+    message.error('上傳失敗！圖片大小不能超過 2MB 😭')
+    return
+  }
+  if (file.length > 256) {
+    message.error('圖片 URL 過長，請更換圖片再試 😭')
+    return
+  }
+
   // 預覽圖片
   const reader = new FileReader()
   reader.onload = (event) => {
@@ -531,6 +540,24 @@ function handlePasswordInput() {
 const toggleLoginSignup = () => {
   isLogin.value = !isLogin.value
   step.value = 1 // 確保進入註冊時從第一步開始
+  resetFormData()
+}
+
+const resetFormData = () => {
+  formValue.value = {
+    avatar: '',
+    user: {
+      username: '',
+      fullname: '',
+    },
+    email: '',
+    phone: '',
+    verificationCode: '',
+  }
+  model.value.password = ''
+  model.value.reenteredPassword = ''
+  isCheckedPrivacy.value = false
+  isCheckedTerms.value = false
 }
 
 // 隱私權政策-控制 checkbox 是否被選中
@@ -590,18 +617,22 @@ const goToStep2 = async () => {
       message.error('😰 密碼不一致哦！請再確認一下吧～ 🔐')
       return
     }
-    // 同意條款才能進到下一步
+    // 確保條款已被同意
     if (!canProceedToNextStep.value) {
       message.error('📝 請先同意隱私權政策和服務條款才能繼續唷！拜託啦看一下就好🙏')
       return
     }
     try {
       // 註冊功能
-      const userResponse = await registerUser(
-        formValue.value.email,
-        model.value.password,
-        formValue.value.user.username,
-      )
+      const userResponse = await registerUser({
+        email: formValue.value.email,
+        password: model.value.password,
+        fullName: formValue.value.user.fullname,
+        displayName: formValue.value.user.username,
+        phoneNumber: formValue.value.phone,
+        photoURL: formValue.value.avatar,
+      })
+
       message.success(userResponse.message)
       console.log('用戶註冊成功！', userResponse.user)
       message.success(`🎉 註冊成功！歡迎加入，${formValue.value.user.username} ✨`)
