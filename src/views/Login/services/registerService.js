@@ -1,7 +1,7 @@
 // 註冊功能
 import { auth } from './firebaseConfig.js'
 import { createUserWithEmailAndPassword, sendEmailVerification, updateProfile } from 'firebase/auth'
-import axios from 'axios'
+// import axios from 'axios'
 
 // 用戶註冊邏輯整合
 // 1. Firebase 註冊
@@ -61,14 +61,14 @@ const registerUser = async ({ email, password, fullName, displayName, phoneNumbe
     }
     console.log(' 傳送至後端的用戶註冊資料：', userData)
 
-    const backendResponse = await axios.post('http://172.20.10.8:3030/users/register', userData)
-    console.log(backendResponse)
+    // const backendResponse = await axios.post('http://172.20.10.8:3030/users/register', userData)
+    // console.log(backendResponse)
 
     return {
       success: true,
       message: '快去檢查信箱，完成驗證吧！📧',
       user,
-      backendResponse: backendResponse.data,
+      // backendResponse: backendResponse.data,
     }
   } catch (error) {
     console.log('用戶註冊失敗：' + error.message, '錯誤物件：' + error)

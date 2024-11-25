@@ -300,6 +300,7 @@ const isRememberMe = ref(false)
 const handleLogin = async () => {
   const email = loginForm.value.email
   const password = loginForm.value.password
+  const rememberMe = isRememberMe.value
 
   // 處理用戶未輸入資訊
   if (!email || !password) {
@@ -309,11 +310,10 @@ const handleLogin = async () => {
 
   try {
     // 用戶登入成功
-    const loginUserResponse = await loginUser(email, password, isRememberMe.value)
+    const loginUserResponse = await loginUser(email, password, rememberMe)
     if (loginUserResponse.success) {
       message.success(loginUserResponse.message)
       console.log('用戶登入成功：', loginUserResponse.user)
-      // 跳轉首頁
       router.push({ name: 'home' })
     }
   } catch (error) {
