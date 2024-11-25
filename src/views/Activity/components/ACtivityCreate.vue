@@ -1,23 +1,8 @@
 <script setup>
-import { Search } from "@iconoir/vue"
+import { Search,XmarkCircle } from "@iconoir/vue"
 import { computed, ref, onMounted,watch } from "vue"
 import { loadGoogleMapsAPI } from "@/views/Activity/components/googleMapsLoader"
 import  debounce from "lodash/debounce"
-
-// data
-const participants = ref(1);
-const participantsError = ref("");
-const paymentMethod = ref("free");
-const category =ref("");
-const eventCost = ref(0);
-const eventCostError = ref("")
-
-const uploadedImage = ref(null);
-const uploadError = ref("");
-const maxFileSize = 5 * 1024 * 1024;
-
-const searchQuery = ref("");
-const suggestions = ref([]);
 
 const inputValues = ref({
   name: "",
@@ -25,15 +10,22 @@ const inputValues = ref({
   price: "",
   eventTime: "",
   deadline: "",
+  category:"",
+  requireApproval:false,
 });
+
 const userNotEnter = ref({
   name: false,
   describe: false,
   price: false,
   eventTime: false,
   deadline: false,
-
+  requireApproval:false
 });
+
+const checkInput = (field) => {
+  userNotEnter.value[field] = !inputValues.value[field];
+};
 
 const timeRange = ref({
   minTime: '',
@@ -41,33 +33,27 @@ const timeRange = ref({
 });
 
 
-// methods
 
-//  監視人數 按鈕
+//  監視人數
+const participants = ref(1)
+const participantsError = ref("")
+
 const updateParticipants = (value) => {
   const newCount = participants.value + value;
   if (newCount < 1) {
     participantsError.value = "人數不得低於 1 人";
     participants.value = 1;
-  } else if (newCount > 999) {
-    participantsError.value = "人數不得超過 999 人";
-    participants.value = 999;
-  } else {
+  }  else {
     participantsError.value = "";
     participants.value = newCount;
   }
 }
-
-//  監視人數 輸入
+//  監視人數輸入
 watch(participants, (newValue) => {
   if (isNaN(newValue) || newValue === "" || newValue <= 0 ) {
     alert("請輸入有效數字")
     participantsError.value = "請輸入有效數字";
-    participants.value = 1;
-  } else if (newValue > 999) {
-    alert("人數不得超過 999 人")
-    participantsError.value = "人數不得超過 999 人";
-    participants.value = 999;
+    participants.value = '';
   }  else {
     participantsError.value = "";
   }
@@ -80,13 +66,14 @@ const validateInput = (event) => {
   value = value.replace(/[^0-9]/g, "");
   value = value.replace(/^0+/, "");
 
-  if (value > 999) {
-    value = 999;
-  }
   event.target.value = value;
 };
 
+
 //  監視費用輸入
+const eventCost = ref(0)
+const eventCostError = ref("")
+
 watch(eventCost,(newValue) => {
   if (isNaN(newValue) || newValue === "" || newValue <= 0 ) {
     eventCostError.value = "請輸入有效數字";
@@ -113,10 +100,6 @@ const eventCostInput = (event) => {
 
 
 
-const checkInput = (field) => {
-  userNotEnter.value[field] = !inputValues.value[field].trim();
-};
-
 const checkTimeInput = (field) => {
   const now = new Date();
 
@@ -126,11 +109,18 @@ const checkTimeInput = (field) => {
   } else if (field === "deadline") {
     const eventTime = new Date(inputValues.value.eventTime);
     const deadline = new Date(inputValues.value.deadline);
-    userNotEnter.value.deadline =
-    !inputValues.value.deadline || deadline > eventTime;
+    if (!inputValues.value.deadline) {
+      userNotEnter.value.deadline = true;
+    } else if (deadline > eventTime) {
+      userNotEnter.value.deadline = true;
+      alert("審核截止時間不可晚於活動時間！");
+    } else {
+      userNotEnter.value.deadline = false;
+    }
   }
 };
 
+const paymentMethod = ref("free")
 const showEventCost = computed(() => paymentMethod.value === "AA");
 
 const validateCost = () => {
@@ -149,6 +139,10 @@ const checkPaymentMethod = () => {
     validateCost();
   }
 };
+
+const uploadedImage = ref(null)
+const uploadError = ref("")
+const maxFileSize = 5 * 1024 * 1024
 
 const handleFileUpload = (event) => {
   const file = event.target.files[0];
@@ -173,116 +167,169 @@ const removeImage = () => {
 }
 
 
-
-
 const apiKey = import.meta.env.VITE_GOOGLE_KEY; // 替換為您的 Google API Key
+const searchQuery = ref("")
+const suggestions = ref([])
+const inputElement = ref(null);
 const autocompleteInstance = ref(null);
+const isLoading = ref(false);
 
-onMounted(async () => {
-  try {
+
+// 初始化 Autocomplete
+const initializeAutocomplete = async () => {
+  if (!autocompleteInstance.value) {
     const googleMaps = await loadGoogleMapsAPI(apiKey);
-    const inputElement = document.getElementById("autocomplete-input");
-
-
-    autocompleteInstance.value = new googleMaps.places.Autocomplete(
-      inputElement,
-      {
-        types: ["geocode"],
-        language: "zh-TW",
-        componentRestrictions: { country: "TW" },
-      }
-    );
-
-
-    autocompleteInstance.value.addListener("place_changed",
-    debounce (() => {
-      const place = autocompleteInstance.value.getPlace();
-      searchQuery.value = place.formatted_address || place.name;
-    },300)
-  );
-
-  } catch (error) {
-    console.error("Error loading Google Maps API:", error);
+    autocompleteInstance.value = new googleMaps.places.AutocompleteService();
   }
-});
+};
 
-const clearSearch = () => {
-  const inputElement = document.getElementById("autocomplete-input");
-  if (!searchQuery.value) {
-    inputElement.focus();
-  } else {
-    searchQuery.value = "";
+// 輸入時觸發搜尋
+const onInputChange = debounce(async () => {
+  if (!autocompleteInstance.value || !searchQuery.value) {
     suggestions.value = [];
+    isLoading.value = false; 
+    return;
+  }
+
+  suggestions.value = []; // 清空建議結果
+
+
+  autocompleteInstance.value.getPlacePredictions(
+    {
+      input: searchQuery.value,
+      types: ["geocode"],
+      language: "zh-TW",
+      componentRestrictions: { country: "TW" },
+    },
+    (predictions, status) => {
+      isLoading.value = false; // 停止載入狀態
+      if (status === google.maps.places.PlacesServiceStatus.OK) {
+        suggestions.value = predictions || [];
+      } else {
+        suggestions.value = [];
+        console.warn("No predictions found:", status);
+      }
+    }
+  );
+}, 2000);
+
+const triggerInputChange = () => {
+  isLoading.value = true; // 立即設置為正在搜尋中
+  onInputChange();
+};
+
+// 選擇建議
+const selectSuggestion = (suggestion) => {
+  searchQuery.value = suggestion.description;
+  suggestions.value = [];
+};
+
+// 清除輸入框
+const clearSearch = () => {
+  searchQuery.value = "";
+  suggestions.value = [];
+  if (inputElement.value) {
+    inputElement.value.focus();
+  }
+};
+
+// 聚焦輸入框
+const focusInput = () => {
+  if (inputElement.value) {
+    inputElement.value.focus();
   }
 };
 
 
-onMounted(() => {
-  // 取得台灣的時區偏移量（台灣 UTC+8）
-  const taiwanTimeOffset = 8 * 60; // 台灣時區偏移量為 8 小時（480 分鐘）
-
-  // 獲取當前的 UTC 時間
+onMounted(()=>{
+  const taiwanTimeOffset = 8 * 60 * 60 * 1000;
   const now = new Date();
+  const taiwanNow = new Date(now.getTime() + taiwanTimeOffset);
 
-  // 計算台灣時間
-  const taiwanNow = new Date(now.getTime() + taiwanTimeOffset * 60 * 1000);
+  const minDate = new Date(taiwanNow); 
+  minDate.setHours(minDate.getHours() + 12);
+  const minTime = minDate.toISOString().slice(0, 16); 
 
-  // 計算當前時間
-  const minDate = taiwanNow
-  const minTime = minDate.toISOString().slice(0, 16); // 轉換為 yyyy-mm-ddThh:mm 格式
+  const maxDate = new Date(taiwanNow);
+  maxDate.setDate(maxDate.getDate() + 90);
+  const maxTime = maxDate.toISOString().slice(0, 16); 
 
-  // 計算台灣時間 + 90 天
-  const maxDate = new Date(taiwanNow.getTime() + 60 * 24 * 60 * 60 * 1000);
-  const maxTime = maxDate.toISOString().slice(0, 16); // 轉換為 yyyy-mm-ddThh:mm 格式
-
-  // 更新動態的 min 和 max 時間
   timeRange.value.minTime = minTime;
   timeRange.value.maxTime = maxTime;
 });
 
 
 
+const formatToCustom = (date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    const hours = String(date.getHours()).padStart(2, "0");
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+    const seconds = String(date.getSeconds()).padStart(2, "0");
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+  };
 
-const selectSuggestion = (suggestion) => {
-  searchQuery.value = suggestion.description;
-  suggestions.value = [];
-};
+  watch(() => inputValues.value.requireApproval,(newVal) => {
+    if (!newVal) {
+      inputValues.value.deadline = ""; // 清空 deadline
+
+    }
+  }
+);
+
+
 
 
 
 const previewActivity = () => {
 
-  Object.keys(inputValues.value).forEach((key) => {
-    checkInput(key);
-  });
-  checkTimeInput("eventTime");
-  checkTimeInput("deadline");
-  validateCost();
+  // Object.keys(inputValues.value).forEach((key) => {
+  //   checkInput(key);
+  // });
+  // checkTimeInput("eventTime");
+  // checkTimeInput("deadline");
+  // validateCost();
 
-  if (
-    Object.values(userNotEnter.value).some((value) => value) ||
-    uploadError.value
-  ) {
-    alert("請填寫完整資料！");
-    return;
+  // if (
+  //   Object.values(userNotEnter.value).some((value) => value) ||
+  //   uploadError.value
+  // ) {
+  //   alert("請填寫完整資料！");
+  //   return;
+  // }
+
+//之後可以改成預覽圖
+  if (!uploadedImage.value){
+    uploadedImage.value = '@/UserUpdata1.jpg' 
   }
+ 
 
+  const formattedEventTime = inputValues.value.eventTime
+   ?formatToCustom(new Date(inputValues.value.eventTime))
+   :""
+  
+  const formattedApprovalDeadline = inputValues.value.deadline
+  ? formatToCustom(new Date(inputValues.value.deadline)) 
+  : "";  
+
+
+  // 之後要submit出去的資料
   console.log("活動資料：", {
   name: inputValues.value.name,
   description: inputValues.value.describe,
-  event_time: inputValues.value.eventTime,
-  deadline: inputValues.value.deadline,
+  event_time: formattedEventTime,
+  approval_deadline: formattedApprovalDeadline,
   max_participants: participants.value,
   pay_type: paymentMethod.value,
   price: eventCost.value,
   img_url: uploadedImage.value,
   location: searchQuery.value,
-  category:category.value
+  category:inputValues.value.category,
+  require_approval:inputValues.value.requireApproval,
   });
 
 };
-
-
 </script>
 
 <template>
@@ -363,21 +410,31 @@ const previewActivity = () => {
             </label>
             <div class="flex items-center border rounded-md">
               <input
+              ref="inputElement"
               type="text"
               placeholder="搜尋聚會地點"
               class="flex-grow p-3 border-none focus:outline-none"
-              id="autocomplete-input"
+              v-model="searchQuery"
+              @input="triggerInputChange"
+              @focus="initializeAutocomplete"
               />
-              <button class="p-3  border-l-2" @click="clearSearch">
-                <Search />
+              <button v-if="searchQuery" 
+              class="p-3" @click="clearSearch">
+                <XmarkCircle />
               </button>
-              <ul v-if="suggestions.length" class="border rounded-md mt-2 bg-white">
+              <button class="p-3  border-l-2" @click="focusInput">
+                <Search /> 
+              </button>
+            </div>
+            <div> 
+              <ul v-if="isLoading || suggestions.length" class="border rounded-md mt-2 bg-white">
+                <li v-if="isLoading" class="p-2 text-gray-500">正在搜尋中...</li>
                 <li
+                  v-else
                   v-for="(suggestion, index) in suggestions"
                   :key="index"
                   class="p-2 cursor-pointer hover:bg-gray-100"
-                  @click="selectSuggestion(suggestion)"
-                >
+                  @click="selectSuggestion(suggestion)">
                   {{ suggestion.description }}
                 </li>
               </ul>
@@ -404,9 +461,16 @@ const previewActivity = () => {
             >活動時間不可低於當前時間*</p>
           </div>
 
-          <div class="block font-medium mb-2 p-2">是否需要審核</div>
-
-          <div>
+          
+          <div class=" flex font-medium mb-2 p-2">是否需要審核
+            <div>
+              <input type="checkbox"
+              class=" mx-3"
+              v-model="inputValues.requireApproval"
+              >
+            </div>
+          </div>
+          <div v-if="inputValues.requireApproval">
             <label class="block font-medium mb-2 p-2">
               最晚審核時間 <span class="text-red-600">*</span>
             </label>
@@ -456,8 +520,7 @@ const previewActivity = () => {
           <div>
           <label class="block  font-medium mb-2">活動類型 <span class="text-red-600">*</span></label>
           <select  class="w-full p-3 border rounded-md"
-          v-model="category"
-          >
+          v-model="inputValues.category">
               <option value="" disabled selected>請選擇聚會類型</option>
               <option value="food">美食</option>
               <option value="shopping">購物</option>
@@ -497,7 +560,6 @@ const previewActivity = () => {
           <button class=" bg-yellow-200 rounded-md  w-full mx-3 py-2 px-3"
           @click="previewActivity"
           >預覽</button>
-
         </div>
       </div>
   </main>
