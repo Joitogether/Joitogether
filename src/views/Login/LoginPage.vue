@@ -2,68 +2,99 @@
   <div class="login-wrapper">
     <div class="block shadow-md">
       <div class="event-image bg-green-100"></div>
-      <div></div>
       <div v-if="isLogin" class="login-box">
-        <h2 class="font-black text-6xl" style="color: #18a058">登入</h2>
-
-        <n-form ref="loginFormRef" :label-width="80" :model="loginForm" :rules="loginRules">
-          <n-form-item path="email">
-            <n-input v-model:value="loginForm.email" placeholder="輸入信箱" />
-          </n-form-item>
-          <n-form-item path="password" style="--n-label-height: 15px">
-            <n-input type="password" v-model:value="loginForm.password" placeholder="輸入密碼" />
-          </n-form-item>
-        </n-form>
-        <div class="flex justify-between items-center mb-3">
-          <n-checkbox v-model:checked="isRememberMe" size="large" label="記住我" />
-          <n-button text style="--n-font-size: 15px"> 忘記密碼 </n-button>
+        <div v-if="loginStep === 1">
+          <h2 class="font-black text-6xl" style="color: #18a058">登入</h2>
+          <n-form ref="loginFormRef" :label-width="80" :model="loginForm" :rules="loginRules">
+            <n-form-item path="email">
+              <n-input v-model:value="loginForm.email" placeholder="輸入信箱" />
+            </n-form-item>
+            <n-form-item path="password" style="--n-label-height: 15px">
+              <n-input type="password" v-model:value="loginForm.password" placeholder="輸入密碼" />
+            </n-form-item>
+          </n-form>
+          <div class="flex justify-between items-center mb-3">
+            <n-checkbox v-model:checked="isRememberMe" size="large" label="記住我" />
+            <n-button text style="--n-font-size: 15px" @click="gotoLoginStep2"> 忘記密碼 </n-button>
+          </div>
+          <div class="flex justify-center flex-col gap-3 items-center">
+            <n-button
+              @click="handleLogin"
+              class="w-full mt-3 font-bold text-lg py-5"
+              round
+              type="primary"
+            >
+              登入
+            </n-button>
+          </div>
+          <div class="flex items-center mb-6 mt-6">
+            <div class="flex-grow border-t border-gray-300"></div>
+            <span class="mx-4 text-gray-600">第三方平台登入</span>
+            <div class="flex-grow border-t border-gray-300"></div>
+          </div>
+          <div class="flex justify-center flex-col gap-3 items-center">
+            <n-button
+              class="w-full mt-3 font-bold text-lg py-5"
+              round
+              type="primary"
+              @click="loginGoogle"
+              >Google</n-button
+            >
+            <n-button
+              class="w-full mt-3 font-bold text-lg py-5"
+              round
+              type="primary"
+              @click="loginFacebook"
+              >Facebook</n-button
+            >
+          </div>
+          <div class="flex items-center mb-7 mt-8">
+            <div class="flex-grow border-t border-gray-300"></div>
+            <span class="mx-4 text-gray-600">或是</span>
+            <div class="flex-grow border-t border-gray-300"></div>
+          </div>
+          <div class="flex justify-center flex-col gap-3 items-center">
+            <n-button
+              @click="toggleLoginSignup"
+              class="w-full mt-3 font-bold text-lg py-5"
+              round
+              type="primary"
+            >
+              註冊一個帳號吧
+            </n-button>
+          </div>
         </div>
-        <div class="flex justify-center flex-col gap-3 items-center">
-          <n-button
-            @click="handleLogin"
-            class="w-full mt-3 font-bold text-lg py-5"
-            round
-            type="primary"
-          >
-            登入
-          </n-button>
-        </div>
-
-        <div class="flex items-center mb-6 mt-6">
-          <div class="flex-grow border-t border-gray-300"></div>
-          <span class="mx-4 text-gray-600">第三方平台登入</span>
-          <div class="flex-grow border-t border-gray-300"></div>
-        </div>
-        <div class="flex justify-center flex-col gap-3 items-center">
-          <n-button
-            class="w-full mt-3 font-bold text-lg py-5"
-            round
-            type="primary"
-            @click="loginGoogle"
-            >Google</n-button
-          >
-          <n-button
-            class="w-full mt-3 font-bold text-lg py-5"
-            round
-            type="primary"
-            @click="loginFacebook"
-            >Facebook</n-button
-          >
-        </div>
-        <div class="flex items-center mb-7 mt-8">
-          <div class="flex-grow border-t border-gray-300"></div>
-          <span class="mx-4 text-gray-600">或是</span>
-          <div class="flex-grow border-t border-gray-300"></div>
-        </div>
-        <div class="flex justify-center flex-col gap-3 items-center">
-          <n-button
-            @click="toggleLoginSignup"
-            class="w-full mt-3 font-bold text-lg py-5"
-            round
-            type="primary"
-          >
-            註冊一個帳號吧
-          </n-button>
+        <div v-if="loginStep === 2">
+          <h2 class="font-black text-6xl" style="color: #18a058">忘記密碼</h2>
+          <p class="text-center leading-loose text-gray-600">
+            嘿！忘記密碼了嗎？別擔心～<br />
+            輸入您的電子郵件<br />
+            我們會馬上寄送重設密碼的連結給您。<br />
+            快來找回你的帳號吧！🔐
+          </p>
+          <n-form :model="forgotPassword" ref="forgotPassword">
+            <n-form-item path="email">
+              <n-input v-model:value="forgotPassword.email" placeholder="輸入註冊的電子郵件" />
+            </n-form-item>
+          </n-form>
+          <div class="flex justify-center gap-3 items-center">
+            <n-button
+              @click="gotoLoginStep1"
+              class="w-1/2 mt-3 font-bold text-lg py-5"
+              round
+              type="primary"
+            >
+              回到登入頁
+            </n-button>
+            <n-button
+              @click="handleForgotPassword"
+              class="w-1/2 mt-3 font-bold text-lg py-5"
+              round
+              type="primary"
+            >
+              發送重設連結
+            </n-button>
+          </div>
         </div>
       </div>
       <div v-else class="signup-box">
@@ -222,76 +253,15 @@
           <p class="text-center leading-loose text-gray-600">
             為了確保您的帳戶安全<br />我們已向 example@mail.com 發送了一封驗證信<br />請打開您的信箱<br />並點擊信中的驗證連結以完成註冊流程
           </p>
-          <n-form ref="formRef" :label-width="80" :model="formValue" :rules="rules">
-            <n-form-item path="verificationCode">
-              <n-input v-model:value="formValue.verificationCode" placeholder="請輸入驗證碼" />
-            </n-form-item>
-          </n-form>
-          <div class="flex justify-center gap-3 items-center">
+          <div class="flex justify-center flex-col gap-3 items-center">
             <n-button
               @click="goToStep1"
-              class="w-1/2 mt-3 font-bold text-lg py-5"
-              round
-              type="primary"
-            >
-              回上一步
-            </n-button>
-            <n-button
-              @click="goToStep3"
-              class="w-1/2 mt-3 font-bold text-lg py-5"
-              round
-              type="primary"
-            >
-              下一步
-            </n-button>
-          </div>
-        </div>
-        <div v-else-if="step === 3">
-          <h2 class="font-black text-6xl" style="color: #18a058">完成註冊</h2>
-          <div class="flex flex-col items-center space-y-4 mb-5">
-            <div class="relative w-36 h-36">
-              <div
-                class="w-full h-full rounded-full overflow-hidden border border-gray-300 bg-gray-100 flex items-center justify-center"
-              >
-                <img
-                  v-if="formValue.avatar"
-                  :src="formValue.avatar"
-                  alt="Avatar Preview"
-                  class="w-full h-full object-cover"
-                />
-                <span v-else class="text-gray-500">無圖片</span>
-              </div>
-            </div>
-          </div>
-          <p class="text-center leading-loose text-gray-600">
-            尋找感興趣的活動並與大家一起揪團，快來加入吧！
-          </p>
-          <div class="flex justify-center flex-col gap-3 items-center">
-            <n-button class="w-full mt-3 font-bold text-lg py-5" round type="primary"
-              >(5s)後回到首頁</n-button
-            >
-          </div>
-          <div class="flex items-center mb-7 mt-8">
-            <div class="flex-grow border-t border-gray-300"></div>
-            <span class="mx-4 text-gray-600">或是</span>
-            <div class="flex-grow border-t border-gray-300"></div>
-          </div>
-          <p class="text-center leading-loose text-gray-600">
-            填寫資料，讓您的個人頁面更完整！<br />輕鬆找到志同道合的人！
-          </p>
-          <div class="flex justify-center flex-col gap-3 items-center">
-            <n-button class="w-full mt-3 font-bold text-lg py-5" round type="primary"
-              >前往個人頁面</n-button
-            >
-            <!--測試用按鈕之後會撤掉-->
-            <n-button
-              @click="goToStep2"
               class="w-full mt-3 font-bold text-lg py-5"
               round
               type="primary"
             >
-              (測試用)上一步
-            </n-button>
+              回上一步</n-button
+            >
           </div>
         </div>
       </div>
@@ -393,6 +363,47 @@ const loginRules = {
   },
 }
 
+// 忘記密碼邏輯
+import { sendPasswordResetLink } from './services/passwordService.js'
+
+const forgotPassword = ref({
+  email: '',
+})
+
+const handleForgotPassword = async () => {
+  const email = forgotPassword.value.email
+  if (!email) {
+    message.error('😅 哎呀！你忘了輸入信箱了！快輸入一下～')
+    return
+  }
+
+  // 信箱格式驗證
+  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  if (!emailPattern.test(email)) {
+    message.error('😱 信箱格式不對哦！請確認一下信箱是否正確～')
+    return
+  }
+
+  try {
+    // 直接發送重設密碼的連結
+    await sendPasswordResetLink(email, message)
+    message.success('🎉 好棒！我們已經將重設密碼的連結發送到您的郵箱了，請查收！')
+  } catch (error) {
+    console.error('重設密碼錯誤:', error)
+    message.error('信箱可能輸入錯誤或尚未註冊！我們再試一次好嗎🥺')
+  }
+}
+
+// 忘記密碼 換頁邏輯
+const loginStep = ref(1)
+
+const gotoLoginStep2 = () => {
+  loginStep.value = 2
+}
+const gotoLoginStep1 = () => {
+  loginStep.value = 1
+}
+
 // 第三方登入
 const loginGoogle = async () => {
   try {
@@ -415,48 +426,6 @@ const loginFacebook = async () => {
     console.error(error)
   }
 }
-
-// 隱私權政策-控制 checkbox 是否被選中
-const showModalPrivacy = ref(false)
-const isCheckedPrivacy = ref(false)
-const showModalTerms = ref(false)
-const isCheckedTerms = ref(false)
-
-function onCheckboxChangePrivacy() {
-  showModalPrivacy.value = true
-}
-
-// 同意
-const onAgreePrivacy = () => {
-  isCheckedPrivacy.value = true
-  showModalPrivacy.value = false
-}
-
-// 不同意
-const onDisagreePrivacy = () => {
-  isCheckedPrivacy.value = false
-  showModalPrivacy.value = false
-}
-function onCheckboxChangeTerms() {
-  showModalTerms.value = true
-}
-
-// 同意
-const onAgreeTerms = () => {
-  isCheckedTerms.value = true
-  showModalTerms.value = false
-}
-
-// 不同意
-const onDisagreeTerms = () => {
-  isCheckedTerms.value = false
-  showModalTerms.value = false
-}
-
-// 同意條款才能進到下一步
-const canProceedToNextStep = computed(() => {
-  return isCheckedPrivacy.value && isCheckedTerms.value
-})
 
 // 大頭貼的邏輯
 const handleFileChange = async (fileList) => {
@@ -564,10 +533,50 @@ const toggleLoginSignup = () => {
   step.value = 1 // 確保進入註冊時從第一步開始
 }
 
-// 註冊流程換頁的邏輯
-const goToStep3 = () => {
-  step.value = 3
+// 隱私權政策-控制 checkbox 是否被選中
+const showModalPrivacy = ref(false)
+const isCheckedPrivacy = ref(false)
+const showModalTerms = ref(false)
+const isCheckedTerms = ref(false)
+
+function onCheckboxChangePrivacy() {
+  showModalPrivacy.value = true
 }
+
+// 同意
+const onAgreePrivacy = () => {
+  isCheckedPrivacy.value = true
+  showModalPrivacy.value = false
+}
+
+// 不同意
+const onDisagreePrivacy = () => {
+  isCheckedPrivacy.value = false
+  showModalPrivacy.value = false
+}
+function onCheckboxChangeTerms() {
+  showModalTerms.value = true
+}
+
+// 同意
+const onAgreeTerms = () => {
+  isCheckedTerms.value = true
+  showModalTerms.value = false
+}
+
+// 不同意
+const onDisagreeTerms = () => {
+  isCheckedTerms.value = false
+  showModalTerms.value = false
+}
+
+// 同意條款才能進到下一步
+const canProceedToNextStep = computed(() => {
+  return isCheckedPrivacy.value && isCheckedTerms.value
+})
+
+// 註冊流程換頁的邏輯
+
 const goToStep2 = async () => {
   if (step.value === 1) {
     // 引入表單驗證的錯誤訊息
