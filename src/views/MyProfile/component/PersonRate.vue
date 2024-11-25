@@ -7,6 +7,8 @@ const comment = reactive([
   {
     id: 1,
     userId: 1,
+    imgUrl:
+      'https://img.lovepik.com/png/20231015/cute-japanese-cartoon-lucky-cat-tradition-white-isolated_216931_wh300.png',
     userName: '王大錘',
     location: '台北',
     content: '今天在這裡玩很開心謝謝大家。',
@@ -16,6 +18,8 @@ const comment = reactive([
   {
     id: 2,
     userId: 2,
+    imgUrl:
+      'https://img.lovepik.com/original_origin_pic/18/05/27/4d8b100fc94de5d7840560f6f7da77f4.png_wh300.png',
     userName: '李小明',
     location: '台中',
     content: '環境很好，主辦方很專業。',
@@ -143,8 +147,8 @@ const comment = reactive([
           <div class="mb-4">
             <div v-for="userPost in comment" :key="userPost.id" class="mb-6">
               <section class="flex gap-2">
-                <div>
-                  <a href=""><img src="https://fakeimg.pl/48x48/200" class="rounded-full" /></a>
+                <div class="max-w-[44px] max-h-[44px]">
+                  <a href=""><img :src="userPost.imgUrl" class="rounded-full" /></a>
                 </div>
                 <div>
                   <h2>{{ userPost.userName }}</h2>

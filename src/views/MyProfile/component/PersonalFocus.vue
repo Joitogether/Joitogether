@@ -5,16 +5,19 @@ import { NTabs, NTabPane, NDivider } from 'naive-ui'
 const followingList = reactive([
   {
     userId: 1,
+    imgUrl: 'https://img.lovepik.com/element/40080/7463.png_300.png',
     userName: '王大錘',
     think: '我好帥',
   },
   {
     userId: 2,
+    imgUrl: 'https://img.lovepik.com/element/40116/7316.png_300.png',
     userName: '張大仙',
     think: '想交朋友',
   },
   {
     userId: 3,
+    imgUrl: 'https://img.lovepik.com/element/40253/7513.png_300.png',
     userName: '劉大吉',
     think: '請多多追隨',
   },
@@ -23,16 +26,21 @@ const followingList = reactive([
 const followerList = reactive([
   {
     userId: 1,
+    imgUrl:
+      'https://img.lovepik.com/free_png/32/25/61/59758PIC7z1fa7i86bqr58PIC_PIC2018.png_300.png',
     userName: '彭大海',
     think: '今天很想跟朋友一起出門',
   },
   {
     userId: 2,
+    imgUrl: 'https://img.lovepik.com/photo/45014/5426.jpg_wh300.jpg',
     userName: '謝小夜',
     think: '大家好像都玩得很開心',
   },
   {
     userId: 3,
+    imgUrl:
+      'https://img.lovepik.com/png/20231023/Cute-cartoon-pink-hairball-pig-rabbit-monster-tooth-ear_322945_wh300.png',
     userName: '蔡大雞',
     think: '跨年要做什麼呢～？',
   },
@@ -52,8 +60,8 @@ const followerList = reactive([
           >
             <div>
               <a class="flex" href="">
-                <div class="me-5">
-                  <img src="https://fakeimg.pl/44x44/200" class="rounded-full" />
+                <div class="me-5 max-w-[44px] max-h-[44px]">
+                  <img :src="userFollowingList.imgUrl" class="rounded-full self-center" />
                 </div>
                 <div>
                   <div>{{ userFollowingList.userName }}</div>
@@ -68,8 +76,8 @@ const followerList = reactive([
         <div>
           <div class="my-5" v-for="userFollowerList in followerList" :key="userFollowerList.userId">
             <div class="flex">
-              <div class="me-5">
-                <img src="https://fakeimg.pl/44x44/200" class="rounded-full" />
+              <div class="me-5 max-w-[44px] max-h-[44px]">
+                <img :src="userFollowerList.imgUrl" class="rounded-full" />
               </div>
               <div>
                 <div>{{ userFollowerList.userName }}</div>
