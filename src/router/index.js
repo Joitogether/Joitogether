@@ -6,6 +6,7 @@ import PersonInfo from '@/views/MyProfile/component/PersonInfo.vue'
 import PersonActivity from '@/views/MyProfile/component/PersonActivity.vue'
 import PersonPost from '@/views/MyProfile/component/PersonPost.vue'
 import PersonRate from '@/views/MyProfile/component/PersonRate.vue'
+import PersonalFocus from '@/views/MyProfile/component/PersonalFocus.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -34,6 +35,11 @@ const router = createRouter({
           path: 'personpost',
           name: 'personpost',
           component: PersonPost,
+        },
+        {
+          path: 'personalfocus',
+          name: 'personalfocus',
+          component: PersonalFocus,
         },
         {
           path: 'personActivity',

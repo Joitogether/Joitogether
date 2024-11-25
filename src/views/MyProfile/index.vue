@@ -55,7 +55,9 @@ import userInfo from '@/views/MyProfile/component/person'
           /></RouterLink>
         </li>
         <li class="hover:cursor-pointer w-24">
-          <Heart class="justify-self-center" />
+          <RouterLink to="/profile/personalfocus">
+            <Heart class="justify-self-center" />
+          </RouterLink>
         </li>
         <li
           class="hover:cursor-pointer w-24"
