@@ -588,7 +588,11 @@ const goToStep2 = async () => {
     }
     try {
       // 註冊功能
-      const userResponse = await registerUser(formValue.value.email, model.value.password)
+      const userResponse = await registerUser(
+        formValue.value.email,
+        model.value.password,
+        formValue.value.user.username,
+      )
       message.success(userResponse.message)
       console.log('用戶註冊成功！', userResponse.user)
       message.success(`🎉 註冊成功！歡迎加入，${formValue.value.user.username} ✨`)
