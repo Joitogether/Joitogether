@@ -3,30 +3,24 @@ import { getAuth, signInWithPopup, GoogleAuthProvider, FacebookAuthProvider } fr
 
 const auth = getAuth()
 
-// google
-export async function loginWithGoogle() {
-  const provider = new GoogleAuthProvider()
+async function loginWithProvider(provider) {
   try {
     const result = await signInWithPopup(auth, provider)
     const user = result.user
-    console.log('Google 登入成功：', user)
+    console.log(`${provider.providerId} 登入成功：`, user)
     return user
   } catch (error) {
-    console.error('Google 登入失敗：', error.message)
-    throw new Error(error.message)
+    console.error(`${provider.providerId} 登入失敗：`, error.code, error.message)
+    throw new Error(`登入失敗 (${error.code}): ${error.message}`)
   }
 }
 
-// facebook
-export async function loginWithFacebook() {
+export function loginWithGoogle() {
+  const provider = new GoogleAuthProvider()
+  return loginWithProvider(provider)
+}
+
+export function loginWithFacebook() {
   const provider = new FacebookAuthProvider()
-  try {
-    const result = await signInWithPopup(auth, provider)
-    const user = result.user
-    console.log('Facebook 登入成功：', user)
-    return user
-  } catch (error) {
-    console.error('Facebook 登入失敗：', error.message)
-    throw new Error(error.message)
-  }
+  return loginWithProvider(provider)
 }
