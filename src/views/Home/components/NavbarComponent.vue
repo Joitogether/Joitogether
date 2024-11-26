@@ -45,19 +45,14 @@ import { RouterLink } from 'vue-router';
               >加入聚會</a
             >
           </li>
-          <li>
-            <a
-              href="#"
-              class="block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-black dark:hover:text-white"
-              >社群</a
-            >
+          <li class="block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-black dark:hover:text-white">
+            <RouterLink to="/post">社群</RouterLink>
           </li>
           <li>
             <a
               href="#"
-              class="block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-black dark:hover:text-white"
-              >活動中心</a
-            >
+              class="block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-black dark:hover:text-white">
+              活動中心</a>
           </li>
           <li>
             <a
@@ -79,12 +74,8 @@ import { RouterLink } from 'vue-router';
             >加入聚會</a
           >
         </li>
-        <li>
-          <a
-            href="#"
-            class="block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-black dark:hover:text-white"
-            >社群</a
-          >
+        <li class="block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-black dark:hover:text-white">
+          <RouterLink to="/post">社群</RouterLink>
         </li>
         <li>
           <a

@@ -16,4 +16,8 @@ const userInfo = ref({
   lifePhoto2: 'https://shoplineimg.com/5ab875018d1db9e3db00025b/5e15c900fe2d2b002db19bfb/800x.jpg?'
 })
 
+localStorage.setItem("user", JSON.stringify(userInfo.value));
+console.log(JSON.parse(localStorage.getItem("user")));
+
+
 export default userInfo;

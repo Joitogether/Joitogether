@@ -5,6 +5,7 @@ import Home from '@/views/Home/index.vue'
 import PersonInfo from '@/views/MyProfile/component/PersonInfo.vue'
 import PersonActivity from '@/views/MyProfile/component/PersonActivity.vue'
 import PersonPost from '@/views/MyProfile/component/PersonPost.vue'
+import Post from '../views/Post/index.vue'
 
 
 const router = createRouter({
@@ -28,14 +29,19 @@ const router = createRouter({
       {
         path: 'personpost',
         name: 'personpost',
-        component: PersonPost,
+        component: PersonPost
       },
       {
         path: 'personActivity',
         name: 'personActivity',
-        component: PersonActivity,
+        component: PersonActivity
       },
     ]
+  },
+  {
+    path: '/post',
+    name: 'post',
+    component: Post
   },
   {
     path: '/',
