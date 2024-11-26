@@ -38,19 +38,26 @@ function sendPersonInfo() {
 </script>
 
 <template>
-  <div class="container mx-auto ">
-    <div class=" card-container border rounded-lg overflow-hidden bg-white">
+  <div class="container mx-auto">
+    <div class="card-container border rounded-lg overflow-hidden bg-white">
       <div class="img-container w-full">
-        <img class="card-img w-full h-full object-cover" :src="userInfo.photoURL" alt="userPhoto"/>
+        <!-- <img class="card-img w-full h-full object-cover" src="@/assets/jun.jpg" alt=""> -->
+        <img
+          class="card-img w-full h-full object-cover"
+          src="https://shoplineimg.com/5ab875018d1db9e3db00025b/5e15c900fe2d2b002db19bfb/800x.jpg?"
+          alt=""
+        />
       </div>
-      <div class="card-content-container   p-5">
+      <div class="card-content-container p-5">
         <h3 class="user-name text-2xl text-center font-bold">{{ userInfo.name }}</h3>
-        <div class="text-md font-bold ">
+        <div class="text-md font-bold">
           <span>{{ userInfo.city }}</span>
           <span> • {{ userInfo.age }}</span>
           <span> • {{ userInfo.job }}</span>
         </div>
-        <p class="user-description text-2xl font-bold mt-1 md:mb-5">: {{ userInfo.shortDescription}}</p>
+        <p class="user-description text-2xl font-bold mt-1 md:mb-5">
+          : {{ userInfo.shortDescription }}
+        </p>
         <div class="btn-container flex gap-2 mt-8 mb-8">
           <n-button @click="showModal = true" type="primary" ghost class="flex-[2_2_0%]" round >編輯檔案</n-button>
           <n-modal v-model:show="showModal">
@@ -141,29 +148,53 @@ function sendPersonInfo() {
           </n-modal>
         </div>
         <div class="tag-container flex gap-3 flex-wrap">
-          <span v-for="item in userInfo.tags" :key="item.tags" class="border-2 px-3 py-1 rounded"># {{ item }}</span>
+          <span v-for="item in userInfo.tags" :key="item.tags" class="border-2 px-3 py-1 rounded"
+            ># {{ item }}</span
+          >
         </div>
       </div>
     </div>
     <div>
       <ul class="flex justify-between px-10 py-5">
-        <li class="hover:cursor-pointer w-24" :class="{ 'border-b-4 border-solid border-green-600': $route.path === '/profile/personInfo' }">
-            <RouterLink to="/profile/personInfo"><ProfileCircle class="justify-self-center"/></RouterLink>
+        <li
+          class="hover:cursor-pointer w-24"
+          :class="{
+            'border-b-4 border-solid border-green-600': $route.path === '/profile/personInfo',
+          }"
+        >
+          <RouterLink to="/profile/personInfo"
+            ><ProfileCircle class="justify-self-center"
+          /></RouterLink>
         </li>
         <li class="hover:cursor-pointer w-24">
-          <BrightStar class="justify-self-center"/>
+          <RouterLink to="/profile/personalrate"
+            ><BrightStar class="justify-self-center"
+          /></RouterLink>
         </li>
         <li class="hover:cursor-pointer w-24">
-          <Heart class="justify-self-center"/>
+          <RouterLink to="/profile/personalfocus">
+            <Heart class="justify-self-center" />
+          </RouterLink>
         </li>
-        <li class="hover:cursor-pointer w-24" :class="{ 'border-b-4 border-solid border-green-600': $route.path === '/profile/personpost' }">
-          <RouterLink to="/profile/personpost"><Post class="justify-self-center"/></RouterLink>
+        <li
+          class="hover:cursor-pointer w-24"
+          :class="{
+            'border-b-4 border-solid border-green-600': $route.path === '/profile/personpost',
+          }"
+        >
+          <RouterLink to="/profile/personpost"><Post class="justify-self-center" /></RouterLink>
         </li>
-        <li class="hover:cursor-pointer w-24" :class="{ 'border-b-4 border-solid border-green-600': $route.path === '/profile/personActivity' }">
-          <RouterLink to="/profile/personActivity"><Group class="justify-self-center"/></RouterLink>
+        <li
+          class="hover:cursor-pointer w-24"
+          :class="{
+            'border-b-4 border-solid border-green-600': $route.path === '/profile/personActivity',
+          }"
+        >
+          <RouterLink to="/profile/personActivity"
+            ><Group class="justify-self-center"
+          /></RouterLink>
         </li>
-    </ul>
-
+      </ul>
     </div>
     <div class="border">
       <router-view></router-view>
@@ -194,7 +225,7 @@ function sendPersonInfo() {
 }
 
 @media screen and (width < 768px) {
-  .container{
+  .container {
     max-width: 550px;
     box-sizing: border-box;
   }
@@ -245,12 +276,10 @@ function sendPersonInfo() {
   .user-description {
     font-size: 1rem;
     margin-top: -0.1rem;
-
   }
 }
 
 @media screen and (width >= 1024px) {
-
   .container {
     max-width: 880px;
   }
@@ -260,8 +289,5 @@ function sendPersonInfo() {
     flex-direction: column;
     justify-content: space-between;
   }
-
-
-
 }
 </style>

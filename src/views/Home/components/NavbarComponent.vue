@@ -1,8 +1,8 @@
 <script setup>
 import { Search, User, Menu, Sweep3d } from '@iconoir/vue'
-import { NButton, NDivider } from 'naive-ui';
+import { NButton, NDivider } from 'naive-ui'
 import userInfo from '../../MyProfile/component/person'
-import { RouterLink } from 'vue-router';
+import { RouterLink } from 'vue-router'
 </script>
 
 <template>
@@ -100,14 +100,16 @@ import { RouterLink } from 'vue-router';
       <input type="checkbox" id="login-toggle" class="hidden" />
       <label
         for="login-toggle"
-        class="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-500 rounded-lg cursor-pointer hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-black">
-        <User/>
+        class="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-500 rounded-lg cursor-pointer hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-black"
+      >
+        <User />
       </label>
       <div
         id="login-menu"
-        class="hidden md:hidden w-1/4 bg-gray-50 text-black p-6 space-y-4 absolute top-10 right-0">
+        class="hidden md:hidden w-1/4 bg-gray-50 text-black p-6 space-y-4 absolute top-10 right-0"
+      >
         <div class="w-1/2 rounded-full overflow-hidden flex justify-self-center">
-          <img :src="userInfo.photoURL" alt="userPhoto">
+          <img :src="userInfo.photoURL" alt="userPhoto" />
         </div>
         <div class="text-center font-bold text-xl">{{ userInfo.name }}</div>
         <div class="text-md font-bold text-center">
@@ -117,9 +119,7 @@ import { RouterLink } from 'vue-router';
         </div>
         <div class="flex justify-center">
           <RouterLink to="/profile/personInfo">
-            <n-button type="primary" ghost round >
-              查看個人頁面
-            </n-button>
+            <n-button type="primary" ghost round> 查看個人頁面 </n-button>
           </RouterLink>
         </div>
 
@@ -139,9 +139,7 @@ import { RouterLink } from 'vue-router';
         </div>
         <n-divider />
         <div class="flex justify-center">
-          <n-button strong secondary type="tertiary">
-            登出
-          </n-button>
+          <n-button strong secondary type="tertiary"> 登出 </n-button>
         </div>
         <!-- <ul>
           <li>
