@@ -106,16 +106,11 @@ const checkTimeInput = (field) => {
     userNotEnter.value.eventTime = !inputValues.value.eventTime || eventTime < now;
   }
 
-    if (field === "deadline") {
-    if (!userNotEnter.value.requireApproval) {
-      userNotEnter.value.deadline = false;
-      return;
-    }
-
+     if (field === "deadline" && inputValues.value.requireApproval) { 
     const eventTime = new Date(inputValues.value.eventTime);
     const deadline = new Date(inputValues.value.deadline);
 
-    if (!inputValues.value.deadline) {
+    if (!inputValues.value.deadline && inputValues.value.requireApproval) {
       userNotEnter.value.deadline = true;
     } else if (deadline > eventTime) {
       userNotEnter.value.deadline = true;
@@ -125,6 +120,10 @@ const checkTimeInput = (field) => {
     }
   }
 };
+
+
+
+
 
 const paymentMethod = ref("free")
 const showEventCost = computed(() => paymentMethod.value === "AA");
@@ -288,50 +287,44 @@ onMounted(()=>{
 const checkInput = (field) => {
   if (field === "deadline" && !userNotEnter.value.requireApproval) {
     userNotEnter.value.deadline = false;
-    return;
+    return
   }
   userNotEnter.value[field] = !inputValues.value[field];
 };
 
 const previewActivity = () => {
   Object.keys(inputValues.value).forEach((key) => {
-    checkInput(key);
-  });
+    if (key === "deadline" && !inputValues.value.requireApproval) {
+    return
+  }checkInput(key);
+})
 
   checkTimeInput("eventTime");
 
   if (inputValues.value.requireApproval) {
-    checkTimeInput("deadline");
+  checkTimeInput("deadline")
   }
-
   validateCost()
 
   const fieldsToCheck = ["name", "describe", "price", "eventTime", "category"];
-
   if (inputValues.value.requireApproval) {
-  fieldsToCheck.push("deadline");
-}
-
-if (
-  Object.values({
-    ...userNotEnter.value,
-    ...fieldsToCheck.reduce((acc, field) => {
-      acc[field] = userNotEnter.value[field];
-      return acc;
-    }, {}),
-  }).some((value) => value) ||
-  uploadError.value
-) {
-  alert("請填寫完整資料！");
-  return;
-}
-
-
-//之後可以改成預覽圖
-  if (!uploadedImage.value){
-    uploadedImage.value = '@/UserUpdata1.jpg'
+    fieldsToCheck.push("deadline");
   }
 
+  const hasUnfilledFields = fieldsToCheck.some((field) => {
+    if (field === "deadline" && !inputValues.value.requireApproval) {
+      return false;
+    }
+    return userNotEnter.value[field];
+  });
+
+  const hasUploadError = uploadError.value;
+
+ 
+  if (hasUnfilledFields || hasUploadError) {
+    alert("請填寫完整資料！");
+    return;
+  }
 
   const formattedEventTime = inputValues.value.eventTime
    ?formatToCustom(new Date(inputValues.value.eventTime))
@@ -339,8 +332,7 @@ if (
 
   const formattedApprovalDeadline = inputValues.value.deadline
   ? formatToCustom(new Date(inputValues.value.deadline))
-  : "";
-
+  : ""
 
   // 之後要submit出去的資料
   console.log("活動資料：", {
@@ -355,9 +347,9 @@ if (
   location: searchQuery.value,
   category:inputValues.value.category,
   require_approval:inputValues.value.requireApproval,
-  });
+  })
 
-};
+}
 
 </script>
 
@@ -388,7 +380,6 @@ if (
                 @change="handleFileUpload"
                 accept="image/*"
                 :disabled="!!uploadedImage"
-
               />
             </label>
             <span
@@ -515,7 +506,7 @@ if (
             <p
             class="text-red-600 text-sm"
             v-if="userNotEnter.deadline"
-            >審核時間不可晚於活動時間 * {{  }}</p>
+            >審核時間不可晚於活動時間 *</p>
           </div >
           <div  class=" bg-gray-200 mt-2 p-6 flex items-center justify-center border rounded-md">
           <span>你的聚會將會刊登在列表上，直到時間截止。記得在最晚審核時間前勾選參加者。</span>
