@@ -3,6 +3,10 @@ import { Search,XmarkCircle } from "@iconoir/vue"
 import { computed, ref, onMounted,watch } from "vue"
 import { loadGoogleMapsAPI } from "@/views/Activity/components/googleMapsLoader"
 import  debounce from "lodash/debounce"
+import { useMessage } from "naive-ui"
+
+const message = useMessage()
+
 
 const inputValues = ref({
   name: "",
@@ -33,6 +37,8 @@ const timeRange = ref({
 
 
 
+
+
 //  監視人數
 const participants = ref(1)
 const participantsError = ref("")
@@ -50,7 +56,7 @@ const updateParticipants = (value) => {
 //  監視人數輸入
 watch(participants, (newValue) => {
   if (isNaN(newValue) || newValue === "" || newValue <= 0 ) {
-    alert("請輸入有效數字")
+    message.warning("請輸入有效數字");
     participantsError.value = "請輸入有效數字";
     participants.value = '';
   }  else {
@@ -106,7 +112,7 @@ const checkTimeInput = (field) => {
     userNotEnter.value.eventTime = !inputValues.value.eventTime || eventTime < now;
   }
 
-     if (field === "deadline" && inputValues.value.requireApproval) { 
+     if (field === "deadline" && inputValues.value.requireApproval) {
     const eventTime = new Date(inputValues.value.eventTime);
     const deadline = new Date(inputValues.value.deadline);
 
@@ -114,7 +120,7 @@ const checkTimeInput = (field) => {
       userNotEnter.value.deadline = true;
     } else if (deadline > eventTime) {
       userNotEnter.value.deadline = true;
-      alert("審核截止時間不可晚於活動時間！");
+      message.warning("審核截止時間不可晚於活動時間！")
     } else {
       userNotEnter.value.deadline = false;
     }
@@ -145,13 +151,13 @@ const checkPaymentMethod = () => {
 
 const uploadedImage = ref(null)
 const uploadError = ref("")
-const maxFileSize = 5 * 1024 * 1024
+const maxFileSize = 1 * 1024 * 1024
 
 const handleFileUpload = (event) => {
   const file = event.target.files[0];
 
   if (file.size > maxFileSize) {
-    uploadError.value = "檔案大小不可超過 5 MB";
+    uploadError.value = "檔案大小不可超過 1 MB";
     return;
   }
 
@@ -197,7 +203,6 @@ const onInputChange = debounce(async () => {
 
   suggestions.value = []; // 清空建議結果
 
-
   autocompleteInstance.value.getPlacePredictions(
     {
       input: searchQuery.value,
@@ -213,7 +218,8 @@ const onInputChange = debounce(async () => {
       } else {
         suggestions.value = [];
         isLoadOK.value =true
-        alert('未搜尋到地址，請重新輸入')
+        message.warning('未搜尋到地址，請重新輸入')
+        searchQuery.value=null
       }
     }
   );
@@ -320,9 +326,9 @@ const previewActivity = () => {
 
   const hasUploadError = uploadError.value;
 
- 
+
   if (hasUnfilledFields || hasUploadError) {
-    alert("請填寫完整資料！");
+    message.warning("請填寫完整資料！")
     return;
   }
 
@@ -373,7 +379,7 @@ const previewActivity = () => {
               alt="預覽圖片"
               class="w-full h-full object-cover rounded-md"
               />
-              <span v-else class="text-gray-500">點擊上傳圖片</span>
+              <span v-else class="text-gray-500 text-base">點擊上傳圖片</span>
               <input
                 type="file"
                 class="hidden"
@@ -397,10 +403,10 @@ const previewActivity = () => {
       <!-- 活動名稱和描述 -->
     <div class=" bg-white p-5 px-4 mb-3 rounded-lg">
       <div class="mb-6 mt-6">
-          <label class="block  font-medium mb-2 p-2">活動名稱
+          <label class="block  font-medium mb-2 p-2  text-base">活動名稱
             <span class="text-red-600">*</span>
           </label>
-          <input type="text" placeholder="請填活動名稱" class="w-full p-3  border-b rounded-md  focus:outline-none"
+          <input type="text" placeholder="請填活動名稱" class="w-full p-3  border-b rounded-md  focus:outline-none  text-base"
           v-model="inputValues.name"
           @blur="checkInput('name')"
           />
@@ -409,15 +415,15 @@ const previewActivity = () => {
           >請輸入活動名稱*</p>
       </div>
       <div class="mb-6">
-          <label class="block  font-medium mb-2 p-2">活動描述
+          <label class="block  font-medium mb-2 p-2  text-base">活動描述
             <span class="text-red-600">*</span>
           </label>
-          <textarea placeholder="請填活動描述" rows="4" class="w-full p-3 border rounded-md focus:outline-none"
+          <textarea placeholder="請填活動描述" rows="4" class="w-full p-3 border rounded-md focus:outline-none  text-base"
           v-model="inputValues.describe"
           @blur="checkInput('describe')"
 
           ></textarea>
-          <p class="text-sm text-red-600"
+          <p class="text-sm text-red-600 "
           v-if="userNotEnter.describe"
           >請輸入活動描述*</p>
       </div>
@@ -425,7 +431,7 @@ const previewActivity = () => {
       <!-- 地點 -->
       <div class="mt-6">
         <div class="mb-6">
-            <label class="block  font-medium mb-2 p-2">
+            <label class="block  font-medium mb-2 p-2  text-base">
               地點<span class="text-red-600">*</span>
             </label>
             <div class="flex items-center border rounded-md">
@@ -433,7 +439,7 @@ const previewActivity = () => {
               ref="inputElement"
               type="text"
               placeholder="搜尋聚會地點"
-              class="flex-grow p-3 border-none focus:outline-none"
+              class="flex-grow p-3 border-none focus:outline-none  text-base"
               v-model="searchQuery"
               @input="triggerInputChange"
               @focus="initializeAutocomplete"
@@ -465,24 +471,24 @@ const previewActivity = () => {
       <!-- 日期與時間 -->
       <div class="grid grid-cols-1 gap-4">
           <div>
-            <label class="block font-medium mb-2 p-2">活動時間
+            <label class="block font-medium mb-2 p-2 text-base">活動時間
               <span class="text-red-600">*</span>
             </label>
             <input type="datetime-local"
             :min="timeRange.minTime"
             :max="timeRange.maxTime"
-            class="w-full p-3 border rounded-md focus:outline-none"
+            class="w-full p-3 border rounded-md focus:outline-none  text-base"
             v-model="inputValues.eventTime"
             @blur="checkTimeInput('eventTime')"
             />
             <p
-            class="text-red-600 text-sm"
+            class="text-red-600 text-sm "
             v-if="userNotEnter.eventTime"
             >請選擇活動時間*</p>
           </div>
 
 
-          <div class=" flex font-medium mb-2 p-2">是否需要審核
+          <div class=" flex font-medium mb-2 p-2  text-base">是否需要審核
             <div>
               <input type="checkbox"
               class=" mx-3"
@@ -491,14 +497,14 @@ const previewActivity = () => {
             </div>
           </div>
           <div v-if="inputValues.requireApproval">
-            <label class="block font-medium mb-2 p-2">
+            <label class="block font-medium mb-2 p-2  text-base">
               最晚審核時間 <span class="text-red-600">*</span>
             </label>
             <input
             type="datetime-local"
             :min="timeRange.minTime"
             :max="timeRange.maxTime"
-            class="w-full p-3 border rounded-md"
+            class="w-full p-3 border rounded-md  text-base"
             v-model="inputValues.deadline"
             @blur="checkTimeInput('deadline')"
             />
@@ -508,7 +514,7 @@ const previewActivity = () => {
             v-if="userNotEnter.deadline"
             >審核時間不可晚於活動時間 *</p>
           </div >
-          <div  class=" bg-gray-200 mt-2 p-6 flex items-center justify-center border rounded-md">
+          <div  class=" bg-gray-200 mt-2 p-6 flex items-center justify-center border rounded-md  text-base">
           <span>你的聚會將會刊登在列表上，直到時間截止。記得在最晚審核時間前勾選參加者。</span>
           </div>
       </div>
@@ -518,7 +524,7 @@ const previewActivity = () => {
         <!-- 最大最小參加人數 -->
       <div class="mt-6 mb-6 grid grid-cols-2 gap-4 ">
         <div>
-          <label class="block font-medium mb-2 p-2">活動人數 <span class="text-red-600">*</span></label>
+          <label class="block font-medium mb-2 p-2  text-base">活動人數 <span class="text-red-600">*</span></label>
         </div>
           <div>
             <div class="flex justify-end items-center">
@@ -530,7 +536,7 @@ const previewActivity = () => {
               <button class=" w-10 px-3 py-3 rounded-md justify-end items-center hover:bg-gray-200" @click="updateParticipants(1)">+</button>
             </div>
           </div>
-          <p class="text-sm text-red-600"
+          <p class="text-sm text-red-600 mx-1"
           v-if="participantsError"
           > {{ participantsError }}*</p>
       </div>
@@ -538,8 +544,8 @@ const previewActivity = () => {
         <!-- 類型與費用 -->
       <div class="grid grid-cols-1 gap-4">
           <div>
-          <label class="block  font-medium mb-2">活動類型 <span class="text-red-600">*</span></label>
-          <select  class="w-full p-3 border rounded-md"
+          <label class="block  font-medium mb-2  text-base">活動類型 <span class="text-red-600">*</span></label>
+          <select  class="w-full p-3 border rounded-md  text-base"
               v-model="inputValues.category"
               @blur="checkInput('category')"
               >
@@ -557,7 +563,7 @@ const previewActivity = () => {
           </div>
           <div>
           <label class="block  font-medium mb-2">付款方式 <span class="text-red-600">*</span></label>
-          <select  class="w-full p-3 border rounded-md"
+          <select  class="w-full p-3 border rounded-md  text-base"
           v-model="paymentMethod"
           @change="checkPaymentMethod"
           >
