@@ -1,40 +1,81 @@
-import { getAuth, sendPasswordResetEmail } from 'firebase/auth'
+import { auth } from './firebaseConfig.js'
+import { sendPasswordResetEmail, fetchSignInMethodsForEmail } from 'firebase/auth'
 
-// 驗證電子郵件格式的正則表達式
-const validateEmailFormat = (email) => {
-  const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
-  return emailPattern.test(email)
-}
+export const passwordService = {
+  async checkUserRegistered(email) {
+    try {
+      // 檢查該 email 是否有註冊
+      const methods = await fetchSignInMethodsForEmail(auth, email)
+      console.log('該信箱已註冊的方法：', methods)
 
-// 發送重設密碼郵件
-export const sendPasswordResetLink = async (email, showMessage) => {
-  const auth = getAuth()
+      if (methods.length === 0) {
+        throw {
+          success: false,
+          message: '😵‍💫 該信箱尚未註冊！請檢查後再試！',
+        }
+      }
 
-  // 檢查是否提供了電子郵件
-  if (!email) {
-    showMessage('請輸入您的電子郵件地址', 'error')
-    return
-  }
+      return {
+        success: true,
+        message: '🎉 該信箱已註冊，可以繼續操作！',
+      }
+    } catch (error) {
+      console.error('檢查用戶是否註冊失敗：', error.message)
 
-  // 檢查電子郵件格式是否正確
-  if (!validateEmailFormat(email)) {
-    showMessage('請輸入有效的電子郵件地址', 'error')
-    return
-  }
+      let errorMessage = '檢查註冊狀態失敗！請稍後再試！'
 
-  try {
-    // 發送重設密碼郵件
-    await sendPasswordResetEmail(auth, email)
-    showMessage('重設密碼的連結已發送至您的信箱！請查收。', 'success')
-  } catch (error) {
-    // 根據錯誤碼顯示不同的錯誤消息
-    if (error.code === 'auth/invalid-email') {
-      showMessage('無效的電子郵件地址，請檢查格式', 'error')
-    } else if (error.code === 'auth/user-not-found') {
-      showMessage('找不到與此電子郵件相關聯的帳戶', 'error')
-    } else {
-      showMessage('發生錯誤，請稍後再試', 'error')
+      if (error.code === 'auth/invalid-email') {
+        errorMessage = '✉️ 信箱格式不對哦！請再確認一下！🔍'
+      } else if (error.message === '😵‍💫 該信箱尚未註冊！請檢查後再試！') {
+        errorMessage = error.message
+      } else {
+        console.error('未識別的錯誤代碼：', error.code)
+      }
+
+      throw {
+        success: false,
+        message: errorMessage,
+      }
     }
-    console.error('Error sending password reset email:', error)
-  }
+  },
+
+  async sendPasswordResetEmail(email) {
+    try {
+      // 設定驗證信的跳轉連結
+      const actionCodeSettings = {
+        url: `${window.location.origin}/reset-password`, // 前面那段是localhost
+        handleCodeInApp: true,
+      }
+
+      // 發送重設密碼的信件
+      await sendPasswordResetEmail(auth, email, actionCodeSettings)
+
+      return {
+        success: true,
+        message: '🎉 已成功發送重設密碼信，請檢查您的信箱！📧',
+      }
+    } catch (error) {
+      console.error('發送重設密碼信失敗：', error.message)
+      console.error('完整錯誤物件：', error)
+
+      let errorMessage = '發送重設密碼信失敗！請稍後再試！'
+
+      if (error.code === 'auth/user-not-found') {
+        errorMessage = '😵‍💫 該信箱尚未註冊，無法發送密碼重設信！'
+      } else if (error.code === 'auth/invalid-email') {
+        errorMessage = '✉️ 信箱格式不對哦！請重新輸入！🔍'
+      } else if (error.code === 'auth/too-many-requests') {
+        errorMessage = '😵 請求過於頻繁，請稍後再試！🚫'
+      } else {
+        console.error('未識別的錯誤代碼：', error.code)
+      }
+
+      throw {
+        success: false,
+        message: errorMessage,
+      }
+    }
+  },
 }
+
+export default passwordService
