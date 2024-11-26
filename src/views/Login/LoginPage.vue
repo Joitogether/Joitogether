@@ -64,7 +64,7 @@
             </n-button>
           </div>
         </div>
-        <div v-if="loginStep === 2">
+        <div v-else>
           <h2 class="font-black text-6xl" style="color: #18a058">忘記密碼</h2>
           <p class="text-center leading-loose text-gray-600">
             嘿！忘記密碼了嗎？別擔心～<br />
@@ -74,7 +74,11 @@
           </p>
           <n-form :model="forgotPassword" ref="forgotPassword">
             <n-form-item path="email">
-              <n-input v-model:value="forgotPassword.email" placeholder="輸入註冊的電子郵件" />
+              <n-input
+                v-model:value="forgotPassword.email"
+                placeholder="輸入註冊的電子郵件"
+                type="email"
+              />
             </n-form-item>
           </n-form>
           <div class="flex justify-center gap-3 items-center">
@@ -87,7 +91,7 @@
               回到登入頁
             </n-button>
             <n-button
-              @click="handleForgotPassword"
+              @click="handleSubmit"
               class="w-1/2 mt-3 font-bold text-lg py-5"
               round
               type="primary"
@@ -290,12 +294,13 @@ import { loginWithGoogle, loginWithFacebook } from './services/authService.js'
 import registerUser from './services/registerService.js'
 import { validateFormFields } from './utils/formValidation.js'
 import loginUser from './services/loginService.js'
+import { passwordService } from './services/passwordService.js'
 
 // 初始化區域
 const message = useMessage()
 const router = useRouter()
-
 const isRememberMe = ref(false)
+
 // 登入功能
 const handleLogin = async () => {
   const email = loginForm.value.email
@@ -364,33 +369,51 @@ const loginRules = {
 }
 
 // 忘記密碼邏輯
-import { sendPasswordResetLink } from './services/passwordService.js'
 
 const forgotPassword = ref({
   email: '',
 })
-
-const handleForgotPassword = async () => {
+console.log('forgotPassword:', forgotPassword.value)
+const handleSubmit = async () => {
   const email = forgotPassword.value.email
+  console.log('信箱:', email)
+
   if (!email) {
     message.error('😅 哎呀！你忘了輸入信箱了！快輸入一下～')
+    console.log('未輸入信箱')
     return
   }
 
-  // 信箱格式驗證
-  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-  if (!emailPattern.test(email)) {
-    message.error('😱 信箱格式不對哦！請確認一下信箱是否正確～')
+  const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
+  if (!emailPattern.test(forgotPassword.value.email.trim())) {
+    message.error('😅 哎呀！請輸入正確的信箱格式！')
+    console.log('信箱格式錯誤')
     return
   }
-
   try {
-    // 直接發送重設密碼的連結
-    await sendPasswordResetLink(email, message)
+    const response = await passwordService.sendPasswordResetEmail(email)
+    console.log('重設密碼連結已發送至您的信箱！', response)
     message.success('🎉 好棒！我們已經將重設密碼的連結發送到您的郵箱了，請查收！')
+
+    setTimeout(() => {
+      loginStep.value = 1
+    }, 3000)
   } catch (error) {
-    console.error('重設密碼錯誤:', error)
-    message.error('信箱可能輸入錯誤或尚未註冊！我們再試一次好嗎🥺')
+    console.error('發生錯誤：', error)
+
+    if (error.code === 'auth/user-not-found') {
+      message.error('😅 哎呀！信箱尚未註冊！')
+      console.log('信箱尚未註冊')
+    } else if (error.code === 'auth/invalid-email') {
+      message.error('😅 哎呀！請輸入正確的信箱格式！')
+      console.log('信箱格式錯誤')
+    } else if (error.code === 'auth/too-many-requests') {
+      message.error('⏳ 嘿！您請求太多次了，請稍後再試！')
+      console.log('請求過多')
+    } else {
+      message.error('😵 發生未知錯誤，請稍後再試一次！')
+      console.log('未知錯誤')
+    }
   }
 }
 
