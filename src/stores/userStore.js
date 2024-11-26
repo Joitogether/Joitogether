@@ -8,6 +8,7 @@ export const useUserStore = defineStore('user', {
     isLogin: false,
     // 保存使用者名稱
     userName: '',
+    user: null,
   }),
   actions: {
     // 初始化 Firebase 狀態監聽
@@ -16,18 +17,25 @@ export const useUserStore = defineStore('user', {
         if (user) {
           console.log('Firebase 檢測到用戶已登入：', user)
           this.isLogin = true
+          this.setUser(user)
           // 假設 displayName 儲存了名稱
           this.userName = user.displayName || '使用者'
         } else {
           console.log('Firebase 檢測到用戶未登入')
           // 使用通用清空方法
           this.clearUserState()
+          this.clearUser()
         }
         // 初始化完成後執行回調
         if (callback) callback()
       })
     },
-
+    setUser(value) {
+      this.user = value
+    },
+    clearUser() {
+      this.user = null
+    },
     // 更新登出狀態
     async logout() {
       try {
