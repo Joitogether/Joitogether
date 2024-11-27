@@ -29,13 +29,6 @@ const loginUser = async (email, password, rememberMe) => {
       }
     }
 
-    // 傳遞用戶資料給後端以獲取 accessToken
-    // const response = await axios.post('http://172.20.10.8:3030', { email, password })
-    // console.log('後端接收成功，回應資料：', response.data, response.data.accessToken)
-
-    // // 儲存 accessToken -> 儲存至 localStorage
-    // localStorage.setItem('accessToken', response.data.accessToken)
-
     return {
       success: true,
       message: `🎉 登入成功 ${user.displayName || '使用者'}！✨`,

@@ -655,10 +655,13 @@ const goToStep2 = async () => {
         phoneNumber: formValue.value.phone,
         photoURL: formValue.value.avatar,
       })
+      console.log('註冊 API 回傳結果：', userResponse)
 
       message.success(userResponse.message)
       console.log('用戶註冊成功！', userResponse.user)
+      // console.log('切換到 Step 2 前的 step 值：', step.value)
       message.success(`🎉 註冊成功！歡迎加入，${formValue.value.user.username} ✨`)
+      // console.log('切換到 Step 2 後的 step 值：', step.value)
 
       // 切換到 Step 2
       step.value = 2
