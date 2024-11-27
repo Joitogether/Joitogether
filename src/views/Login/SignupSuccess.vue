@@ -10,8 +10,8 @@
               class="w-full h-full rounded-full overflow-hidden border border-gray-300 bg-gray-100 flex items-center justify-center"
             >
               <img
-                v-if="formValue.avatar"
-                :src="formValue.avatar"
+                v-if="user && user.photoURL"
+                :src="user.photoURL"
                 alt="Avatar Preview"
                 class="w-full h-full object-cover"
               />
@@ -24,7 +24,7 @@
         </p>
         <div class="flex justify-center flex-col gap-3 items-center">
           <n-button class="w-full mt-3 font-bold text-lg py-5" round type="primary" @click="goHome"
-            >(5s)後回到首頁</n-button
+            >{{ countdown }}s後回到首頁</n-button
           >
         </div>
         <div class="flex items-center mb-7 mt-8">
@@ -53,19 +53,40 @@
 import { NButton } from 'naive-ui'
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { auth } from './services/firebaseConfig.js'
+import { onAuthStateChanged, getAuth } from './services/firebaseConfig.js'
 import axios from 'axios'
 
-const formValue = ref({
-  avatar: '',
+const user = ref(null)
+const router = useRouter()
+const auth = getAuth()
+const countdown = ref(10)
+
+onMounted(() => {
+  onAuthStateChanged(auth, (currentUser) => {
+    if (currentUser) {
+      user.value = currentUser // 更新用戶資料
+    } else {
+      router.push('/login') // 用戶未登入，跳轉至登入頁面
+    }
+  })
+
+  // 開始倒數計時
+  const interval = setInterval(() => {
+    if (countdown.value > 0) {
+      countdown.value -= 1
+    } else {
+      clearInterval(interval) // 倒數結束後清除定時器
+      goHome() // 跳轉到登入頁
+    }
+  }, 1000)
 })
 
-const router = useRouter()
-
+// 回到首頁
 const goHome = () => {
   router.push('/')
 }
 
+// 前往個人頁面
 const goProfile = () => {
   router.push('/profile')
 }

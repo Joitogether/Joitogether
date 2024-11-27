@@ -3,102 +3,66 @@
     <div class="block shadow-md">
       <div class="event-image bg-green-100"></div>
       <div v-if="isLogin" class="login-box">
-        <div v-if="loginStep === 1">
-          <h2 class="font-black text-6xl" style="color: #18a058">登入</h2>
-          <n-form ref="loginFormRef" :label-width="80" :model="loginForm" :rules="loginRules">
-            <n-form-item path="email">
-              <n-input v-model:value="loginForm.email" placeholder="輸入信箱" />
-            </n-form-item>
-            <n-form-item path="password" style="--n-label-height: 15px">
-              <n-input type="password" v-model:value="loginForm.password" placeholder="輸入密碼" />
-            </n-form-item>
-          </n-form>
-          <div class="flex justify-between items-center mb-3">
-            <n-checkbox v-model:checked="isRememberMe" size="large" label="記住我" />
-            <n-button text style="--n-font-size: 15px" @click="gotoLoginStep2"> 忘記密碼 </n-button>
-          </div>
-          <div class="flex justify-center flex-col gap-3 items-center">
-            <n-button
-              @click="handleLogin"
-              class="w-full mt-3 font-bold text-lg py-5"
-              round
-              type="primary"
-            >
-              登入
-            </n-button>
-          </div>
-          <div class="flex items-center mb-6 mt-6">
-            <div class="flex-grow border-t border-gray-300"></div>
-            <span class="mx-4 text-gray-600">第三方平台登入</span>
-            <div class="flex-grow border-t border-gray-300"></div>
-          </div>
-          <div class="flex justify-center flex-col gap-3 items-center">
-            <n-button
-              class="w-full mt-3 font-bold text-lg py-5"
-              round
-              type="primary"
-              @click="loginGoogle"
-              >Google</n-button
-            >
-            <n-button
-              class="w-full mt-3 font-bold text-lg py-5"
-              round
-              type="primary"
-              @click="loginFacebook"
-              >Facebook</n-button
-            >
-          </div>
-          <div class="flex items-center mb-7 mt-8">
-            <div class="flex-grow border-t border-gray-300"></div>
-            <span class="mx-4 text-gray-600">或是</span>
-            <div class="flex-grow border-t border-gray-300"></div>
-          </div>
-          <div class="flex justify-center flex-col gap-3 items-center">
-            <n-button
-              @click="toggleLoginSignup"
-              class="w-full mt-3 font-bold text-lg py-5"
-              round
-              type="primary"
-            >
-              註冊一個帳號吧
-            </n-button>
-          </div>
+        <h2 class="font-black text-6xl" style="color: #18a058">登入</h2>
+        <n-form ref="loginFormRef" :label-width="80" :model="loginForm" :rules="loginRules">
+          <n-form-item path="email">
+            <n-input v-model:value="loginForm.email" placeholder="輸入信箱" />
+          </n-form-item>
+          <n-form-item path="password" style="--n-label-height: 15px">
+            <n-input type="password" v-model:value="loginForm.password" placeholder="輸入密碼" />
+          </n-form-item>
+        </n-form>
+        <div class="flex justify-between items-center mb-3">
+          <n-checkbox v-model:checked="isRememberMe" size="large" label="記住我" />
+          <n-button text style="--n-font-size: 15px" @click="gotoForgotPassword">
+            忘記密碼
+          </n-button>
         </div>
-        <div v-else>
-          <h2 class="font-black text-6xl" style="color: #18a058">忘記密碼</h2>
-          <p class="text-center leading-loose text-gray-600">
-            嘿！忘記密碼了嗎？別擔心～<br />
-            輸入您的電子郵件<br />
-            我們會馬上寄送重設密碼的連結給您。<br />
-            快來找回你的帳號吧！🔐
-          </p>
-          <n-form :model="forgotPassword" ref="forgotPassword">
-            <n-form-item path="email">
-              <n-input
-                v-model:value="forgotPassword.email"
-                placeholder="輸入註冊的電子郵件"
-                type="email"
-              />
-            </n-form-item>
-          </n-form>
-          <div class="flex justify-center gap-3 items-center">
-            <n-button
-              @click="gotoLoginStep1"
-              class="w-1/2 mt-3 font-bold text-lg py-5"
-              round
-              type="primary"
-            >
-              回到登入頁
-            </n-button>
-            <n-button
-              @click="handleSubmit"
-              class="w-1/2 mt-3 font-bold text-lg py-5"
-              round
-              type="primary"
-            >
-              發送重設連結
-            </n-button>
-          </div>
+        <div class="flex justify-center flex-col gap-3 items-center">
+          <n-button
+            @click="handleLogin"
+            class="w-full mt-3 font-bold text-lg py-5"
+            round
+            type="primary"
+          >
+            登入
+          </n-button>
+        </div>
+        <div class="flex items-center mb-6 mt-6">
+          <div class="flex-grow border-t border-gray-300"></div>
+          <span class="mx-4 text-gray-600">第三方平台登入</span>
+          <div class="flex-grow border-t border-gray-300"></div>
+        </div>
+        <div class="flex justify-center flex-col gap-3 items-center">
+          <n-button
+            class="w-full mt-3 font-bold text-lg py-5"
+            round
+            type="primary"
+            @click="loginGoogle"
+            >Google</n-button
+          >
+          <n-button
+            class="w-full mt-3 font-bold text-lg py-5"
+            round
+            type="primary"
+            @click="loginFacebook"
+            >Facebook</n-button
+          >
+        </div>
+        <div class="flex items-center mb-7 mt-8">
+          <div class="flex-grow border-t border-gray-300"></div>
+          <span class="mx-4 text-gray-600">或是</span>
+          <div class="flex-grow border-t border-gray-300"></div>
+        </div>
+        <div class="flex justify-center flex-col gap-3 items-center">
+          <n-button
+            @click="toggleLoginSignup"
+            class="w-full mt-3 font-bold text-lg py-5"
+            round
+            type="primary"
+          >
+            註冊一個帳號吧
+          </n-button>
         </div>
       </div>
       <div v-else class="signup-box">
@@ -255,7 +219,9 @@
             </div>
           </div>
           <p class="text-center leading-loose text-gray-600">
-            為了確保您的帳戶安全<br />我們已向 example@mail.com 發送了一封驗證信<br />請打開您的信箱<br />並點擊信中的驗證連結以完成註冊流程
+            為了確保您的帳戶安全<br />我們已向
+            {{ formValue.email }}
+            發送了一封驗證信<br />請打開您的信箱<br />並點擊信中的驗證連結以完成註冊流程
           </p>
           <div class="flex justify-center flex-col gap-3 items-center">
             <n-button
@@ -294,7 +260,6 @@ import { loginWithGoogle, loginWithFacebook } from './services/authService.js'
 import registerUser from './services/registerService.js'
 import { validateFormFields } from './utils/formValidation.js'
 import loginUser from './services/loginService.js'
-import { passwordService } from './services/passwordService.js'
 
 // 初始化區域
 const message = useMessage()
@@ -368,85 +333,27 @@ const loginRules = {
   },
 }
 
-// 忘記密碼邏輯
-
-const forgotPassword = ref({
-  email: '',
-})
-console.log('forgotPassword:', forgotPassword.value)
-const handleSubmit = async () => {
-  const email = forgotPassword.value.email
-  console.log('信箱:', email)
-
-  if (!email) {
-    message.error('😅 哎呀！你忘了輸入信箱了！快輸入一下～')
-    console.log('未輸入信箱')
-    return
-  }
-
-  const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
-  if (!emailPattern.test(forgotPassword.value.email.trim())) {
-    message.error('😅 哎呀！請輸入正確的信箱格式！')
-    console.log('信箱格式錯誤')
-    return
-  }
-  try {
-    const response = await passwordService.sendPasswordResetEmail(email)
-    console.log('重設密碼連結已發送至您的信箱！', response)
-    message.success('🎉 好棒！我們已經將重設密碼的連結發送到您的郵箱了，請查收！')
-
-    setTimeout(() => {
-      loginStep.value = 1
-    }, 3000)
-  } catch (error) {
-    console.error('發生錯誤：', error)
-
-    if (error.code === 'auth/user-not-found') {
-      message.error('😅 哎呀！信箱尚未註冊！')
-      console.log('信箱尚未註冊')
-    } else if (error.code === 'auth/invalid-email') {
-      message.error('😅 哎呀！請輸入正確的信箱格式！')
-      console.log('信箱格式錯誤')
-    } else if (error.code === 'auth/too-many-requests') {
-      message.error('⏳ 嘿！您請求太多次了，請稍後再試！')
-      console.log('請求過多')
-    } else {
-      message.error('😵 發生未知錯誤，請稍後再試一次！')
-      console.log('未知錯誤')
-    }
-  }
-}
-
-// 忘記密碼 換頁邏輯
-const loginStep = ref(1)
-
-const gotoLoginStep2 = () => {
-  loginStep.value = 2
-}
-const gotoLoginStep1 = () => {
-  loginStep.value = 1
-}
-
 // 第三方登入
+
 const loginGoogle = async () => {
   try {
     const user = await loginWithGoogle()
-    message.success(`🎉 Google 登入成功！歡迎，${user.displayName}`)
-    console.log('Google 登入成功：', user)
+    console.log('Google 登入成功！')
+    message.success(`🎉 歡迎，${user.displayName}！登入成功，太棒了！🎉`)
     router.push('/')
   } catch (error) {
-    console.error(error)
+    message.error(`😭 哎呀！${error.message} 💔`)
   }
 }
 
 const loginFacebook = async () => {
   try {
     const user = await loginWithFacebook()
-    message.success(`🎉 Facebook 登入成功！歡迎，${user.displayName}`)
-    console.log('Facebook 登入成功：', user)
+    console.log('Facebook 登入成功！')
+    message.success(`🎉 歡迎，${user.displayName || user.email}！Facebook 登入成功，太棒了！🎉`)
     router.push('/')
   } catch (error) {
-    console.error(error)
+    message.error(`😭 哎呀！${error.message} 💔`)
   }
 }
 
@@ -673,6 +580,10 @@ const goToStep2 = async () => {
 
 const goToStep1 = () => {
   step.value = 1
+}
+
+const gotoForgotPassword = () => {
+  router.push('/forgot-password')
 }
 </script>
 

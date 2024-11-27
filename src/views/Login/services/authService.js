@@ -41,8 +41,26 @@ async function loginWithProvider(provider) {
     await signOut(auth)
     console.log('後端失敗，執行登出')
 
-    throw new Error(`登入失敗 (${error.code}): ${error.message}`)
+    const errorMessage = handleAuthError(error)
+    throw new Error(errorMessage)
   }
+}
+function handleAuthError(error) {
+  let errorMessage = '發生未知錯誤，請稍後再試。'
+
+  if (error.code === 'auth/account-exists-with-different-credential') {
+    console.warn('該帳號已使用其他方式註冊')
+    errorMessage = '此帳戶已使用其他登入方式註冊囉'
+  } else if (error.code === 'auth/popup-closed-by-user') {
+    console.warn('使用者關閉了登入彈窗')
+    errorMessage = '使用者關閉了登入彈窗，請重新嘗試。'
+  } else if (error.code === 'auth/network-request-failed') {
+    console.warn('網路請求失敗')
+    errorMessage = '網路請求失敗，請檢查網路連線。'
+  } else {
+    console.error('未識別的錯誤代碼：', error.code)
+  }
+  return errorMessage
 }
 
 export function loginWithGoogle() {

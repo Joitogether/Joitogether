@@ -7,6 +7,7 @@ import ActivityDetail from '@/views/Activity/components/ActivityDetail.vue'
 import ActivityCreate from '@/views/Activity/components/ActivityCreate.vue'
 import SignupSuccess from '@/views/Login/SignupSuccess.vue'
 import ResetPassword from '@/views/Login/ResetPassword.vue'
+import forgotPassword from '@/views/Login/ForgotPassword.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -20,6 +21,11 @@ const router = createRouter({
       path: '/signup-success',
       name: 'signupSuccess',
       component: SignupSuccess,
+    },
+    {
+      path: '/forgot-password',
+      name: 'forgotPassword',
+      component: forgotPassword,
     },
     {
       path: '/reset-password',
