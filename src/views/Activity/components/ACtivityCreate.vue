@@ -1,11 +1,85 @@
 <script setup>
-import { Search,XmarkCircle } from "@iconoir/vue"
-import { computed, ref, onMounted,watch } from "vue"
+import { Search,XmarkCircle,Clock, CreditCard, MoneySquare, Group, MapPin } from "@iconoir/vue"
+import { computed, ref, onMounted,watch,nextTick } from "vue"
 import { loadGoogleMapsAPI } from "@/views/Activity/components/googleMapsLoader"
 import  debounce from "lodash/debounce"
 import { useMessage } from "naive-ui"
+import dayjs from 'dayjs'
+import axios from 'axios'
+
+//  資料推送
+
+const ActivityDataPush = async () => {
+  const formattedEventTime = inputValues.value.eventTime
+   ?formatToCustom(new Date(inputValues.value.eventTime))
+   :""
+
+  const formattedApprovalDeadline = inputValues.value.deadline
+  ? formatToCustom(new Date(inputValues.value.deadline))
+  : ""
+
+  const activity ={
+    name: inputValues.value.name,
+    description: inputValues.value.describe,
+    event_time: formattedEventTime,
+    approval_deadline: formattedApprovalDeadline,
+    max_participants: participants.value,
+    pay_type: paymentMethod.value,
+    price: eventCost.value,
+    img_url: uploadedImage.value,
+    location: searchQuery.value,
+    category: inputValues.value.category,
+    require_approval: inputValues.value.requireApproval,
+  };
+
+  try {
+    const response = await axios.post('http://localhost:3030/activities',activity)
+    console.log('活動資料送出成功:',response.data)
+    message.success('活動資料已成功送出')
+  } catch(err){
+    console.error('活動資料失敗:',err)
+    message.error('送出活動資料失敗，請在嘗試一次')
+  }
+};
+
+
 
 const message = useMessage()
+const isPreviewMode =ref (false)
+
+// 進入預覽模式時，重新初始化地圖
+const enterPreviewMode = () => {
+  isPreviewMode.value = true;
+
+  // 當地圖需要顯示時，重新初始化地圖
+  previewMap();
+}
+
+const exitPreviewMode = () => {
+  nextTick(() => {
+    isPreviewMode.value = false;
+
+    // 銷毀地圖實例，清除地圖
+    if (map.value) {
+      map.value = null;
+    }
+
+    // 也可以隱藏地圖容器
+    isMapVisible.value = false;
+  });
+};
+
+const handlePreviewClick = () => {
+  // 檢查資料是否完整
+  const isValid = previewActivity();
+  if (isValid) {
+  enterPreviewMode()
+  previewMap()
+  } else {
+    message.error("資料未完成或有誤，請檢查填寫項目！");
+  }
+};
+
 
 
 const inputValues = ref({
@@ -38,6 +112,18 @@ const timeRange = ref({
 
 
 
+const payment = computed(() => {
+  switch (paymentMethod.value) {
+    case 'free':
+      return '免費'
+    case 'AA':
+      return '各付各的'
+    case 'host':
+      return '團主請客'
+    default:
+      return 'null'
+  }
+})
 
 //  監視人數
 const participants = ref(1)
@@ -130,7 +216,6 @@ const checkTimeInput = (field) => {
 
 
 
-
 const paymentMethod = ref("free")
 const showEventCost = computed(() => paymentMethod.value === "AA");
 
@@ -183,6 +268,67 @@ const inputElement = ref(null);
 const autocompleteInstance = ref(null);
 const isLoading = ref(false);
 const isLoadOK =ref(false);
+
+
+
+// google map
+const isMapVisible = ref(false); // 地圖是否可見
+const map = ref(null); // 地圖實例
+const geocoder = ref(null); // Geocoder 實例
+
+
+
+
+
+
+const previewMap = async () => {
+  if (!searchQuery.value) {
+    return;
+  }
+
+  const googleMaps = await loadGoogleMapsAPI(apiKey);
+
+  // 初始化 Geocoder
+  if (!geocoder.value) {
+    geocoder.value = new googleMaps.Geocoder();
+  }
+
+  // 將地址轉換為經緯度
+  geocoder.value.geocode({ address: searchQuery.value }, (results, status) => {
+    if (status === "OK" && results[0]) {
+      const location = results[0].geometry.location;
+
+      // 顯示地圖容器
+      isMapVisible.value = true;
+
+
+      // 初始化地圖
+      nextTick(() => {
+        // 初始化地圖
+        if (!map.value) {
+          const mapElement = document.getElementById("map");
+          map.value = new googleMaps.Map(mapElement, {
+            center: location,
+            zoom: 14,
+          });
+        }
+
+        // 更新地圖位置
+        map.value.setCenter(location);
+
+        // 添加地圖標記
+        new googleMaps.Marker({
+          map: map.value,
+          position: location,
+        });
+      })
+    } else {
+      return;
+    }
+  });
+};
+
+
 
 
 // 初始化 Autocomplete
@@ -328,33 +474,27 @@ const previewActivity = () => {
 
 
   if (hasUnfilledFields || hasUploadError) {
-    message.warning("請填寫完整資料！")
+    // message.warning("請填寫完整資料！")
     return;
   }
 
-  const formattedEventTime = inputValues.value.eventTime
-   ?formatToCustom(new Date(inputValues.value.eventTime))
-   :""
 
-  const formattedApprovalDeadline = inputValues.value.deadline
-  ? formatToCustom(new Date(inputValues.value.deadline))
-  : ""
 
-  // 之後要submit出去的資料
-  console.log("活動資料：", {
-  name: inputValues.value.name,
-  description: inputValues.value.describe,
-  event_time: formattedEventTime,
-  approval_deadline: formattedApprovalDeadline,
-  max_participants: participants.value,
-  pay_type: paymentMethod.value,
-  price: eventCost.value,
-  img_url: uploadedImage.value,
-  location: searchQuery.value,
-  category:inputValues.value.category,
-  require_approval:inputValues.value.requireApproval,
-  })
+  //  {
+  // name: inputValues.value.name,
+  // description: inputValues.value.describe,
+  // event_time: formattedEventTime,
+  // approval_deadline: formattedApprovalDeadline,
+  // max_participants: participants.value,
+  // pay_type: paymentMethod.value,
+  // price: eventCost.value,
+  // img_url: uploadedImage.value,
+  // location: searchQuery.value,
+  // category:inputValues.value.category,
+  // require_approval:inputValues.value.requireApproval,
+  // })
 
+  return true; // 檢查通過
 }
 
 </script>
@@ -362,9 +502,11 @@ const previewActivity = () => {
 <template>
 <section>
 <div class=" bg-gray-300">
-  <main class="max-w-xl mx-auto min-h-screen px-6 items-center justify-center">
-      <h3 class="font-semibold text-lg mb-2 p-3">活動建立</h3>
+  <form @submit.prevent>
+    <main class="max-w-xl mx-auto min-h-screen px-6 items-center justify-center">
       <!-- 圖片上傳 -->
+      <div v-if="!isPreviewMode">
+        <h3 class="font-semibold text-lg mb-2 p-3">活動建立</h3>
       <div class="bg-white rounded-lg p-5 mb-3 ">
         <div class="mb-6">
           <div class="relative rounded-lg flex justify-center items-center p-6">
@@ -529,7 +671,7 @@ const previewActivity = () => {
           <div>
             <div class="flex justify-end items-center">
               <button class=" w-10 px-3 py-3 rounded-md justify-end items-center hover:bg-gray-200"  @click="updateParticipants(-1)">-</button>
-              <input  type="number" min="1" max="30" class=" w-32 text-center p-3 mx-3 border rounded-md focus:outline-none "
+              <input  type="number" min="1"  class=" w-32 text-center p-3 mx-3 border rounded-md focus:outline-none "
               v-model="participants"
               @input="validateInput"
               />
@@ -589,12 +731,73 @@ const previewActivity = () => {
         </div>
         <div class="my-6 flex items-center justify-center ">
           <button class=" bg-yellow-200 rounded-md  w-full mx-3 py-2 px-3"
-          @click="previewActivity"
-          >預覽</button>
+          @click="handlePreviewClick"
+          >預覽活動</button>
+        </div>
+      </div>
+      </div>
+      <!-- 活動預覽區 -->
+      <div v-else>
+        <h3 class="font-semibold text-lg mb-2 p-3">活動預覽</h3>
+        <div class="bg-white rounded-lg p-5 mb-3 ">
+          <!-- activityDetail.vue -->
+          <div class="flex h-full  justify-start ml-[5%] w-full">
+          <img class="w-14 aspect-square rounded-full" src="/src/assets/UserUpdata1.jpg" alt="">
+          <div class="ml-3 relative w-full h-14">
+            <p class="font-bold text-lg absolute top-0">Justin</p>
+            <p class="absolute bottom-0">新北市 • 45 • 員工</p>
+          </div>
         </div>
 
+
+      <div class=" aspect-square overflow-hidden rounded-md  p-4">
+        <img class="w-full h-full object-cover rounded-md " :src="uploadedImage" alt="">
       </div>
-  </main>
+      <div class="px-5 py-3">
+        <h3 class="font-bold text-2xl truncate">{{ inputValues.name }}</h3>
+        <div class="flex items-center text-gray-500">
+          <Clock/>
+          <span class="pl-3">{{ `${dayjs(inputValues.eventTime).format('YYYY, MM月DD日 dddd')} ${inputValues.eventTime}` }}</span>
+        </div>
+        <span v-if="inputValues.requireApproval" class="text-sm text-red-500">{{ `最後審核時間 ${inputValues.deadline}` }}</span>
+        <p class="py-8 leading-6">{{ inputValues.describe }}</p>
+        <ul class="flex justify-around text-md border border-gray-200/100 rounded-lg p-2">
+          <li class="flex flex-col items-center">
+            <CreditCard height="35" width="35"></CreditCard>
+            <p class="mt-2">{{ payment }}</p>
+          </li>
+          <li class="flex flex-col items-center">
+            <MoneySquare height="35" width="35"></MoneySquare>
+            <p class="mt-2">{{`$${eventCost}`  }}</p>
+          </li>
+          <li class="flex flex-col items-center">
+            <Group height="35" width="35"></Group>
+            <p class="mt-2">{{ `${participants}人` }}</p>
+          </li>
+        </ul>
+        <div class="flex items-center my-5">
+          <MapPin height="32" width="32"></MapPin>
+          <span class="text-lg ml-5">{{ inputElement.value }}</span>
+        </div>
+        <div id="map" class="border  h-56 text-5xl font-bold">
+        google地圖
+        </div>
+
+        <div class="my-6 flex items-center justify-center ">
+          <button class=" bg-yellow-200 rounded-md  w-full mx-3 py-2 px-3"
+          @click="ActivityDataPush"
+          >送出活動</button>
+        </div>
+        <div class="my-6 flex items-center justify-center ">
+          <button class=" bg-yellow-200 rounded-md  w-full mx-3 py-2 px-3"
+          @click="exitPreviewMode"
+          >返回編輯</button>
+        </div>
+      </div>
+      </div>
+    </div>
+    </main>
+  </form>
 </div>
 </section>
 
