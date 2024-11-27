@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { Clock, CreditCard, MoneySquare, Group, MapPin, NavArrowLeft } from '@iconoir/vue'
 import dayjs from 'dayjs';
 import 'dayjs/locale/zh'
@@ -7,32 +7,32 @@ import { NInput, NButton, NModal, NCard } from 'naive-ui';
 dayjs.locale('zh') 
 import ActivityCard from '@/views/components/ActivityCard.vue';
 import router from '@/router';
+import { useRoute } from 'vue-router';
+import axios from 'axios';
 
 const activity = ref({
   id: 'unique-activity-id',
   name: '一起去玩水', // 活動名稱
   img_url: 'https://www.welcometw.com/wp-content/uploads/2022/06/%E7%B6%B2%E7%BE%8E%E8%80%81%E6%9C%A8@sshihhan-850x638.jpg', // 活動照片網址
   location: '261宜蘭縣頭城鎮濱海路二段6號',
-  event_time: '2024-11-25 10:00:00',
   host_id: 'uid', // 團主 ID
-  description: '新竹尖石鄉最美的「尖石薰衣草森林」介紹分享，新竹薰衣草森林是台灣首家以香草植物為主題的景觀餐廳，園區內有薰衣草希望之丘、鄉村祕密花園、四月繡球花季，與五月的薰衣草、鼠尾草小徑是來薰衣草森林必拍場景，尖石薰衣草森林美麗的仙境景色，怎麼看都不會膩，精選尖石薰衣草森林順遊景點、交通方式、園區介紹等等，一起出發到薰衣草森林走走 ...🌲🌳🌲🏕⛰️', // 活動描述
+  description: "一場帶你品嘗台北美味夜市小吃的活動。",
   max_participants: 5, // 最大人數
   min_participants: 2, // 最小人數
-  participants: {
-    registered: ['uid1', 'uid2'], // 報名
-    approved: ['uid1', 'uid2'], // 審核通過
-    declined: [], // 拒絕
-  },
   category: 'travel',
-  require_approval: true, // 是否需要審核
-  approval_deadline: '2024-12-15', // 最後審核日期
   status: 'ongoing', // 活動狀態    registrationOpen|onGoing|completed|cancelled
   price: 100, // 活動費用，0 表示免費
   pay_type: 'free', // 付款方式 free|AA|host
+  require_approval: true, // 是否需要審核
+  approval_deadline: "2024-12-08T23:59:59.000Z", // 最後審核日期
+  event_time: "2024-12-08T23:59:59.000Z",
+  participants: [],
 })
 
+const host = ref({})
+
 const user = ref({
-  uid: '7P6ocyCefPc8oTzjfAEs16RZThR2',
+  uid: 'zm5skjX4z7WTal4x6m7f6Ae0zzE2',
   email: 'mbg@dghuifr.voh',
   email_verified: false,
   full_name: '張曉明',
@@ -55,7 +55,7 @@ const payment = computed(() => {
 })
 
 const registerCount = computed(() => {
-  return activity.value.participants.registered.length
+  return activity.value.participants.length
 })
 
 const clearComment = () => {
@@ -82,6 +82,21 @@ const isHost = computed(() => {
 })
 
 const userComment = ref('')
+
+
+const route = useRoute()
+
+onMounted(async() => {
+  const id = route.params.id
+  const response = await axios.get(`http://localhost:3030/activities/${id}`)
+  if(response.status === 200) {
+    const { data } = response.data
+    activity.value = data
+    host.value = data.host_info
+  }
+  // 如果回傳錯誤??
+})
+
 </script>
 <template>
   <div class="container ">
@@ -91,9 +106,9 @@ const userComment = ref('')
           <NavArrowLeft  stroke-width="2" class="w-8 h-8 "></NavArrowLeft>
         </router-link>
         <div class="flex h-full  justify-start ml-[5%] w-full">
-          <img class="w-14 aspect-square rounded-full" src="/src/assets/UserUpdata1.jpg" alt="">
+          <img class="w-14 aspect-square rounded-full" :src="host.photo_url" alt="">
           <div class="ml-3 relative w-full h-14">
-            <p class="font-bold text-lg absolute top-0">Justin</p>
+            <p class="font-bold text-lg absolute top-0">{{ host.display_name }}</p>
             <p class="absolute bottom-0">新北市 • 45 • 員工</p>
           </div>
         </div>
@@ -120,7 +135,7 @@ const userComment = ref('')
           </li>
           <li class="flex flex-col items-center">
             <MoneySquare height="35" width="35"></MoneySquare>
-            <p class="mt-2">{{`$${activity.price.toFixed()}`  }}</p>
+            <p class="mt-2">{{`$${parseInt(activity.price).toFixed()}`  }}</p>
           </li>
           <li class="flex flex-col items-center">
             <Group height="35" width="35"></Group> 
@@ -156,7 +171,7 @@ const userComment = ref('')
         :actImgUrl="activity.img_url"
         :location="activity.location"
         :dateTime="dayjs(activity.event_time).format('YYYY年MM月DD日')"
-        :participants="activity.participants.registered.length"
+        :participants="registerCount"
         :host="activity.hostId"
         class="mb-[3%]"
       ></ActivityCard>
