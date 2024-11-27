@@ -5,7 +5,7 @@ const userStore = useUserStore()
 
 // 「記住我」功能--初始化 Firebase 狀態
 userStore.initAuthState(() => {
-  // console.log('Firebase 狀態監聽已完成')
+  // console.log('Firebase 狀態初始化完成')
 })
 </script>
 

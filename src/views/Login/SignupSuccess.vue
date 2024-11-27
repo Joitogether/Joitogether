@@ -53,8 +53,7 @@
 import { NButton } from 'naive-ui'
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { onAuthStateChanged, getAuth } from './services/firebaseConfig.js'
-import axios from 'axios'
+import { onAuthStateChanged, getAuth } from 'firebase/auth'
 
 const user = ref(null)
 const router = useRouter()
@@ -90,38 +89,6 @@ const goHome = () => {
 const goProfile = () => {
   router.push('/profile')
 }
-
-// 驗證信箱並更新資料
-const verifyEmailUpdate = async () => {
-  try {
-    const user = auth.currentUser
-
-    if (!user) {
-      throw new Error('用戶未登入')
-    }
-    // 刷新用戶狀態
-    await user.reload()
-
-    if (!user.emailVerified) {
-      console.log('信箱尚未驗證')
-      return
-    }
-    console.log('信箱驗證成功 🎉')
-
-    // 向後端更新資料
-    const userId = user.uid
-    const backendResponse = await axios.put(`http://localhost:3030/users/update/${userId}`, {
-      email_verified: true,
-    })
-    console.log('驗證成功，狀態已更新', backendResponse.data)
-  } catch (error) {
-    console.error('無法更新用戶狀態：', error)
-  }
-}
-
-onMounted(() => {
-  verifyEmailUpdate()
-})
 </script>
 
 <style scoped>

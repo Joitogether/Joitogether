@@ -80,10 +80,13 @@ const registerUser = async ({ email, password, fullName, displayName, phoneNumbe
     } else if (error.code === 'auth/weak-password') {
       errorMessage = '🔑 密碼太簡單了啦！至少6字符，還要有數字和字母喔～ 💪'
     }
+
+    // 清理已創建的使用者帳戶 -> 測試時可以用，生產環境不要用
     console.error('更新使用者資料失敗，清理帳戶：', error)
     if (auth.currentUser) {
-      await auth.currentUser.delete() // 刪除已創建的使用者帳戶
+      await auth.currentUser.delete()
     }
+
     throw (
       ({
         success: false,

@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { onAuthStateChanged } from 'firebase/auth'
 import { auth } from '/src/views/Login/services/firebaseConfig.js'
+import axios from 'axios'
 
 export const useUserStore = defineStore('user', {
   state: () => ({
@@ -8,7 +9,10 @@ export const useUserStore = defineStore('user', {
     isLogin: false,
     // 保存使用者名稱
     userName: '',
+    // 使用者對象
     user: null,
+    // 信箱是否驗證
+    emailVerified: false,
   }),
   actions: {
     // 初始化 Firebase 狀態監聽
@@ -20,6 +24,14 @@ export const useUserStore = defineStore('user', {
           this.setUser(user)
           // 假設 displayName 儲存了名稱
           this.userName = user.displayName || '使用者'
+
+          // 更新 emailVerified 狀態
+          this.emailVerified = user.emailVerified
+
+          // 如果信箱已驗證，觸發後端同步
+          if (user.emailVerified) {
+            this.updateEmailVerifiedInBackend(user.uid)
+          }
         } else {
           console.log('Firebase 檢測到用戶未登入')
           // 使用通用清空方法
@@ -30,6 +42,17 @@ export const useUserStore = defineStore('user', {
         if (callback) callback()
       })
     },
+    async updateEmailVerifiedInBackend(uid) {
+      try {
+        const response = await axios.put(`http://localhost:3030/users/update/${uid}`, {
+          email_verified: true,
+        })
+        console.log('後端 email_verified 更新成功：', response.data)
+      } catch (error) {
+        console.error('後端 email_verified 更新失敗：', error.message)
+      }
+    },
+
     setUser(value) {
       this.user = value
     },
