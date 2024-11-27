@@ -28,8 +28,8 @@ onMounted(() => {
       skipNextWatch.value = true
       if (userStore.isLogin) {
         // 初始化時登入提示
-        message.success('🎉 歡迎回來～很高興見到您！✨')
-        // message.success(`歡迎回來 ${userStore.userName} 🎉`)
+        // message.success('🎉 歡迎回來～很高興見到您！✨')
+        message.success(`歡迎回來 ${userStore.userName}，很高興見到您！🎉`)
       } else {
         // 初始化時未登入提示
         message.warning('😵 您尚未登入，部分功能可能無法使用喔！💔')
