@@ -61,9 +61,8 @@ const toggleRegistration = (status) => {
     registrationStatus.value = 'open'
   }
 }
-
-const searchQuery = ref('') // 搜尋輸入框的內容
-
+// 搜尋功能
+const searchQuery = ref('') 
 const filteredAttendees = computed(() => {
   if (!searchQuery.value) {
     return attendee.value
@@ -76,18 +75,66 @@ const filteredAttendees = computed(() => {
 const handleAttendeeClick = (callback, id) => {
   const approvalAttendee = attendee.value.find((item) => item.id === id)
 
-  // 如果用户已被拒绝，直接提示
-  if (approvalAttendee && approvalAttendee.rejected) {
-    alert(`${approvalAttendee.name} 已經被拒絕參加本次揪團！`)
+  // 如果報名已截止，顯示提示
+  if (registrationStatus.value === 'closed') {
+    alert('目前報名已截止，無法操作。請返回開放報名繼續操作。')
     return
   }
-  if (registrationStatus.value === 'closed') {
-    alert('目前報名已截止，如果需要調整請返回開放報名繼續操作')
+
+  // 如果用户已被拒绝，顯示提示
+  if (approvalAttendee && approvalAttendee.rejected) {
+    alert(`${approvalAttendee.name} 已經被拒絕參加，無法進行操作！`)
     return
   }
 
   callback()
 }
+
+const handleRejectClick = (id) => {
+  const attendeeToReject = attendee.value.find((item) => item.id === id)
+
+  if (!attendeeToReject) return
+
+  // 報名截止提示
+  if (registrationStatus.value === 'closed') {
+    alert('目前報名已截止，無法操作。請返回開放報名繼續操作。')
+    return
+  }
+
+  // 已拒絕提示
+  if (attendeeToReject.rejected) {
+    alert(`${attendeeToReject.name} 已經被拒絕參加，無需再次操作！`)
+    return
+  }
+
+  // 確認拒絕
+  const confirmReject = confirm(`您確定要拒絕 ${attendeeToReject.name} 的參加申請嗎？`)
+  if (confirmReject) {
+    attendeeToReject.rejected = true
+    attendeeToReject.approved = false
+  }
+}
+
+const rejectAttendee = (id) => {
+  const attendeeToReject = attendee.value.find((item) => item.id === id)
+
+  if (!attendeeToReject) return
+
+  // 如果用戶已被拒絕，顯示提示
+  if (attendeeToReject.rejected) {
+    alert(`${attendeeToReject.name} 已經被拒絕參加，無需再次操作！`)
+    return
+  }
+
+  // 確認是否拒絕
+  const confirmReject = confirm(`您確定要拒絕 ${attendeeToReject.name} 的參加申請嗎？`)
+
+  if (confirmReject) {
+    attendeeToReject.rejected = true
+    attendeeToReject.approved = false
+  }
+}
+
 
 // 切換審核狀態
 const toggleApproval = (id) => {
@@ -304,7 +351,17 @@ const sendReplies = () => {
                 <span v-if="item.rejected">已拒絕參加</span>
                 <span v-else>{{ item.approved ? '解除參加資格' : '允許參加' }}</span>
               </button>
-              <button class="flex justify-center items-center w-32 h-8 mt-2 py-2 border-2 rounded-md text-sm transition-all duration-300 bg-red-500 text-gray-100 border-red-600">拒絕用戶參加</button>
+              <button
+  @click="handleRejectClick(item.id)"
+  :class="[ 
+    'flex justify-center items-center w-32 h-8 py-2 mt-2 border-2 rounded-md text-sm transition-all duration-300',
+    registrationStatus === 'closed' || item.rejected
+      ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+      : 'bg-red-500 text-white border-red-600 hover:bg-red-600 hover:border-red-700'
+  ]"
+>
+  <span>{{ item.rejected ? '已拒絕參加' : '拒絕用戶參加' }}</span>
+</button>
             </div>
           </div>
           <div
