@@ -21,13 +21,12 @@ async function loginWithProvider(provider) {
       uid: user.uid,
       email: user.email,
       email_verified: user.emailVerified,
-      full_name: user.displayName,
+      full_name: user.displayName || '使用者',
       display_name: user.displayName,
-      phone_number: null,
+      phone_number: '0912345678',
       photo_url: user.photoURL,
-      created_at: new Date(),
     }
-
+    console.log(userData)
     // 傳送資料到後端
     const backendResponse = await axios.post('http://localhost:3030/users/register', userData)
     console.log('後端回應：', backendResponse.data)

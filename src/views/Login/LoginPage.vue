@@ -2,7 +2,7 @@
   <div class="login-wrapper">
     <div class="block shadow-md">
       <div class="event-image bg-green-100"></div>
-      <div v-if="isLogin" class="login-box">
+      <div v-if="login" class="login-box">
         <h2 class="font-black text-6xl" style="color: #18a058">登入</h2>
         <n-form ref="loginFormRef" :label-width="80" :model="loginForm" :rules="loginRules">
           <n-form-item path="email">
@@ -266,7 +266,7 @@ import { useUserStore } from '/src/stores/userStore.js'
 const message = useMessage()
 const router = useRouter()
 const userStore = useUserStore()
-const isLogin = computed(() => userStore.user.isLogin)
+// const isLogin = computed(() => userStore.user.isLogin)
 // const displayName = computed(() => userStore.user.displayName)
 const isRememberMe = ref(false)
 
@@ -429,6 +429,7 @@ const handleFileChange = async (fileList) => {
 
 const step = ref(1)
 const formRef = ref(null)
+const login = ref(true)
 const formValue = ref({
   avatar: '',
   user: {
@@ -491,7 +492,7 @@ function handlePasswordInput() {
   }
 }
 const toggleLoginSignup = () => {
-  userStore.user.isLogin = !userStore.user.isLogin
+  login.value = !login.value
   step.value = 1 // 確保進入註冊時從第一步開始
   resetFormData()
 }

@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { onAuthStateChanged } from 'firebase/auth'
 import { auth } from '/src/views/Login/services/firebaseConfig.js'
-import axios from 'axios'
+// import axios from 'axios'
 
 export const useUserStore = defineStore('user', {
   state: () => ({
@@ -32,12 +32,12 @@ export const useUserStore = defineStore('user', {
           }
 
           // 如果信箱已驗證，觸發後端同步
-          if (firebaseUser.emailVerified) {
-            this.updateEmailVerifiedInBackend(firebaseUser.uid)
-          }
+          // if (firebaseUser.emailVerified) {
+          //   this.updateEmailVerifiedInBackend(firebaseUser.uid)
+          // }
         } else {
-          console.log('Firebase 檢測到用戶未登入')
-          this.clearUser() // 清空用戶狀態
+          // console.log('Firebase 檢測到用戶未登入')
+          // this.clearUser() // 清空用戶狀態
         }
 
         // 初始化完成後執行回調
@@ -46,16 +46,16 @@ export const useUserStore = defineStore('user', {
     },
 
     // 更新後端的 emailVerified 狀態
-    async updateEmailVerifiedInBackend(uid) {
-      try {
-        const response = await axios.put(`http://localhost:3030/users/update/${uid}`, {
-          email_verified: true,
-        })
-        console.log('後端 email_verified 更新成功：', response.data)
-      } catch (error) {
-        console.error('後端 email_verified 更新失敗：', error.message)
-      }
-    },
+    // async updateEmailVerifiedInBackend(uid) {
+    //   try {
+    //     const response = await axios.put(`http://localhost:3030/users/update/${uid}`, {
+    //       email_verified: true,
+    //     })
+    //     console.log('後端 email_verified 更新成功：', response.data)
+    //   } catch (error) {
+    //     console.error('後端 email_verified 更新失敗：', error.message)
+    //   }
+    // },
 
     // 設定用戶資料
     setUser(user) {

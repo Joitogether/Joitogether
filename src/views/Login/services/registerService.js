@@ -20,6 +20,9 @@ const registerUser = async ({ email, password, fullName, displayName, phoneNumbe
   try {
     // Step 1: Firebase 註冊用戶
     const userCredential = await createUserWithEmailAndPassword(auth, email, password)
+
+    // 傳送註冊資訊
+
     const user = userCredential.user
     console.log('接收到的表單資料:', {
       email,
@@ -57,7 +60,7 @@ const registerUser = async ({ email, password, fullName, displayName, phoneNumbe
       display_name: displayName,
       phone_number: phoneNumber,
       photo_url: photoURL,
-      created_at: new Date(),
+      // created_at: new Date(),
     }
     console.log(' 傳送至後端的用戶註冊資料：', userData)
 
