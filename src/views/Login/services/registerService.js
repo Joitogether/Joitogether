@@ -1,6 +1,6 @@
 // 註冊功能
 import { auth } from '../../../utils/firebaseConfig.js'
-import { createUserWithEmailAndPassword, sendEmailVerification } from 'firebase/auth'
+import { createUserWithEmailAndPassword, sendEmailVerification, updateProfile } from 'firebase/auth'
 import { userRegisterAPI } from '@/apis/userAPIs.js'
 
 // 用戶註冊邏輯整合
@@ -20,9 +20,15 @@ const registerUser = async ({ email, password, fullName, displayName, phoneNumbe
   try {
     // Step 1: Firebase 註冊用戶
     const userCredential = await createUserWithEmailAndPassword(auth, email, password)
+    const user = userCredential.user
+
+    await updateProfile(user, {
+      // 設置為使用者名稱
+      displayName: displayName,
+      photoURL,
+    })
 
     // 傳送註冊資訊
-    const user = userCredential.user
     const userData = {
       uid: user.uid,
       email: user.email,
