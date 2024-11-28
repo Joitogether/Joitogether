@@ -2,6 +2,7 @@
 import { apiAxios } from '@/utils/request.js'
 import { auth } from '../../../utils/firebaseConfig.js'
 import { createUserWithEmailAndPassword, sendEmailVerification } from 'firebase/auth'
+import { userRegisterAPI } from '@/apis/userAPIs.js'
 
 // 用戶註冊邏輯整合
 // 1. Firebase 註冊
@@ -22,7 +23,6 @@ const registerUser = async ({ email, password, fullName, displayName, phoneNumbe
     const userCredential = await createUserWithEmailAndPassword(auth, email, password)
 
     // 傳送註冊資訊
-
     const user = userCredential.user
     const userData = {
       uid: user.uid,
@@ -32,7 +32,6 @@ const registerUser = async ({ email, password, fullName, displayName, phoneNumbe
       display_name: displayName,
       phone_number: phoneNumber,
       photo_url: photoURL,
-      // created_at: new Date(),
     }
 
     const backendResponse = await apiAxios.post('http://localhost:3030/users/register', userData)
@@ -47,12 +46,6 @@ const registerUser = async ({ email, password, fullName, displayName, phoneNumbe
     // 發送驗證信件
     await sendEmailVerification(user, actionCodeSettings)
     console.log('驗證信已發送 📧')
-
-    // Step 3: 驗證信發送成功後，更新後端 email_verified 狀態
-    const updateResponse = await apiAxios.put(`http://localhost:3030/users/update/${user.uid}`, {
-      email_verified: true,
-    })
-    console.log('後端 email_verified 更新成功：', updateResponse.data)
 
     return {
       success: true,
@@ -72,10 +65,10 @@ const registerUser = async ({ email, password, fullName, displayName, phoneNumbe
     }
 
     // 清理已創建的使用者帳戶 -> 測試時可以用，生產環境不要用
-    // console.error('更新使用者資料失敗，清理帳戶：', error)
-    // if (auth.currentUser) {
-    //   await auth.currentUser.delete()
-    // }
+    console.error('更新使用者資料失敗，清理帳戶：', error)
+    if (auth.currentUser) {
+      await auth.currentUser.delete()
+    }
 
     throw (
       ({

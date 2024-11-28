@@ -53,7 +53,8 @@
 import { NButton } from 'naive-ui'
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { onAuthStateChanged, getAuth } from 'firebase/auth'
+import { getAuth, onAuthStateChanged } from 'firebase/auth'
+import apiAxios from 'axios'
 
 const user = ref(null)
 const router = useRouter()
@@ -61,14 +62,29 @@ const auth = getAuth()
 const countdown = ref(10)
 
 onMounted(() => {
-  onAuthStateChanged(auth, (currentUser) => {
+  onAuthStateChanged(auth, async (currentUser) => {
     if (currentUser) {
-      user.value = currentUser // 更新用戶資料
+      // 手動刷新用戶資料
+      await currentUser.reload()
+      const refreshedUser = auth.currentUser
+
+      user.value = refreshedUser // 更新用戶資料
+
+      if (refreshedUser.emailVerified) {
+        try {
+          const response = await apiAxios.put(
+            `http://localhost:3030/users/update/${refreshedUser.uid}`,
+            { email_verified: true },
+          )
+          console.log('後端 email_verified 狀態已更新：', response.data)
+        } catch (error) {
+          console.log('後端 email_verified 更新失敗：', error)
+        }
+      }
     } else {
       router.push('/login') // 用戶未登入，跳轉至登入頁面
     }
   })
-
   // 開始倒數計時
   const interval = setInterval(() => {
     if (countdown.value > 0) {
