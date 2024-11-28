@@ -12,6 +12,10 @@ import {
   XmarkCircle,
 } from '@iconoir/vue'
 
+import { useDialog, useMessage } from 'naive-ui'
+const dialog = useDialog()
+const message = useMessage()
+
 const attendee = ref([
   {
     id: 1,
@@ -61,8 +65,68 @@ const toggleRegistration = (status) => {
     registrationStatus.value = 'open'
   }
 }
+
+// 切換開放、截止報名的UI
+const openRegistration = () => {
+  dialog.warning({
+    title: '確認操作',
+    content: '您是否確認開放報名？',
+    positiveText: '確認',
+    negativeText: '取消',
+    onPositiveClick: () => {
+      registrationStatus.value = 'open'
+    },
+    onNegativeClick: () => {
+      message.info('您已取消開放報名的操作')
+    },
+  })
+}
+const closeRegistration = () => {
+  dialog.warning({
+    title: '確認操作',
+    content: '您是否確認截止報名？',
+    positiveText: '確認',
+    negativeText: '取消',
+    onPositiveClick: () => {
+      registrationStatus.value = 'closed'
+    },
+    onNegativeClick: () => {
+      message.info('您已取消截止報名的操作')
+    },
+  })
+}
+
+const allowAttendeeClick = () => {
+  dialog.warning({
+    title: '確認操作',
+    content: '`您確定要允許 ${approvalAttendee.name} 參加嗎？',
+    positiveText: '確認',
+    negativeText: '取消',
+    onPositiveClick: () => {
+      registrationStatus.value = 'open'
+    },
+    onNegativeClick: () => {
+      message.info('您已取消開放報名的操作')
+    },
+  })
+}
+const disabledAttendeeClick = () => {
+  dialog.warning({
+    title: '確認操作',
+    content: '`您確定要解除 ${approvalAttendee.name} 的參加資格嗎？',
+    positiveText: '確認',
+    negativeText: '取消',
+    onPositiveClick: () => {
+      registrationStatus.value = 'open'
+    },
+    onNegativeClick: () => {
+      message.info('您已取消開放報名的操作')
+    },
+  })
+}
+
 // 搜尋功能
-const searchQuery = ref('') 
+const searchQuery = ref('')
 const filteredAttendees = computed(() => {
   if (!searchQuery.value) {
     return attendee.value
@@ -77,13 +141,13 @@ const handleAttendeeClick = (callback, id) => {
 
   // 如果報名已截止，顯示提示
   if (registrationStatus.value === 'closed') {
-    alert('目前報名已截止，無法操作。請返回開放報名繼續操作。')
+    message.warning('目前報名已截止，無法操作。請返回開放報名繼續操作。')
     return
   }
 
   // 如果用户已被拒绝，顯示提示
   if (approvalAttendee && approvalAttendee.rejected) {
-    alert(`${approvalAttendee.name} 已經被拒絕參加，無法進行操作！`)
+    message.warning(`${approvalAttendee.name} 已經被拒絕參加，無法進行操作！`)
     return
   }
 
@@ -92,27 +156,35 @@ const handleAttendeeClick = (callback, id) => {
 
 const handleRejectClick = (id) => {
   const attendeeToReject = attendee.value.find((item) => item.id === id)
-
   if (!attendeeToReject) return
 
-  // 報名截止提示
+  // 報名已截止提示
   if (registrationStatus.value === 'closed') {
-    alert('目前報名已截止，無法操作。請返回開放報名繼續操作。')
+    message.warning('目前報名已截止，無法操作。請返回開放報名繼續操作。')
     return
   }
 
   // 已拒絕提示
   if (attendeeToReject.rejected) {
-    alert(`${attendeeToReject.name} 已經被拒絕參加，無需再次操作！`)
+    message.warning(`${attendeeToReject.name} 已經被拒絕參加，無法再次操作！`)
     return
   }
 
-  // 確認拒絕
-  const confirmReject = confirm(`您確定要拒絕 ${attendeeToReject.name} 的參加申請嗎？`)
-  if (confirmReject) {
-    attendeeToReject.rejected = true
-    attendeeToReject.approved = false
-  }
+  dialog.warning({
+    title: '確認拒絕',
+    content: `您確定要拒絕 ${attendeeToReject.name} 的參加申請嗎？`,
+    positiveText: '確認',
+    negativeText: '取消',
+    onPositiveClick: () => {
+      attendeeToReject.rejected = true
+      attendeeToReject.approved = false
+
+      message.success(`${attendeeToReject.name} 的參加申請已被拒絕！`)
+    },
+    onNegativeClick: () => {
+      message.info('您已取消操作！')
+    },
+  })
 }
 
 const rejectAttendee = (id) => {
@@ -120,13 +192,11 @@ const rejectAttendee = (id) => {
 
   if (!attendeeToReject) return
 
-  // 如果用戶已被拒絕，顯示提示
   if (attendeeToReject.rejected) {
-    alert(`${attendeeToReject.name} 已經被拒絕參加，無需再次操作！`)
+    message.warning(`${attendeeToReject.name} 已經被拒絕參加，無需再次操作！`)
     return
   }
 
-  // 確認是否拒絕
   const confirmReject = confirm(`您確定要拒絕 ${attendeeToReject.name} 的參加申請嗎？`)
 
   if (confirmReject) {
@@ -135,30 +205,36 @@ const rejectAttendee = (id) => {
   }
 }
 
-
 // 切換審核狀態
 const toggleApproval = (id) => {
-  if (registrationStatus.value === 'closed') {
-    alert('需要開放報名才能執行審核操作！')
-    return
-  }
-
   const approvalAttendee = attendee.value.find((item) => item.id === id)
-  const message = approvalAttendee.approved
-    ? `您確定要解除 ${approvalAttendee.name} 的參加資格嗎？`
-    : `您確定要允許 ${approvalAttendee.name} 參加嗎？`
-
-  if (!confirm(message)) {
+  if (!approvalAttendee) {
+    message.error('找不到該參加者！')
     return
   }
 
-  if (approvalAttendee.approved) {
-    approvalAttendee.rejected = true
-    approvalAttendee.approved = false
-  } else {
-    approvalAttendee.approved = true
-    approvalAttendee.rejected = false
-  }
+  dialog.warning({
+    title: '確認操作',
+    content: approvalAttendee.approved
+      ? `您確定要取消 ${approvalAttendee.name} 的參加資格嗎？`
+      : `您確定要允許 ${approvalAttendee.name} 參加嗎？`,
+    positiveText: '確認',
+    negativeText: '取消',
+    onPositiveClick: () => {
+      if (approvalAttendee.approved) {
+        approvalAttendee.rejected = true
+        approvalAttendee.approved = false
+        message.success(`已解除 ${approvalAttendee.name} 的參加資格！`)
+      } else {
+        approvalAttendee.approved = true
+        approvalAttendee.rejected = false
+        message.success(`已允許 ${approvalAttendee.name} 參加！`)
+      }
+    },
+    onNegativeClick: () => {
+      message.info('您已取消操作！')
+    },
+  })
 }
 
 // 審核的人數計算
@@ -171,11 +247,11 @@ const rejectCount = computed(() => {
 })
 
 // 快速回覆的視窗狀態和選擇
-const quickReplyVisible = ref(false) // 快速回覆視窗
-const selectedReplies = ref([]) // 預設回復選項
-const sentReplies = ref([]) // 送出回覆
+const quickReplyVisible = ref(false)
+const selectedReplies = ref([])
+const sentReplies = ref([])
 
-const currentAttendeeId = ref(null) // 當前快速回覆的 ID
+const currentAttendeeId = ref(null)
 
 const replyOptions = [
   '審核時間未到，請耐心等候',
@@ -193,12 +269,14 @@ const showQuickReply = (id) => {
 }
 const hideQuickReply = () => {
   quickReplyVisible.value = false
+  message.info('已取消操作')
 }
 
 const sendReplies = () => {
   const attendeeToReply = attendee.value.find((item) => item.id === currentAttendeeId.value)
   if (attendeeToReply) {
     attendeeToReply.replies = [...selectedReplies.value]
+    message.success('已成功發送回覆內容')
   }
 
   selectedReplies.value = []
@@ -234,7 +312,7 @@ const sendReplies = () => {
           class="flex justify-center items-center border-solid border-[3px] p-0.5 h-10 border-gray-200 rounded-full my-5 text-center max-w-[768px]"
         >
           <div
-            @click="toggleRegistration('open')"
+            @click="openRegistration('open')"
             :class="{
               'bg-yellow-400': registrationStatus === 'open',
               'text-gray-400  hover:text-sm hover:font-semibold hover:text-gray-500':
@@ -245,7 +323,7 @@ const sendReplies = () => {
             <a href="#">開放報名</a>
           </div>
           <div
-            @click="toggleRegistration('closed')"
+            @click="closeRegistration('closed')"
             :class="{
               'bg-yellow-400': registrationStatus === 'closed',
               'text-gray-400 hover:text-sm hover:font-semibold hover:text-gray-500':
@@ -351,17 +429,18 @@ const sendReplies = () => {
                 <span v-if="item.rejected">已拒絕參加</span>
                 <span v-else>{{ item.approved ? '解除參加資格' : '允許參加' }}</span>
               </button>
+
               <button
-  @click="handleRejectClick(item.id)"
-  :class="[ 
-    'flex justify-center items-center w-32 h-8 py-2 mt-2 border-2 rounded-md text-sm transition-all duration-300',
-    registrationStatus === 'closed' || item.rejected
-      ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-      : 'bg-red-500 text-white border-red-600 hover:bg-red-600 hover:border-red-700'
-  ]"
->
-  <span>{{ item.rejected ? '已拒絕參加' : '拒絕用戶參加' }}</span>
-</button>
+                @click="handleRejectClick(item.id)"
+                :class="[
+                  'flex justify-center items-center w-32 h-8 py-2 mt-2 border-2 rounded-md text-sm transition-all duration-300',
+                  registrationStatus === 'closed' || item.rejected
+                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    : 'bg-red-500 text-white border-red-600 hover:bg-red-600 hover:border-red-700',
+                ]"
+              >
+                <span>{{ item.rejected ? '已拒絕參加' : '拒絕用戶參加' }}</span>
+              </button>
             </div>
           </div>
           <div
