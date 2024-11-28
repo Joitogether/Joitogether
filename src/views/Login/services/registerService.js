@@ -1,6 +1,6 @@
 // 註冊功能
 import { auth } from './firebaseConfig.js'
-import { createUserWithEmailAndPassword, sendEmailVerification, updateProfile } from 'firebase/auth'
+import { createUserWithEmailAndPassword, sendEmailVerification } from 'firebase/auth'
 import axios from 'axios'
 
 // 用戶註冊邏輯整合
@@ -24,22 +24,19 @@ const registerUser = async ({ email, password, fullName, displayName, phoneNumbe
     // 傳送註冊資訊
 
     const user = userCredential.user
-    console.log('接收到的表單資料:', {
-      email,
-      password,
-      fullName,
-      displayName,
-      phoneNumber,
-      photoURL,
-    })
+    const userData = {
+      uid: user.uid,
+      email: user.email,
+      email_verified: false,
+      full_name: fullName,
+      display_name: displayName,
+      phone_number: phoneNumber,
+      photo_url: photoURL,
+      // created_at: new Date(),
+    }
 
-    // 更新 displayName
-    await updateProfile(user, {
-      // 設置為使用者名稱
-      displayName: displayName,
-      photoURL,
-    })
-    console.log('用戶註冊並更新 displayName 成功:', user)
+    const backendResponse = await axios.post('http://localhost:3030/users/register', userData)
+    console.log('資料已傳送到後端：', backendResponse)
 
     // Step 2: 發送驗證信件
     // 設定驗證信的跳轉連結
@@ -51,21 +48,11 @@ const registerUser = async ({ email, password, fullName, displayName, phoneNumbe
     await sendEmailVerification(user, actionCodeSettings)
     console.log('驗證信已發送 📧')
 
-    // Step 3: 傳遞用戶資料至後端
-    const userData = {
-      uid: user.uid,
-      email: user.email,
-      email_verified: false,
-      full_name: fullName,
-      display_name: displayName,
-      phone_number: phoneNumber,
-      photo_url: photoURL,
-      // created_at: new Date(),
-    }
-    console.log(' 傳送至後端的用戶註冊資料：', userData)
-
-    const backendResponse = await axios.post('http://localhost:3030/users/register', userData)
-    console.log(backendResponse)
+    // Step 3: 驗證信發送成功後，更新後端 email_verified 狀態
+    const updateResponse = await axios.put(`http://localhost:3030/users/update/${user.uid}`, {
+      email_verified: true,
+    })
+    console.log('後端 email_verified 更新成功：', updateResponse.data)
 
     return {
       success: true,
