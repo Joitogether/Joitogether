@@ -28,7 +28,7 @@ const handleLogout = async () => {
     await auth.signOut()
 
     // 更新 userStore 狀態為未登入
-    userStore.clearAuth() // 清空使用者狀態，方法來自 userStore.js
+    userStore.clearUser() // 清空使用者狀態，方法來自 userStore.js
 
     // 顯示成功訊息
     message.success('🎉 成功登出！期待下次見到你～ 👋')

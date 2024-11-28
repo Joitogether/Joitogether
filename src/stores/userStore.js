@@ -5,43 +5,47 @@ import axios from 'axios'
 
 export const useUserStore = defineStore('user', {
   state: () => ({
-    // 用戶登入狀態
-    isLogin: false,
-    // 保存使用者名稱
-    userName: '',
-    // 使用者對象
-    user: null,
-    // 信箱是否驗證
-    emailVerified: false,
+    user: {
+      uid: '',
+      email: '',
+      emailVerified: false,
+      displayName: '',
+      photoURL: '',
+      isLogin: false,
+    },
   }),
   actions: {
     // 初始化 Firebase 狀態監聽
     async initAuthState(callback) {
-      onAuthStateChanged(auth, (user) => {
-        if (user) {
-          console.log('Firebase 檢測到用戶已登入：', user)
-          this.isLogin = true
-          this.setUser(user)
-          // 假設 displayName 儲存了名稱
-          this.userName = user.displayName || '使用者'
+      onAuthStateChanged(auth, (firebaseUser) => {
+        if (firebaseUser) {
+          console.log('Firebase 檢測到用戶已登入：', firebaseUser)
 
-          // 更新 emailVerified 狀態
-          this.emailVerified = user.emailVerified
+          // 更新 user 狀態
+          this.user = {
+            uid: firebaseUser.uid,
+            email: firebaseUser.email,
+            emailVerified: firebaseUser.emailVerified,
+            displayName: firebaseUser.displayName || '使用者',
+            photoURL: firebaseUser.photoURL || '',
+            isLogin: true,
+          }
 
           // 如果信箱已驗證，觸發後端同步
-          if (user.emailVerified) {
-            this.updateEmailVerifiedInBackend(user.uid)
+          if (firebaseUser.emailVerified) {
+            this.updateEmailVerifiedInBackend(firebaseUser.uid)
           }
         } else {
           console.log('Firebase 檢測到用戶未登入')
-          // 使用通用清空方法
-          this.clearUserState()
-          this.clearUser()
+          this.clearUser() // 清空用戶狀態
         }
+
         // 初始化完成後執行回調
         if (callback) callback()
       })
     },
+
+    // 更新後端的 emailVerified 狀態
     async updateEmailVerifiedInBackend(uid) {
       try {
         const response = await axios.put(`http://localhost:3030/users/update/${uid}`, {
@@ -53,46 +57,36 @@ export const useUserStore = defineStore('user', {
       }
     },
 
-    setUser(value) {
-      this.user = value
+    // 設定用戶資料
+    setUser(user) {
+      this.user = {
+        ...this.user, // 保留現有屬性
+        ...user, // 合併新的用戶資料
+        isLogin: true, // 設定為已登入
+      }
     },
+
+    // 清空用戶資料
     clearUser() {
-      this.user = null
+      this.user = {
+        uid: '',
+        email: '',
+        emailVerified: false,
+        displayName: '',
+        photoURL: '',
+        isLogin: false,
+      }
     },
-    // 更新登出狀態
+
+    // 登出
     async logout() {
       try {
         await auth.signOut() // 確保登出 Firebase
-        this.clearUserState()
+        this.clearUser() // 清空用戶狀態
         console.log('用戶已成功登出')
       } catch (error) {
         console.error('登出失敗：', error)
       }
     },
-
-    // 通用清空方法 -> 僅處理 isLogin 和 userName
-    clearUserState() {
-      this.isLogin = false
-      this.userName = ''
-    },
-
-    // 清空所有使用者相關狀態
-    clearAuth() {
-      this.isLogin = false
-      this.userName = ''
-      this.user = {
-        uid: '',
-        email: '',
-        displayName: '',
-        photoURL: '',
-      }
-      this.auth = {
-        accessToken: '',
-      }
-    },
-  },
-  getters: {
-    // 確認是否登入
-    isAuthenticated: (state) => state.isLogin,
   },
 })

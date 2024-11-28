@@ -260,10 +260,14 @@ import { loginWithGoogle, loginWithFacebook } from './services/authService.js'
 import registerUser from './services/registerService.js'
 import { validateFormFields } from './utils/formValidation.js'
 import loginUser from './services/loginService.js'
+import { useUserStore } from '/src/stores/userStore.js'
 
 // 初始化區域
 const message = useMessage()
 const router = useRouter()
+const userStore = useUserStore()
+const isLogin = computed(() => userStore.user.isLogin)
+// const displayName = computed(() => userStore.user.displayName)
 const isRememberMe = ref(false)
 
 // 登入功能
@@ -340,6 +344,16 @@ const loginGoogle = async () => {
     const user = await loginWithGoogle()
     console.log('Google 登入成功！')
     message.success(`🎉 歡迎，${user.displayName}！登入成功，太棒了！🎉`)
+
+    // 更新 userStore 狀態
+    userStore.user = {
+      uid: user.uid,
+      email: user.email,
+      displayName: user.displayName,
+      photoURL: user.photoURL,
+      isLogin: true,
+    }
+
     router.push('/')
   } catch (error) {
     message.error(`😭 哎呀！${error.message} 💔`)
@@ -351,6 +365,16 @@ const loginFacebook = async () => {
     const user = await loginWithFacebook()
     console.log('Facebook 登入成功！')
     message.success(`🎉 歡迎，${user.displayName || user.email}！Facebook 登入成功，太棒了！🎉`)
+
+    // 更新 userStore 狀態
+    userStore.user = {
+      uid: user.uid,
+      email: user.email,
+      displayName: user.displayName,
+      photoURL: user.photoURL,
+      isLogin: true,
+    }
+
     router.push('/')
   } catch (error) {
     message.error(`😭 哎呀！${error.message} 💔`)
@@ -403,7 +427,6 @@ const handleFileChange = async (fileList) => {
   }
 }
 
-const isLogin = ref(true)
 const step = ref(1)
 const formRef = ref(null)
 const formValue = ref({
@@ -468,7 +491,7 @@ function handlePasswordInput() {
   }
 }
 const toggleLoginSignup = () => {
-  isLogin.value = !isLogin.value
+  userStore.user.isLogin = !userStore.user.isLogin
   step.value = 1 // 確保進入註冊時從第一步開始
   resetFormData()
 }

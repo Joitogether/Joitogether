@@ -26,10 +26,10 @@ onMounted(() => {
       hasInitialized.value = true
       // 屏蔽下一次 watch 執行
       skipNextWatch.value = true
-      if (userStore.isLogin) {
+      if (userStore.user.isLogin) {
         // 初始化時登入提示
         // message.success('🎉 歡迎回來～很高興見到您！✨')
-        message.success(`歡迎回來 ${userStore.userName}，很高興見到您！🎉`)
+        message.success(`歡迎回來 ${userStore.user.displayName}，很高興見到您！🎉`)
       } else {
         // 初始化時未登入提示
         message.warning('😵 您尚未登入，部分功能可能無法使用喔！💔')
@@ -40,7 +40,7 @@ onMounted(() => {
 
 // 監聽登入狀態的變化（避免在初始化時重複執行）
 watch(
-  () => userStore.isLogin,
+  () => userStore.user.isLogin,
   (isLogin, prevLogin) => {
     if (skipNextWatch.value) {
       skipNextWatch.value = false // 重置標誌，允許後續監聽
@@ -51,8 +51,8 @@ watch(
     if (hasInitialized.value && isLogin !== prevLogin) {
       if (isLogin) {
         // 登入提示
-        message.success('🎉 歡迎回來～開心見到您！✨')
-        // message.success(`歡迎回來 ${userStore.userName} 🎉`)
+        // message.success('🎉 歡迎回來～開心見到您！✨')
+        message.success(`歡迎回來 ${userStore.user.displayName} 🎉`)
       } else {
         // 未登入提示
         message.warning('😵 您尚未登入，部分功能可能無法使用喔！💔')
