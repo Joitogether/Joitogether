@@ -7,22 +7,15 @@ import { useMessage } from "naive-ui"
 import dayjs from 'dayjs'
 import axios from 'axios'
 
+dayjs.locale("zh-tw"); 
+
 //  資料推送
-
 const ActivityDataPush = async () => {
-  const formattedEventTime = inputValues.value.eventTime
-   ?formatToCustom(new Date(inputValues.value.eventTime))
-   :""
-
-  const formattedApprovalDeadline = inputValues.value.deadline
-  ? formatToCustom(new Date(inputValues.value.deadline))
-  : ""
-
   const activity ={
     name: inputValues.value.name,
     description: inputValues.value.describe,
-    event_time: formattedEventTime,
-    approval_deadline: formattedApprovalDeadline,
+    event_time: formattedEventTime.value,
+    approval_deadline: formattedApprovalDeadline.value,
     max_participants: participants.value,
     pay_type: paymentMethod.value,
     price: eventCost.value,
@@ -31,6 +24,10 @@ const ActivityDataPush = async () => {
     category: inputValues.value.category,
     require_approval: inputValues.value.requireApproval,
   };
+
+  console.log(activity)
+
+
 
   try {
     const response = await axios.post('http://localhost:3030/activities',activity)
@@ -43,6 +40,19 @@ const ActivityDataPush = async () => {
 };
 
 
+  const formattedEventTime = computed(() =>
+      inputValues.value.eventTime
+        ? formatToCustom(new Date(inputValues.value.eventTime))
+        : ""
+    );
+
+    const formattedApprovalDeadline = computed(() =>
+      inputValues.value.deadline
+        ? formatToCustom(new Date(inputValues.value.deadline))
+        : ""
+    );
+
+
 
 const message = useMessage()
 const isPreviewMode =ref (false)
@@ -50,6 +60,10 @@ const isPreviewMode =ref (false)
 // 進入預覽模式時，重新初始化地圖
 const enterPreviewMode = () => {
   isPreviewMode.value = true;
+
+
+  
+
 
   // 當地圖需要顯示時，重新初始化地圖
   previewMap();
@@ -472,27 +486,9 @@ const previewActivity = () => {
 
   const hasUploadError = uploadError.value;
 
-
   if (hasUnfilledFields || hasUploadError) {
-    // message.warning("請填寫完整資料！")
     return;
   }
-
-
-
-  //  {
-  // name: inputValues.value.name,
-  // description: inputValues.value.describe,
-  // event_time: formattedEventTime,
-  // approval_deadline: formattedApprovalDeadline,
-  // max_participants: participants.value,
-  // pay_type: paymentMethod.value,
-  // price: eventCost.value,
-  // img_url: uploadedImage.value,
-  // location: searchQuery.value,
-  // category:inputValues.value.category,
-  // require_approval:inputValues.value.requireApproval,
-  // })
 
   return true; // 檢查通過
 }
@@ -730,7 +726,7 @@ const previewActivity = () => {
             </div>
         </div>
         <div class="my-6 flex items-center justify-center ">
-          <button class=" bg-yellow-200 rounded-md  w-full mx-3 py-2 px-3"
+          <button class=" bg-yellow-200 rounded-md  w-full mx-3 py-2 px-3 hover:bg-yellow-100"
           @click="handlePreviewClick"
           >預覽活動</button>
         </div>
@@ -757,9 +753,9 @@ const previewActivity = () => {
         <h3 class="font-bold text-2xl truncate">{{ inputValues.name }}</h3>
         <div class="flex items-center text-gray-500">
           <Clock/>
-          <span class="pl-3">{{ `${dayjs(inputValues.eventTime).format('YYYY, MM月DD日 dddd')} ${inputValues.eventTime}` }}</span>
+          <span class="pl-3">{{ `${dayjs(formattedEventTime).format("YYYY, MM月DD日 dddd HH:mm")} ` }}</span>
         </div>
-        <span v-if="inputValues.requireApproval" class="text-sm text-red-500">{{ `最後審核時間 ${inputValues.deadline}` }}</span>
+        <span v-if="inputValues.requireApproval" class="text-sm text-red-500">{{ `最後審核時間 ${dayjs(formattedApprovalDeadline).format("YYYY-MM-DD") }` }}</span>
         <p class="py-8 leading-6">{{ inputValues.describe }}</p>
         <ul class="flex justify-around text-md border border-gray-200/100 rounded-lg p-2">
           <li class="flex flex-col items-center">
@@ -780,16 +776,15 @@ const previewActivity = () => {
           <span class="text-lg ml-5">{{ inputElement.value }}</span>
         </div>
         <div id="map" class="border  h-56 text-5xl font-bold">
-        google地圖
         </div>
 
         <div class="my-6 flex items-center justify-center ">
-          <button class=" bg-yellow-200 rounded-md  w-full mx-3 py-2 px-3"
+          <button class=" bg-yellow-200 rounded-md  w-full mx-3 py-2 px-3 hover:bg-yellow-100"
           @click="ActivityDataPush"
           >送出活動</button>
         </div>
         <div class="my-6 flex items-center justify-center ">
-          <button class=" bg-yellow-200 rounded-md  w-full mx-3 py-2 px-3"
+          <button class=" bg-yellow-200 rounded-md  w-full mx-3 py-2 px-3 hover:bg-yellow-100"
           @click="exitPreviewMode"
           >返回編輯</button>
         </div>
