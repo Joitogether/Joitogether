@@ -109,16 +109,16 @@ import { RouterLink } from 'vue-router'
         class="hidden md:hidden w-1/4 bg-gray-50 text-black p-6 space-y-4 absolute top-10 right-0"
       >
         <div class="w-1/2 rounded-full overflow-hidden flex justify-self-center">
-          <img :src="userInfo.photoURL" alt="userPhoto" />
+          <img :src="userInfo.imgUrl" alt="userPhoto" />
         </div>
-        <div class="text-center font-bold text-xl">{{ userInfo.name }}</div>
+        <div class="text-center font-bold text-xl">{{ userInfo.nickName }}</div>
         <div class="text-md font-bold text-center">
           <span>{{ userInfo.city }}</span>
           <span> • {{ userInfo.age }}</span>
-          <span> • {{ userInfo.job }}</span>
+          <span> • {{ userInfo.career }}</span>
         </div>
         <div class="flex justify-center">
-          <RouterLink to="/profile/personInfo">
+          <RouterLink to="/profile">
             <n-button type="primary" ghost round> 查看個人頁面 </n-button>
           </RouterLink>
         </div>

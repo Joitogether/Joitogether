@@ -21,6 +21,7 @@ const router = createRouter({
       path: '/profile',
       name: 'profile',
       component: Profile,
+      redirect: { name: 'personInfo' },
       children: [
         {
           path: 'personInfo',
