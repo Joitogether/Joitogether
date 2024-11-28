@@ -1,7 +1,6 @@
 let isAPILoaded = false;
 let onLoadCallbacks = [];
 
-
 // 動態載入 Google Maps API
 export const loadGoogleMapsAPI = (apiKey, libraries = "places", language = "zh-TW") => {
   return new Promise((resolve, reject) => {

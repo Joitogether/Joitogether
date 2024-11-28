@@ -1,13 +1,23 @@
 <script setup>
 import { Search,XmarkCircle,Clock, CreditCard, MoneySquare, Group, MapPin } from "@iconoir/vue"
-import { computed, ref, onMounted,watch,nextTick } from "vue"
-import { loadGoogleMapsAPI } from "@/views/Activity/components/googleMapsLoader"
-import  debounce from "lodash/debounce"
+import { computed, ref, onMounted,watch } from "vue"
+import { useGoogleMaps } from "@/stores/useGoogleMaps";
+import { useAutocomplete } from "@/stores/useAutocomplete";
+import { usePreviewMode } from "@/stores/usePreviewMode";
 import { useMessage } from "naive-ui"
 import dayjs from 'dayjs'
-import axios from 'axios'
+import { apiAxios } from "@/utils/request"
 
-dayjs.locale("zh-tw"); 
+const apiKey = import.meta.env.VITE_GOOGLE_KEY;
+
+const { searchQuery, suggestions, initializeAutocomplete, triggerInputChange, } = useAutocomplete(apiKey);
+const { map, previewMap } = useGoogleMaps(apiKey);
+const { isPreviewMode, enterPreviewMode, exitPreviewMode } = usePreviewMode(previewMap, map);
+
+
+const message = useMessage()
+dayjs.locale("zh-tw");
+
 
 //  資料推送
 const ActivityDataPush = async () => {
@@ -28,9 +38,8 @@ const ActivityDataPush = async () => {
   console.log(activity)
 
 
-
   try {
-    const response = await axios.post('http://localhost:3030/activities',activity)
+    const response = await apiAxios.post('http://localhost:3030/activities',activity)
     console.log('活動資料送出成功:',response.data)
     message.success('活動資料已成功送出')
   } catch(err){
@@ -54,46 +63,18 @@ const ActivityDataPush = async () => {
 
 
 
-const message = useMessage()
-const isPreviewMode =ref (false)
 
-// 進入預覽模式時，重新初始化地圖
-const enterPreviewMode = () => {
-  isPreviewMode.value = true;
-
-
-  
-
-
-  // 當地圖需要顯示時，重新初始化地圖
-  previewMap();
-}
-
-const exitPreviewMode = () => {
-  nextTick(() => {
-    isPreviewMode.value = false;
-
-    // 銷毀地圖實例，清除地圖
-    if (map.value) {
-      map.value = null;
-    }
-
-    // 也可以隱藏地圖容器
-    isMapVisible.value = false;
-  });
-};
 
 const handlePreviewClick = () => {
   // 檢查資料是否完整
   const isValid = previewActivity();
   if (isValid) {
-  enterPreviewMode()
-  previewMap()
+  enterPreviewMode(searchQuery.value)
+  // previewMap(searchQuery.value)
   } else {
     message.error("資料未完成或有誤，請檢查填寫項目！");
   }
 };
-
 
 
 const inputValues = ref({
@@ -122,7 +103,6 @@ const timeRange = ref({
   minTime: '',
   maxTime: '',
 });
-
 
 
 
@@ -275,120 +255,9 @@ const removeImage = () => {
 }
 
 
-const apiKey = import.meta.env.VITE_GOOGLE_KEY; // 替換為您的 Google API Key
-const searchQuery = ref("")
-const suggestions = ref([])
-const inputElement = ref(null);
-const autocompleteInstance = ref(null);
-const isLoading = ref(false);
+
 const isLoadOK =ref(false);
 
-
-
-// google map
-const isMapVisible = ref(false); // 地圖是否可見
-const map = ref(null); // 地圖實例
-const geocoder = ref(null); // Geocoder 實例
-
-
-
-
-
-
-const previewMap = async () => {
-  if (!searchQuery.value) {
-    return;
-  }
-
-  const googleMaps = await loadGoogleMapsAPI(apiKey);
-
-  // 初始化 Geocoder
-  if (!geocoder.value) {
-    geocoder.value = new googleMaps.Geocoder();
-  }
-
-  // 將地址轉換為經緯度
-  geocoder.value.geocode({ address: searchQuery.value }, (results, status) => {
-    if (status === "OK" && results[0]) {
-      const location = results[0].geometry.location;
-
-      // 顯示地圖容器
-      isMapVisible.value = true;
-
-
-      // 初始化地圖
-      nextTick(() => {
-        // 初始化地圖
-        if (!map.value) {
-          const mapElement = document.getElementById("map");
-          map.value = new googleMaps.Map(mapElement, {
-            center: location,
-            zoom: 14,
-          });
-        }
-
-        // 更新地圖位置
-        map.value.setCenter(location);
-
-        // 添加地圖標記
-        new googleMaps.Marker({
-          map: map.value,
-          position: location,
-        });
-      })
-    } else {
-      return;
-    }
-  });
-};
-
-
-
-
-// 初始化 Autocomplete
-const initializeAutocomplete = async () => {
-  if (!autocompleteInstance.value) {
-    const googleMaps = await loadGoogleMapsAPI(apiKey);
-    autocompleteInstance.value = new googleMaps.places.AutocompleteService();
-  }
-};
-
-// 輸入時觸發搜尋
-const onInputChange = debounce(async () => {
-  if (!autocompleteInstance.value || !searchQuery.value) {
-    suggestions.value = [];
-    isLoading.value = false;
-    return;
-  }
-
-  suggestions.value = []; // 清空建議結果
-
-  autocompleteInstance.value.getPlacePredictions(
-    {
-      input: searchQuery.value,
-      types: ["geocode"],
-      language: "zh-TW",
-      componentRestrictions: { country: "TW" },
-    },
-    (predictions, status) => {
-      isLoading.value = false;
-      if (status === google.maps.places.PlacesServiceStatus.OK) {
-        suggestions.value = predictions || [];
-        isLoadOK.value =true
-      } else {
-        suggestions.value = [];
-        isLoadOK.value =true
-        message.warning('未搜尋到地址，請重新輸入')
-        searchQuery.value=null
-      }
-    }
-  );
-}, 2000);
-
-const triggerInputChange = () => {
-  isLoading.value = true; // 立即設置為正在搜尋中
-  onInputChange();
-};
 
 // 選擇建議
 const selectSuggestion = (suggestion) => {
@@ -399,14 +268,11 @@ const selectSuggestion = (suggestion) => {
 // 清除輸入框
 const clearSearch = () => {
   searchQuery.value = "";
-  isLoadOK.value=false;
   suggestions.value = [];
-  if (inputElement.value) {
-    inputElement.value.focus();
-  }
 };
 
 // 聚焦輸入框
+const inputElement = ref(null);
 const focusInput = () => {
   if (inputElement.value) {
     inputElement.value.focus();
@@ -577,7 +443,7 @@ const previewActivity = () => {
               ref="inputElement"
               type="text"
               placeholder="搜尋聚會地點"
-              class="flex-grow p-3 border-none focus:outline-none  text-base"
+              class="flex-grow p-3 border-none focus:outline-none text-base"
               v-model="searchQuery"
               @input="triggerInputChange"
               @focus="initializeAutocomplete"
@@ -775,7 +641,7 @@ const previewActivity = () => {
           <MapPin height="32" width="32"></MapPin>
           <span class="text-lg ml-5">{{ inputElement.value }}</span>
         </div>
-        <div id="map" class="border  h-56 text-5xl font-bold">
+        <div  id="map" class="border h-56 text-5xl font-bold">地圖
         </div>
 
         <div class="my-6 flex items-center justify-center ">
