@@ -1,4 +1,5 @@
 <script setup>
+import {NConfigProvider,NDialogProvider,NMessageProvider} from 'naive-ui'
 import { useUserStore } from './stores/userStore'
 
 const userStore = useUserStore()
@@ -10,9 +11,13 @@ userStore.initAuthState(() => {
 </script>
 
 <template>
-  <n-message-provider>
-    <RouterView />
-  </n-message-provider>
+  <n-config-provider>
+    <n-dialog-provider>
+      <n-message-provider>
+      <RouterView />
+      </n-message-provider>
+    </n-dialog-provider>
+  </n-config-provider>
 </template>
 
 <style scoped></style>

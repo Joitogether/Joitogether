@@ -5,6 +5,7 @@ import Home from '@/views/Home/index.vue'
 import Activity from '@/views/Activity/index.vue'
 import ActivityDetail from '@/views/Activity/components/ActivityDetail.vue'
 import ActivityCreate from '@/views/Activity/components/ActivityCreate.vue'
+import ActivityReview from '@/views/Activity/components/ActivityReview.vue'
 import SignupSuccess from '@/views/Login/SignupSuccess.vue'
 import ResetPassword from '@/views/Login/ResetPassword.vue'
 import forgotPassword from '@/views/Login/ForgotPassword.vue'
@@ -42,24 +43,30 @@ const router = createRouter({
       name: 'home',
       component: Home,
     },
-    {
-      path: '/activity',
-      name: 'activity',
-      component: Activity,
-      children: [
-        {
-          path: 'detail:id',
-          name: 'activityDetail',
-          component: ActivityDetail,
-        },
-        {
-          path: 'create',
-          name: 'activityCreate',
-          component: ActivityCreate,
-        },
-      ],
-    },
-  ],
+  {
+    path: '/activity',
+    name: 'activity',
+    component: Activity,
+    children: [
+      {
+        path: 'detail/:id',
+        name: 'activityDetail',
+        component: ActivityDetail
+      }, {
+        path: 'create',
+        name: 'activityCreate',
+        component: ActivityCreate
+      },
+
+      {
+        path: 'review',
+        name: 'activityReview',
+        component: ActivityReview
+      }
+    ]
+  }
+
+],
 })
 
 export default router
