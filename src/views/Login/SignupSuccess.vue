@@ -61,6 +61,20 @@ const router = useRouter()
 const auth = getAuth()
 const countdown = ref(10)
 
+// 更新用戶的 emailVerified 狀態到後端
+const updateEmailVerified = async (uid) => {
+  const updateData = {
+    email_verified: true,
+  }
+
+  try {
+    const response = await userUpdateEmailVerifiedAPI(uid, updateData)
+    console.log('後端 email_verified 更新成功！', response.data)
+  } catch (error) {
+    console.error('後端 email_verified 更新失敗：', error)
+  }
+}
+
 onMounted(() => {
   onAuthStateChanged(auth, async (currentUser) => {
     if (currentUser) {
@@ -73,12 +87,9 @@ onMounted(() => {
 
       // 檢查是否已驗證
       if (refreshedUser.emailVerified) {
-        try {
-          await userUpdateEmailVerifiedAPI(refreshedUser.uid, true)
-          console.log('後端 email_verified 更新成功！')
-        } catch (error) {
-          console.log('後端 email_verified 更新失敗：', error)
-        }
+        console.log('用戶已驗證信箱！')
+        // 調用模組化的更新函數
+        await updateEmailVerified(refreshedUser.uid)
       }
     } else {
       // 用戶未登入，跳轉至登入頁面

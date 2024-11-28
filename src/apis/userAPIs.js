@@ -16,9 +16,9 @@ export const userRegisterAPI = async (data) => {
   }
 }
 
-export const userUpdateEmailVerifiedAPI = async (data) => {
+export const userUpdateEmailVerifiedAPI = async (uid, data) => {
   try {
-    const response = await apiAxios.put(`users/update/${data.uid}`, data)
+    const response = await apiAxios.put(`users/update/${uid}`, data)
     if (response.status >= 200 && response.status < 300) {
       console.log('更新信箱認證成功', response.data)
       return response
