@@ -1,5 +1,4 @@
 // services/authService.js
-import axios from 'axios'
 import {
   getAuth,
   signInWithPopup,
@@ -7,6 +6,7 @@ import {
   FacebookAuthProvider,
   signOut,
 } from 'firebase/auth'
+import { apiAxios } from '@/utils/request.js'
 
 const auth = getAuth()
 
@@ -28,7 +28,7 @@ async function loginWithProvider(provider) {
     }
     console.log(userData)
     // 傳送資料到後端
-    const backendResponse = await axios.post('http://localhost:3030/users/register', userData)
+    const backendResponse = await apiAxios.post('http://localhost:3030/users/register', userData)
     console.log('後端回應：', backendResponse.data)
 
     // 返回後端處理結果

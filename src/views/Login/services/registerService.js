@@ -1,7 +1,7 @@
 // 註冊功能
-import { auth } from './firebaseConfig.js'
+import { apiAxios } from '@/utils/request.js'
+import { auth } from '../../../utils/firebaseConfig.js'
 import { createUserWithEmailAndPassword, sendEmailVerification } from 'firebase/auth'
-import axios from 'axios'
 
 // 用戶註冊邏輯整合
 // 1. Firebase 註冊
@@ -35,7 +35,7 @@ const registerUser = async ({ email, password, fullName, displayName, phoneNumbe
       // created_at: new Date(),
     }
 
-    const backendResponse = await axios.post('http://localhost:3030/users/register', userData)
+    const backendResponse = await apiAxios.post('http://localhost:3030/users/register', userData)
     console.log('資料已傳送到後端：', backendResponse)
 
     // Step 2: 發送驗證信件
@@ -49,7 +49,7 @@ const registerUser = async ({ email, password, fullName, displayName, phoneNumbe
     console.log('驗證信已發送 📧')
 
     // Step 3: 驗證信發送成功後，更新後端 email_verified 狀態
-    const updateResponse = await axios.put(`http://localhost:3030/users/update/${user.uid}`, {
+    const updateResponse = await apiAxios.put(`http://localhost:3030/users/update/${user.uid}`, {
       email_verified: true,
     })
     console.log('後端 email_verified 更新成功：', updateResponse.data)

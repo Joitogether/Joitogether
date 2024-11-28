@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { onAuthStateChanged } from 'firebase/auth'
-import { auth } from '/src/views/Login/services/firebaseConfig.js'
+import { auth } from '@/utils/firebaseConfig.js'
 // import axios from 'axios'
 
 export const useUserStore = defineStore('user', {

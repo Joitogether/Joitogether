@@ -1,5 +1,5 @@
 // 用戶驗證--登入、登出
-import { auth } from './firebaseConfig.js'
+import { auth } from '../../../utils/firebaseConfig.js'
 import {
   signInWithEmailAndPassword,
   browserLocalPersistence,

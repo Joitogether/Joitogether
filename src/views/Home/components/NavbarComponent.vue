@@ -2,7 +2,7 @@
 import { Search, User, Menu, Sweep3d } from '@iconoir/vue'
 import { useMessage } from 'naive-ui'
 import { useUserStore } from '/src/stores/userStore.js'
-import { auth } from '@/views/Login/services/firebaseConfig.js'
+import { auth } from '@/utils/firebaseConfig.js'
 import { useRouter } from 'vue-router'
 
 const message = useMessage()

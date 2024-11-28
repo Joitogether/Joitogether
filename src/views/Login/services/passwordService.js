@@ -1,4 +1,4 @@
-import { auth } from './firebaseConfig.js'
+import { auth } from '../../../utils/firebaseConfig.js'
 import { sendPasswordResetEmail, fetchSignInMethodsForEmail } from 'firebase/auth'
 
 export const passwordService = {

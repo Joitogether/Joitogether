@@ -254,7 +254,7 @@ import {
 } from 'naive-ui'
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { storage } from './services/firebaseConfig.js'
+import { storage } from '../../utils/firebaseConfig.js'
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage'
 import { loginWithGoogle, loginWithFacebook } from './services/authService.js'
 import registerUser from './services/registerService.js'
