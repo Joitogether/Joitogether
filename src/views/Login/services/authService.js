@@ -6,7 +6,7 @@ import {
   FacebookAuthProvider,
   signOut,
 } from 'firebase/auth'
-import { apiAxios } from '@/utils/request.js'
+import { userAuthLoginAPI } from '@/apis/userAPIs'
 
 const auth = getAuth()
 
@@ -27,9 +27,10 @@ async function loginWithProvider(provider) {
       photo_url: user.photoURL,
     }
     console.log(userData)
+
     // 傳送資料到後端
-    const backendResponse = await apiAxios.post('http://localhost:3030/users/register', userData)
-    console.log('後端回應：', backendResponse.data)
+    const backendResponse = await userAuthLoginAPI(userData)
+    // console.log('第三方登入資料已傳送到後端：', backendResponse)
 
     // 返回後端處理結果
     return backendResponse.data

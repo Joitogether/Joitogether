@@ -1,5 +1,4 @@
 // 註冊功能
-import { apiAxios } from '@/utils/request.js'
 import { auth } from '../../../utils/firebaseConfig.js'
 import { createUserWithEmailAndPassword, sendEmailVerification } from 'firebase/auth'
 import { userRegisterAPI } from '@/apis/userAPIs.js'
@@ -34,8 +33,8 @@ const registerUser = async ({ email, password, fullName, displayName, phoneNumbe
       photo_url: photoURL,
     }
 
-    const backendResponse = await apiAxios.post('http://localhost:3030/users/register', userData)
-    console.log('資料已傳送到後端：', backendResponse)
+    const backendResponse = await userRegisterAPI(userData)
+    // console.log('註冊資料已傳送到後端：', backendResponse)
 
     // Step 2: 發送驗證信件
     // 設定驗證信的跳轉連結

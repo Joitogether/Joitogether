@@ -54,7 +54,7 @@ import { NButton } from 'naive-ui'
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { getAuth, onAuthStateChanged } from 'firebase/auth'
-import apiAxios from 'axios'
+import { userUpdateEmailVerifiedAPI } from '@/apis/userAPIs'
 
 const user = ref(null)
 const router = useRouter()
@@ -68,21 +68,21 @@ onMounted(() => {
       await currentUser.reload()
       const refreshedUser = auth.currentUser
 
-      user.value = refreshedUser // 更新用戶資料
+      // 更新用戶資料
+      user.value = refreshedUser
 
+      // 檢查是否已驗證
       if (refreshedUser.emailVerified) {
         try {
-          const response = await apiAxios.put(
-            `http://localhost:3030/users/update/${refreshedUser.uid}`,
-            { email_verified: true },
-          )
-          console.log('後端 email_verified 狀態已更新：', response.data)
+          await userUpdateEmailVerifiedAPI(refreshedUser.uid, true)
+          console.log('後端 email_verified 更新成功！')
         } catch (error) {
           console.log('後端 email_verified 更新失敗：', error)
         }
       }
     } else {
-      router.push('/login') // 用戶未登入，跳轉至登入頁面
+      // 用戶未登入，跳轉至登入頁面
+      router.push('/login')
     }
   })
   // 開始倒數計時
@@ -90,8 +90,10 @@ onMounted(() => {
     if (countdown.value > 0) {
       countdown.value -= 1
     } else {
-      clearInterval(interval) // 倒數結束後清除定時器
-      goHome() // 跳轉到登入頁
+      // 倒數結束後清除定時器
+      clearInterval(interval)
+      // 跳轉到登入頁
+      goHome()
     }
   }, 1000)
 })
