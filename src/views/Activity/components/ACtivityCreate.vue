@@ -7,13 +7,13 @@ import { usePreviewMode } from "@/stores/usePreviewMode";
 import { useMessage } from "naive-ui"
 import dayjs from 'dayjs'
 import { apiAxios } from "@/utils/request"
+import { userActivityCreateAPI } from '@/apis/userActivityCreateAPI';
 
 const apiKey = import.meta.env.VITE_GOOGLE_KEY;
 
-const { searchQuery, suggestions, initializeAutocomplete, triggerInputChange, } = useAutocomplete(apiKey);
+const { searchQuery, suggestions, initializeAutocomplete, triggerInputChange,isLoading  } = useAutocomplete(apiKey);
 const { map, previewMap } = useGoogleMaps(apiKey);
 const { isPreviewMode, enterPreviewMode, exitPreviewMode } = usePreviewMode(previewMap, map);
-
 
 const message = useMessage()
 dayjs.locale("zh-tw");
@@ -21,35 +21,35 @@ dayjs.locale("zh-tw");
 
 //  資料推送
 const ActivityDataPush = async () => {
+
   const activity ={
     name: inputValues.value.name,
     description: inputValues.value.describe,
-    event_time: formattedEventTime.value,
-    approval_deadline: formattedApprovalDeadline.value,
+    event_time: "2024-12-10T04:02:00+08:00",
+    approval_deadline: "2024-12-07T04:02:00+08:00" || null,
     max_participants: participants.value,
+    min_participants: 2 || null,
     pay_type: paymentMethod.value,
     price: eventCost.value,
-    img_url: uploadedImage.value,
-    location: searchQuery.value,
-    category: inputValues.value.category,
-    require_approval: inputValues.value.requireApproval,
+    img_url:"https://example.com/images/mountain_hike.jpg" || null,
+    location: searchQuery.value ||null,
+    category: inputValues.value.category ||null,
+    require_approval: inputValues.value.requireApproval ? 1:0,
+    host_id:'7P6ocyCefPc8oTzjfAEs16RZThR2',
+    status:'registrationOpen'
   };
 
   console.log(activity)
 
 
   try {
-    const response = await apiAxios.post('http://localhost:3030/activities',activity)
-    console.log('活動資料送出成功:',response.data)
-    message.success('活動資料已成功送出')
-  } catch(err){
-    console.error('活動資料失敗:',err)
-    message.error('送出活動資料失敗，請在嘗試一次')
+    const result = await userActivityCreateAPI(activity);
+    console.log('成功回應:', result);
+  } catch (err) {
+    console.error('錯誤回應:', err);
   }
 };
-
-
-  const formattedEventTime = computed(() =>
+    const formattedEventTime = computed(() =>
       inputValues.value.eventTime
         ? formatToCustom(new Date(inputValues.value.eventTime))
         : ""
