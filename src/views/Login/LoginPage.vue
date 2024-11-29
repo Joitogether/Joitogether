@@ -349,14 +349,19 @@ const loginGoogle = async () => {
     userStore.user = {
       uid: user.uid,
       email: user.email,
-      displayName: user.displayName,
+      displayName: user.displayName || '使用者',
       photoURL: user.photoURL,
       isLogin: true,
     }
 
     router.push('/')
   } catch (error) {
-    message.error(`😭 哎呀！${error.message} 💔`)
+    if (error.message.includes('displayName')) {
+      console.warn('靜默處理 displayName 錯誤')
+    } else {
+      // 其他錯誤顯示彈窗
+      message.error(`😭 哎呀！${error.message} 💔`)
+    }
   }
 }
 
@@ -370,14 +375,19 @@ const loginFacebook = async () => {
     userStore.user = {
       uid: user.uid,
       email: user.email,
-      displayName: user.displayName,
+      displayName: user.displayName || '使用者',
       photoURL: user.photoURL,
       isLogin: true,
     }
 
     router.push('/')
   } catch (error) {
-    message.error(`😭 哎呀！${error.message} 💔`)
+    if (error.message.includes('displayName')) {
+      console.warn('靜默處理 displayName 錯誤')
+    } else {
+      // 其他錯誤顯示彈窗
+      message.error(`😭 哎呀！${error.message} 💔`)
+    }
   }
 }
 

@@ -7,6 +7,7 @@ import {
   signOut,
 } from 'firebase/auth'
 import { userAuthLoginAPI } from '@/apis/userAPIs'
+import router from '@/router'
 
 const auth = getAuth()
 
@@ -31,6 +32,7 @@ async function loginWithProvider(provider) {
     // 傳送資料到後端
     const backendResponse = await userAuthLoginAPI(userData)
     // console.log('第三方登入資料已傳送到後端：', backendResponse)
+    backToIndex()
 
     // 返回後端處理結果
     return backendResponse.data
@@ -44,6 +46,10 @@ async function loginWithProvider(provider) {
     const errorMessage = handleAuthError(error)
     throw new Error(errorMessage)
   }
+}
+
+const backToIndex = () => {
+  router.push('/')
 }
 function handleAuthError(error) {
   let errorMessage = '發生未知錯誤，請稍後再試。'

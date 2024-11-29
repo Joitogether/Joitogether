@@ -43,6 +43,16 @@ export const userAuthLoginAPI = async (data) => {
       throw new Error(`第三方登入資料後端回應失敗，狀態碼：${response.status}`)
     }
   } catch (error) {
+    if (error.response?.status === 409) {
+      // 特殊處理 409 錯誤，返回結構化數據
+      console.log('用戶已存在 (409)，處理登入流程')
+      return {
+        status: 409,
+        message: '用戶已存在，繼續登入流程',
+        data: null,
+      }
+    }
+
     console.error('第三方登入資料 API 呼叫失敗：', error.message)
     throw error
   }
