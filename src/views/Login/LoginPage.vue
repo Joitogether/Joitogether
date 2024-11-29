@@ -235,12 +235,12 @@
             <n-button
               :disabled="isCooldown"
               @click="resendVerificationEmail"
-              class="w-1/2 mt-3 font-bold text-lg py-5"
+              class="w-1/2 mt-3 font-bold text-lg py-5 text-center"
               round
               type="primary"
             >
               <template v-if="isCooldown">{{ countdown }}s後重新發送</template>
-              <template v-else>重新發送驗證碼</template>
+              <template v-else>重新發送</template>
             </n-button>
           </div>
         </div>
@@ -271,10 +271,8 @@ import registerUser from './services/registerService.js'
 import { validateFormFields } from './utils/formValidation.js'
 import loginUser from './services/loginService.js'
 import { useUserStore } from '/src/stores/userStore.js'
-import { sendEmailVerification } from 'firebase/auth'
-import { auth } from '../../utils/firebaseConfig.js'
-// import { send } from 'vite'
-// import { omit } from 'naive-ui/es/_utils/index.js'
+import firebase from 'firebase/compat/app'
+import { getAuth, sendEmailVerification } from 'firebase/auth'
 
 // 初始化區域
 const message = useMessage()
@@ -582,9 +580,6 @@ const canProceedToNextStep = computed(() => {
 
 // 註冊流程換頁的邏輯
 
-const isCooldown = ref(false)
-const countdown = ref(10)
-
 const goToStep2 = async () => {
   if (step.value === 1) {
     // 引入表單驗證的錯誤訊息
@@ -630,10 +625,12 @@ const goToStep2 = async () => {
     }
   }
 }
+const isCooldown = ref(false)
+const countdown = ref(60)
 
 const startCooldown = () => {
   isCooldown.value = true
-  countdown.value = 10
+  countdown.value = 60
   const timer = setInterval(() => {
     countdown.value--
     if (countdown.value === 0) {
@@ -643,17 +640,25 @@ const startCooldown = () => {
   }, 1000)
 }
 
-const resendVerificationEmail = async () => {
+const resendVerificationEmail = async (user) => {
   try {
+    const auth = getAuth() // 獲取認證實例
+    const user = auth.currentUser
     if (isCooldown.value) {
       message.error(`請等待 ${countdown.value} 秒後再重新發送驗證信`)
       return
     }
 
-    startCooldown()
+    const actionCodeSettings = {
+      url: `${window.location.origin}/signup-success`, // 前面那段是localhost
+      handleCodeInApp: true,
+    }
+    // 發送驗證信件
+    await sendEmailVerification(user, actionCodeSettings)
+    console.log('驗證信已發送 📧')
+    message.success('驗證信已重新發送 📧')
 
-    await sendEmailVerification(auth.currentUser)
-    message.success('驗證信已重新發送')
+    startCooldown()
   } catch (error) {
     console.error('發送驗證信失敗：', error)
 
