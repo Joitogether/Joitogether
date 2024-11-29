@@ -91,9 +91,6 @@ onMounted(() => {
         // 調用模組化的更新函數
         await updateEmailVerified(refreshedUser.uid)
       }
-    } else {
-      // 用戶未登入，跳轉至登入頁面
-      router.push('/login')
     }
   })
   // 開始倒數計時

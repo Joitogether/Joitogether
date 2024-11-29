@@ -3,11 +3,6 @@ import { auth } from '../../../utils/firebaseConfig.js'
 import { createUserWithEmailAndPassword, sendEmailVerification, updateProfile } from 'firebase/auth'
 import { userRegisterAPI } from '@/apis/userAPIs.js'
 
-// 用戶註冊邏輯整合
-// 1. Firebase 註冊
-// 2. 發送驗證信件
-// 3. 傳遞用戶資料至後端
-//
 // @param {Object} formData - 使用者的註冊資訊
 // @param {string} formData.email - 用戶信箱
 // @param {string} formData.password - 密碼
@@ -75,14 +70,11 @@ const registerUser = async ({ email, password, fullName, displayName, phoneNumbe
       await auth.currentUser.delete()
     }
 
-    throw (
-      ({
-        success: false,
-        message: errorMessage,
-        code: error.code,
-      },
-      error)
-    )
+    throw {
+      success: false,
+      message: errorMessage,
+      code: error.code,
+    }
   }
 }
 

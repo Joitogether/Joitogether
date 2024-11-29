@@ -607,7 +607,8 @@ const goToStep2 = async () => {
       // 切換到 Step 2
       step.value = 2
     } catch (error) {
-      message.error(error.message)
+      console.log(error)
+      message.error(error.message || '登入失敗，請稍後再試！😞')
     }
   }
 }
