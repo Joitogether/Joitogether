@@ -223,15 +223,25 @@
             {{ formValue.email }}
             發送了一封驗證信<br />請打開您的信箱<br />並點擊信中的驗證連結以完成註冊流程
           </p>
-          <div class="flex justify-center flex-col gap-3 items-center">
+          <div class="flex justify-center gap-3 items-center">
             <n-button
               @click="goToStep1"
-              class="w-full mt-3 font-bold text-lg py-5"
+              class="w-1/2 mt-3 font-bold text-lg py-5"
               round
               type="primary"
             >
               回上一步</n-button
             >
+            <n-button
+              :disabled="isCooldown"
+              @click="resendVerificationEmail"
+              class="w-1/2 mt-3 font-bold text-lg py-5"
+              round
+              type="primary"
+            >
+              <template v-if="isCooldown">{{ countdown }}s後重新發送</template>
+              <template v-else>重新發送驗證碼</template>
+            </n-button>
           </div>
         </div>
       </div>
@@ -252,7 +262,7 @@ import {
   useMessage,
   NModal,
 } from 'naive-ui'
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { storage } from '../../utils/firebaseConfig.js'
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage'
@@ -261,6 +271,10 @@ import registerUser from './services/registerService.js'
 import { validateFormFields } from './utils/formValidation.js'
 import loginUser from './services/loginService.js'
 import { useUserStore } from '/src/stores/userStore.js'
+import { sendEmailVerification } from 'firebase/auth'
+import { auth } from '../../utils/firebaseConfig.js'
+// import { send } from 'vite'
+// import { omit } from 'naive-ui/es/_utils/index.js'
 
 // 初始化區域
 const message = useMessage()
@@ -568,6 +582,9 @@ const canProceedToNextStep = computed(() => {
 
 // 註冊流程換頁的邏輯
 
+const isCooldown = ref(false)
+const countdown = ref(10)
+
 const goToStep2 = async () => {
   if (step.value === 1) {
     // 引入表單驗證的錯誤訊息
@@ -606,9 +623,44 @@ const goToStep2 = async () => {
 
       // 切換到 Step 2
       step.value = 2
+      startCooldown()
     } catch (error) {
       console.log(error)
       message.error(error.message || '登入失敗，請稍後再試！😞')
+    }
+  }
+}
+
+const startCooldown = () => {
+  isCooldown.value = true
+  countdown.value = 10
+  const timer = setInterval(() => {
+    countdown.value--
+    if (countdown.value === 0) {
+      isCooldown.value = false
+      clearInterval(timer)
+    }
+  }, 1000)
+}
+
+const resendVerificationEmail = async () => {
+  try {
+    if (isCooldown.value) {
+      message.error(`請等待 ${countdown.value} 秒後再重新發送驗證信`)
+      return
+    }
+
+    startCooldown()
+
+    await sendEmailVerification(auth.currentUser)
+    message.success('驗證信已重新發送')
+  } catch (error) {
+    console.error('發送驗證信失敗：', error)
+
+    if (error.code === 'auth/too-many-requests') {
+      message.error('請稍等一下，您發送驗證信的次數過多，請稍後再試。')
+    } else {
+      message.error('發送驗證信失敗，請稍後再試。')
     }
   }
 }
