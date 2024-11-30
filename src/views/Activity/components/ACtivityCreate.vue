@@ -59,7 +59,7 @@ const ActivityDataPush = async () => {
     pay_type: paymentMethod.value,
     price: eventCost.value,
     img_url:"https://example.com/images/mountain_hike.jpg" || null, // **
-    location: searchQuery.value ||null,npm
+    location: searchQuery.value ||null,
     category: inputValues.value.category ||null,
     require_approval: inputValues.value.requireApproval ? 1:0,
     host_id:'7P6ocyCefPc8oTzjfAEs16RZThR2',   //useUid
