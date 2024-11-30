@@ -6,36 +6,70 @@ import { useAutocomplete } from "@/stores/useAutocomplete";
 import { usePreviewMode } from "@/stores/usePreviewMode";
 import { useMessage } from "naive-ui"
 import dayjs from 'dayjs'
-import { apiAxios } from "@/utils/request"
 import { userActivityCreateAPI } from '@/apis/userActivityCreateAPI';
+import { taiwanTime, formatToISOWithTimezone} from '@/stores/useDateTime'
 
 const apiKey = import.meta.env.VITE_GOOGLE_KEY;
-
-const { searchQuery, suggestions, initializeAutocomplete, triggerInputChange,isLoading  } = useAutocomplete(apiKey);
+const { searchQuery, suggestions, initializeAutocomplete, triggerInputChange,isLoading:loadingState ,isLoadOK: loadStateOK } = useAutocomplete(apiKey);
 const { map, previewMap } = useGoogleMaps(apiKey);
 const { isPreviewMode, enterPreviewMode, exitPreviewMode } = usePreviewMode(previewMap, map);
+const { minTime, maxTime } = taiwanTime();
+
 
 const message = useMessage()
 dayjs.locale("zh-tw");
 
 
+
+const textButton = () => {
+    console.log(uploadedImage.value);
+};
+
+
+
+  // 將輸入的值格式化為存儲所需的 ISO 格式
+    const isoEventTime = computed(() =>
+      inputValues.value.eventTime
+        ? formatToISOWithTimezone(inputValues.value.eventTime)
+        : ""
+    );
+      const isoDeadLine = computed(() =>
+      inputValues.value.eventTime
+        ? formatToISOWithTimezone(inputValues.value.eventTime)
+        : ""
+    );
+
+      // 預覽時間格式
+      const formattedEventTime = computed(() =>
+      inputValues.value.eventTime
+        ? dayjs(inputValues.value.eventTime).format("YYYY, MM月DD日 dddd HH:mm")
+        : "未設定時間"
+    );
+
+      // 預覽審核時間格式
+      const formattedDeadLine = computed(() =>
+      inputValues.value.deadline
+        ? dayjs(inputValues.value.deadline).format("YYYY-MM-DD")
+        : "未設定時間"
+    );
+
+
 //  資料推送
 const ActivityDataPush = async () => {
-
   const activity ={
     name: inputValues.value.name,
     description: inputValues.value.describe,
-    event_time: "2024-12-10T04:02:00+08:00",
-    approval_deadline: "2024-12-07T04:02:00+08:00" || null,
+    event_time: isoEventTime.value,  // **
+    approval_deadline: isoDeadLine.value || null, // **
     max_participants: participants.value,
     min_participants: 2 || null,
     pay_type: paymentMethod.value,
     price: eventCost.value,
-    img_url:"https://example.com/images/mountain_hike.jpg" || null,
+    img_url:"https://example.com/images/mountain_hike.jpg" || null, // **
     location: searchQuery.value ||null,
     category: inputValues.value.category ||null,
     require_approval: inputValues.value.requireApproval ? 1:0,
-    host_id:'7P6ocyCefPc8oTzjfAEs16RZThR2',
+    host_id:'7P6ocyCefPc8oTzjfAEs16RZThR2',   //useUid
     status:'registrationOpen'
   };
 
@@ -49,20 +83,6 @@ const ActivityDataPush = async () => {
     console.error('錯誤回應:', err);
   }
 };
-    const formattedEventTime = computed(() =>
-      inputValues.value.eventTime
-        ? formatToCustom(new Date(inputValues.value.eventTime))
-        : ""
-    );
-
-    const formattedApprovalDeadline = computed(() =>
-      inputValues.value.deadline
-        ? formatToCustom(new Date(inputValues.value.deadline))
-        : ""
-    );
-
-
-
 
 
 const handlePreviewClick = () => {
@@ -208,8 +228,6 @@ const checkTimeInput = (field) => {
 };
 
 
-
-
 const paymentMethod = ref("free")
 const showEventCost = computed(() => paymentMethod.value === "AA");
 
@@ -255,10 +273,6 @@ const removeImage = () => {
 }
 
 
-
-const isLoadOK =ref(false);
-
-
 // 選擇建議
 const selectSuggestion = (suggestion) => {
   searchQuery.value = suggestion.description;
@@ -269,6 +283,8 @@ const selectSuggestion = (suggestion) => {
 const clearSearch = () => {
   searchQuery.value = "";
   suggestions.value = [];
+  loadStateOK.value =false;
+  loadingState.value =false;
 };
 
 // 聚焦輸入框
@@ -281,33 +297,11 @@ const focusInput = () => {
 
 
 onMounted(()=>{
-  const taiwanTimeOffset = 8 * 60 * 60 * 1000;
-  const now = new Date();
-  const taiwanNow = new Date(now.getTime() + taiwanTimeOffset);
-
-  const minDate = new Date(taiwanNow);
-  minDate.setHours(minDate.getHours() + 12);
-  const minTime = minDate.toISOString().slice(0, 16);
-
-  const maxDate = new Date(taiwanNow);
-  maxDate.setDate(maxDate.getDate() + 90);
-  const maxTime = maxDate.toISOString().slice(0, 16);
-
   timeRange.value.minTime = minTime;
   timeRange.value.maxTime = maxTime;
 });
 
 
-  // 轉資料型態
-  const formatToCustom = (date) => {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    const hours = String(date.getHours()).padStart(2, "0");
-    const minutes = String(date.getMinutes()).padStart(2, "0");
-    const seconds = String(date.getSeconds()).padStart(2, "0");
-    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-  };
 
   watch(() => inputValues.value.requireApproval,(newVal) => {
     if (!newVal) {
@@ -369,6 +363,8 @@ const previewActivity = () => {
       <!-- 圖片上傳 -->
       <div v-if="!isPreviewMode">
         <h3 class="font-semibold text-lg mb-2 p-3">活動建立</h3>
+        <button @click="textButton">我是測試紐喔</button>
+
       <div class="bg-white rounded-lg p-5 mb-3 ">
         <div class="mb-6">
           <div class="relative rounded-lg flex justify-center items-center p-6">
@@ -448,7 +444,7 @@ const previewActivity = () => {
               @input="triggerInputChange"
               @focus="initializeAutocomplete"
               />
-              <button v-if="isLoadOK"
+              <button v-if="loadStateOK"
               class="p-3" @click="clearSearch">
                 <XmarkCircle />
               </button>
@@ -457,8 +453,8 @@ const previewActivity = () => {
               </button>
             </div>
             <div>
-              <ul v-if="isLoading || suggestions.length" class="border rounded-md mt-2 bg-white">
-                <li v-if="isLoading" class="p-2 text-gray-500">正在搜尋中...</li>
+              <ul v-if="loadingState || suggestions.length" class="border rounded-md mt-2 bg-white">
+                <li v-if="loadingState" class="p-2 text-gray-500 text-sm">搜尋中...</li>
                 <li
                   v-else
                   v-for="(suggestion, index) in suggestions"
@@ -479,8 +475,8 @@ const previewActivity = () => {
               <span class="text-red-600">*</span>
             </label>
             <input type="datetime-local"
-            :min="timeRange.minTime"
-            :max="timeRange.maxTime"
+            :min="minTime.slice(0, 16)"
+            :max="maxTime.slice(0, 16)"
             class="w-full p-3 border rounded-md focus:outline-none  text-base"
             v-model="inputValues.eventTime"
             @blur="checkTimeInput('eventTime')"
@@ -506,8 +502,8 @@ const previewActivity = () => {
             </label>
             <input
             type="datetime-local"
-            :min="timeRange.minTime"
-            :max="timeRange.maxTime"
+            :min="minTime.slice(0, 16)"
+            :max="maxTime.slice(0, 16)"
             class="w-full p-3 border rounded-md  text-base"
             v-model="inputValues.deadline"
             @blur="checkTimeInput('deadline')"
@@ -619,9 +615,9 @@ const previewActivity = () => {
         <h3 class="font-bold text-2xl truncate">{{ inputValues.name }}</h3>
         <div class="flex items-center text-gray-500">
           <Clock/>
-          <span class="pl-3">{{ `${dayjs(formattedEventTime).format("YYYY, MM月DD日 dddd HH:mm")} ` }}</span>
+          <span class="pl-3">{{ formattedEventTime }}</span>
         </div>
-        <span v-if="inputValues.requireApproval" class="text-sm text-red-500">{{ `最後審核時間 ${dayjs(formattedApprovalDeadline).format("YYYY-MM-DD") }` }}</span>
+        <span v-if="inputValues.requireApproval" class="text-sm text-red-500">{{ `最後審核時間 ${formattedDeadLine}` }}</span>
         <p class="py-8 leading-6">{{ inputValues.describe }}</p>
         <ul class="flex justify-around text-md border border-gray-200/100 rounded-lg p-2">
           <li class="flex flex-col items-center">
@@ -641,7 +637,7 @@ const previewActivity = () => {
           <MapPin height="32" width="32"></MapPin>
           <span class="text-lg ml-5">{{ inputElement.value }}</span>
         </div>
-        <div  id="map" class="border h-56 text-5xl font-bold">地圖
+        <div  id="map" class="border h-56 text-5xl font-bold">GOOGLE 地圖
         </div>
 
         <div class="my-6 flex items-center justify-center ">

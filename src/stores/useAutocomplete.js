@@ -4,14 +4,22 @@ import debounce from "lodash/debounce";
 import { useMessage } from "naive-ui"
 
 export function useAutocomplete(apiKey) {
-  const searchQuery = ref("");
-  const suggestions = ref([]);
-  const autocompleteInstance = ref(null);
-  const isLoading = ref(false);
-  const isLoadOK =ref(false);
+  const searchQuery = ref("")
+  const suggestions = ref([])
+  const autocompleteInstance = ref(null)
+  const isLoading = ref(false)
+  const isLoadOK =ref(false)
+  const isLoadSearch =ref(false)
   const message = useMessage()
 
   const initializeAutocomplete = async () => {
+      try{
+        isLoading.value = true;
+        isLoadSearch.value =true
+      }catch(error){
+        isLoading.value = false; // 如果失敗，設置為 false
+      }
+
     if (!autocompleteInstance.value) {
       const googleMaps = await loadGoogleMapsAPI(apiKey);
       autocompleteInstance.value = new googleMaps.places.AutocompleteService();
@@ -50,8 +58,9 @@ export function useAutocomplete(apiKey) {
           isLoadOK.value =true
         } else {
           suggestions.value = [];
-          isLoadOK.value =true
           message.warning('未搜尋到地址，請重新輸入')
+          isLoadOK.value =false
+          isLoading.value=false
           searchQuery.value=null
         }
       }
@@ -59,7 +68,8 @@ export function useAutocomplete(apiKey) {
   }, 2000);
 
   const triggerInputChange = () => {
-    isLoading.value = true;
+    isLoading.value=true;
+    isLoadOK.value=false;
     onInputChange();
   };
 
@@ -70,6 +80,8 @@ export function useAutocomplete(apiKey) {
     triggerInputChange,
     initializeAutocomplete,
     fetchSuggestions,
-
+    isLoading,
+    isLoadOK,
+    isLoadSearch,
     };
 }
