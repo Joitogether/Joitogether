@@ -3,12 +3,33 @@ import { computed, onMounted, ref } from 'vue'
 import { Clock, CreditCard, MoneySquare, Group, MapPin, NavArrowLeft } from '@iconoir/vue'
 import dayjs from 'dayjs';
 import 'dayjs/locale/zh'
-import { NInput, NButton, NModal, NCard } from 'naive-ui';
+import { NInput, NButton, NModal, NCard, useMessage } from 'naive-ui';
 dayjs.locale('zh') 
 import ActivityCard from '@/views/components/ActivityCard.vue';
 import router from '@/router';
 import { useRoute } from 'vue-router';
-import axios from 'axios';
+import { useUserStore } from '@/stores/userStore';
+import { activityCancelRegisterAPI, activityGetDetailAPI, activityRegisterAPI } from '@/apis/activityApi';
+
+const route = useRoute()
+const userComment = ref('')
+const registerComment = ref('')
+const activityId = route.params.id
+async function getActivityDetail(){
+  const activityDetail = await activityGetDetailAPI(activityId)
+  // 有資料或null
+  if(!activityDetail){
+    message.error('獲取活動失敗')
+    // 這裡應該要針對沒有拿到id的狀態處理
+    return
+  }
+  activity.value = activityDetail
+  host.value = activityDetail.host_id
+}
+
+const userStore = useUserStore()
+const message = useMessage()
+
 
 const activity = ref({
   id: 'unique-activity-id',
@@ -63,40 +84,67 @@ const clearComment = () => {
 }
 
 const showRegisterModal = ref(false)
-const toggleModal = () => {
+const toggleRegisterModal = () => {
   showRegisterModal.value = !showRegisterModal.value
 }
 
-const registerActivity = () => {
+const registerActivity = async () => {
   const data = {
-    activity_id: activity.value.id,
-    participant_id: '12313',
-    status: 'registered',
-    comment: userComment.value
+    participant_id: user.value.uid, //這裡記得改成pinia定義的user
+    comment: registerComment.value
   }
-  console.log(data);
+  // 等登入那部份處理好
+  // if(!userStore.user.isLogin){
+  //   alert('請先登入')
+  //   return
+  // }
+  const res = await activityRegisterAPI(activityId, data)
+  if(res.status !== 201){
+    message.error('報名失敗')
+    toggleRegisterModal()
+    return
+  }
+  await getActivityDetail()
+  //報名成功
+  message.success('報名成功！')
+  toggleRegisterModal()
 }
-
+// 根據活動判斷當前使用者是否為主辦者
 const isHost = computed(() => {
   return activity.value.host_id === user.value.uid
 })
 
-const userComment = ref('')
 
-
-const route = useRoute()
 
 onMounted(async() => {
-  const id = route.params.id
-  const response = await axios.get(`http://localhost:3030/activities/${id}`)
-  if(response.status === 200) {
-    const { data } = response.data
-    activity.value = data
-    host.value = data.host_info
-  }
-  // 如果回傳錯誤??
+  await getActivityDetail()
+})
+// 根據抓取回來的資料判斷使用者是否已註冊該活動
+const isRegistered = computed(() => {
+  return activity.value.participants?.some(participant => participant.participant_id === user.value.uid && participant.status === 'registered')
 })
 
+
+const showConfirmModal = ref(false)
+const toggleConfirmModal =  () => {
+  showConfirmModal.value = !showConfirmModal.value
+}
+const onNegativeClick = () => {
+  toggleConfirmModal()
+}
+
+// 取消報名
+const onPositiveClick = async() => {
+    const res = await activityCancelRegisterAPI(activity.value.id, user.value.uid)
+    if(res.status != 200){
+      toggleConfirmModal()
+      return message.error('取消報名失敗')
+    }
+    await getActivityDetail()
+    //  取消報名成功
+    toggleConfirmModal()
+    message.success('取消報名成功')
+}
 </script>
 <template>
   <div class="container ">
@@ -126,7 +174,20 @@ onMounted(async() => {
         <span class="text-sm text-red-500">{{ `最後審核時間 ${dayjs(activity.approval_deadline).format('YYYY年MM月DD日dddd HH:mm')}` }}</span>
         <p class="font-bold text-lg text-end">{{ `${registerCount}人報名` }}</p>
         <NButton v-if="isHost" class="w-full mt-3 font-bold text-lg py-5" round type="primary" @click="router.push({ name: 'activityReview'})">審核</NButton>
-        <NButton v-else class="w-full mt-3 font-bold text-lg py-5" round type="primary" @click="toggleModal">報名</NButton> 
+        <div v-else>
+          <NButton v-if="isRegistered" class="w-full mt-3 font-bold text-lg py-5" round type="primary" @click="toggleConfirmModal">取消報名</NButton>
+          <NButton v-else class="w-full mt-3 font-bold text-lg py-5" round type="primary" @click="toggleRegisterModal">報名</NButton> 
+        </div>
+        <n-modal
+            v-model:show="showConfirmModal"
+            preset="dialog"
+            title="取消報名"
+            content="你確定要取消報名嗎？"
+            positive-text="確定"
+            negative-text="再想想"
+            @positive-click="onPositiveClick"
+            @negative-click="onNegativeClick"
+          />
         <p class="py-8 leading-6">{{ activity.description }}</p>
         <ul class="flex justify-around text-md border border-gray-200/100 rounded-lg p-2">
           <li class="flex flex-col items-center">
@@ -192,10 +253,10 @@ onMounted(async() => {
         <template #header-extra>
           這裡還可以放東西
         </template>
-        <NInput :show-count="true" :maxlength="50" :clearable="true" type="textarea" placeholder="告訴團主你為什麼想參加吧！"></NInput>
+        <NInput :show-count="true" v-model:value="registerComment" :maxlength="50" :clearable="true" type="textarea" placeholder="告訴團主你為什麼想參加吧！"></NInput>
         <template #footer>
           <NButton @click="registerActivity" type="primary" round class="font-bold w-full">報名</NButton>
-          <NButton type="secondary" round class="font-bold mt-2 w-full" @click="toggleModal">取消</NButton> 
+          <NButton type="secondary" round class="font-bold mt-2 w-full" @click="toggleRegisterModal">取消</NButton> 
         </template>
       </n-card>
     </NModal>
