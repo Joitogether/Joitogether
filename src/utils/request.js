@@ -10,10 +10,10 @@ const apiAxios = axios.create({
 
 apiAxios.interceptors.request.use(
   async function (config) {
-    const token = await getIdToken(auth.currentUser)
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`
-    }
+    // const token = await getIdToken(auth.currentUser)
+    // if (token) {
+    //   config.headers.Authorization = `Bearer ${token}`
+    // }
     return config
   },
   function (error) {

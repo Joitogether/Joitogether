@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import {
   NavArrowLeft,
   ThumbsUp,
@@ -13,9 +13,18 @@ import {
 } from '@iconoir/vue'
 
 import { useDialog, useMessage } from 'naive-ui'
+
+import { apiAxios } from '@/utils/request'
+import { ActivityGetApplicationsAPI } from '@/apis/activityApi'
+import { useRoute } from 'vue-router'
+const route = useRoute()
+onMounted(async () => {
+  const response = await ActivityGetApplicationsAPI(10)
+  console.log(response)
+})
+
 const dialog = useDialog()
 const message = useMessage()
-
 const attendee = ref([
   {
     id: 1,
@@ -125,7 +134,6 @@ const disabledAttendeeClick = () => {
   })
 }
 
-// 搜尋功能
 const searchQuery = ref('')
 const filteredAttendees = computed(() => {
   if (!searchQuery.value) {
@@ -139,13 +147,11 @@ const filteredAttendees = computed(() => {
 const handleAttendeeClick = (callback, id) => {
   const approvalAttendee = attendee.value.find((item) => item.id === id)
 
-  // 如果報名已截止，顯示提示
   if (registrationStatus.value === 'closed') {
     message.warning('目前報名已截止，無法操作。請返回開放報名繼續操作。')
     return
   }
 
-  // 如果用户已被拒绝，顯示提示
   if (approvalAttendee && approvalAttendee.rejected) {
     message.warning(`${approvalAttendee.name} 已經被拒絕參加，無法進行操作！`)
     return
@@ -158,18 +164,15 @@ const handleRejectClick = (id) => {
   const attendeeToReject = attendee.value.find((item) => item.id === id)
   if (!attendeeToReject) return
 
-  // 報名已截止提示
   if (registrationStatus.value === 'closed') {
     message.warning('目前報名已截止，無法操作。請返回開放報名繼續操作。')
     return
   }
 
-  // 已拒絕提示
   if (attendeeToReject.rejected) {
     message.warning(`${attendeeToReject.name} 已經被拒絕參加，無法再次操作！`)
     return
   }
-
   dialog.warning({
     title: '確認拒絕',
     content: `您確定要拒絕 ${attendeeToReject.name} 的參加申請嗎？`,
@@ -237,7 +240,6 @@ const toggleApproval = (id) => {
   })
 }
 
-// 審核的人數計算
 const approvedCount = computed(() => {
   return attendee.value.filter((item) => item.approved).length
 })
@@ -246,7 +248,6 @@ const rejectCount = computed(() => {
   return attendee.value.filter((item) => item.rejected).length
 })
 
-// 快速回覆的視窗狀態和選擇
 const quickReplyVisible = ref(false)
 const selectedReplies = ref([])
 const sentReplies = ref([])
