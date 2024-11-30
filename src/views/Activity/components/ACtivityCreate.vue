@@ -20,13 +20,6 @@ const message = useMessage()
 dayjs.locale("zh-tw");
 
 
-
-const textButton = () => {
-    console.log(uploadedImage.value);
-};
-
-
-
   // 將輸入的值格式化為存儲所需的 ISO 格式
     const isoEventTime = computed(() =>
       inputValues.value.eventTime
@@ -66,7 +59,7 @@ const ActivityDataPush = async () => {
     pay_type: paymentMethod.value,
     price: eventCost.value,
     img_url:"https://example.com/images/mountain_hike.jpg" || null, // **
-    location: searchQuery.value ||null,
+    location: searchQuery.value ||null,npm
     category: inputValues.value.category ||null,
     require_approval: inputValues.value.requireApproval ? 1:0,
     host_id:'7P6ocyCefPc8oTzjfAEs16RZThR2',   //useUid
@@ -363,7 +356,7 @@ const previewActivity = () => {
       <!-- 圖片上傳 -->
       <div v-if="!isPreviewMode">
         <h3 class="font-semibold text-lg mb-2 p-3">活動建立</h3>
-        <button @click="textButton">我是測試紐喔</button>
+
 
       <div class="bg-white rounded-lg p-5 mb-3 ">
         <div class="mb-6">
