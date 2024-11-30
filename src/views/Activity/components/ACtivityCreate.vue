@@ -14,6 +14,7 @@ const { searchQuery, suggestions, initializeAutocomplete, triggerInputChange,isL
 const { map, previewMap } = useGoogleMaps(apiKey);
 const { isPreviewMode, enterPreviewMode, exitPreviewMode } = usePreviewMode(previewMap, map);
 const { minTime, maxTime } = taiwanTime();
+const selectedFile  = ref(null);
 
 
 const message = useMessage()
@@ -49,7 +50,7 @@ dayjs.locale("zh-tw");
 
 //  資料推送
 const ActivityDataPush = async () => {
-  const activity ={
+  const activityData   ={
     name: inputValues.value.name,
     description: inputValues.value.describe,
     event_time: isoEventTime.value,  // **
@@ -58,7 +59,7 @@ const ActivityDataPush = async () => {
     min_participants: 2 || null,
     pay_type: paymentMethod.value,
     price: eventCost.value,
-    img_url:"https://example.com/images/mountain_hike.jpg" || null, // **
+    // img_url:uploadedImage.value || DefaultImage,
     location: searchQuery.value ||null,
     category: inputValues.value.category ||null,
     require_approval: inputValues.value.requireApproval ? 1:0,
@@ -66,11 +67,8 @@ const ActivityDataPush = async () => {
     status:'registrationOpen'
   };
 
-  console.log(activity)
-
-
   try {
-    const result = await userActivityCreateAPI(activity);
+    const result = await userActivityCreateAPI(selectedFile.value || null, activityData);
     console.log('成功回應:', result);
   } catch (err) {
     console.error('錯誤回應:', err);
@@ -246,20 +244,25 @@ const maxFileSize = 1 * 1024 * 1024
 const handleFileUpload = (event) => {
   const file = event.target.files[0];
 
-  if (file.size > maxFileSize) {
-    uploadError.value = "檔案大小不可超過 1 MB";
-    return;
-  }
-
+ if(file){
+    if (file.size > maxFileSize) {
+      uploadError.value = "檔案大小不可超過 1 MB";
+      return;
+    }
+ }
   uploadError.value = "";
+
   const reader = new FileReader();
   reader.onload = () => {
     uploadedImage.value = reader.result;
   };
   reader.readAsDataURL(file);
+  selectedFile.value = file;
 
-  event.target.value = "";
+  event.target.value = "";  // 重置文件輸入
+
 };
+
 
 const removeImage = () => {
   uploadedImage.value = null;
