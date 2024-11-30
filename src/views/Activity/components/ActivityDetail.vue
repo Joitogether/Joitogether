@@ -90,7 +90,7 @@ const toggleRegisterModal = () => {
 
 const registerActivity = async () => {
   const data = {
-    participant_id: user.value.uid, //這裡記得改成pinia定義的user
+    participant_id: userStore.user.uid, //這裡記得改成pinia定義的user
     comment: registerComment.value
   }
   // 等登入那部份處理好
@@ -118,10 +118,11 @@ const isHost = computed(() => {
 
 onMounted(async() => {
   await getActivityDetail()
+  user.value = userStore.user
 })
 // 根據抓取回來的資料判斷使用者是否已註冊該活動
 const isRegistered = computed(() => {
-  return activity.value.participants?.some(participant => participant.participant_id === user.value.uid && participant.status === 'registered')
+  return activity.value.participants?.some(participant => participant.participant_id === userStore.user.uid && participant.status === 'registered')
 })
 
 
@@ -135,7 +136,7 @@ const onNegativeClick = () => {
 
 // 取消報名
 const onPositiveClick = async() => {
-    const res = await activityCancelRegisterAPI(activity.value.id, user.value.uid)
+    const res = await activityCancelRegisterAPI(activity.value.id, userStore.user.uid)
     if(res.status != 200){
       toggleConfirmModal()
       return message.error('取消報名失敗')
