@@ -98,8 +98,10 @@ const registerActivity = async () => {
   //   alert('請先登入')
   //   return
   // }
+
   const res = await activityRegisterAPI(activityId, data)
   if(res.status !== 201){
+    console.log(res)
     message.error('報名失敗')
     toggleRegisterModal()
     return
@@ -146,6 +148,18 @@ const onPositiveClick = async() => {
     toggleConfirmModal()
     message.success('取消報名成功')
 }
+
+const showReviewModal = ref(false)
+const toggleReviewModal = () => {
+  showReviewModal.value = !showReviewModal.value
+}
+const onReviewPositiveClick = () => {
+  router.push({ name: 'activityReview', params: { activity_id: activityId } })
+}
+
+const onReviewNegativeClick = () => {
+  toggleReviewModal
+}
 </script>
 <template>
   <div class="container ">
@@ -174,7 +188,7 @@ const onPositiveClick = async() => {
         </div>
         <span class="text-sm text-red-500">{{ `最後審核時間 ${dayjs(activity.approval_deadline).format('YYYY年MM月DD日dddd HH:mm')}` }}</span>
         <p class="font-bold text-lg text-end">{{ `${registerCount}人報名` }}</p>
-        <NButton v-if="isHost" class="w-full mt-3 font-bold text-lg py-5" round type="primary" @click="router.push({ name: 'activityReview'})">審核</NButton>
+        <NButton v-if="isHost" class="w-full mt-3 font-bold text-lg py-5" round type="primary" @click="toggleReviewModal">審核</NButton>
         <div v-else>
           <NButton v-if="isRegistered" class="w-full mt-3 font-bold text-lg py-5" round type="primary" @click="toggleConfirmModal">取消報名</NButton>
           <NButton v-else class="w-full mt-3 font-bold text-lg py-5" round type="primary" @click="toggleRegisterModal">報名</NButton> 
@@ -189,6 +203,16 @@ const onPositiveClick = async() => {
             @positive-click="onPositiveClick"
             @negative-click="onNegativeClick"
           />
+          <n-modal
+            v-model:show="showReviewModal"
+            preset="dialog"
+            title="前往審核頁面"
+            content="你確定要前往審核頁面嗎？"
+            positive-text="確定"
+            negative-text="再想想"
+            @positive-click="onReviewPositiveClick"
+            @negative-click="onReviewNegativeClick"
+        />
         <p class="py-8 leading-6">{{ activity.description }}</p>
         <ul class="flex justify-around text-md border border-gray-200/100 rounded-lg p-2">
           <li class="flex flex-col items-center">
