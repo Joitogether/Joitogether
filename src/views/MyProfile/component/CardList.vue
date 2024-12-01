@@ -1,51 +1,86 @@
 <script setup>
 import { NButton } from 'naive-ui';
+import { UserGetApi } from '../../../../apis/UserApi'
+import { ref, onMounted } from 'vue';
 
 defineProps({
   items: {
-    type: Array,
-    required: true
+    type: Object,
+    required: true,
+    default: () => ({
+      display_name: '名字加載中',
+      city: '城市加載中',
+      age: '年齡加載中',
+      career: '職業加載中',
+      favorite_sentence: '喜愛的句子加載中',
+      tag: '標籤加載中'
+    })
   },
   type: {
     type: String,
     required: true,
-    // validator: value => ['hero', 'monster'].includes(value)
   }
 })
+const user = ref(null);  // 儲存使用者資料
+const loading = ref(true);
+const errorMessage = ref(null);
+const userUid = '3465767889ddgijjljk';
+
+const fetchUserData = async () => {
+  try {
+    const result = await UserGetApi(userUid);
+    console.log('API回傳資料:', result);
+
+    if (result) {
+      user.value = result;
+      loading.value = false;  // 資料加載完成，關閉加載狀態
+      return user.value
+    }
+  } catch (err) {
+    errorMessage.value = err.message || '資料加載錯誤';
+    loading.value = false;  // 發生錯誤時也關閉加載狀態
+  }
+    };
+
+    onMounted(() => {
+      fetchUserData();
+    });
 
 const emit = defineEmits(['edit'])
 </script>
 <template>
-<div v-if="items" class="card-container border rounded-lg overflow-hidden bg-white">
-  <div class="img-container w-full">
-    <img
-      class="card-img w-full h-full object-cover"
-      :src="items.photo_url"
-      alt="personImg"
-    />
+  <div v-if="loading">
+    <n-spin size="medium" />
+    資料正在跑來的路上...
+  </div>
+  <div v-else class="card-container border rounded-lg overflow-hidden bg-white">
+    <div class="img-container w-full">
+      <img
+        class="card-img w-full h-full object-cover"
+        :src="user.photo_url"
+        alt="personImg"
+      />
+    </div>
+
+    <div class="card-content-container">
+      <h3 class="user-name text-2xl text-center font-bold">{{ user.display_name  }}</h3>
+      <div class="text-md font-bold">
+        <span>{{ user.city }}</span>
+        <span> • {{ user.age }}</span>
+        <span> • {{ user.career }}</span>
+      </div>
+      <p class="user-description text-2xl font-bold mt-1 md:mb-5">
+        : {{ user.favorite_sentence }}
+      </p>
+      <n-button @click="emit('edit', 'users')" size="tiny" type="primary" ghost round >編輯檔案</n-button>
+      <div class="tag-container flex gap-3 flex-wrap">
+        <span v-for="(item, index) in user.tags.split(',')" :key="index"  class="border-2 px-3 py-1 rounded"
+          ># {{ item }}</span
+        >
+      </div>
+    </div>
   </div>
 
-  <div class="card-content-container p-5">
-    <h3 class="user-name text-2xl text-center font-bold">{{ items.display_name  }}</h3>
-    <div class="text-md font-bold">
-      <span>{{ items.city }}</span>
-      <span> • {{ items.age }}</span>
-      <span> • {{ items.career }}</span>
-    </div>
-    <p class="user-description text-2xl font-bold mt-1 md:mb-5">
-      : {{ items.favorite_sentence }}
-    </p>
-    <n-button @click="emit('edit', items, 'users')" type="primary" ghost class="flex-[2_2_0%]" round >編輯檔案</n-button>
-    <div class="tag-container flex gap-3 flex-wrap">
-      <span v-for="(item, index) in tags" :key="index"  class="border-2 px-3 py-1 rounded"
-        ># {{ item }}</span
-      >
-    </div>
-  </div>
-</div>
-<div v-else>
-  <p>正在加載資料...</p>
-</div>
 </template>
 <style scope>
 @media screen and (width >= 768px) {
