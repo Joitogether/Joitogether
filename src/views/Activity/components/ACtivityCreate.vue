@@ -10,6 +10,7 @@ import dayjs from 'dayjs'
 import { userActivityCreateAPI } from '@/apis/userActivityCreateAPI';
 import { taiwanTime, formatToISOWithTimezone} from '@/stores/useDateTime'
 import { useUserStore } from '@/stores/userStore';
+import { marked } from "marked";
 
 const apiKey = import.meta.env.VITE_GOOGLE_KEY;
 const { searchQuery, suggestions, initializeAutocomplete, triggerInputChange,isLoading:loadingState ,isLoadOK: loadStateOK } = useAutocomplete(apiKey);
@@ -21,7 +22,7 @@ const isSubmitting = ref(false); // 控制按鈕狀態
 const router = useRouter();
 const userStore = useUserStore();
 
-
+const markdownPreview = computed(() => marked(inputValues.value.describe || ""));
 
 const message = useMessage()
 dayjs.locale("zh-tw");
@@ -627,7 +628,9 @@ const previewActivity = () => {
           <span class="pl-3">{{ formattedEventTime }}</span>
         </div>
         <span v-if="inputValues.requireApproval" class="text-sm text-red-500">{{ `最後審核時間 ${formattedDeadLine}` }}</span>
-        <p class="py-8 leading-6">{{ inputValues.describe }}</p>
+        <p class="py-8 leading-6 markdown-content"
+        v-html="markdownPreview"
+        ></p>
         <ul class="flex justify-around text-md border border-gray-200/100 rounded-lg p-2">
           <li class="flex flex-col items-center">
             <CreditCard height="35" width="35"></CreditCard>
