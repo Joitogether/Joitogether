@@ -4,11 +4,17 @@ import { Clock, CreditCard, MoneySquare, Group, MapPin, NavArrowLeft } from '@ic
 import dayjs from 'dayjs';
 import 'dayjs/locale/zh'
 import { NInput, NButton, NModal, NCard } from 'naive-ui';
-dayjs.locale('zh') 
+dayjs.locale('zh')
 import ActivityCard from '@/views/components/ActivityCard.vue';
 import router from '@/router';
 import { useRoute } from 'vue-router';
 import axios from 'axios';
+
+import { useGoogleMaps } from "@/stores/useGoogleMaps";
+const apiKey = import.meta.env.VITE_GOOGLE_KEY;
+const { previewMap } = useGoogleMaps(apiKey);
+const searchQuery= ref("");
+
 
 const activity = ref({
   id: 'unique-activity-id',
@@ -85,8 +91,9 @@ const userComment = ref('')
 
 
 const route = useRoute()
-
 onMounted(async() => {
+  searchQuery.value = activity.value.location;
+  await previewMap(searchQuery.value);
   const id = route.params.id
   const response = await axios.get(`http://localhost:3030/activities/${id}`)
   if(response.status === 200) {
@@ -94,6 +101,7 @@ onMounted(async() => {
     activity.value = data
     host.value = data.host_info
   }
+
   // 如果回傳錯誤??
 })
 
@@ -126,7 +134,7 @@ onMounted(async() => {
         <span class="text-sm text-red-500">{{ `最後審核時間 ${dayjs(activity.approval_deadline).format('YYYY年MM月DD日dddd HH:mm')}` }}</span>
         <p class="font-bold text-lg text-end">{{ `${registerCount}人報名` }}</p>
         <NButton v-if="isHost" class="w-full mt-3 font-bold text-lg py-5" round type="primary" @click="router.push({ name: 'activityReview'})">審核</NButton>
-        <NButton v-else class="w-full mt-3 font-bold text-lg py-5" round type="primary" @click="toggleModal">報名</NButton> 
+        <NButton v-else class="w-full mt-3 font-bold text-lg py-5" round type="primary" @click="toggleModal">報名</NButton>
         <p class="py-8 leading-6">{{ activity.description }}</p>
         <ul class="flex justify-around text-md border border-gray-200/100 rounded-lg p-2">
           <li class="flex flex-col items-center">
@@ -138,7 +146,7 @@ onMounted(async() => {
             <p class="mt-2">{{`$${parseInt(activity.price).toFixed()}`  }}</p>
           </li>
           <li class="flex flex-col items-center">
-            <Group height="35" width="35"></Group> 
+            <Group height="35" width="35"></Group>
             <p class="mt-2">{{ `${activity.max_participants}人` }}</p>
           </li>
         </ul>
@@ -146,7 +154,7 @@ onMounted(async() => {
           <MapPin height="32" width="32"></MapPin>
           <span class="text-lg ml-5">{{ activity.location }}</span>
         </div>
-        <div class="border h-52 text-5xl font-bold">這裡放地圖</div>
+        <div id="map" class="border w-full h-52 text-5xl font-bold">這裡放地圖</div>
 
         <div class="mt-3">
           <span class="block text-2xl font-bold mb-2">阿勳的評價與評分</span>
@@ -155,14 +163,14 @@ onMounted(async() => {
           <NInput v-model:value="userComment" type="textarea" placeholder="留下你想說的話吧!"></NInput>
           <div class="text-end mt-2">
             <NButton secondary @click="clearComment">取消</NButton>
-            <NButton :disabled="userComment.length == 0" type="primary" class="ml-2">留言</NButton> 
+            <NButton :disabled="userComment.length == 0" type="primary" class="ml-2">留言</NButton>
           </div>
         </div>
       </div>
     </div>
     <div class="cards-container  px-[2%] ">
       <h2 class="text-2xl font-bold mb-10">近期活動</h2>
-      <ActivityCard 
+      <ActivityCard
         v-for="(items, index) in 5"
         :key="index"
 
@@ -176,7 +184,7 @@ onMounted(async() => {
         class="mb-[3%]"
       ></ActivityCard>
     </div>
-    <NModal 
+    <NModal
       class="rounded-lg"
       v-model:show="showRegisterModal"
       :auto-focus="false"
@@ -195,7 +203,7 @@ onMounted(async() => {
         <NInput :show-count="true" :maxlength="50" :clearable="true" type="textarea" placeholder="告訴團主你為什麼想參加吧！"></NInput>
         <template #footer>
           <NButton @click="registerActivity" type="primary" round class="font-bold w-full">報名</NButton>
-          <NButton type="secondary" round class="font-bold mt-2 w-full" @click="toggleModal">取消</NButton> 
+          <NButton type="secondary" round class="font-bold mt-2 w-full" @click="toggleModal">取消</NButton>
         </template>
       </n-card>
     </NModal>
@@ -213,14 +221,14 @@ onMounted(async() => {
 @media screen and (width > 768px) {
   .container {
     display: flex;
-    max-width: 990px; 
+    max-width: 990px;
     flex-wrap: wrap;
   }
 }
 
 @media screen and (width >= 1024px) {
   .container {
-    max-width: 70%; 
+    max-width: 70%;
   }
 
   .detail-container {
@@ -231,8 +239,8 @@ onMounted(async() => {
     flex: 1;
     max-width: 50%;
     padding-left: 5%;
-    padding-right: 2%; 
+    padding-right: 2%;
   }
 }
 
-</style>  
+</style>
