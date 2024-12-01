@@ -1,6 +1,7 @@
 <script setup>
 import { Search,XmarkCircle,Clock, CreditCard, MoneySquare, Group, MapPin } from "@iconoir/vue"
 import { computed, ref, onMounted,watch } from "vue"
+import { useRouter } from 'vue-router';
 import { useGoogleMaps } from "@/stores/useGoogleMaps";
 import { useAutocomplete } from "@/stores/useAutocomplete";
 import { usePreviewMode } from "@/stores/usePreviewMode";
@@ -15,42 +16,21 @@ const { map, previewMap } = useGoogleMaps(apiKey);
 const { isPreviewMode, enterPreviewMode, exitPreviewMode } = usePreviewMode(previewMap, map);
 const { minTime, maxTime } = taiwanTime();
 const selectedFile  = ref(null);
+const isSubmitting = ref(false); // 控制按鈕狀態
+const router = useRouter();
 
 
 const message = useMessage()
 dayjs.locale("zh-tw");
 
 
-  // 將輸入的值格式化為存儲所需的 ISO 格式
-    const isoEventTime = computed(() =>
-      inputValues.value.eventTime
-        ? formatToISOWithTimezone(inputValues.value.eventTime)
-        : ""
-    );
-      const isoDeadLine = computed(() =>
-      inputValues.value.eventTime
-        ? formatToISOWithTimezone(inputValues.value.eventTime)
-        : ""
-    );
-
-      // 預覽時間格式
-      const formattedEventTime = computed(() =>
-      inputValues.value.eventTime
-        ? dayjs(inputValues.value.eventTime).format("YYYY, MM月DD日 dddd HH:mm")
-        : "未設定時間"
-    );
-
-      // 預覽審核時間格式
-      const formattedDeadLine = computed(() =>
-      inputValues.value.deadline
-        ? dayjs(inputValues.value.deadline).format("YYYY-MM-DD")
-        : "未設定時間"
-    );
-
 
 //  資料推送
 const ActivityDataPush = async () => {
-  const activityData   ={
+   if(isSubmitting.value) return;
+   isSubmitting.value =true;
+
+  const activityData  ={
     name: inputValues.value.name,
     description: inputValues.value.describe,
     event_time: isoEventTime.value,  // **
@@ -70,8 +50,12 @@ const ActivityDataPush = async () => {
   try {
     const result = await userActivityCreateAPI(selectedFile.value || null, activityData);
     console.log('成功回應:', result);
+     // 成功後導向首頁
+     router.replace('/');
   } catch (err) {
     console.error('錯誤回應:', err);
+  } finally {
+    isSubmitting.value = false; // 完成後恢復按鈕可用狀態
   }
 };
 
@@ -291,6 +275,32 @@ const focusInput = () => {
   }
 };
 
+
+  // 將輸入的值格式化為存儲所需的 ISO 格式
+  const isoEventTime = computed(() =>
+      inputValues.value.eventTime
+        ? formatToISOWithTimezone(inputValues.value.eventTime)
+        : ""
+    );
+      const isoDeadLine = computed(() =>
+      inputValues.value.eventTime
+        ? formatToISOWithTimezone(inputValues.value.eventTime)
+        : ""
+    );
+
+      // 預覽時間格式
+      const formattedEventTime = computed(() =>
+      inputValues.value.eventTime
+        ? dayjs(inputValues.value.eventTime).format("YYYY, MM月DD日 dddd HH:mm")
+        : "未設定時間"
+    );
+
+      // 預覽審核時間格式
+      const formattedDeadLine = computed(() =>
+      inputValues.value.deadline
+        ? dayjs(inputValues.value.deadline).format("YYYY-MM-DD")
+        : "未設定時間"
+    );
 
 onMounted(()=>{
   timeRange.value.minTime = minTime;
@@ -638,8 +648,11 @@ const previewActivity = () => {
 
         <div class="my-6 flex items-center justify-center ">
           <button class=" bg-yellow-200 rounded-md  w-full mx-3 py-2 px-3 hover:bg-yellow-100"
+          :disabled="isSubmitting"
           @click="ActivityDataPush"
-          >送出活動</button>
+          >
+          {{ isSubmitting ? "送出中..." : "送出活動" }}
+        </button>
         </div>
         <div class="my-6 flex items-center justify-center ">
           <button class=" bg-yellow-200 rounded-md  w-full mx-3 py-2 px-3 hover:bg-yellow-100"
