@@ -13,7 +13,6 @@ import {
 } from '@iconoir/vue'
 
 import { useDialog, useMessage } from 'naive-ui'
-
 import { apiAxios } from '@/utils/request'
 import { ActivityGetApplicationsAPI, ActivityReviewApplicationsAPI } from '@/apis/activityApi'
 import { useRoute } from 'vue-router'
@@ -23,6 +22,28 @@ const activity_id = route.params.activity_id
 //   const response = await ActivityGetApplicationsAPI(10)
 //   console.log(response)
 // })
+const refreshAttendees = async () => {
+  try {
+    const response = await ActivityGetApplicationsAPI(activity_id)
+    if (response.status === 200) {
+      attendee.value = response.data.data.map((item) => ({
+        id: item.application_id,
+        name: item.participant_info.full_name,
+        avatar: '@/assets/avatar.png',
+        number: `@${item.participant_id}` || '未提供 ID',
+        message: item.comment || '這位參加者尚無留言',
+        date: new Date().toLocaleDateString(),
+        approved: item.status === 'approved',
+        host_declined: item.status === 'host_declined',
+        registered: item.status === 'registered',
+        participant_cancelled: item.status === 'participant_cancelled',
+        replies: '',
+      }))
+    }
+  } catch (error) {
+    console.error('數據刷新失敗:', error)
+  }
+}
 
 onMounted(async () => {
   try {
@@ -38,8 +59,9 @@ onMounted(async () => {
         message: item.comment || '這位參加者尚無留言',
         date: new Date().toLocaleDateString(),
         approved: item.status === 'approved',
-        rejected: item.status === 'registered',
-        cancelled: item.status === 'participant_cancelled',
+        host_declined: item.status === 'host_declined',
+        registered: item.status === 'registered',
+        participant_cancelled: item.status === 'participant_cancelled',
         replies: '',
       }))
       console.log('格式化後的 attendee:', attendee.value)
@@ -66,34 +88,13 @@ const attendee = ref([])
 //     approved: false,
 //     rejected: false,
 //     replies: '',
-//   },
-//   {
-//     id: 2,
-//     name: '天橋下說書人',
-//     avatar: '@/assets/avatar.png',
-//     number: '@1ih499f304ja8v77',
-//     message: '第一次參加，團主帶帶我！',
-//     date: '周日,11月17日 2024',
-//     approved: false,
-//     rejected: false,
-//     replies: '',
-//   },
-//   {
-//     id: 3,
-//     name: '泡泡勇士',
-//     avatar: '@/assets/avatar.png',
-//     number: '@a937vvyr49s7882p',
-//     message: '已經參加第二次了，團主很活潑！',
-//     date: '周日,11月19日 2024',
-//     approved: false,
-//     rejected: false,
-//     replies: '',
+//
 //   },
 // ])
 
 //切換報名,截止報名功能
 const registrationStatus = ref('open')
-const toggleRegistration = (status) => {
+const toggleRegistration = async (status) => {
   if (status === 'closed') {
     const checkClose = confirm('您是否確認截止報名？')
     if (!checkClose) return
@@ -103,6 +104,7 @@ const toggleRegistration = (status) => {
     if (!checkOpen) return
     registrationStatus.value = 'open'
   }
+  await refreshAttendees()
 }
 
 // 切換開放、截止報名的UI
@@ -131,35 +133,6 @@ const closeRegistration = () => {
     },
     onNegativeClick: () => {
       message.info('您已取消截止報名的操作')
-    },
-  })
-}
-
-const allowAttendeeClick = () => {
-  dialog.warning({
-    title: '確認操作',
-    content: '`您確定要允許 ${approvalAttendee.name} 參加嗎？',
-    positiveText: '確認',
-    negativeText: '取消',
-    onPositiveClick: () => {
-      registrationStatus.value = 'open'
-    },
-    onNegativeClick: () => {
-      message.info('您已取消開放報名的操作')
-    },
-  })
-}
-const disabledAttendeeClick = () => {
-  dialog.warning({
-    title: '確認操作',
-    content: '`您確定要解除 ${approvalAttendee.name} 的參加資格嗎？',
-    positiveText: '確認',
-    negativeText: '取消',
-    onPositiveClick: () => {
-      registrationStatus.value = 'open'
-    },
-    onNegativeClick: () => {
-      message.info('您已取消開放報名的操作')
     },
   })
 }
@@ -213,12 +186,10 @@ const handleApproveClick = async (id) => {
     negativeText: '取消',
     async onPositiveClick() {
       try {
-        // 調用後端 API 更新狀態
         const response = await ActivityReviewApplicationsAPI(id, 'approved')
         if (response && response.status === 200) {
-          attendeeToUpdate.approved = true
-          attendeeToUpdate.clicked = true // 禁用按鈕
           message.success(`${attendeeToUpdate.name} 已被允許參加`)
+          await refreshAttendees()
         } else {
           message.error('操作失敗，請稍後再試！')
         }
@@ -233,10 +204,9 @@ const handleApproveClick = async (id) => {
   })
 }
 
-const handleRejectClick = async (id) => {
-  const attendeeToReject = attendee.value.find((item) => item.id === id)
-
-  if (!attendeeToReject) {
+const handleDeclinedClick = async (id) => {
+  const attendeeToDeclined = attendee.value.find((item) => item.id === id)
+  if (!attendeeToDeclined) {
     message.error('找不到該參加者！')
     return
   }
@@ -246,26 +216,22 @@ const handleRejectClick = async (id) => {
     return
   }
 
-  if (attendeeToReject.rejected) {
-    message.warning(`${attendeeToReject.name} 已經被拒絕參加，無法再次操作！`)
+  if (attendeeToDeclined.host_declined) {
+    message.warning(`${attendeeToDeclined.name} 已經被拒絕參加，無需再次操作！`)
     return
   }
 
   dialog.warning({
     title: '確認拒絕',
-    content: `您確定要拒絕 ${attendeeToReject.name} 的參加申請嗎？`,
+    content: `您確定要拒絕 ${attendeeToDeclined.name} 的參加申請嗎？`,
     positiveText: '確認',
     negativeText: '取消',
     async onPositiveClick() {
       try {
-        // 調用後端 API 更新狀態
-        const response = await ActivityReviewApplicationsAPI(id, 'registered')
+        const response = await ActivityReviewApplicationsAPI(id, 'host_declined')
         if (response && response.status === 200) {
-          // 更新前端資料
-          attendeeToReject.rejected = true
-          attendeeToReject.approved = false
-
-          message.success(`${attendeeToReject.name} 的參加申請已被拒絕！`)
+          message.success(`${attendeeToDeclined.name} 的參加申請已被拒絕！`)
+          await refreshAttendees()
         } else {
           message.error('操作失敗，請稍後再試！')
         }
@@ -280,52 +246,29 @@ const handleRejectClick = async (id) => {
   })
 }
 
-// const rejectAttendee = (id) => {
-//   const attendeeToReject = attendee.value.find((item) => item.id === id)
-
-//   if (!attendeeToReject) return
-
-//   if (attendeeToReject.rejected) {
-//     message.warning(`${attendeeToReject.name} 已經被拒絕參加，無需再次操作！`)
-//     return
-//   }
-
-//   const confirmReject = confirm(`您確定要拒絕 ${attendeeToReject.name} 的參加申請嗎？`)
-
-//   if (confirmReject) {
-//     attendeeToReject.rejected = true
-//     attendeeToReject.approved = false
-//   }
-// }
-
 const handleCancelClick = async (id) => {
   const attendeeToCancel = attendee.value.find((item) => item.id === id)
 
   if (!attendeeToCancel) {
-    message.error('找不到該參加者！') // 當找不到參加者時提示錯誤
+    message.error('找不到該參加者！')
     return
   }
 
-  // 報名截止的檢查
   if (registrationStatus.value === 'closed') {
     message.warning('目前報名已截止，無法操作。請返回開放報名繼續操作。')
     return
   }
 
-
-  // 已取消狀態檢查，提供具體提示
   if (attendeeToCancel.rejected) {
     message.warning(`${attendeeToCancel.name} 的參加資格已被取消，無需再次操作！`)
     return
   }
 
-  // 尚未被允許參加的檢查
   if (!attendeeToCancel.approved) {
     message.warning(`${attendeeToCancel.name} 尚未被允許參加，無法取消參加資格！`)
     return
   }
 
-  // 確認操作的對話框
   dialog.warning({
     title: '確認取消參加',
     content: `您確定要取消 ${attendeeToCancel.name} 的參加資格嗎？`,
@@ -333,13 +276,13 @@ const handleCancelClick = async (id) => {
     negativeText: '取消',
     async onPositiveClick() {
       try {
-        // 調用後端 API 更新狀態
         const response = await ActivityReviewApplicationsAPI(id, 'participant_cancelled')
 
         if (response && response.status === 200) {
-          attendeeToCancel.approved = false // 更新狀態為未允許
-          attendeeToCancel.rejected = true // 更新狀態為已取消
+          attendeeToCancel.approved = false
+          attendeeToCancel.rejected = true
           message.success(`${attendeeToCancel.name} 的參加資格已被取消！`)
+          await refreshAttendees()
         } else {
           message.error('操作失敗，請稍後再試！')
         }
@@ -419,7 +362,7 @@ const hideQuickReply = () => {
   message.info('已取消操作')
 }
 
-const sendReplies = () => {
+const sendReplies = async () => {
   const attendeeToReply = attendee.value.find((item) => item.id === currentAttendeeId.value)
   if (attendeeToReply) {
     attendeeToReply.replies = [...selectedReplies.value]
@@ -513,17 +456,14 @@ const sendReplies = () => {
           class="flex flex-col text-gray-500 bg-gray-100 border-[1px] border-gray-200 rounded-xl p-2 my-2 w-full"
         >
           <div
-            class="flex py-3 px-1 rounded-2xl  transition-all duration-75"
+            class="flex py-3 px-1 rounded-2xl bg-gray-100 border-4 border-gray-400 transition-all duration-500"
             :class="[
-              item.approved
-                ? 'border-yellow-500 bg-yellow-100 border-4 rounded-2xl  transition-all duration-75'
-                : 'border-4 border-solid border-gray-300 bg-gray-300  transition-all duration-200',
-              item.cancelled
-                ? 'border-gray-500 bg-gray-100 border-4 rounded-2xl  transition-all duration-75'
-                : 'border-4 border-solid border-gray-100  transition-all duration-200',
-              item.rejected
-                ? 'border-red-400 bg-red-100 border-4 rounded-2xl  transition-all duration-75'
-                : 'border-4 border-solid border-red-100  transition-all duration-200',
+              item.registered ? 'border-gray-500 bg-gray-100 transition-all duration-500' : '',
+              item.approved ? 'border-yellow-400 bg-yellow-100 transition-all duration-500' : '',
+              item.participant_cancelled
+                ? 'border-gray-600 bg-gray-200 transition-all duration-500'
+                : '',
+              item.host_declined ? 'border-red-700 bg-red-100 transition-all duration-500' : '',
               ,
             ]"
           >
@@ -552,12 +492,12 @@ const sendReplies = () => {
               </div>
             </div>
 
-            <div class="flex flex-col justify-center items-center w-52 px-4 ">
+            <div class="flex flex-col justify-center items-center w-52 px-4">
               <p
-                v-if="item.rejected"
-                class="flex items-center justify-center text-xs text-red-400 my-1 w-32 font-semibold"
+                v-if="item.registered"
+                class="flex justify-center text-xs text-gray-400 my-1 w-32 font-semibold"
               >
-                團主已拒絕用戶參加<XmarkCircle width="12" height="12" />
+                尚未審核
               </p>
               <p
                 v-else-if="item.approved"
@@ -566,17 +506,22 @@ const sendReplies = () => {
                 審核已通過<CheckCircleSolid width="14" height="14" />
               </p>
               <p
-                v-else-if="item.cancelled"
+                v-else-if="item.participant_cancelled"
                 class="flex justify-center items-center w-32 text-xs text-gray-600 my-1 font-semibold"
               >
                 已取消用戶參加
               </p>
-              
-              <p v-else class="flex justify-center text-xs text-gray-400 my-1 w-32">尚未審核</p>
 
-              <button 
+              <p
+                v-else-if="item.host_declined"
+                class="flex justify-center text-xs text-red-400 my-1 w-32 font-semibold"
+              >
+                團主已拒絕用戶參加<XmarkCircle width="12" height="12" />
+              </p>
+
+              <button
                 @click="handleApproveClick(item.id)"
-                v-if="!item.approved && !item.cancelled && !item.rejected"
+                v-if="!item.approved && !item.participant_cancelled && !item.host_declined"
                 :class="[
                   'flex justify-center items-center w-32 h-8 py-2 mt-2 border-2 rounded-md text-sm transition-all duration-300',
                   registrationStatus === 'closed' || item.approved
@@ -589,7 +534,7 @@ const sendReplies = () => {
 
               <button
                 @click="handleCancelClick(item.id)"
-                v-else-if="item.approved && !item.cancelled"
+                v-if="item.approved && !item.participant_cancelled && !item.host_declined"
                 :class="[
                   'flex justify-center items-center w-32 h-8 py-2 mt-2 border-2 rounded-md text-sm transition-all duration-300',
                   registrationStatus === 'closed' || item.rejected
@@ -601,8 +546,8 @@ const sendReplies = () => {
               </button>
 
               <button
-                @click="handleRejectClick(item.id)"
-                v-else-if="!item.cancelled && !item.approved && !item.rejected"
+                @click="handleDeclinedClick(item.id)"
+                v-if="!item.participant_cancelled && !item.approved && !item.host_declined"
                 :class="[
                   'flex justify-center items-center w-32 h-8 py-2 mt-2 border-2 rounded-md text-sm transition-all duration-300',
                   registrationStatus === 'closed' || item.rejected
@@ -610,7 +555,7 @@ const sendReplies = () => {
                     : 'bg-red-500 text-white border-red-600 hover:bg-red-600 hover:border-red-700',
                 ]"
               >
-                <span>{{ item.rejected ? '已拒絕參加' : '拒絕用戶參加' }}</span>
+                <span>{{ item.host_declined ? '已拒絕參加' : '拒絕用戶參加' }}</span>
               </button>
             </div>
           </div>
