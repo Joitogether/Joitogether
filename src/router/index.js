@@ -99,7 +99,7 @@ const router = createRouter({
         },
 
         {
-          path: 'review',
+          path: 'review/:activity_id',
           name: 'activityReview',
           component: ActivityReview,
         },

@@ -15,51 +15,81 @@ import {
 import { useDialog, useMessage } from 'naive-ui'
 
 import { apiAxios } from '@/utils/request'
-import { ActivityGetApplicationsAPI } from '@/apis/activityApi'
+import { ActivityGetApplicationsAPI, ActivityReviewApplicationsAPI } from '@/apis/activityApi'
 import { useRoute } from 'vue-router'
 const route = useRoute()
+const activity_id = route.params.activity_id
+// onMounted(async () => {
+//   const response = await ActivityGetApplicationsAPI(10)
+//   console.log(response)
+// })
+
 onMounted(async () => {
-  const response = await ActivityGetApplicationsAPI(10)
-  console.log(response)
+  try {
+    const response = await ActivityGetApplicationsAPI(activity_id)
+    console.log('API 返回資料:', response)
+
+    if (response.status === 200 && response.data) {
+      attendee.value = response.data.data.map((item) => ({
+        id: item.application_id,
+        name: item.participant_info.full_name,
+        avatar: '@/assets/avatar.png',
+        number: `@${item.participant_id}` || '未提供 ID',
+        message: item.comment || '這位參加者尚無留言',
+        date: new Date().toLocaleDateString(),
+        approved: item.status === 'approved',
+        rejected: item.status === 'registered',
+        cancelled: item.status === 'participant_cancelled',
+        replies: '',
+      }))
+      console.log('格式化後的 attendee:', attendee.value)
+    }
+  } catch (error) {
+    console.error('獲取後端資料失敗:', error)
+  }
+  const res = await ActivityReviewApplicationsAPI(4)
+  console.log(res)
 })
 
 const dialog = useDialog()
 const message = useMessage()
-const attendee = ref([
-  {
-    id: 1,
-    name: '財哥',
-    avatar: '@/assets/avatar.png',
-    number: '@2af60e4cc341a435',
-    message: '好期待這次的遊戲類型會是什麼！',
-    date: '周一,11月18日 2024',
-    approved: false,
-    rejected: false,
-    replies: '',
-  },
-  {
-    id: 2,
-    name: '天橋下說書人',
-    avatar: '@/assets/avatar.png',
-    number: '@1ih499f304ja8v77',
-    message: '第一次參加，團主帶帶我！',
-    date: '周日,11月17日 2024',
-    approved: false,
-    rejected: false,
-    replies: '',
-  },
-  {
-    id: 3,
-    name: '泡泡勇士',
-    avatar: '@/assets/avatar.png',
-    number: '@a937vvyr49s7882p',
-    message: '已經參加第二次了，團主很活潑！',
-    date: '周日,11月19日 2024',
-    approved: false,
-    rejected: false,
-    replies: '',
-  },
-])
+const attendee = ref([])
+
+// const attendee = ref([
+//   {
+//     id: 1,
+//     name: '財哥',
+//     avatar: '@/assets/avatar.png',
+//     number: '@2af60e4cc341a435',
+//     message: '好期待這次的遊戲類型會是什麼！',
+//     date: '周一,11月18日 2024',
+//     approved: false,
+//     rejected: false,
+//     replies: '',
+//   },
+//   {
+//     id: 2,
+//     name: '天橋下說書人',
+//     avatar: '@/assets/avatar.png',
+//     number: '@1ih499f304ja8v77',
+//     message: '第一次參加，團主帶帶我！',
+//     date: '周日,11月17日 2024',
+//     approved: false,
+//     rejected: false,
+//     replies: '',
+//   },
+//   {
+//     id: 3,
+//     name: '泡泡勇士',
+//     avatar: '@/assets/avatar.png',
+//     number: '@a937vvyr49s7882p',
+//     message: '已經參加第二次了，團主很活潑！',
+//     date: '周日,11月19日 2024',
+//     approved: false,
+//     rejected: false,
+//     replies: '',
+//   },
+// ])
 
 //切換報名,截止報名功能
 const registrationStatus = ref('open')
@@ -159,10 +189,57 @@ const handleAttendeeClick = (callback, id) => {
 
   callback()
 }
+const handleApproveClick = async (id) => {
+  const attendeeToUpdate = attendee.value.find((item) => item.id === id)
+  if (!attendeeToUpdate) {
+    message.error('找不到該參加者！')
+    return
+  }
 
-const handleRejectClick = (id) => {
+  if (attendeeToUpdate.approved) {
+    message.warning(`${attendeeToUpdate.name} 已經被允許參加，無需再次操作！`)
+    return
+  }
+
+  if (registrationStatus.value === 'closed') {
+    message.warning('目前報名已截止，無法操作。請返回開放報名繼續操作。')
+    return
+  }
+
+  dialog.warning({
+    title: '確認允許參加',
+    content: `您確定要允許 ${attendeeToUpdate.name} 參加嗎？`,
+    positiveText: '確認',
+    negativeText: '取消',
+    async onPositiveClick() {
+      try {
+        // 調用後端 API 更新狀態
+        const response = await ActivityReviewApplicationsAPI(id, 'approved')
+        if (response && response.status === 200) {
+          attendeeToUpdate.approved = true
+          attendeeToUpdate.clicked = true // 禁用按鈕
+          message.success(`${attendeeToUpdate.name} 已被允許參加`)
+        } else {
+          message.error('操作失敗，請稍後再試！')
+        }
+      } catch (error) {
+        console.error('API 請求失敗:', error)
+        message.error('操作失敗，請稍後再試！')
+      }
+    },
+    onNegativeClick: () => {
+      message.info('您已取消操作！')
+    },
+  })
+}
+
+const handleRejectClick = async (id) => {
   const attendeeToReject = attendee.value.find((item) => item.id === id)
-  if (!attendeeToReject) return
+
+  if (!attendeeToReject) {
+    message.error('找不到該參加者！')
+    return
+  }
 
   if (registrationStatus.value === 'closed') {
     message.warning('目前報名已截止，無法操作。請返回開放報名繼續操作。')
@@ -173,16 +250,29 @@ const handleRejectClick = (id) => {
     message.warning(`${attendeeToReject.name} 已經被拒絕參加，無法再次操作！`)
     return
   }
+
   dialog.warning({
     title: '確認拒絕',
     content: `您確定要拒絕 ${attendeeToReject.name} 的參加申請嗎？`,
     positiveText: '確認',
     negativeText: '取消',
-    onPositiveClick: () => {
-      attendeeToReject.rejected = true
-      attendeeToReject.approved = false
+    async onPositiveClick() {
+      try {
+        // 調用後端 API 更新狀態
+        const response = await ActivityReviewApplicationsAPI(id, 'registered')
+        if (response && response.status === 200) {
+          // 更新前端資料
+          attendeeToReject.rejected = true
+          attendeeToReject.approved = false
 
-      message.success(`${attendeeToReject.name} 的參加申請已被拒絕！`)
+          message.success(`${attendeeToReject.name} 的參加申請已被拒絕！`)
+        } else {
+          message.error('操作失敗，請稍後再試！')
+        }
+      } catch (error) {
+        console.error('API 請求失敗:', error)
+        message.error('操作失敗，請稍後再試！')
+      }
     },
     onNegativeClick: () => {
       message.info('您已取消操作！')
@@ -190,22 +280,78 @@ const handleRejectClick = (id) => {
   })
 }
 
-const rejectAttendee = (id) => {
-  const attendeeToReject = attendee.value.find((item) => item.id === id)
+// const rejectAttendee = (id) => {
+//   const attendeeToReject = attendee.value.find((item) => item.id === id)
 
-  if (!attendeeToReject) return
+//   if (!attendeeToReject) return
 
-  if (attendeeToReject.rejected) {
-    message.warning(`${attendeeToReject.name} 已經被拒絕參加，無需再次操作！`)
+//   if (attendeeToReject.rejected) {
+//     message.warning(`${attendeeToReject.name} 已經被拒絕參加，無需再次操作！`)
+//     return
+//   }
+
+//   const confirmReject = confirm(`您確定要拒絕 ${attendeeToReject.name} 的參加申請嗎？`)
+
+//   if (confirmReject) {
+//     attendeeToReject.rejected = true
+//     attendeeToReject.approved = false
+//   }
+// }
+
+const handleCancelClick = async (id) => {
+  const attendeeToCancel = attendee.value.find((item) => item.id === id)
+
+  if (!attendeeToCancel) {
+    message.error('找不到該參加者！') // 當找不到參加者時提示錯誤
     return
   }
 
-  const confirmReject = confirm(`您確定要拒絕 ${attendeeToReject.name} 的參加申請嗎？`)
-
-  if (confirmReject) {
-    attendeeToReject.rejected = true
-    attendeeToReject.approved = false
+  // 報名截止的檢查
+  if (registrationStatus.value === 'closed') {
+    message.warning('目前報名已截止，無法操作。請返回開放報名繼續操作。')
+    return
   }
+
+
+  // 已取消狀態檢查，提供具體提示
+  if (attendeeToCancel.rejected) {
+    message.warning(`${attendeeToCancel.name} 的參加資格已被取消，無需再次操作！`)
+    return
+  }
+
+  // 尚未被允許參加的檢查
+  if (!attendeeToCancel.approved) {
+    message.warning(`${attendeeToCancel.name} 尚未被允許參加，無法取消參加資格！`)
+    return
+  }
+
+  // 確認操作的對話框
+  dialog.warning({
+    title: '確認取消參加',
+    content: `您確定要取消 ${attendeeToCancel.name} 的參加資格嗎？`,
+    positiveText: '確認',
+    negativeText: '取消',
+    async onPositiveClick() {
+      try {
+        // 調用後端 API 更新狀態
+        const response = await ActivityReviewApplicationsAPI(id, 'participant_cancelled')
+
+        if (response && response.status === 200) {
+          attendeeToCancel.approved = false // 更新狀態為未允許
+          attendeeToCancel.rejected = true // 更新狀態為已取消
+          message.success(`${attendeeToCancel.name} 的參加資格已被取消！`)
+        } else {
+          message.error('操作失敗，請稍後再試！')
+        }
+      } catch (error) {
+        console.error('API 請求失敗:', error)
+        message.error('操作失敗，請稍後再試！')
+      }
+    },
+    onNegativeClick: () => {
+      message.info('您已取消操作！')
+    },
+  })
 }
 
 // 切換審核狀態
@@ -367,11 +513,18 @@ const sendReplies = () => {
           class="flex flex-col text-gray-500 bg-gray-100 border-[1px] border-gray-200 rounded-xl p-2 my-2 w-full"
         >
           <div
-            class="flex py-3 px-1 rounded-2xl bg-gray-200 transition-all duration-75"
+            class="flex py-3 px-1 rounded-2xl  transition-all duration-75"
             :class="[
               item.approved
-                ? 'border-yellow-400 border-4 rounded-2xl  transition-all duration-75'
+                ? 'border-yellow-500 bg-yellow-100 border-4 rounded-2xl  transition-all duration-75'
+                : 'border-4 border-solid border-gray-300 bg-gray-300  transition-all duration-200',
+              item.cancelled
+                ? 'border-gray-500 bg-gray-100 border-4 rounded-2xl  transition-all duration-75'
                 : 'border-4 border-solid border-gray-100  transition-all duration-200',
+              item.rejected
+                ? 'border-red-400 bg-red-100 border-4 rounded-2xl  transition-all duration-75'
+                : 'border-4 border-solid border-red-100  transition-all duration-200',
+              ,
             ]"
           >
             <div class="mx-2 w-1/12">
@@ -382,7 +535,7 @@ const sendReplies = () => {
               <div class="my-1 text-xs max-sm:hidden">{{ item.number }}</div>
               <div class="flex">
                 <div
-                  class="flex flex-row justify-center items-center text-[10px] text-red-500 border-solid border-2 border-red-500 px-1 rounded-md"
+                  class="flex flex-row justify-center items-center text-[10px] text-red-500 border-solid border-2 border-red-500 bg-red-100 px-1 rounded-md"
                 >
                   <FireFlame width="13" height="13" />10
                 </div>
@@ -399,40 +552,57 @@ const sendReplies = () => {
               </div>
             </div>
 
-            <div class="flex flex-col justify-center items-center w-52 px-4">
+            <div class="flex flex-col justify-center items-center w-52 px-4 ">
               <p
                 v-if="item.rejected"
-                class="flex items-center justify-center text-xs text-red-400 my-1 w-32"
+                class="flex items-center justify-center text-xs text-red-400 my-1 w-32 font-semibold"
               >
                 團主已拒絕用戶參加<XmarkCircle width="12" height="12" />
               </p>
               <p
                 v-else-if="item.approved"
-                class="flex justify-center items-center w-24 text-xs text-green-600 my-1"
+                class="flex justify-center items-center w-32 text-xs text-green-600 my-1 font-semibold"
               >
                 審核已通過<CheckCircleSolid width="14" height="14" />
               </p>
-              <p v-else class="flex justify-center text-xs text-gray-400 my-1 w-16">尚未審核</p>
-              <button
-                @click="handleAttendeeClick(() => toggleApproval(item.id), item.id)"
-                :class="[
-                  'flex justify-center items-center w-24 h-14 py-2 border-2 rounded-md text-sm transition-all duration-300',
-                  registrationStatus === 'closed'
-                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                    : item.rejected
-                      ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                      : item.approved
-                        ? 'bg-red-500 text-gray-100 border-red-600 font-semibold'
-                        : 'hover:bg-yellow-400 hover:text-yellow-700 border-gray-300 hover:border-yellow-500',
-                ]"
-                class="flex justify-center items-center max-sm:hidden w-full sm:w-30 h-8 py-2 border-2 rounded-md text-xs sm:text-sm transition-all"
+              <p
+                v-else-if="item.cancelled"
+                class="flex justify-center items-center w-32 text-xs text-gray-600 my-1 font-semibold"
               >
-                <span v-if="item.rejected">已拒絕參加</span>
-                <span v-else>{{ item.approved ? '解除參加資格' : '允許參加' }}</span>
+                已取消用戶參加
+              </p>
+              
+              <p v-else class="flex justify-center text-xs text-gray-400 my-1 w-32">尚未審核</p>
+
+              <button 
+                @click="handleApproveClick(item.id)"
+                v-if="!item.approved && !item.cancelled && !item.rejected"
+                :class="[
+                  'flex justify-center items-center w-32 h-8 py-2 mt-2 border-2 rounded-md text-sm transition-all duration-300',
+                  registrationStatus === 'closed' || item.approved
+                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    : 'bg-green-500 hover:bg-green-600 text-white',
+                ]"
+              >
+                <span>{{ item.approved ? '已允許參加' : '允許參加' }}</span>
+              </button>
+
+              <button
+                @click="handleCancelClick(item.id)"
+                v-else-if="item.approved && !item.cancelled"
+                :class="[
+                  'flex justify-center items-center w-32 h-8 py-2 mt-2 border-2 rounded-md text-sm transition-all duration-300',
+                  registrationStatus === 'closed' || item.rejected
+                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    : 'bg-red-500 text-white border-red-600 hover:bg-red-600 hover:border-red-700',
+                ]"
+              >
+                <span>{{ item.cancelled ? '已取消參加' : '取消用戶參加' }}</span>
               </button>
 
               <button
                 @click="handleRejectClick(item.id)"
+                v-else-if="!item.cancelled && !item.approved && !item.rejected"
                 :class="[
                   'flex justify-center items-center w-32 h-8 py-2 mt-2 border-2 rounded-md text-sm transition-all duration-300',
                   registrationStatus === 'closed' || item.rejected
