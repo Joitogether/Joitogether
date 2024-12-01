@@ -9,6 +9,7 @@ import { useMessage } from "naive-ui"
 import dayjs from 'dayjs'
 import { userActivityCreateAPI } from '@/apis/userActivityCreateAPI';
 import { taiwanTime, formatToISOWithTimezone} from '@/stores/useDateTime'
+import { useUserStore } from '@/stores/userStore';
 
 const apiKey = import.meta.env.VITE_GOOGLE_KEY;
 const { searchQuery, suggestions, initializeAutocomplete, triggerInputChange,isLoading:loadingState ,isLoadOK: loadStateOK } = useAutocomplete(apiKey);
@@ -18,11 +19,12 @@ const { minTime, maxTime } = taiwanTime();
 const selectedFile  = ref(null);
 const isSubmitting = ref(false); // 控制按鈕狀態
 const router = useRouter();
+const userStore = useUserStore();
+
 
 
 const message = useMessage()
 dayjs.locale("zh-tw");
-
 
 
 //  資料推送
@@ -30,6 +32,7 @@ const ActivityDataPush = async () => {
    if(isSubmitting.value) return;
    isSubmitting.value =true;
 
+  const hostId = userStore.user.uid;
   const activityData  ={
     name: inputValues.value.name,
     description: inputValues.value.describe,
@@ -43,8 +46,8 @@ const ActivityDataPush = async () => {
     location: searchQuery.value ||null,
     category: inputValues.value.category ||null,
     require_approval: inputValues.value.requireApproval ? 1:0,
-    host_id:'7P6ocyCefPc8oTzjfAEs16RZThR2',   //useUid
-    status:'registrationOpen'
+    host_id:hostId,   //useUid
+    status:'registrationOpen',
   };
 
   try {
