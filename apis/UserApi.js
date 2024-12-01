@@ -1,29 +1,21 @@
 import axios from "axios";
-import { ref } from "vue";
 
-
-const user = ref([])
 
 export const UserGetApi = async (uid) => {
   try {
     const response = await axios.get(`http://localhost:3030/users/${uid}`);
 
-    if (response.data.status === 200) {
-      user.value = response.data.data;
-      return { success: true, data: user.value };
-    } else {
-      console.error('API 返回錯誤：', response.data.message);
-      return { success: false, error: response.data.message };
+    if (response && response.status === 200) {
+      return response.data.data
     }
-  } catch (error) {
-    console.error('獲取使用者資料失敗：', error.message);
-    return { success: false, error: error.message };
+  } catch (err) {
+    return err.response.message
   }
 };
 
 export const UserPutApi = async(uid, data) => {
   try {
-  const response = await axios.put(`http://localhost:3030/users/${uid}`, data)
+  const response = await axios.put(`http://localhost:3030/users/update/${uid}`, data)
   if (response.data.status === 220) {
   console.log('更新成功：', response.data);
   return { success: true, data: response.data };
@@ -39,18 +31,13 @@ export const UserPutApi = async(uid, data) => {
 }
 
 
-export const UserPostApi = async(data) => {
+export const UserPostApi = async(uid, data) => {
   try {
-    const response = await axios.post('http://localhost:3030/users', data);
-    if (response.data.status === 230) {
-      console.log('新增成功：', response.data);
-      return { success: true, data: response.data };
-  } else {
-    console.log('新增失敗：', response.data);
-    return { success: false, error: response.data.message };
-  }
-  } catch (error) {
-    console.error('發送 POST 請求失敗：', error.message);
-    return { success: false, error: error.message };
+    return await axios.post(`http://localhost:3030/users/register/${uid}`, data);
+
+  } catch (err) {
+    return err.response.data
+
   }
 }
+
