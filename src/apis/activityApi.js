@@ -27,3 +27,11 @@ export const activityGetDetailAPI = async (activityId) => {
       return null
     }
 }
+
+export const activityCancelAPI = async (activityId) => {
+  try {
+    return await apiAxios.put(`/activities/cancel/${activityId}`)
+  } catch (err) {
+    return err.response.data
+  }
+} 
