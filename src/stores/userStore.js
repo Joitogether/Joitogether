@@ -16,29 +16,29 @@ export const useUserStore = defineStore('user', {
   }),
   actions: {
     // 初始化 Firebase 狀態監聽
-    async initAuthState(callback) {
-      onAuthStateChanged(auth, (firebaseUser) => {
-        if (firebaseUser) {
-          console.log('Firebase 檢測到用戶已登入：', firebaseUser)
+    // async initAuthState(callback) {
+    //   onAuthStateChanged(auth, (firebaseUser) => {
+    //     if (firebaseUser) {
+    //       console.log('Firebase 檢測到用戶已登入：', firebaseUser)
 
-          // 更新 user 狀態
-          this.user = {
-            uid: firebaseUser.uid,
-            email: firebaseUser.email,
-            emailVerified: firebaseUser.emailVerified,
-            displayName: firebaseUser.displayName || '使用者',
-            photoURL: firebaseUser.photoURL || '',
-            isLogin: true,
-          }
-        } else {
-          console.log('Firebase 檢測到用戶未登入')
-          this.clearUser() // 清空用戶狀態
-        }
+    //       // 更新 user 狀態
+    //       this.user = {
+    //         uid: firebaseUser.uid,
+    //         email: firebaseUser.email,
+    //         emailVerified: firebaseUser.emailVerified,
+    //         displayName: firebaseUser.displayName || '使用者',
+    //         photoURL: firebaseUser.photoURL || '',
+    //         isLogin: true,
+    //       }
+    //     } else {
+    //       console.log('Firebase 檢測到用戶未登入')
+    //       this.clearUser() // 清空用戶狀態
+    //     }
 
-        // 初始化完成後執行回調
-        if (callback) callback()
-      })
-    },
+    //     // 初始化完成後執行回調
+    //     if (callback) callback()
+    //   })
+    // },
 
     // 設定用戶資料
     setUser(user) {

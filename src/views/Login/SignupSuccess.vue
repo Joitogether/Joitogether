@@ -55,6 +55,7 @@ import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { getAuth, onAuthStateChanged } from 'firebase/auth'
 import { userUpdateEmailVerifiedAPI } from '@/apis/userAPIs'
+import { useUserStore } from '@/stores/userStore'
 
 const user = ref(null)
 const router = useRouter()
@@ -75,24 +76,24 @@ const updateEmailVerified = async (uid) => {
   }
 }
 
-onMounted(() => {
-  onAuthStateChanged(auth, async (currentUser) => {
-    if (currentUser) {
-      // 手動刷新用戶資料
-      await currentUser.reload()
-      const refreshedUser = auth.currentUser
+onMounted(async() => {
+  // onAuthStateChanged(auth, async (currentUser) => {
+  //   if (currentUser) {
+  //     // 手動刷新用戶資料
+  //     await currentUser.reload()
+  //     const refreshedUser = auth.currentUser
 
-      // 更新用戶資料
-      user.value = refreshedUser
-
-      // 檢查是否已驗證
-      if (refreshedUser.emailVerified) {
-        console.log('用戶已驗證信箱！')
-        // 調用模組化的更新函數
-        await updateEmailVerified(refreshedUser.uid)
-      }
+  //     // 更新用戶資料
+  //     user.value = refreshedUser
+  const userStore = useUserStore()
+    // 檢查是否已驗證
+    if (userStore.user.emailVerified) {
+      console.log('用戶已驗證信箱！')
+      // 調用模組化的更新函數
+      await updateEmailVerified(userStore.user.uid)
     }
-  })
+  //   }
+  // })
   // 開始倒數計時
   const interval = setInterval(() => {
     if (countdown.value > 0) {
