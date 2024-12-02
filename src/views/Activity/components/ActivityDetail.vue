@@ -151,6 +151,7 @@ const onNegativeClick = () => {
 // 取消報名
 const onPositiveClick = async() => {
     const res = await activityCancelRegisterAPI(activity.value.id, userStore.user.uid)
+    console.log(res)
     if(res.status != 200){
       toggleConfirmModal()
       return message.error('取消報名失敗')
@@ -328,29 +329,31 @@ const handleDropSelect = async (key, comment_id) => {
             <span class="block text-2xl font-bold mb-2">阿勳的評價與評分</span>
             <div class="border h-52 text-5xl font-bold">這裡放星星評分</div>
             <span class="block mt-10 mb-2">留言</span>
-            <NInput v-model:value="userComment" type="textarea" placeholder="留下你想說的話吧!"></NInput>
+          </div>
+          <div class="comment-section border-b border-gray-300 pb-4" >
+            <NInput size="large" show-count="true" maxlength="50" class="bg-transparent aspect-[5/1]" v-model:value="userComment" type="textarea" placeholder="留下你想說的話吧!"></NInput>
             <div class="text-end mt-2">
               <NButton secondary @click="clearComment">取消</NButton>
               <NButton :disabled="userComment.length == 0" @click="submitComment" type="primary" class="ml-2">留言</NButton> 
             </div>
-          </div>
-          <div class="comment-section border-b border-gray-300 pb-4" v-for="comment in comments">
-            <div class="flex h-full  justify-start  w-full   mt-10">
-              <img class="w-14 aspect-square rounded-full" :src="comment.photo_url" alt="">
-              <div class="ml-3 relative w-full h-14">
-                <p class="font-bold text-lg absolute top-0">{{ comment.display_name }}</p>
-                <p class="absolute bottom-0 text-md">{{`${comment.location} • ${comment.age} • ${comment.career}`}}</p>
-                <p class="absolute bottom-0 text-sm right-0">{{ dayjs(comment.created_at).fromNow() }}</p>
+            <div v-for="comment in comments" :key="comment.comment_id">
+              <div class="flex h-full  justify-start  w-full   mt-10">
+                <img class="w-14 aspect-square rounded-full" :src="comment.photo_url" alt="">
+                <div class="ml-3 relative w-full h-14">
+                  <p class="font-bold text-lg absolute top-0">{{ comment.display_name }}</p>
+                  <p class="absolute bottom-0 text-md">{{`${comment.location} • ${comment.age} • ${comment.career}`}}</p>
+                  <p class="absolute bottom-0 text-sm right-0">{{ dayjs(comment.created_at).fromNow() }}</p>
+                </div>
+                <n-dropdown :on-select="(key) => handleDropSelect(key, comment.comment_id)" :options="options" placement="bottom" trigger="hover">
+                  <n-button class="self-start" text>
+                    <n-icon  size="20">
+                      <MoreVert  ></MoreVert>
+                    </n-icon>
+                  </n-button>
+                </n-dropdown>
               </div>
-              <n-dropdown :on-select="(key) => handleDropSelect(key, comment.comment_id)" :options="options" placement="bottom" trigger="hover">
-                <n-button class="self-start" text>
-                  <n-icon  size="20">
-                    <MoreVert  ></MoreVert>
-                  </n-icon>
-                </n-button>
-              </n-dropdown>
+              <p class="pl-[66px] pt-2 text-md">{{ comment.user_comment }}</p>
             </div>
-            <p class="pl-[66px] pt-2 text-md">{{ comment.user_comment }}</p>
           </div>
      
         </div>
