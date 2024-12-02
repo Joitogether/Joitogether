@@ -1,7 +1,7 @@
 <script setup>
 import { NButton, NModal, NCard, NUpload, NInput, NStep, NSpace, NSteps, NInputNumber, NDynamicTags } from 'naive-ui';
 import { ArrowLeft, ArrowRight } from '@iconoir/vue';
-import { ref, defineEmits, computed, watch } from 'vue';
+import { ref, defineEmits, computed, watch, onMounted } from 'vue';
 import { UserPutApi, UserGetApi } from '../../../apis/UserApi';
 import { useUserStore } from '@/stores/userStore';
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage'
@@ -12,9 +12,14 @@ const user = ref(null)
 const userStore = useUserStore()
 const errorMessage = ref(null);
 const loading = ref(true);
+const tagsArray = ref([]);
 
 // 大頭貼的邏輯
 const handleFileChange = async (fileList) => {
+  console.log("檔案變更:", fileList);
+  // 你可以根據需要將上傳的檔案更新到 `user.life_photo_1`
+  // 比如：user.value.life_photo_1 = fileList[0] ? fileList[0].url : null;
+
   // 無選擇文件時直接返回
   if (fileList.length === 0) return
   const file = fileList[0]?.file
@@ -56,9 +61,9 @@ const fetchUserData = async () => {
     const result = await UserGetApi(userStore.user.uid);
     if (result) {
       user.value = result;
+      // 將 tags 字符串轉換為陣列並更新 tagsArray
+      tagsArray.value = result.tags.split(',');
       console.log('資料加載完成:', result);
-      console.log(user.tags);
-
       loading.value = false;
       showModal.value = true;  // 當資料加載完成後顯示 Modal
     }
@@ -69,10 +74,17 @@ const fetchUserData = async () => {
   }
 };
 
+// 監聽 tagsArray，當 tagsArray 變動時更新 user.tags
+watch(tagsArray, (newTags) => {
+  user.value.tags = newTags.join(',');
+});
 
-if (userStore.user.isLogin) {
+onMounted(() => {
+  if (userStore.user.isLogin) {
     fetchUserData();
-}
+  }
+});
+
 
 const currentRef = ref(1)
 const currentStatus = ref("process");
@@ -110,6 +122,7 @@ const handleSave = () => {
       // 資料保存後再打印更新過的資料
       console.log('更新後的資料:', user.value);
       emit('save');
+      showModal.value = false;
     })
     .catch(error => {
       console.error('資料保存錯誤:', error);
@@ -143,18 +156,29 @@ const emit = defineEmits(['close', 'save'])
           <div class="flex mt-5 flex-wrap">所在地：<n-input v-model:value="user.city" placeholder="你在哪裡呢？"/></div>
           <div class="flex mt-5 flex-wrap">職業：<n-input v-model:value="user.career" placeholder="什麼領域的呢？" /></div>
           <div class="flex mt-5 flex-wrap">喜歡的一句話：<n-input v-model:value="user.favorite_sentence" placeholder="例如：我要發大財" /></div>
-          <div class="flex mt-5 flex-wrap">個性標籤：<n-dynamic-tags v-model="user.tags" :max="6" /></div>
+          <div class="flex mt-5 flex-wrap">個性標籤：<n-dynamic-tags v-model:value="tagsArray" :max="6" /></div>
         </div>
         <div id="target2" class="innerPart_2" v-show="currentRef === 2">
-          <div class="photosupload">
-            <p>上傳兩張生活照</p>
+          <div class="photosupload" >
+            <p>上傳第一張生活照</p>
             <n-upload
               accept="image/*"
               :default-file-list="fileList"
               list-type="image-card"
               @preview="handlePreview"
               @change="handleFileChange"
-              :max="2"
+              :max="1"
+              v-model:value="user.life_photo_1"
+            />
+            <p>上傳第二張生活照</p>
+            <n-upload
+              accept="image/*"
+              :default-file-list="fileList"
+              list-type="image-card"
+              @preview="handlePreview"
+              @change="handleFileChange"
+              :max="1"
+              v-model:value="user.life_photo_2"
             />
           </div>
           <div class="selfIntro">
