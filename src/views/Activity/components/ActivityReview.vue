@@ -11,6 +11,7 @@ import {
   Search,
   XmarkCircle,
 } from '@iconoir/vue'
+import defaultAvatar from '@/assets/avatar.png'
 
 import { useDialog, useMessage } from 'naive-ui'
 import { apiAxios } from '@/utils/request'
@@ -29,7 +30,7 @@ const refreshAttendees = async () => {
       attendee.value = response.data.data.map((item) => ({
         id: item.application_id,
         name: item.participant_info.full_name,
-        avatar: '@/assets/avatar.png',
+        avatar: item.participant_info.photo_url || defaultAvatar,
         number: `@${item.participant_id}` || '未提供 ID',
         message: item.comment || '這位參加者尚無留言',
         date: new Date().toLocaleDateString(),
@@ -54,7 +55,7 @@ onMounted(async () => {
       attendee.value = response.data.data.map((item) => ({
         id: item.application_id,
         name: item.participant_info.full_name,
-        avatar: '@/assets/avatar.png',
+        avatar: item.avatar,
         number: `@${item.participant_id}` || '未提供 ID',
         message: item.comment || '這位參加者尚無留言',
         date: new Date().toLocaleDateString(),
@@ -76,7 +77,6 @@ onMounted(async () => {
 const dialog = useDialog()
 const message = useMessage()
 const attendee = ref([])
-
 // const attendee = ref([
 //   {
 //     id: 1,
@@ -334,7 +334,7 @@ const approvedCount = computed(() => {
 })
 
 const rejectCount = computed(() => {
-  return attendee.value.filter((item) => item.rejected).length
+  return attendee.value.filter((item) => item.host_declined).length
 })
 
 const quickReplyVisible = ref(false)
@@ -381,10 +381,9 @@ const sendReplies = async () => {
     >
       <div id="review" class="m-5 max-w-[768px]">
         <div class="flex my-2">
-          <div class="hover:bg-yellow-300 rounded-full mr-2 transition-all">
-            <a href="https://www.google.com/" class="hover:text-yellow-600"
-              ><NavArrowLeft width="32px" height="32"
-            /></a>
+          <div @click="$router.push({ name: 'activityDetail', params: { id: $route.params.activity_id } })"
+          class="hover:bg-yellow-300 rounded-full mr-2 transition-all">
+            <NavArrowLeft width="32px" height="32"/>
           </div>
 
           <div class="text-2xl font-bold text-gray-700">審核列表</div>
@@ -468,7 +467,12 @@ const sendReplies = async () => {
             ]"
           >
             <div class="mx-2 w-1/12">
-              <img src="@/assets/avatar.png" class="w-12 min-w-8 rounded-full" alt="Avatar" />
+              <img
+                :src="item.avatar || '/images/default-avatar.png'"
+                class="w-12 min-w-8 rounded-full"
+                alt="Avatar"
+                @error="(e) => (e.target.src = defaultAvatar)"
+              />
             </div>
             <div class="flex flex-col w-11/12 mx-2">
               <div class="text-sm">{{ item.name }}</div>
