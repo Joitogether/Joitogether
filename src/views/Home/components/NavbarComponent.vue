@@ -1,16 +1,55 @@
 <script setup>
 import { Search, User, Menu, Sweep3d } from '@iconoir/vue'
-import { NButton, NDivider } from 'naive-ui'
-import userInfo from '../../MyProfile/component/person'
-import { RouterLink } from 'vue-router'
-import { useMessage } from 'naive-ui'
+import { NButton, NDivider, useMessage } from 'naive-ui'
 import { useUserStore } from '/src/stores/userStore.js'
 import { auth } from '@/utils/firebaseConfig.js'
-import { useRouter } from 'vue-router'
+import { useRouter, RouterLink } from 'vue-router'
+import { UserGetApi } from '@/apis/UserApi'
+import { ref } from 'vue'
 
 const message = useMessage()
 const userStore = useUserStore()
 const router = useRouter()
+
+defineProps({
+  items: {
+    type: Object,
+    required: true,
+    default: () => ({
+      display_name: '名字加載中',
+      photo_url: '大頭照加載中',
+      city: '城市加載中',
+      age: '年齡加載中',
+      career: '職業加載中',
+    })
+  },
+  type: {
+    type: String,
+    required: true,
+  }
+})
+const user = ref(null);  // 儲存使用者資料
+const loading = ref(true);
+const errorMessage = ref(null);
+const userUid = '3465767889ddgijjljk';
+
+const fetchUserData = async () => {
+  try {
+    const result = await UserGetApi(userUid);
+    console.log('API回傳資料:', result);
+
+    if (result) {
+      user.value = result;
+      loading.value = false;
+      return user.value
+    }
+  } catch (err) {
+    errorMessage.value = err.message || '資料加載錯誤';
+    loading.value = false;
+  }
+    };
+
+  fetchUserData();
 
 // 註冊/登入按鈕跳轉
 const navigateToLogin = () => {
@@ -68,8 +107,7 @@ const handleLogout = async () => {
       <!--選單內容-->
       <div
         id="menu"
-        class="hidden md:hidden bg-gray-200 text-white p-6 space-y-4 absolute top-10 inset-x-0"
-      >
+        class="hidden md:hidden bg-gray-200 text-white p-6 space-y-4 absolute top-10 inset-x-0">
         <ul>
           <li class="flex">
             <Search />
@@ -78,29 +116,24 @@ const handleLogout = async () => {
           <li>
             <a
               href="#"
-              class="block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-black dark:hover:text-white"
-              >加入聚會</a
-            >
+              class="block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-black dark:hover:text-white">
+              加入聚會</a>
           </li>
           <li
-            class="block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-black dark:hover:text-white"
-          >
+            class="block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-black dark:hover:text-white">
             <RouterLink to="/post">社群</RouterLink>
           </li>
           <li>
             <a
               href="#"
-              class="block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-black dark:hover:text-white"
-            >
-              活動中心</a
-            >
+              class="block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-black dark:hover:text-white">
+              活動中心</a>
           </li>
           <li>
             <a
               href="#"
-              class="block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-black dark:hover:text-white"
-              >儲值中心</a
-            >
+              class="block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-black dark:hover:text-white">
+              儲值中心</a>
           </li>
         </ul>
       </div>
@@ -111,27 +144,24 @@ const handleLogout = async () => {
         <li>
           <a
             href="#"
-            class="block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-black dark:hover:text-white"
-            >加入聚會</a
-          >
+            class="block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-black dark:hover:text-white">
+            加入聚會</a>
         </li>
         <li
-          class="block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-black dark:hover:text-white"
-        >
+          class="block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-black dark:hover:text-white">
           <RouterLink to="/post">社群</RouterLink>
         </li>
         <li>
           <a
             href="#"
-            class="block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-black dark:hover:text-white"
-            >活動中心</a
-          >
+            class="block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-black dark:hover:text-white">
+            活動中心</a>
         </li>
         <li>
           <a
             href="#"
-            class="block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-black dark:hover:text-white"
-            >儲值中心</a
+            class="block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-black dark:hover:text-white">
+            儲值中心</a
           >
         </li>
       </ul>
@@ -147,18 +177,20 @@ const handleLogout = async () => {
       >
         <User />
       </label>
+      <div v-if="loading"> 加载中... </div>
+
       <div
+        v-else
         id="login-menu"
-        class="hidden md:hidden w-1/4 bg-gray-50 text-black p-6 space-y-4 absolute top-10 right-0"
-      >
-        <div class="w-1/2 rounded-full overflow-hidden flex justify-self-center">
-          <img :src="userInfo.imgUrl" alt="userPhoto" />
+        class="hidden md:hidden w-1/4 bg-gray-50 text-black p-6 space-y-4 absolute top-10 right-0">
+        <div class="rounded-full overflow-hidden flex justify-self-center">
+          <img :src="user.photo_url || 'default_image_path.jpg'" alt="userPhoto" />
         </div>
-        <div class="text-center font-bold text-xl">{{ userInfo.nickName }}</div>
+        <div class="text-center font-bold text-xl">{{ user.display_name || '暱稱'}}</div>
         <div class="text-md font-bold text-center">
-          <span>{{ userInfo.city }}</span>
-          <span> • {{ userInfo.age }}</span>
-          <span> • {{ userInfo.career }}</span>
+          <span>{{ user.city  || '所在地'}}</span>
+          <span> • {{ user.age || '年齡'}}</span>
+          <span> • {{ user.career || '職業' }}</span>
         </div>
         <div class="flex justify-center">
           <RouterLink to="/profile">
