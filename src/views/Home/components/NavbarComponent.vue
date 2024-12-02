@@ -3,6 +3,43 @@ import { Search, User, Menu, Sweep3d } from '@iconoir/vue'
 import { NButton, NDivider } from 'naive-ui'
 import userInfo from '../../MyProfile/component/person'
 import { RouterLink } from 'vue-router'
+import { useMessage } from 'naive-ui'
+import { useUserStore } from '/src/stores/userStore.js'
+import { auth } from '@/utils/firebaseConfig.js'
+import { useRouter } from 'vue-router'
+
+const message = useMessage()
+const userStore = useUserStore()
+const router = useRouter()
+
+// 註冊/登入按鈕跳轉
+const navigateToLogin = () => {
+  router.push({ name: 'login' })
+}
+
+// 登出功能
+const handleLogout = async () => {
+  const currentUser = auth.currentUser
+  if (!currentUser) {
+    // 如果用戶未登入，顯示未登入提示
+    message.warning('🚫 尚未登入，無法執行登出操作喔！💡')
+    return
+  }
+
+  try {
+    // 調用 Firebase 登出邏輯
+    await auth.signOut()
+
+    // 更新 userStore 狀態為未登入
+    userStore.clearUser() // 清空使用者狀態，方法來自 userStore.js
+
+    // 顯示成功訊息
+    message.success('🎉 成功登出！期待下次見到你～ 👋')
+  } catch (error) {
+    message.error('😵 登出時發生錯誤啦！請稍後再試一次吧 💔')
+    console.error('登出錯誤：', error)
+  }
+}
 </script>
 
 <template>
@@ -45,14 +82,18 @@ import { RouterLink } from 'vue-router'
               >加入聚會</a
             >
           </li>
-          <li class="block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-black dark:hover:text-white">
+          <li
+            class="block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-black dark:hover:text-white"
+          >
             <RouterLink to="/post">社群</RouterLink>
           </li>
           <li>
             <a
               href="#"
-              class="block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-black dark:hover:text-white">
-              活動中心</a>
+              class="block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-black dark:hover:text-white"
+            >
+              活動中心</a
+            >
           </li>
           <li>
             <a
@@ -74,7 +115,9 @@ import { RouterLink } from 'vue-router'
             >加入聚會</a
           >
         </li>
-        <li class="block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-black dark:hover:text-white">
+        <li
+          class="block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-black dark:hover:text-white"
+        >
           <RouterLink to="/post">社群</RouterLink>
         </li>
         <li>
@@ -141,27 +184,39 @@ import { RouterLink } from 'vue-router'
         <div class="flex justify-center">
           <n-button strong secondary type="tertiary"> 登出 </n-button>
         </div>
-        <!-- <ul>
+        <ul>
           <li>
             <a
+              @click="navigateToLogin"
               href="#"
-              class="block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-black dark:hover:text-white">
+              class="block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-black dark:hover:text-white"
+            >
               登入
             </a>
           </li>
           <li>
             <a
+              @click="navigateToLogin"
               href="#"
-              class="block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-black dark:hover:text-white">
+              class="block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-black dark:hover:text-white"
+            >
               註冊
             </a>
           </li>
-        </ul> -->
+          <li>
+            <a
+              @click="handleLogout"
+              href="#"
+              class="block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-black dark:hover:text-white"
+              >登出</a
+            >
+          </li>
+        </ul>
       </div>
     </div>
   </div>
 
-  <!-- 登入/註冊顯示選單 -->
+  <!-- <!-- 登入/註冊顯示選單 -->
 </template>
 
 <style scoped>
