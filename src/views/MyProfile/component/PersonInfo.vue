@@ -1,7 +1,8 @@
 <script setup>
-import { UserGetApi } from '../../../../apis/UserApi';
+import { UserGetApi } from '../../../apis/UserApi';
 import { ref, onMounted } from 'vue';
 import { NSpin } from 'naive-ui';
+import { useUserStore } from '@/stores/userStore';
 
 defineProps({
   items: {
@@ -25,11 +26,11 @@ defineProps({
 const user = ref(null);
 const loading = ref(true);
 const errorMessage = ref(null);
-const userUid = '3465767889ddgijjljk';
-
-const fetchUserData = async () => {
+const userStore = useUserStore()
+if (userStore.user.isLogin) {
+  const fetchUserData = async () => {
   try {
-    const result = await UserGetApi(userUid);
+    const result = await UserGetApi(userStore.user.uid);
     console.log('API回傳資料:', result);
 
     if (result) {
@@ -41,11 +42,11 @@ const fetchUserData = async () => {
     errorMessage.value = err.message || '資料加載錯誤';
     loading.value = false;
   }
-    };
+    }
+    fetchUserData();
 
-    onMounted(() => {
-      fetchUserData();
-    });
+}
+
 
 </script>
 <template>

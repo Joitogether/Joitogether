@@ -1,7 +1,8 @@
 <script setup>
 import { NButton, NSpin } from 'naive-ui';
-import { UserGetApi } from '../../../../apis/UserApi'
-import { ref, onMounted } from 'vue';
+import { UserGetApi } from '../../../apis/UserApi'
+import { ref } from 'vue';
+import { useUserStore } from '@/stores/userStore';
 
 defineProps({
   items: {
@@ -24,11 +25,11 @@ defineProps({
 const user = ref(null);  // 儲存使用者資料
 const loading = ref(true);
 const errorMessage = ref(null);
-const userUid = '3465767889ddgijjljk';
-
-const fetchUserData = async () => {
+const userStore = useUserStore()
+if (userStore.user.isLogin) {
+  const fetchUserData = async () => {
   try {
-    const result = await UserGetApi(userUid);
+    const result = await UserGetApi(userStore.user.uid);
 
     if (result) {
       user.value = result;
@@ -40,10 +41,9 @@ const fetchUserData = async () => {
     loading.value = false;  // 發生錯誤時也關閉加載狀態
   }
     };
+    fetchUserData();
+}
 
-    onMounted(() => {
-      fetchUserData();
-    });
 
 const emit = defineEmits(['edit'])
 </script>

@@ -31,11 +31,11 @@ defineProps({
 const user = ref(null);  // 儲存使用者資料
 const loading = ref(true);
 const errorMessage = ref(null);
-const userUid = '3465767889ddgijjljk';
-
-const fetchUserData = async () => {
+if (userStore.user.isLogin) {
+  console.log(userStore.user.uid);
+  const fetchUserData = async () => {
   try {
-    const result = await UserGetApi(userUid);
+    const result = await UserGetApi(userStore.user.uid);
     console.log('API回傳資料:', result);
 
     if (result) {
@@ -48,8 +48,12 @@ const fetchUserData = async () => {
     loading.value = false;
   }
     };
+    fetchUserData();
+} else {
+  router.push({ name: 'login' })
 
-  fetchUserData();
+}
+
 
 // 註冊/登入按鈕跳轉
 const navigateToLogin = () => {
