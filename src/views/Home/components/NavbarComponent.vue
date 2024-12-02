@@ -5,11 +5,15 @@ import { useUserStore } from '/src/stores/userStore.js'
 import { auth } from '@/utils/firebaseConfig.js'
 import { useRouter, RouterLink } from 'vue-router'
 import { UserGetApi } from '@/apis/UserApi'
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 
 const message = useMessage()
 const userStore = useUserStore()
 const router = useRouter()
+const user = ref(null);  // 儲存使用者資料
+const loading = ref(true);
+const errorMessage = ref(null);
+const isMenuOpen = ref(false); // 用來控制選單顯示狀態
 
 defineProps({
   items: {
@@ -28,32 +32,33 @@ defineProps({
     required: true,
   }
 })
-const user = ref(null);  // 儲存使用者資料
-const loading = ref(true);
-const errorMessage = ref(null);
-if (userStore.user.isLogin) {
-  console.log(userStore.user.uid);
-  const fetchUserData = async () => {
+// 檢查用戶登入狀態並獲取用戶資料
+const fetchUserData = async () => {
   try {
     const result = await UserGetApi(userStore.user.uid);
-    console.log('API回傳資料:', result);
-
     if (result) {
       user.value = result;
       loading.value = false;
-      return user.value
     }
   } catch (err) {
-    errorMessage.value = err.message || '資料加載錯誤';
+    message.error('載入用戶資料錯誤');
     loading.value = false;
   }
-    };
+};
+
+// 註冊登入邏輯
+onMounted(() => {
+  if (userStore.user.isLogin) {
     fetchUserData();
-} else {
-  router.push({ name: 'login' })
+  } else {
+    loading.value = false;
+  }
+});
 
-}
-
+// 切換選單顯示
+const toggleMenu = () => {
+  isMenuOpen.value = !isMenuOpen.value;
+};
 
 // 註冊/登入按鈕跳轉
 const navigateToLogin = () => {
@@ -172,7 +177,7 @@ const handleLogout = async () => {
     </div>
     <!-- 登入/註冊 -->
     <div class="flex">
-      <div class="hidden md:flex min-w-20 items-center">登入/註冊</div>
+      <!-- <div class="hidden md:flex min-w-20 items-center">登入/註冊</div> -->
 
       <input type="checkbox" id="login-toggle" class="hidden" />
       <label
@@ -187,22 +192,22 @@ const handleLogout = async () => {
         v-else
         id="login-menu"
         class="hidden md:hidden w-1/4 bg-gray-50 text-black p-6 space-y-4 absolute top-10 right-0">
-        <div class="rounded-full overflow-hidden flex justify-self-center">
+        <div v-if="userStore.user.isLogin" class="rounded-full overflow-hidden flex justify-self-center">
           <img :src="user.photo_url || 'default_image_path.jpg'" alt="userPhoto" />
         </div>
-        <div class="text-center font-bold text-xl">{{ user.display_name || '暱稱'}}</div>
-        <div class="text-md font-bold text-center">
+        <div v-if="userStore.user.isLogin" class="text-center font-bold text-xl">{{ user.display_name || '暱稱'}}</div>
+        <div v-if="userStore.user.isLogin" class="text-md font-bold text-center">
           <span>{{ user.city  || '所在地'}}</span>
           <span> • {{ user.age || '年齡'}}</span>
           <span> • {{ user.career || '職業' }}</span>
         </div>
-        <div class="flex justify-center">
+        <div v-if="userStore.user.isLogin" class="flex justify-center">
           <RouterLink to="/profile">
             <n-button type="primary" ghost round> 查看個人頁面 </n-button>
           </RouterLink>
         </div>
 
-        <div class="flex justify-center gap-10">
+        <div v-if="userStore.user.isLogin" class="flex justify-center gap-10">
           <div class="grid text-center">
             <span>0</span>
             <span>聚會</span>
@@ -217,42 +222,19 @@ const handleLogout = async () => {
           </div>
         </div>
         <n-divider />
+        <!-- 登出/登入 按鈕 -->
         <div class="flex justify-center">
-          <n-button strong secondary type="tertiary"> 登出 </n-button>
+          <n-button
+            strong
+            secondary
+            type="tertiary"
+            @click="userStore.user.isLogin ? handleLogout() : navigateToLogin()">
+            {{ userStore.user.isLogin ? '登出' : '登入' }}
+          </n-button>
         </div>
-        <ul>
-          <li>
-            <a
-              @click="navigateToLogin"
-              href="#"
-              class="block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-black dark:hover:text-white"
-            >
-              登入
-            </a>
-          </li>
-          <li>
-            <a
-              @click="navigateToLogin"
-              href="#"
-              class="block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-black dark:hover:text-white"
-            >
-              註冊
-            </a>
-          </li>
-          <li>
-            <a
-              @click="handleLogout"
-              href="#"
-              class="block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-black dark:hover:text-white"
-              >登出</a
-            >
-          </li>
-        </ul>
       </div>
     </div>
   </div>
-
-  <!-- <!-- 登入/註冊顯示選單 -->
 </template>
 
 <style scoped>
