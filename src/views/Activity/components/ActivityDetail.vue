@@ -328,7 +328,7 @@ const handleDropSelect = async (key, comment_id) => {
           <div class="mt-3">
             <span class="block text-2xl font-bold mb-2">阿勳的評價與評分</span>
             <div class="border h-52 text-5xl font-bold">這裡放星星評分</div>
-            <span class="block mt-10 mb-2">留言</span>
+            <span class="block mt-10 mb-2 text-lg">留言</span>
           </div>
           <div class="comment-section border-b border-gray-300 pb-4" >
             <NInput size="large" show-count="true" maxlength="50" class="bg-transparent aspect-[5/1]" v-model:value="userComment" type="textarea" placeholder="留下你想說的話吧!"></NInput>
