@@ -1,5 +1,5 @@
 <script setup>
-import { NButton } from 'naive-ui';
+import { NButton, NSpin } from 'naive-ui';
 import { UserGetApi } from '../../../../apis/UserApi'
 import { ref, onMounted } from 'vue';
 
@@ -29,7 +29,6 @@ const userUid = '3465767889ddgijjljk';
 const fetchUserData = async () => {
   try {
     const result = await UserGetApi(userUid);
-    console.log('API回傳資料:', result);
 
     if (result) {
       user.value = result;
@@ -72,11 +71,10 @@ const emit = defineEmits(['edit'])
       <p class="user-description text-2xl font-bold mt-1 md:mb-5">
         : {{ user.favorite_sentence }}
       </p>
-      <n-button @click="emit('edit', 'users')" size="tiny" type="primary" ghost round >編輯檔案</n-button>
+      <n-button @click="emit('edit', 'users')" type="primary" ghost round >編輯檔案</n-button>
       <div class="tag-container flex gap-3 flex-wrap">
-        <span v-for="(item, index) in user.tags.split(',')" :key="index"  class="border-2 px-3 py-1 rounded"
-          ># {{ item }}</span
-        >
+        <span v-for="(item, index) in user.tags.split(',')" :key="index"  class="border-2 px-3 py-1 rounded">
+          # {{ item }}</span>
       </div>
     </div>
   </div>

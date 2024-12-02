@@ -2,64 +2,8 @@
 import { NButton, NModal, NCard, NUpload, NInput, NStep, NSpace, NSteps, NInputNumber, NDynamicTags } from 'naive-ui';
 import { ArrowLeft, ArrowRight } from '@iconoir/vue';
 import { ref, computed, watch } from 'vue';
+import { UserPostApi } from '../../../../apis/UserApi';
 
-const props = defineProps({
-  modelValue: {
-    type: Object,
-    required: true
-  },
-  show: {
-    type: Boolean,
-    default: false // 預設為 false
-  },
-  type: {
-    type: String,
-    default: 'defaultType', // 如果沒有傳遞，設置默認值
-    required: true,
-    // validator: value => ['hero', 'monster'].includes(value)
-  }
-})
-
-const emit = defineEmits(['update:modelValue', 'save', 'cancel'])
-const showModal = ref(props.show);  // 初始化 showModal 變數
-
-const formData = computed({
-  get: () => props.modelValue,
-  set: (value) => emit('update:modelValue', value)
-})
-
-// 定義響應式的文件列表
-const fileList = ref([]);
-
-// 定義用來存儲兩張照片的變數
-const fileData = ref({
-  life_photo_1: null,
-  life_photo_2: null,
-});
-
-// 處理文件變更的邏輯
-function handleFileChange(newFileList) {
-  // 更新 fileList，這會觸發 Vue 的響應式更新
-  fileList.value = newFileList;
-
-  // 根據 fileList 的長度來分配到不同的屬性
-  if (fileList.value.length > 0) {
-    fileData.value.life_photo_1 = fileList.value[0]; // 第一張照片
-  }
-  if (fileList.value.length > 1) {
-    fileData.value.life_photo_2 = fileList.value[1]; // 第二張照片
-  }
-}
-
-// 當 `show` 變更時，更新 `showModal`
-watch(() => props.show, (newValue) => {
-  showModal.value = newValue;
-});
-
-// 控制模態框顯示與隱藏
-// const closeModal = () => {
-//   emit('update:show', false); // 向父組件發送更新
-// };
 
 
 const currentRef = ref(1)
@@ -84,7 +28,7 @@ const prev = () => {
 
 </script>
 <template>
-<div class="btn-container flex gap-2 mt-8 mb-8">
+<div v-if="show" class="btn-container flex gap-2 mt-8 mb-8">
   <n-modal v-model:show="showModal">
     <n-card
       style="width: 600px"
@@ -93,6 +37,7 @@ const prev = () => {
       size="huge"
       role="dialog"
       aria-modal="true"
+      @submit.prevent = "UserPostApi"
     >
 
         <input type="checkbox" id="slide1" class="hidden" checked>
