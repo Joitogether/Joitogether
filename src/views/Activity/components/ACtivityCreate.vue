@@ -22,7 +22,11 @@ const isSubmitting = ref(false); // 控制按鈕狀態
 const router = useRouter();
 const userStore = useUserStore();
 
+
 const markdownPreview = computed(() => marked(inputValues.value.describe || ""));
+marked.setOptions({
+  breaks: true, // 啟用單換行解析
+});
 
 const message = useMessage()
 dayjs.locale("zh-tw");

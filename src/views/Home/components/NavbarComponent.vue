@@ -1,5 +1,5 @@
 <script setup>
-import { Search, User, Menu, Sweep3d } from '@iconoir/vue'
+import { Search, User, Menu, Sweep3d, Activity } from '@iconoir/vue'
 import { NButton, NDivider } from 'naive-ui'
 import userInfo from '../../MyProfile/component/person'
 import { RouterLink } from 'vue-router'
@@ -7,10 +7,14 @@ import { useMessage } from 'naive-ui'
 import { useUserStore } from '/src/stores/userStore.js'
 import { auth } from '@/utils/firebaseConfig.js'
 import { useRouter } from 'vue-router'
+import {  ref } from "vue"
+
 
 const message = useMessage()
 const userStore = useUserStore()
 const router = useRouter()
+const activityCreate =ref(true)
+
 
 // 註冊/登入按鈕跳轉
 const navigateToLogin = () => {
@@ -139,7 +143,11 @@ const handleLogout = async () => {
     <!-- 登入/註冊 -->
     <div class="flex">
       <div class="hidden md:flex min-w-20 items-center">登入/註冊</div>
-
+      <div class="hidden md:flex min-w-20 items-center" v-if="activityCreate">
+        <router-link :to="{ name: 'activityCreate' }">
+          <button>活動創建</button>
+        </router-link>
+      </div>
       <input type="checkbox" id="login-toggle" class="hidden" />
       <label
         for="login-toggle"
