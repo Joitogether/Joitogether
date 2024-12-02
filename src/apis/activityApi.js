@@ -10,7 +10,7 @@ export const activityCancelRegisterAPI = async (activityId, participant_id) => {
 
 export const activityRegisterAPI = async (activity_id ,data) => {
   try{
-    return await apiAxios.post(`/activities/applications/${activity_id}`,data)
+    return await apiAxios.post(`/activities/applications/${activity_id}`, data)
   }catch(err){
     return err.response.data
   }
@@ -35,3 +35,19 @@ export const activityCancelAPI = async (activityId) => {
     return err.response.data
   }
 } 
+
+export const activityNewCommentAPI = async (activity_id, data) => {
+  try{
+    return await apiAxios.post(`/activities/comment/${activity_id}`, data)
+  }catch (err) {
+    return err.response.data
+  }
+}
+
+export const activityDeleteCommentAPI = async (comment_id) => {
+  try{
+    return await apiAxios.delete(`/activities/comment/${comment_id}`)
+  }catch (err) {
+    return err.response.data
+  }
+}

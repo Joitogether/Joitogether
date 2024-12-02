@@ -1,23 +1,25 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
-import { Clock, CreditCard, MoneySquare, Group, MapPin, NavArrowLeft } from '@iconoir/vue'
+import { Clock, CreditCard, MoneySquare, Group, MapPin, NavArrowLeft, MoreVert } from '@iconoir/vue'
 import dayjs from 'dayjs';
-import 'dayjs/locale/zh'
-import { NInput, NButton, NModal, NCard, useMessage } from 'naive-ui';
-dayjs.locale('zh') 
+import 'dayjs/locale/zh-tw.js'
+import relativeTime from 'dayjs/plugin/relativeTime'
+import { NInput, NButton, NModal, NCard, useMessage, NDropdown, NIcon } from 'naive-ui';
 import ActivityCard from '@/views/components/ActivityCard.vue';
 import router from '@/router';
 import { useRoute } from 'vue-router';
 import { useUserStore } from '@/stores/userStore';
-import { activityCancelRegisterAPI, activityGetDetailAPI, activityRegisterAPI, activityCancelAPI } from '@/apis/activityApi';
-import { comment } from 'postcss';
+import { activityCancelRegisterAPI, activityGetDetailAPI, activityRegisterAPI, activityCancelAPI, activityNewCommentAPI, activityDeleteCommentAPI } from '@/apis/activityApi';
 
+dayjs.locale('zh-tw') 
+dayjs.extend(relativeTime)
 const route = useRoute()
 const userComment = ref('')
 const registerComment = ref('')
 const activityId = route.params.id
 async function getActivityDetail(){
   const activityDetail = await activityGetDetailAPI(activityId)
+  
   // 有資料或null
   if(!activityDetail){
     message.error('獲取活動失敗')
@@ -26,6 +28,7 @@ async function getActivityDetail(){
   }
   activity.value = activityDetail
   host.value = activityDetail.host_id
+  comments.value = activityDetail.comments
 }
 
 const userStore = useUserStore()
@@ -191,6 +194,42 @@ const onCancelPositiveClick = async () => {
   message.success('取消活動成功')
 }
 
+const submitComment = async () => {
+  const data = {
+    comment: userComment.value,
+    participant_id: userStore.user.uid
+  }
+  const res = await activityNewCommentAPI(activity.value.id, data)
+  if(res.status !== 201){
+    console.log(res)
+    return message.error('留言失敗')
+  }
+  await getActivityDetail()
+  message.success('新增留言成功')
+  clearComment()
+}
+
+const options = [
+  {
+    label: '刪除',
+    key: 'delete'
+  },
+  {
+    label: '取消',
+    key: 'cancel'
+  }
+]
+
+const handleDropSelect = async (key, comment_id) => {
+  if(key === 'delete'){
+    const res = await activityDeleteCommentAPI(comment_id)
+    if(res.status !== 200){
+      message.error('刪除留言失敗')
+    }
+    message.success('刪除留言成功')
+    await getActivityDetail()
+  }
+}
 
 </script>
 <template>
@@ -292,18 +331,26 @@ const onCancelPositiveClick = async () => {
             <NInput v-model:value="userComment" type="textarea" placeholder="留下你想說的話吧!"></NInput>
             <div class="text-end mt-2">
               <NButton secondary @click="clearComment">取消</NButton>
-              <NButton :disabled="userComment.length == 0" type="primary" class="ml-2">留言</NButton> 
+              <NButton :disabled="userComment.length == 0" @click="submitComment" type="primary" class="ml-2">留言</NButton> 
             </div>
           </div>
-          <div class="comment-section border-b border-gray-300 pb-4" v-for="item in 5">
+          <div class="comment-section border-b border-gray-300 pb-4" v-for="comment in comments">
             <div class="flex h-full  justify-start  w-full   mt-10">
-              <img class="w-14 aspect-square rounded-full" :src="comments.photo_url" alt="">
+              <img class="w-14 aspect-square rounded-full" :src="comment.photo_url" alt="">
               <div class="ml-3 relative w-full h-14">
-                <p class="font-bold text-lg absolute top-0">{{ comments.display_name }}</p>
-                <p class="absolute bottom-0 text-md">新北市 • 45 • 員工</p>
+                <p class="font-bold text-lg absolute top-0">{{ comment.display_name }}</p>
+                <p class="absolute bottom-0 text-md">{{`${comment.location} • ${comment.age} • ${comment.career}`}}</p>
+                <p class="absolute bottom-0 text-sm right-0">{{ dayjs(comment.created_at).fromNow() }}</p>
               </div>
+              <n-dropdown :on-select="(key) => handleDropSelect(key, comment.comment_id)" :options="options" placement="bottom" trigger="hover">
+                <n-button class="self-start" text>
+                  <n-icon  size="20">
+                    <MoreVert  ></MoreVert>
+                  </n-icon>
+                </n-button>
+              </n-dropdown>
             </div>
-            <p class="pl-[66px] pt-2 text-md">一起去吧!</p>
+            <p class="pl-[66px] pt-2 text-md">{{ comment.user_comment }}</p>
           </div>
      
         </div>
@@ -382,5 +429,27 @@ const onCancelPositiveClick = async () => {
     padding-right: 2%; 
   }
 }
+
+:deep(.slide-left-enter-active),
+:deep(.slide-left-leave-active) {
+  transition:
+    transform 0.3s ease,
+    opacity 0.3s ease;
+}
+
+:deep(.slide-left-enter-from),
+:deep(.slide-left-leave-to) {
+  position: absolute;
+  opacity: 0;
+}
+
+:deep(.slide-left-enter-from) {
+  transform: translateX(-10px);
+}
+
+:deep(.slide-left-leave-to) {
+  transform: translateX(10px);
+}
+
 
 </style>  

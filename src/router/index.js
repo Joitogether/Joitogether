@@ -10,7 +10,7 @@ import PersonRate from '@/views/MyProfile/component/PersonRate.vue'
 import PersonalFocus from '@/views/MyProfile/component/PersonalFocus.vue'
 import Activity from '@/views/Activity/index.vue'
 import ActivityDetail from '@/views/Activity/components/ActivityDetail.vue'
-import ActivityCreate from '@/views/Activity/components/ActivityCreate.vue'
+import ActivityCreate from '@/views/Activity/components/ACtivityCreate.vue'
 import ActivityReview from '@/views/Activity/components/ActivityReview.vue'
 import SignupSuccess from '@/views/Login/SignupSuccess.vue'
 import ResetPassword from '@/views/Login/ResetPassword.vue'
@@ -122,6 +122,7 @@ router.beforeEach( (to, from, next) => {
       next()
     } else {
       // next('/login')
+      console.log('尚未登入')
       userStore.clearUser()
       next()
     }
