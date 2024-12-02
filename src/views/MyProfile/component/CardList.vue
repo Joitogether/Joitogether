@@ -1,7 +1,7 @@
 <script setup>
 import { NButton, NSpin } from 'naive-ui';
 import { UserGetApi } from '../../../apis/UserApi'
-import { ref } from 'vue';
+import { ref, defineEmits } from 'vue';
 import { useUserStore } from '@/stores/userStore';
 
 defineProps({
@@ -25,7 +25,9 @@ defineProps({
 const user = ref(null);  // 儲存使用者資料
 const loading = ref(true);
 const errorMessage = ref(null);
-const userStore = useUserStore()
+const userStore = useUserStore();
+const showModal = ref(false);  // 控制 modal 顯示
+
 if (userStore.user.isLogin) {
   const fetchUserData = async () => {
   try {
@@ -43,9 +45,12 @@ if (userStore.user.isLogin) {
     };
     fetchUserData();
 }
+// 控制 modal 開啟
+const openModal = () => {
+  showModal.value = true;
+};
 
-
-const emit = defineEmits(['edit'])
+const emit = defineEmits(['edit', 'close'])
 </script>
 <template>
   <div v-if="loading">
@@ -71,7 +76,7 @@ const emit = defineEmits(['edit'])
       <p class="user-description text-2xl font-bold mt-1 md:mb-5">
         : {{ user.favorite_sentence }}
       </p>
-      <n-button @click="emit('edit', 'users')" type="primary" ghost round >編輯檔案</n-button>
+      <n-button @click="emit('edit', 'close',user)" @open-modal="openModal" type="primary" ghost round >編輯檔案</n-button>
       <div class="tag-container flex gap-3 flex-wrap">
         <span v-for="(item, index) in user.tags.split(',')" :key="index"  class="border-2 px-3 py-1 rounded">
           # {{ item }}</span>

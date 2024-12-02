@@ -5,7 +5,7 @@ import { RouterLink, RouterView } from 'vue-router'
 import axios from 'axios';
 import CardList from './component/CardList.vue'
 import EditModal from './component/EditModal.vue';
-import { UserGetApi } from '../../../apis/UserApi';
+import { UserGetApi } from '../../apis/UserApi';
 
 const showModal = ref(false)
 const editingItem = ref(null)
@@ -14,35 +14,46 @@ const currentUser = ref(null);
 const user = ref(null);
 const loading = ref(true);
 const errorMessage = ref(null);
-const userUid = '3465767889ddgijjljk';
+// const userUid = '3cfhvjbkjk89ddgi6699jk';
 
-const fetchUserData = async () => {
-  try {
-    const result = await UserGetApi(userUid);
-    console.log('API回傳資料:', result);
+// const fetchUserData = async () => {
+//   try {
+//     const result = await UserGetApi(userUid);
+//     console.log('API回傳資料:', result);
 
-    if (result) {
-      user.value = result;
-      loading.value = false;
-      return user.value
-    }
-  } catch (err) {
-    errorMessage.value = err.message || '資料加載錯誤';
-    loading.value = false;
-  }
-    };
+//     if (result) {
+//       user.value = result;
+//       loading.value = false;
+//       return user.value
+//     }
+//   } catch (err) {
+//     errorMessage.value = err.message || '資料加載錯誤';
+//     loading.value = false;
+//   }
+//     };
 
-    onMounted(() => {
-      fetchUserData();
-    });
+//     onMounted(() => {
+//       fetchUserData();
+//     });
 
+const isEditModalOpen = ref(false);
+// 開啟編輯視窗
+const openEditModal = (param) => {
+  console.log(param);  // 查看傳遞的參數
+  console.log(JSON.stringify(user.value, null, 2))
+  isEditModalOpen.value = true;  // 顯示編輯視窗
+};
 
+// 關閉編輯視窗
+const closeEditModal = () => {
+  isEditModalOpen.value = false;
+};
 
 // 編輯
 const handleEdit = (item, type) => {
-  editingItem.value = { ...item }; // 深拷贝
-  editingType.value = type; // 设置类型
-  showModal.value = true;  // 显示编辑弹窗
+  editingItem.value = { ...item };
+  editingType.value = type;
+  showModal.value = true;
 }
 
 const handleSave = async () => {
@@ -87,10 +98,11 @@ const handleSave = async () => {
 
 <template>
   <div class="container mx-auto">
-  <CardList :items="currentUser" type="users" @edit="handleEdit" />
+  <CardList :items="currentUser" type="users" @edit="openEditModal" @close="closeEditModal" />
   <!-- <EditModal v-if="editingItem" v-model="editingItem" :type="editingType" @save="handleSave"
   @cancel="editingItem = null"/> -->
-  <EditModal :modelValue="editingItem" v-model:show="showModal" :type="'users'" @save="handleSave" />
+  <!-- <EditModal :modelValue="editingItem" :type="'users'" @save="handleSave" /> -->
+  <EditModal v-if="isEditModalOpen" @close="closeEditModal" @edit="openEditModal"  />
 
   <div>
     <ul class="flex justify-between px-10 py-5">
