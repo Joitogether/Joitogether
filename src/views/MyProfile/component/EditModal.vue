@@ -1,5 +1,5 @@
 <script setup>
-import { NButton, NModal, NCard, NUpload, NInput, NStep, NSpace, NSteps, NInputNumber, NDynamicTags } from 'naive-ui';
+import { NButton, NModal, NCard, NUpload, NInput, NStep, NSpace, NSteps, NInputNumber, NDynamicTags, NSelect } from 'naive-ui';
 import { ArrowLeft, ArrowRight } from '@iconoir/vue';
 import { ref, computed, watch, onMounted } from 'vue';
 import { UserPutApi, UserGetApi } from '../../../apis/UserApi';
@@ -16,6 +16,49 @@ const loading = ref(true);
 const tagsArray = ref([]);
 const fileListSec = ref([]);
 
+const options = [
+  { label:"基隆市", value:"基隆市" },
+  { label:"台北市", value:"台北市" },
+  { label:"新北市", value:"新北市" },
+  { label:"桃園市", value:"桃園市" },
+  { label:"新竹縣", value:"新竹縣" },
+  { label:"新竹市", value:"新竹市" },
+  { label:"苗栗縣", value:"苗栗縣" },
+  { label:"台中市", value:"台中市" },
+  { label:"彰化縣", value:"彰化縣" },
+  { label:"南投縣", value:"南投縣" },
+  { label:"雲林縣", value:"雲林縣" },
+  { label:"嘉義縣", value:"嘉義縣" },
+  { label:"嘉義市", value:"嘉義市" },
+  { label:"台南市", value:"台南市" },
+  { label:"高雄市", value:"高雄市" },
+  { label:"屏東縣", value:"屏東縣" },
+  { label:"宜蘭縣", value:"宜蘭縣" },
+  { label:"花蓮縣", value:"花蓮縣" },
+  { label:"台東縣", value:"台東縣" },
+  { label:"澎湖縣", value:"澎湖縣" },
+  { label:"金門縣", value:"金門縣" },
+  { label:"連江縣", value:"連江縣" },
+
+]
+
+const fetchUserData = async () => {
+  try {
+    const result = await UserGetApi(userStore.user.uid);
+    if (result) {
+      user.value = result;
+      // 將 tags 字符串轉換為陣列並更新 tagsArray
+      tagsArray.value = result.tags.split(',');
+      console.log('資料加載完成:', result);
+      loading.value = false;
+      showModal.value = true;  // 當資料加載完成後顯示 Modal
+    }
+  } catch (err) {
+    errorMessage.value = err.message || '資料加載錯誤';
+    loading.value = false;
+    console.error('資料加載錯誤:', err);
+  }
+};
 
 //處理第一張照片
 const handleFileChange1 = async (fileList) => {
@@ -122,24 +165,6 @@ const reader = new FileReader()
 };
 
 
-const fetchUserData = async () => {
-  try {
-    const result = await UserGetApi(userStore.user.uid);
-    if (result) {
-      user.value = result;
-      // 將 tags 字符串轉換為陣列並更新 tagsArray
-      tagsArray.value = result.tags.split(',');
-      console.log('資料加載完成:', result);
-      loading.value = false;
-      showModal.value = true;  // 當資料加載完成後顯示 Modal
-    }
-  } catch (err) {
-    errorMessage.value = err.message || '資料加載錯誤';
-    loading.value = false;
-    console.error('資料加載錯誤:', err);
-  }
-};
-
 // 監聽 tagsArray，當 tagsArray 變動時更新 user.tags
 watch(tagsArray, (newTags) => {
   user.value.tags = newTags.join(',');
@@ -219,7 +244,12 @@ const emit = defineEmits(['close', 'save'])
         <div id="target1" class="innerPart_1"  v-if="!loading" v-show="currentRef === 1">
           <div class="flex mt-5 flex-wrap">暱稱：<n-input v-model:value="user.display_name" placeholder="朋友都如何稱呼你？"/></div>
           <div class="flex mt-5 flex-wrap">年齡：<n-input-number v-model:value="user.age" clearable placeholder="年齡不是問題"/></div>
-          <div class="flex mt-5 flex-wrap">所在地：<n-input v-model:value="user.city" placeholder="你在哪裡呢？"/></div>
+          <div class="flex mt-5 flex-wrap">所在地：</div>
+            <!-- <n-input v-model:value="user.city" placeholder="你在哪裡呢？"/> -->
+            <n-space vertical>
+              <n-select v-model:value="user.city" :options="options"/>
+            </n-space>
+
           <div class="flex mt-5 flex-wrap">職業：<n-input v-model:value="user.career" placeholder="什麼領域的呢？" /></div>
           <div class="flex mt-5 flex-wrap">座右銘：<n-input v-model:value="user.favorite_sentence" placeholder="例如：我要發大財" /></div>
           <div class="flex mt-5 flex-wrap">個性標籤：<n-dynamic-tags v-model:value="tagsArray" :max="6" /></div>
