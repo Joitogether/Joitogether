@@ -53,29 +53,56 @@
 import { NButton } from 'naive-ui'
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { onAuthStateChanged, getAuth } from 'firebase/auth'
+import { getAuth, onAuthStateChanged } from 'firebase/auth'
+import { userUpdateEmailVerifiedAPI } from '@/apis/userAPIs'
+import { useUserStore } from '@/stores/userStore'
 
 const user = ref(null)
 const router = useRouter()
 const auth = getAuth()
 const countdown = ref(10)
 
-onMounted(() => {
-  onAuthStateChanged(auth, (currentUser) => {
-    if (currentUser) {
-      user.value = currentUser // 更新用戶資料
-    } else {
-      router.push('/login') // 用戶未登入，跳轉至登入頁面
-    }
-  })
+// 更新用戶的 emailVerified 狀態到後端
+const updateEmailVerified = async (uid) => {
+  const updateData = {
+    email_verified: true,
+  }
 
+  try {
+    const response = await userUpdateEmailVerifiedAPI(uid, updateData)
+    console.log('後端 email_verified 更新成功！', response.data)
+  } catch (error) {
+    console.error('後端 email_verified 更新失敗：', error)
+  }
+}
+
+onMounted(async() => {
+  // onAuthStateChanged(auth, async (currentUser) => {
+  //   if (currentUser) {
+  //     // 手動刷新用戶資料
+  //     await currentUser.reload()
+  //     const refreshedUser = auth.currentUser
+
+  //     // 更新用戶資料
+  //     user.value = refreshedUser
+  const userStore = useUserStore()
+    // 檢查是否已驗證
+    if (userStore.user.emailVerified) {
+      console.log('用戶已驗證信箱！')
+      // 調用模組化的更新函數
+      await updateEmailVerified(userStore.user.uid)
+    }
+  //   }
+  // })
   // 開始倒數計時
   const interval = setInterval(() => {
     if (countdown.value > 0) {
       countdown.value -= 1
     } else {
-      clearInterval(interval) // 倒數結束後清除定時器
-      goHome() // 跳轉到登入頁
+      // 倒數結束後清除定時器
+      clearInterval(interval)
+      // 跳轉到登入頁
+      goHome()
     }
   }, 1000)
 })

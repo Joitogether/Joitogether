@@ -20,23 +20,23 @@ const skipNextWatch = ref(false)
 
 onMounted(() => {
   // 使用 onAuthStateChanged 確保狀態同步後進行初始化
-  userStore.initAuthState(() => {
-    if (!hasInitialized.value) {
-      // 標記初始化完成
-      hasInitialized.value = true
-      // 屏蔽下一次 watch 執行
-      skipNextWatch.value = true
-      if (userStore.user.isLogin) {
-        // 初始化時登入提示
-        // message.success('🎉 歡迎回來～很高興見到您！✨')
-        message.success(`歡迎回來 ${userStore.user.displayName}，很高興見到您！🎉`)
-      } else {
-        // 初始化時未登入提示
-        message.warning('😵 您尚未登入，部分功能可能無法使用喔！💔')
-      }
-    }
-  })
-})
+  // userStore.initAuthState(() => {
+  //   if (!hasInitialized.value) {
+  //     // 標記初始化完成
+  //     hasInitialized.value = true
+  //     // 屏蔽下一次 watch 執行
+  //     skipNextWatch.value = true
+  if (userStore.user.isLogin) {
+    // 初始化時登入提示
+    // message.success('🎉 歡迎回來～很高興見到您！✨')
+    message.success(`歡迎回來 ${userStore.user.displayName}，很高興見到您！🎉`)
+  } else {
+    // 初始化時未登入提示
+    message.warning('😵 您尚未登入，部分功能可能無法使用喔！💔')
+  }
+  }
+  // })
+)
 
 // 監聽登入狀態的變化（避免在初始化時重複執行）
 watch(

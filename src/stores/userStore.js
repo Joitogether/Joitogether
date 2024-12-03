@@ -16,45 +16,28 @@ export const useUserStore = defineStore('user', {
   }),
   actions: {
     // 初始化 Firebase 狀態監聽
-    async initAuthState(callback) {
-      onAuthStateChanged(auth, (firebaseUser) => {
-        if (firebaseUser) {
-          console.log('Firebase 檢測到用戶已登入：', firebaseUser)
+    // async initAuthState(callback) {
+    //   onAuthStateChanged(auth, (firebaseUser) => {
+    //     if (firebaseUser) {
+    //       console.log('Firebase 檢測到用戶已登入：', firebaseUser)
 
-          // 更新 user 狀態
-          this.user = {
-            uid: firebaseUser.uid,
-            email: firebaseUser.email,
-            emailVerified: firebaseUser.emailVerified,
-            displayName: firebaseUser.displayName || '使用者',
-            photoURL: firebaseUser.photoURL || '',
-            isLogin: true,
-          }
+    //       // 更新 user 狀態
+    //       this.user = {
+    //         uid: firebaseUser.uid,
+    //         email: firebaseUser.email,
+    //         emailVerified: firebaseUser.emailVerified,
+    //         displayName: firebaseUser.displayName || '使用者',
+    //         photoURL: firebaseUser.photoURL || '',
+    //         isLogin: true,
+    //       }
+    //     } else {
+    //       console.log('Firebase 檢測到用戶未登入')
+    //       this.clearUser() // 清空用戶狀態
+    //     }
 
-          // 如果信箱已驗證，觸發後端同步
-          // if (firebaseUser.emailVerified) {
-          //   this.updateEmailVerifiedInBackend(firebaseUser.uid)
-          // }
-        } else {
-          // console.log('Firebase 檢測到用戶未登入')
-          // this.clearUser() // 清空用戶狀態
-        }
-
-        // 初始化完成後執行回調
-        if (callback) callback()
-      })
-    },
-
-    // 更新後端的 emailVerified 狀態
-    // async updateEmailVerifiedInBackend(uid) {
-    //   try {
-    //     const response = await axios.put(`http://localhost:3030/users/update/${uid}`, {
-    //       email_verified: true,
-    //     })
-    //     console.log('後端 email_verified 更新成功：', response.data)
-    //   } catch (error) {
-    //     console.error('後端 email_verified 更新失敗：', error.message)
-    //   }
+    //     // 初始化完成後執行回調
+    //     if (callback) callback()
+    //   })
     // },
 
     // 設定用戶資料

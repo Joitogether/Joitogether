@@ -10,11 +10,15 @@ import PersonRate from '@/views/MyProfile/component/PersonRate.vue'
 import PersonalFocus from '@/views/MyProfile/component/PersonalFocus.vue'
 import Activity from '@/views/Activity/index.vue'
 import ActivityDetail from '@/views/Activity/components/ActivityDetail.vue'
-import ActivityCreate from '@/views/Activity/components/ActivityCreate.vue'
+import ActivityCreate from '@/views/Activity/components/ACtivityCreate.vue'
 import ActivityReview from '@/views/Activity/components/ActivityReview.vue'
 import SignupSuccess from '@/views/Login/SignupSuccess.vue'
 import ResetPassword from '@/views/Login/ResetPassword.vue'
 import forgotPassword from '@/views/Login/ForgotPassword.vue'
+import { onAuthStateChanged } from 'firebase/auth'
+import { auth } from '@/utils/firebaseConfig.js'
+import { useUserStore } from '@/stores/userStore'
+
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -99,13 +103,30 @@ const router = createRouter({
         },
 
         {
-          path: 'review',
+          path: 'review/:activity_id',
           name: 'activityReview',
           component: ActivityReview,
         },
       ],
     },
   ],
+})
+
+
+
+router.beforeEach( (to, from, next) => {
+  const userStore = useUserStore()
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      userStore.setUser(user)
+      next()
+    } else {
+      // next('/login')
+      console.log('尚未登入')
+      userStore.clearUser()
+      next()
+    }
+  })
 })
 
 export default router
