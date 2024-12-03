@@ -1,7 +1,7 @@
 <script setup>
 import { NButton, NModal, NCard, NUpload, NInput, NStep, NSpace, NSteps, NInputNumber, NDynamicTags } from 'naive-ui';
 import { ArrowLeft, ArrowRight } from '@iconoir/vue';
-import { ref, defineEmits, computed, watch, onMounted } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
 import { UserPutApi, UserGetApi } from '../../../apis/UserApi';
 import { useUserStore } from '@/stores/userStore';
 import { storage } from '@/utils/firebaseConfig';
@@ -14,10 +14,11 @@ const userStore = useUserStore()
 const errorMessage = ref(null);
 const loading = ref(true);
 const tagsArray = ref([]);
-const fileList = ref([]);  // 用來保存檔案的列表
+const fileListSec = ref([]);
 
 
-const handleFileChange = async (fileList) => {
+//處理第一張照片
+const handleFileChange1 = async (fileList) => {
   console.log('檔案變更:', fileList);  // 輸出 fileList 的內容
 
   if (fileList.length === 0) {
@@ -38,6 +39,13 @@ const handleFileChange = async (fileList) => {
     message.error('上傳失敗！圖片大小不能超過 2MB 😭');
     return;
   }
+// 預覽圖片
+const reader = new FileReader()
+  reader.onload = (event) => {
+    // 本地圖片預覽
+    user.value.life_photo_1 = event.target.result
+  }
+  reader.readAsDataURL(file)
 
   try {
     // 設定圖片文件的存儲路徑
@@ -54,12 +62,61 @@ const handleFileChange = async (fileList) => {
     // 更新 user 中的圖片 URL
     user.value.life_photo_1 = downloadURL;
     console.log('更新後的 user:', user.value);
-
-    // 假設這裡是用來更新 MySQL 的 API
-    await UserPutApi(userStore.user.uid, user.value);
     // message.success('🎉 圖片上傳成功！');
   } catch (error) {
     console.error('圖片上傳失敗:', error.message);
+    // message.error('😭 上傳圖片失敗，請稍後再試。');
+  }
+};
+
+// 處理第二張照片
+const handleFileChange2 = async (fileListSec) => {
+  console.log('檔案變更:', fileListSec);  // 輸出 fileList 的內容
+
+  if (fileListSec.length === 0) {
+    console.log('沒有檔案被選中');
+    return;
+  }
+
+  // 確保能從 fileList 中正確取得檔案
+  const file2 = fileListSec[0]?.file;
+  console.log('第二張選中的檔案:', file2);
+
+  if (!file2) {
+    console.log('第二張檔案對象不存在');
+    return;
+  }
+
+  if (file2.size > 2 * 1024 * 1024) {  // 檢查檔案大小
+    message.error('第二張上傳失敗！圖片大小不能超過 2MB 😭');
+    return;
+  }
+// 預覽圖片
+const reader = new FileReader()
+  reader.onload = (event) => {
+    // 本地圖片預覽
+    user.value.life_photo_2 = event.target.result
+  }
+  reader.readAsDataURL(file2)
+
+  try {
+    // 設定圖片文件的存儲路徑
+    const filePath = `lifephoto/${Date.now()}_${file2.name}`;
+    const fileRef = storageRef(storage, filePath);
+
+    console.log('第二張圖片開始上傳檔案...', file2.name);
+
+    const snapshot = await uploadBytes(fileRef, file2);
+    const downloadURL = await getDownloadURL(snapshot.ref);
+
+    console.log('第二張圖片下載 URL:', downloadURL);
+
+    // 更新 user 中的圖片 URL
+    user.value.life_photo_2 = downloadURL;
+    console.log('第二張上傳後更新後的 user:', user.value);
+    // message.success('🎉 圖片上傳成功！');
+  } catch (error) {
+    console.error('第二張圖片上傳失敗:', error.message);
     // message.error('😭 上傳圖片失敗，請稍後再試。');
   }
 };
@@ -169,16 +226,30 @@ const emit = defineEmits(['close', 'save'])
         </div>
         <div id="target2" class="innerPart_2" v-show="currentRef === 2">
           <div class="photosupload" >
-            <p>上傳第一張生活照</p>
+            <p>上傳生活照</p>
+            <div class="w-full h-full rounded-full overflow-hidden border border-gray-300 bg-gray-100 flex items-center justify-center">
+              <img v-if="user.life_photo_1" :src="user.life_photo_1" alt="life_photo"/>
+              <span v-else>第一張照片還沒上傳</span>
+            </div>
             <n-upload
-                  accept="image/*"
-                  :max="1"
-                  :file-list="[]"
-                  :on-update:file-list="handleFileChange"
-                  :show-file-list="false"
-                >
-                  <n-button type="primary" round circle>+</n-button>
-                </n-upload>
+              accept="image/*"
+              :max="1"
+              :file-list="[]"
+              :on-update:file-list="handleFileChange1">
+              <n-button type="primary" round circle>+</n-button>
+              </n-upload>
+            <div class="w-full h-full rounded-full overflow-hidden border border-gray-300 bg-gray-100 flex items-center justify-center">
+              <img v-if="user.life_photo_2" :src="user.life_photo_2" alt="life_photo"/>
+              <span v-else>第二張照片還沒上傳</span>
+            </div>
+            <n-upload
+              accept="image/*"
+              :max="1"
+              :file-list="fileListSec"
+              :on-update:file-list="handleFileChange2">
+              <n-button type="primary" round circle>+</n-button>
+            </n-upload>
+
           </div>
           <div class="selfIntro">
             <n-space vertical>
