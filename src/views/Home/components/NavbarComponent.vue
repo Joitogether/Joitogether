@@ -7,13 +7,18 @@ import { useMessage } from 'naive-ui'
 import { useUserStore } from '/src/stores/userStore.js'
 import { auth } from '@/utils/firebaseConfig.js'
 import { useRouter } from 'vue-router'
-import {  ref } from "vue"
-
+import { defineProps } from 'vue'
 
 const message = useMessage()
 const userStore = useUserStore()
 const router = useRouter()
-const activityCreate =ref(true)
+// 登入顯示活動創建
+defineProps({
+  isUserLoggedIn: {
+    type: Boolean,
+    required: true,
+  },
+});
 
 
 // 註冊/登入按鈕跳轉
@@ -143,7 +148,7 @@ const handleLogout = async () => {
     <!-- 登入/註冊 -->
     <div class="flex">
       <div class="hidden md:flex min-w-20 items-center">登入/註冊</div>
-      <div class="hidden md:flex min-w-20 items-center" v-if="activityCreate">
+      <div class="hidden md:flex min-w-20 items-center" v-if="isUserLoggedIn">
         <router-link :to="{ name: 'activityCreate' }">
           <button>活動創建</button>
         </router-link>

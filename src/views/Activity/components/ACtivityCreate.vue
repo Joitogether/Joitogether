@@ -10,7 +10,9 @@ import dayjs from 'dayjs'
 import { userActivityCreateAPI } from '@/apis/userActivityCreateAPI';
 import { taiwanTime, formatToISOWithTimezone} from '@/stores/useDateTime'
 import { useUserStore } from '@/stores/userStore';
-import { marked } from "marked";
+import { convertMarkdown } from "@/stores/useMarkdown";
+
+
 
 const apiKey = import.meta.env.VITE_GOOGLE_KEY;
 const { searchQuery, suggestions, initializeAutocomplete, triggerInputChange,isLoading:loadingState ,isLoadOK: loadStateOK } = useAutocomplete(apiKey);
@@ -23,10 +25,8 @@ const router = useRouter();
 const userStore = useUserStore();
 
 
-const markdownPreview = computed(() => marked(inputValues.value.describe || ""));
-marked.setOptions({
-  breaks: true, // 啟用單換行解析
-});
+const markdownPreview = computed(() => convertMarkdown(inputValues.value.describe));
+
 
 const message = useMessage()
 dayjs.locale("zh-tw");
