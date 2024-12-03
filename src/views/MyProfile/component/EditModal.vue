@@ -16,7 +16,7 @@ const loading = ref(true);
 const tagsArray = ref([]);
 const fileListSec = ref([]);
 
-const options = [
+const cityOptions = [
   { label:"基隆市", value:"基隆市" },
   { label:"台北市", value:"台北市" },
   { label:"新北市", value:"新北市" },
@@ -39,7 +39,21 @@ const options = [
   { label:"澎湖縣", value:"澎湖縣" },
   { label:"金門縣", value:"金門縣" },
   { label:"連江縣", value:"連江縣" },
-
+  { label:"國外", value:"國外" },
+]
+const zodiacOptions = [
+  { label:"摩羯座", value:"摩羯座"},
+  { label:"水瓶座", value:"水瓶座"},
+  { label:"雙魚座", value:"雙魚座"},
+  { label:"牡羊座", value:"牡羊座"},
+  { label:"金牛座", value:"金牛座"},
+  { label:"雙子座", value:"雙子座"},
+  { label:"巨蟹座", value:"巨蟹座"},
+  { label:"獅子座", value:"獅子座"},
+  { label:"處女座", value:"處女座"},
+  { label:"天秤座", value:"天秤座"},
+  { label:"天蠍座", value:"天蠍座"},
+  { label:"射手座", value:"射手座"},
 ]
 
 const fetchUserData = async () => {
@@ -221,7 +235,7 @@ const handleSave = () => {
 };
 // 用來關閉視窗的函數
 const closeModal = () => {
-  showModal.value = false;  // 設為 false 關閉 modal
+  showModal.value = false;
   emit('close');  // 向父組件發送事件，通知關閉
 };
 const emit = defineEmits(['close', 'save'])
@@ -245,18 +259,16 @@ const emit = defineEmits(['close', 'save'])
           <div class="flex mt-5 flex-wrap">暱稱：<n-input v-model:value="user.display_name" placeholder="朋友都如何稱呼你？"/></div>
           <div class="flex mt-5 flex-wrap">年齡：<n-input-number v-model:value="user.age" clearable placeholder="年齡不是問題"/></div>
           <div class="flex mt-5 flex-wrap">所在地：</div>
-            <!-- <n-input v-model:value="user.city" placeholder="你在哪裡呢？"/> -->
             <n-space vertical>
-              <n-select v-model:value="user.city" :options="options"/>
+              <n-select v-model:value="user.city" :options="cityOptions"/>
             </n-space>
-
           <div class="flex mt-5 flex-wrap">職業：<n-input v-model:value="user.career" placeholder="什麼領域的呢？" /></div>
           <div class="flex mt-5 flex-wrap">座右銘：<n-input v-model:value="user.favorite_sentence" placeholder="例如：我要發大財" /></div>
           <div class="flex mt-5 flex-wrap">個性標籤：<n-dynamic-tags v-model:value="tagsArray" :max="6" /></div>
         </div>
         <div id="target2" class="innerPart_2" v-show="currentRef === 2">
           <div class="photosupload" >
-            <p>上傳生活照</p>
+            <p>生活照上傳區</p>
             <div class="w-full h-full rounded-full overflow-hidden border border-gray-300 bg-gray-100 flex items-center justify-center">
               <img v-if="user.life_photo_1" :src="user.life_photo_1" alt="life_photo"/>
               <span v-else>第一張照片還沒上傳</span>
@@ -289,7 +301,10 @@ const emit = defineEmits(['close', 'save'])
               v-model:value="user.self_introduction"
               type="textarea"/>
             </div>
-            <div class="flex mt-5 flex-wrap">星座：<n-input placeholder="沒有博愛座喔" v-model:value="user.zodiac"/></div>
+            <div class="flex mt-5 flex-wrap">星座：</div>
+            <n-space vertical>
+              <n-select v-model:value="user.zodiac" :options="zodiacOptions"/>
+            </n-space>
             <div class="flex mt-5 flex-wrap">嗜好：<n-input placeholder="放假喜歡做什麼呢？" v-model:value="user.hobby" /></div>
             <div class="flex mt-5 flex-wrap">專長：<n-input placeholder="很會睡也可以是專長（？" v-model:value="user.expertise"/></div>
             <div class="flex mt-5 flex-wrap">感興趣的活動：<n-input placeholder="幫助你找到志同道合的朋友喔！" v-model:value="user.interested_in"/></div>
