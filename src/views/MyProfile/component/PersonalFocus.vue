@@ -1,4 +1,5 @@
 <script setup>
+import { UserGetApi } from '../../../../apis/UserApi'
 import { reactive, ref } from 'vue'
 import { NTabs, NTabPane, NDivider } from 'naive-ui'
 

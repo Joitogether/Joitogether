@@ -1,7 +1,33 @@
 <script setup>
+import { UserGetApi } from '../../../../apis/UserApi'
 import { reactive, ref } from 'vue'
 import { ArrowLeft, Heart, Search, HeartSolid } from '@iconoir/vue'
 import { NProgress, NDropdown, NButton, NRate } from 'naive-ui'
+
+const user = ref(null)
+const loading = ref(true)
+const errorMessage = ref(null)
+const userUid = '3465767889ddgijjljk'
+
+const fetchUserData = async () => {
+  try {
+    const result = await UserGetApi(userUid)
+    console.log('API回傳資料:', result)
+
+    if (result) {
+      user.value = result
+      loading.value = false
+      return user.value
+    }
+  } catch (err) {
+    errorMessage.value = err.message || '資料加載錯誤'
+    loading.value = false
+  }
+}
+
+onMounted(() => {
+  fetchUserData()
+})
 
 const comment = reactive([
   {
