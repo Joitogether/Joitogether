@@ -1,7 +1,7 @@
 <script setup>
 import { NButton, NSpin } from 'naive-ui';
 import { UserGetApi } from '../../../apis/UserApi'
-import { ref, defineEmits } from 'vue';
+import { ref } from 'vue';
 import { useUserStore } from '@/stores/userStore';
 
 defineProps({
