@@ -76,10 +76,11 @@ const emit = defineEmits(['edit', 'close'])
       <p class="user-description text-2xl font-bold mt-1 md:mb-5">
         : {{ user.favorite_sentence || "座右銘還未填寫唷👀"}}
       </p>
+
       <n-button @click="emit('edit', 'close',user)" @open-modal="openModal" type="primary" ghost round >編輯檔案</n-button>
       <div class="tag-container flex gap-3 flex-wrap">
         <span v-for="(item, index) in user.tags.split(',')" :key="index"  class="border-2 px-3 py-1 rounded">
-          # {{ item || "未填寫"}}</span>
+          # {{ item || "未填寫" }}</span>
       </div>
     </div>
   </div>
@@ -116,12 +117,6 @@ const emit = defineEmits(['edit', 'close'])
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-  }
-
-  .btn-container {
-    margin-bottom: 0.5rem;
-    margin-top: 0;
-    width: 70%;
   }
 
   .user-name {
