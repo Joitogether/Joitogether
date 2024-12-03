@@ -67,19 +67,19 @@ const emit = defineEmits(['edit', 'close'])
     </div>
 
     <div class="card-content-container">
-      <h3 class="user-name text-2xl text-center font-bold">{{ user.display_name  }}</h3>
+      <h3 class="user-name text-2xl text-center font-bold">{{ user.display_name || "大名還未填寫唷👀" }}</h3>
       <div class="text-md font-bold">
-        <span>{{ user.city }}</span>
-        <span> • {{ user.age }}</span>
-        <span> • {{ user.career }}</span>
+        <span>{{ user.city || "所在地還未填寫唷👀"}}</span>
+        <span> • {{ user.age || "年齡還未填寫唷👀"}}</span>
+        <span> • {{ user.career || "職業還未填寫唷👀" }}</span>
       </div>
       <p class="user-description text-2xl font-bold mt-1 md:mb-5">
-        : {{ user.favorite_sentence }}
+        : {{ user.favorite_sentence || "座右銘還未填寫唷👀"}}
       </p>
       <n-button @click="emit('edit', 'close',user)" @open-modal="openModal" type="primary" ghost round >編輯檔案</n-button>
       <div class="tag-container flex gap-3 flex-wrap">
         <span v-for="(item, index) in user.tags.split(',')" :key="index"  class="border-2 px-3 py-1 rounded">
-          # {{ item }}</span>
+          # {{ item || "未填寫"}}</span>
       </div>
     </div>
   </div>
