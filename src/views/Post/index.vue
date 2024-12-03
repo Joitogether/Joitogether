@@ -30,9 +30,14 @@ const options = [
 
 //預設是美食
 const selectedTag = ref('美食')
-const handleSelect = (tag) => {
+const handleTagSelect = (tag) => {
   // 這裡可以針對點擊事件做後續處理
   selectedTag.value = tag
+}
+
+const handleFilterSelect = (value) => {
+  // 這裡可以針對點擊事件做後續處理
+  console.log(value)
 }
 
 const postList = reactive([
@@ -61,15 +66,15 @@ const selectValue = ref()
   <div class="postsArea max-w-[1140px] mx-auto px-4" >
     <div class="md:flex justify-between w-full  md:py-7">
       <div class="flex  w-full  md:flex md:w-[35%] md:min-w-[550px] md:justify-between">
-        <p @click="handleSelect('美食')" :class="{ 'activated-tag' : selectedTag === '美食'}" class="text-gray-400 border-transparent text-center pb-1 md:pb-0 border-b-[2px] md:  md:rounded-full flex-1 cursor-pointer md:leading-0 leading-9 md:bg-yellow-300 text-base py-1 md:py-0 md:px-4 md:mr-3">美食</p>
-        <p @click="handleSelect('逛街')" :class="{ 'activated-tag' : selectedTag === '逛街'}" class="text-gray-400 border-transparent text-center pb-1 md:pb-0 border-b-[2px] md:  md:rounded-full flex-1 cursor-pointer md:leading-0 leading-9 md:bg-yellow-300 text-base py-1 md:py-0 md:px-4 md:mr-3">逛街</p>
-        <p @click="handleSelect('旅行')" :class="{ 'activated-tag' : selectedTag === '旅行'}" class="text-gray-400 border-transparent text-center pb-1 md:pb-0 border-b-[2px] md:  md:rounded-full flex-1 cursor-pointer md:leading-0 leading-9 md:bg-yellow-300 text-base py-1 md:py-0 md:px-4 md:mr-3">旅行</p>
-        <p @click="handleSelect('運動')" :class="{ 'activated-tag' : selectedTag === '運動'}" class="text-gray-400 border-transparent text-center pb-1 md:pb-0 border-b-[2px] md:  md:rounded-full flex-1 cursor-pointer md:leading-0 leading-9 md:bg-yellow-300 text-base py-1 md:py-0 md:px-4 md:mr-3">運動</p>
-        <p @click="handleSelect('教育')" :class="{ 'activated-tag' : selectedTag === '教育'}" class="text-gray-400 border-transparent text-center pb-1 md:pb-0 border-b-[2px] md:  md:rounded-full flex-1 cursor-pointer md:leading-0 leading-9 md:bg-yellow-300 text-base py-1 md:py-0 md:px-4 md:mr-3">教育</p>
-        <p @click="handleSelect('其他')" :class="{ 'activated-tag' : selectedTag === '其他'}" class="text-gray-400 border-transparent text-center pb-1 md:pb-0 border-b-[2px] md:  md:rounded-full flex-1 cursor-pointer md:leading-0 leading-9 md:bg-yellow-300 text-base py-1 md:py-0 md:px-4 md:mr-3">其他</p>
+        <p @click="handleTagSelect('美食')" :class="{ 'activated-tag' : selectedTag === '美食'}" class="text-gray-400 border-transparent text-center pb-1 md:pb-0 border-b-[2px] md:  md:rounded-full flex-1 cursor-pointer md:leading-0 leading-9 md:bg-yellow-300 text-base py-1 md:py-0 md:px-4 md:mr-3">美食</p>
+        <p @click="handleTagSelect('逛街')" :class="{ 'activated-tag' : selectedTag === '逛街'}" class="text-gray-400 border-transparent text-center pb-1 md:pb-0 border-b-[2px] md:  md:rounded-full flex-1 cursor-pointer md:leading-0 leading-9 md:bg-yellow-300 text-base py-1 md:py-0 md:px-4 md:mr-3">逛街</p>
+        <p @click="handleTagSelect('旅行')" :class="{ 'activated-tag' : selectedTag === '旅行'}" class="text-gray-400 border-transparent text-center pb-1 md:pb-0 border-b-[2px] md:  md:rounded-full flex-1 cursor-pointer md:leading-0 leading-9 md:bg-yellow-300 text-base py-1 md:py-0 md:px-4 md:mr-3">旅行</p>
+        <p @click="handleTagSelect('運動')" :class="{ 'activated-tag' : selectedTag === '運動'}" class="text-gray-400 border-transparent text-center pb-1 md:pb-0 border-b-[2px] md:  md:rounded-full flex-1 cursor-pointer md:leading-0 leading-9 md:bg-yellow-300 text-base py-1 md:py-0 md:px-4 md:mr-3">運動</p>
+        <p @click="handleTagSelect('教育')" :class="{ 'activated-tag' : selectedTag === '教育'}" class="text-gray-400 border-transparent text-center pb-1 md:pb-0 border-b-[2px] md:  md:rounded-full flex-1 cursor-pointer md:leading-0 leading-9 md:bg-yellow-300 text-base py-1 md:py-0 md:px-4 md:mr-3">教育</p>
+        <p @click="handleTagSelect('其他')" :class="{ 'activated-tag' : selectedTag === '其他'}" class="text-gray-400 border-transparent text-center pb-1 md:pb-0 border-b-[2px] md:  md:rounded-full flex-1 cursor-pointer md:leading-0 leading-9 md:bg-yellow-300 text-base py-1 md:py-0 md:px-4 md:mr-3">其他</p>
       </div>
       <n-space  class=" w-[20%] border-none text-center ml-auto mt-2 md:mt-0   md:w-[20%] md:max-w-[160px] " vertical >
-        <n-select  placeholder="排序" v-model:value="selectValue" :options="options" >
+        <n-select @update:value="handleFilterSelect" placeholder="排序" v-model:value="selectValue" :options="options" >
         </n-select>
       </n-space>
     </div>
