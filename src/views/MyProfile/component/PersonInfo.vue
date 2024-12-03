@@ -71,33 +71,12 @@ if (userStore.user.isLogin) {
       </div>
     </div>
     <div class="contentArea sm:leading-loose sm:text-xl text-sm mx-5 mt-5 px-5">
-      <p class="bg-orange-200">自我介紹：{{ user.self_introduction || '這裡是您的自我介紹。' }}</p>
-      <p class="bg-red-200">星座：{{ user.zodiac || '這裡是您的星座。' }}</p>
-      <p class="bg-yellow-200">嗜好：{{ user.hobby || '這裡是您的興趣。' }}</p>
-      <p class="bg-lime-200">專長：{{ user.expertise || '這裡是您的專長。' }}</p>
-      <p class="bg-violet-200">興趣的活動：{{ user.interested_in || '這裡是您的興趣得活動。' }}</p>
-      =======
-      <img
-        :src="user.life_photo_1 || 'default_image_path.jpg'"
-        alt="lifePhoto-1"
-        class="rounded-3xl"
-      />
+      <p class="bg-orange-200">自我介紹：{{ user.self_introduction || '自我介紹還未填寫唷👀' }}</p>
+      <p class="bg-red-200">星座：{{ user.zodiac || '星座還未填寫唷👀' }}</p>
+      <p class="bg-yellow-200">嗜好：{{ user.hobby || '嗜好還未填寫唷👀' }}</p>
+      <p class="bg-lime-200">專長：{{ user.expertise || '專長還未填寫唷👀' }}</p>
+      <p class="bg-violet-200">興趣的活動：{{ user.interested_in || '興趣的活動還未填寫唷👀' }}</p>
     </div>
-    <div class="secondPhoto justify-self-center self-center">
-      <img
-        :src="user.life_photo_2 || 'default_image_path.jpg'"
-        alt="lifePhoto1-2"
-        class="rounded-3xl"
-      />
-    </div>
-  </div>
-  <div class="contentArea sm:leading-loose sm:text-xl text-sm mx-5 mt-5 px-5">
-    <p class="bg-orange-200">自我介紹：{{ user.self_introduction || '這裡是您的自我介紹。' }}</p>
-    <p class="bg-red-200">星座：{{ user.zodiac || '這裡是您的星座。' }}</p>
-    <p class="bg-yellow-200">嗜好：{{ user.hobby || '這裡是您的興趣。' }}</p>
-    <p class="bg-lime-200">專長：{{ user.expertise || '這裡是您的專長。' }}</p>
-    <p class="bg-violet-200">興趣的活動：{{ user.interested_in || '這裡是您的興趣得活動。' }}</p>
-    >>>>>>> 5df42387e1f129fbdbf5849a34b1393b6256b00c
   </div>
 </template>
 

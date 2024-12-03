@@ -15,6 +15,7 @@ import { ArrowLeft, ArrowRight } from '@iconoir/vue'
 import { ref, defineEmits, computed, watch, onMounted } from 'vue'
 import { UserPutApi, UserGetApi } from '../../../apis/UserApi'
 import { useUserStore } from '@/stores/userStore'
+import { storage } from '@/utils/firebaseConfig'
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage'
 
 const showModal = ref(false)
@@ -23,46 +24,53 @@ const userStore = useUserStore()
 const errorMessage = ref(null)
 const loading = ref(true)
 const tagsArray = ref([])
+const fileList = ref([]) // 用來保存檔案的列表
 
-// 大頭貼的邏輯
 const handleFileChange = async (fileList) => {
-  console.log('檔案變更:', fileList)
-  // 你可以根據需要將上傳的檔案更新到 `user.life_photo_1`
-  // 比如：user.value.life_photo_1 = fileList[0] ? fileList[0].url : null;
+  console.log('檔案變更:', fileList) // 輸出 fileList 的內容
 
-  // 無選擇文件時直接返回
-  if (fileList.length === 0) return
-  const file = fileList[0]?.file
-  if (!file) return
-
-  if (file.size > 2 * 1024 * 1024) {
-    message.error('上傳失敗！圖片大小不能超過 2MB 😭')
+  if (fileList.length === 0) {
+    console.log('沒有檔案被選中')
     return
   }
-  if (file.length > 256) {
-    message.error('圖片 URL 過長，請更換圖片再試 😭')
+
+  // 確保能從 fileList 中正確取得檔案
+  const file = fileList[0]?.file
+  console.log('選中的檔案:', file)
+
+  if (!file) {
+    console.log('檔案對象不存在')
+    return
+  }
+
+  if (file.size > 2 * 1024 * 1024) {
+    // 檢查檔案大小
+    message.error('上傳失敗！圖片大小不能超過 2MB 😭')
     return
   }
 
   try {
     // 設定圖片文件的存儲路徑
-    const filePath = `avatars/${Date.now()}_${file.name}`
+    const filePath = `lifephoto/${Date.now()}_${file.name}`
     const fileRef = storageRef(storage, filePath)
 
-    // 上傳文件至 Firebase Storage
-    const snapshot = await uploadBytes(fileRef, file)
+    console.log('開始上傳檔案...', file.name)
 
-    // 獲取下載 URL
+    const snapshot = await uploadBytes(fileRef, file)
     const downloadURL = await getDownloadURL(snapshot.ref)
 
-    // 更新圖片 URL 到用戶的表單數據
-    formValue.value.avatar = downloadURL
+    console.log('圖片下載 URL:', downloadURL)
 
-    console.log('📸 圖片上傳成功，URL:', downloadURL)
-    message.success('🎉 圖片上傳成功啦！太棒了呢～ ✨')
+    // 更新 user 中的圖片 URL
+    user.value.life_photo_1 = downloadURL
+    console.log('更新後的 user:', user.value)
+
+    // 假設這裡是用來更新 MySQL 的 API
+    await UserPutApi(userStore.user.uid, user.value)
+    // message.success('🎉 圖片上傳成功！');
   } catch (error) {
-    console.error('⚠️ 圖片上傳失敗:', error)
-    message.error(`😭 哎呀！圖片上傳失敗了～ 請稍後再試看看吧 💔`)
+    console.error('圖片上傳失敗:', error.message)
+    // message.error('😭 上傳圖片失敗，請稍後再試。');
   }
 }
 
@@ -154,7 +162,6 @@ const emit = defineEmits(['close', 'save'])
         size="huge"
         role="dialog"
         aria-modal="true"
-        @submit.prevent="UserPostApi"
       >
         <input type="checkbox" id="slide1" class="hidden" checked />
         <input type="checkbox" id="slide2" class="hidden" />
@@ -172,7 +179,7 @@ const emit = defineEmits(['close', 'save'])
             職業：<n-input v-model:value="user.career" placeholder="什麼領域的呢？" />
           </div>
           <div class="flex mt-5 flex-wrap">
-            喜歡的一句話：<n-input
+            座右銘：<n-input
               v-model:value="user.favorite_sentence"
               placeholder="例如：我要發大財"
             />
@@ -186,23 +193,13 @@ const emit = defineEmits(['close', 'save'])
             <p>上傳第一張生活照</p>
             <n-upload
               accept="image/*"
-              :default-file-list="fileList"
-              list-type="image-card"
-              @preview="handlePreview"
-              @change="handleFileChange"
               :max="1"
-              v-model:value="user.life_photo_1"
-            />
-            <p>上傳第二張生活照</p>
-            <n-upload
-              accept="image/*"
-              :default-file-list="fileList"
-              list-type="image-card"
-              @preview="handlePreview"
-              @change="handleFileChange"
-              :max="1"
-              v-model:value="user.life_photo_2"
-            />
+              :file-list="[]"
+              :on-update:file-list="handleFileChange"
+              :show-file-list="false"
+            >
+              <n-button type="primary" round circle>+</n-button>
+            </n-upload>
           </div>
           <div class="selfIntro">
             <n-space vertical>
