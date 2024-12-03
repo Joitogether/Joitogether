@@ -1,7 +1,8 @@
 <script setup>
-import { NButton, NSpin } from 'naive-ui';
-import { UserGetApi } from '../../../../apis/UserApi'
-import { ref, onMounted } from 'vue';
+import { NButton, NSpin } from 'naive-ui'
+import { UserGetApi } from '../../../apis/UserApi'
+import { ref, defineEmits } from 'vue'
+import { useUserStore } from '@/stores/userStore'
 
 defineProps({
   items: {
@@ -13,39 +14,42 @@ defineProps({
       age: '年齡加載中',
       career: '職業加載中',
       favorite_sentence: '喜愛的句子加載中',
-      tag: '標籤加載中'
-    })
+      tag: '標籤加載中',
+    }),
   },
   type: {
     type: String,
     required: true,
-  }
+  },
 })
-const user = ref(null);  // 儲存使用者資料
-const loading = ref(true);
-const errorMessage = ref(null);
-const userUid = '3465767889ddgijjljk';
+const user = ref(null) // 儲存使用者資料
+const loading = ref(true)
+const errorMessage = ref(null)
+const userStore = useUserStore()
+const showModal = ref(false) // 控制 modal 顯示
+if (userStore.user.isLogin) {
+  const fetchUserData = async () => {
+    try {
+      const result = await UserGetApi(userStore.user.uid)
 
-const fetchUserData = async () => {
-  try {
-    const result = await UserGetApi(userUid);
-
-    if (result) {
-      user.value = result;
-      loading.value = false;  // 資料加載完成，關閉加載狀態
-      return user.value
+      if (result) {
+        user.value = result
+        loading.value = false // 資料加載完成，關閉加載狀態
+        return user.value
+      }
+    } catch (err) {
+      errorMessage.value = err.message || '資料加載錯誤'
+      loading.value = false // 發生錯誤時也關閉加載狀態
     }
-  } catch (err) {
-    errorMessage.value = err.message || '資料加載錯誤';
-    loading.value = false;  // 發生錯誤時也關閉加載狀態
   }
-    };
+  fetchUserData()
+}
+// 控制 modal 開啟
+const openModal = () => {
+  showModal.value = true
+}
 
-    onMounted(() => {
-      fetchUserData();
-    });
-
-const emit = defineEmits(['edit'])
+const emit = defineEmits(['edit', 'close'])
 </script>
 <template>
   <div v-if="loading">
@@ -54,31 +58,36 @@ const emit = defineEmits(['edit'])
   </div>
   <div v-else class="card-container border rounded-lg overflow-hidden bg-white">
     <div class="img-container w-full">
-      <img
-        class="card-img w-full h-full object-cover"
-        :src="user.photo_url"
-        alt="personImg"
-      />
+      <img class="card-img w-full h-full object-cover" :src="user.photo_url" alt="personImg" />
     </div>
 
     <div class="card-content-container">
-      <h3 class="user-name text-2xl text-center font-bold">{{ user.display_name  }}</h3>
+      <h3 class="user-name text-2xl text-center font-bold">{{ user.display_name }}</h3>
       <div class="text-md font-bold">
         <span>{{ user.city }}</span>
         <span> • {{ user.age }}</span>
         <span> • {{ user.career }}</span>
       </div>
-      <p class="user-description text-2xl font-bold mt-1 md:mb-5">
-        : {{ user.favorite_sentence }}
-      </p>
-      <n-button @click="emit('edit', 'users')" type="primary" ghost round >編輯檔案</n-button>
+      <p class="user-description text-2xl font-bold mt-1 md:mb-5">: {{ user.favorite_sentence }}</p>
+      <<<<<<< HEAD
+      <n-button @click="emit('edit', 'users')" type="primary" ghost round>編輯檔案</n-button>
+      =======
+      <n-button
+        @click="emit('edit', 'close', user)"
+        @open-modal="openModal"
+        type="primary"
+        ghost
+        round
+        >編輯檔案</n-button
+      >
+      >>>>>>> 5df42387e1f129fbdbf5849a34b1393b6256b00c
       <div class="tag-container flex gap-3 flex-wrap">
-        <span v-for="(item, index) in user.tags.split(',')" :key="index"  class="border-2 px-3 py-1 rounded">
-          # {{ item }}</span>
+        <span v-for="(item, index) in tags" :key="index" class="border-2 px-3 py-1 rounded">
+          # {{ item }}</span
+        >
       </div>
     </div>
   </div>
-
 </template>
 <style scope>
 @media screen and (width >= 768px) {
@@ -140,5 +149,4 @@ const emit = defineEmits(['edit'])
     justify-content: space-between;
   }
 }
-
 </style>

@@ -1,5 +1,5 @@
 <script setup>
-import { UserGetApi } from '../../../../apis/UserApi'
+import { UserGetApi } from '@/apis/UserApi'
 import { reactive, ref } from 'vue'
 import { ArrowLeft, Heart, Search, HeartSolid } from '@iconoir/vue'
 import { NProgress, NDropdown, NButton, NRate } from 'naive-ui'
