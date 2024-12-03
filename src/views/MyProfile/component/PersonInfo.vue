@@ -77,6 +77,17 @@ if (userStore.user.isLogin) {
 
 <style scoped>
 
+@media screen and (width < 768px) {
+  .photoArea {
+    display: block;
+  }
+
+  .photoArea img{
+    margin-bottom: 20px;
+  }
+}
+
+
 .contentArea p{
   margin-bottom: 20px;
   padding: 0 15px;
