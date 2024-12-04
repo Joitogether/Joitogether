@@ -19,7 +19,6 @@ import { onAuthStateChanged } from 'firebase/auth'
 import { auth } from '@/utils/firebaseConfig.js'
 import { useUserStore } from '@/stores/userStore'
 
-
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -112,9 +111,7 @@ const router = createRouter({
   ],
 })
 
-
-
-router.beforeEach( (to, from, next) => {
+router.beforeEach((to, from, next) => {
   const userStore = useUserStore()
   onAuthStateChanged(auth, (user) => {
     if (user) {

@@ -262,7 +262,7 @@ import {
   useMessage,
   NModal,
 } from 'naive-ui'
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { storage } from '../../utils/firebaseConfig.js'
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage'
