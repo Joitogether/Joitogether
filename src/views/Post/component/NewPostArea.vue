@@ -1,11 +1,13 @@
 <script setup>
 import { ref, watch } from 'vue'
+import { useUserStore } from '@/stores/userStore'
 
 const showModal = ref(false)
 const value = ref(null)
 const titleText = ref('')
 const articleContent = ref('')
 const currentSmallTalk = ref('')
+const userStore = useUserStore()
 
 const smallTalk = [
   '沒靈感嗎？🤔 試著寫下第一個想到的想法吧～有時靈感就是這麼突然！✨',
@@ -74,12 +76,17 @@ watch(showModal, (newValue) => {
       <n-avatar
         round
         :size="100"
-        src="https://i.pinimg.com/736x/20/3e/d7/203ed7d8550c2c1c145a2fb24b6fbca3.jpg"
+        :src="
+          userStore.user.photoURL ||
+          'https://i.pinimg.com/736x/20/3e/d7/203ed7d8550c2c1c145a2fb24b6fbca3.jpg'
+        "
       />
     </div>
 
     <div class="w-2/3 flex flex-col justify-center pl-4 mt-4">
-      <div class="mb-0 text-lg font-xl ml-5">(｡•̀ᴗ-)✧ 用戶名</div>
+      <div class="mb-0 text-lg font-xl ml-5">
+        (｡•̀ᴗ-)✧ {{ userStore.user.displayName || '訪客' }}
+      </div>
       <n-button @click="showModal = true" class="w-100 m-4 rounded-full">
         📝 記錄一刻，分享所有 🐾
       </n-button>
@@ -113,7 +120,10 @@ watch(showModal, (newValue) => {
           <n-avatar
             round
             :size="110"
-            src="https://i.pinimg.com/736x/20/3e/d7/203ed7d8550c2c1c145a2fb24b6fbca3.jpg"
+            :src="
+              userStore.user.photoURL ||
+              'https://i.pinimg.com/736x/20/3e/d7/203ed7d8550c2c1c145a2fb24b6fbca3.jpg'
+            "
           />
         </div>
 
