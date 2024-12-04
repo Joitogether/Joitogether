@@ -10,8 +10,8 @@
               class="w-full h-full rounded-full overflow-hidden border border-gray-300 bg-gray-100 flex items-center justify-center"
             >
               <img
-                v-if="user && user.photoURL"
-                :src="user.photoURL"
+                v-if="userStore.user.photoURL"
+                :src="userStore.user.photoURL"
                 alt="Avatar Preview"
                 class="w-full h-full object-cover"
               />
@@ -75,8 +75,8 @@ const updateEmailVerified = async (uid) => {
     console.error('後端 email_verified 更新失敗：', error)
   }
 }
-
-onMounted(async() => {
+const userStore = useUserStore()
+onMounted(async () => {
   // onAuthStateChanged(auth, async (currentUser) => {
   //   if (currentUser) {
   //     // 手動刷新用戶資料
@@ -86,12 +86,12 @@ onMounted(async() => {
   //     // 更新用戶資料
   //     user.value = refreshedUser
   const userStore = useUserStore()
-    // 檢查是否已驗證
-    if (userStore.user.emailVerified) {
-      console.log('用戶已驗證信箱！')
-      // 調用模組化的更新函數
-      await updateEmailVerified(userStore.user.uid)
-    }
+  // 檢查是否已驗證
+  if (userStore.user.emailVerified) {
+    console.log('用戶已驗證信箱！')
+    // 調用模組化的更新函數
+    await updateEmailVerified(userStore.user.uid)
+  }
   //   }
   // })
   // 開始倒數計時

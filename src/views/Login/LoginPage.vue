@@ -354,18 +354,12 @@ const loginRules = {
 const loginGoogle = async () => {
   try {
     const user = await loginWithGoogle()
+    console.log(user)
     console.log('Google 登入成功！')
-    message.success(`🎉 歡迎，${user.displayName}！登入成功，太棒了！🎉`)
-
+    console.log(userStore.user)
     // 更新 userStore 狀態
-    userStore.user = {
-      uid: user.uid,
-      email: user.email,
-      displayName: user.displayName || '使用者',
-      photoURL: user.photoURL,
-      isLogin: true,
-    }
 
+    message.success(`🎉 歡迎，${userStore.user.displayName}！登入成功，太棒了！🎉`)
     router.push('/')
   } catch (error) {
     if (error.message.includes('displayName')) {
