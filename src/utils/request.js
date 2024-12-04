@@ -8,18 +8,18 @@ const apiAxios = axios.create({
   headers: { 'X-Custom-Header': 'foobar' },
 })
 
-// apiAxios.interceptors.request.use(
-//   async function (config) {
-//     const token = await getIdToken(auth.currentUser)
-//     if (token) {
-//       config.headers.Authorization = `Bearer ${token}`
-//     }
-//     return config
-//   },
-//   function (error) {
-//     return Promise.reject(error)
-//   },
-// )
+apiAxios.interceptors.request.use(
+  async function (config) {
+    // const token = await getIdToken(auth.currentUser)
+    // if (token) {
+    //   config.headers.Authorization = `Bearer ${token}`
+    // }
+    return config
+  },
+  function (error) {
+    return Promise.reject(error)
+  },
+)
 
 apiAxios.interceptors.response.use(
   function (response) {
