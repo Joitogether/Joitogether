@@ -69,19 +69,35 @@ watch(showModal, (newValue) => {
 </script>
 
 <template>
-  <n-button @click="showModal = true" class="w-full m-4 rounded-full">
-    想和大家討論什麼呢？
-  </n-button>
+  <div class="flex justify-between items-center p-4 border border-gray-300 rounded-md">
+    <div class="w-1/3 flex justify-center">
+      <n-avatar
+        round
+        :size="100"
+        src="https://i.pinimg.com/736x/20/3e/d7/203ed7d8550c2c1c145a2fb24b6fbca3.jpg"
+      />
+    </div>
+
+    <div class="w-2/3 flex flex-col justify-center pl-4 mt-4">
+      <div class="mb-0 text-lg font-xl ml-5">(｡•̀ᴗ-)✧ 用戶名</div>
+      <n-button @click="showModal = true" class="w-100 m-4 rounded-full">
+        📝 記錄一刻，分享所有 🐾
+      </n-button>
+    </div>
+  </div>
+
   <n-modal
     v-model:show="showModal"
-    class="custom-card"
+    class="custom-card overflow-y-scroll"
     preset="card"
     :style="bodyStyle"
     size="huge"
     :bordered="false"
     :segmented="segmented"
   >
-    <template #header-extra>👋 再見只是為了下一次見面～😊</template>
+    <template #header-extra
+      ><span class="hidden sm:block">👋 再見只是為了下一次見面～😊</span></template
+    >
     <template #header>
       <div>
         <n-h1 prefix="bar" align-text type="success">
@@ -92,8 +108,8 @@ watch(showModal, (newValue) => {
       </div>
     </template>
     <template #default>
-      <div class="flex p-3">
-        <div class="mr-20">
+      <div class="flex flex-col lg:flex-row p-3">
+        <div class="flex-shrink-0 mb-4 lg:mb-0 lg:mr-20">
           <n-avatar
             round
             :size="110"
@@ -119,8 +135,12 @@ watch(showModal, (newValue) => {
               placement="bottom-start"
             >
               <div class="flex items-center space-x-2">
-                <n-button class="category">{{ value || '類別' }}</n-button>
-                <span class="small-talk"> {{ currentSmallTalk }}</span>
+                <n-button class="px-4 py-2 rounded-md text-gray-700">
+                  {{ value || '類別' }}
+                </n-button>
+                <span class="small-talk lg:inline-block text-sm font-medium text-gray-400">
+                  {{ currentSmallTalk }}</span
+                >
               </div>
             </n-popselect>
           </div>
@@ -133,7 +153,6 @@ watch(showModal, (newValue) => {
           :default-file-list="previewFileList"
           list-type="image-card"
           @preview="handlePreview"
-          :item-style="{ width: '150px', height: '150px' }"
         />
       </div>
 
@@ -144,12 +163,13 @@ watch(showModal, (newValue) => {
           round
           placeholder="📝 快來寫下你的精彩內容吧～ (｡♥‿♥｡)"
           :autosize="{
-            minRows: 15,
+            minRows: 8,
           }"
+          class="w-full"
         />
       </div>
-      <div class="footer-container">
-        <n-button type="primary" size="large" round @click="handleSubmit" class="item-end">
+      <div class="flex justify-center lg:justify-end p-4">
+        <n-button type="primary" size="large" round @click="handleSubmit" class="px-6 py-3">
           送出 🚀
         </n-button>
       </div>
@@ -162,27 +182,10 @@ h1 {
   margin: 0 0 0 0;
 }
 
-.footer-container {
-  display: flex;
-  justify-content: flex-end;
-  padding: 16px;
-}
-
-.small-talk {
-  display: none;
-}
-
-@media screen and (width >= 1024px) {
-  .small-talk {
-    display: block;
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: rgba(103, 103, 103, 0.693);
-  }
-
-  .category {
-    padding: 0.5rem 1rem;
-    font-size: 1rem;
-  }
-}
+/* .small-talk {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: rgba(103, 103, 103, 0.693);
+} */
 </style>
