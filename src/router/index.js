@@ -15,10 +15,10 @@ import ActivityReview from '@/views/Activity/components/ActivityReview.vue'
 import SignupSuccess from '@/views/Login/SignupSuccess.vue'
 import ResetPassword from '@/views/Login/ResetPassword.vue'
 import forgotPassword from '@/views/Login/ForgotPassword.vue'
+import testPost from '../views/Post/component/testPostAPI.vue'
 import { onAuthStateChanged } from 'firebase/auth'
 import { auth } from '@/utils/firebaseConfig.js'
 import { useUserStore } from '@/stores/userStore'
-
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -82,6 +82,11 @@ const router = createRouter({
       component: Post,
     },
     {
+      path: '/testpost',
+      name: 'testpost',
+      component: testPost,
+    },
+    {
       path: '/',
       name: 'home',
       component: Home,
@@ -112,9 +117,7 @@ const router = createRouter({
   ],
 })
 
-
-
-router.beforeEach( (to, from, next) => {
+router.beforeEach((to, from, next) => {
   const userStore = useUserStore()
   onAuthStateChanged(auth, (user) => {
     if (user) {
