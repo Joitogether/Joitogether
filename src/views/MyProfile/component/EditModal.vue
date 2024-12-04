@@ -15,6 +15,7 @@ const errorMessage = ref(null);
 const loading = ref(true);
 const tagsArray = ref([]);
 const fileListSec = ref([]);
+const fileListAva = ref([]);
 
 const cityOptions = [
   { label:"基隆市", value:"基隆市" },
@@ -74,6 +75,57 @@ const fetchUserData = async () => {
   }
 };
 
+//處理大頭照
+const handleAvatarChange = async (fileListAva) => {
+  console.log('大頭照檔案變更:', fileListAva);  // 輸出 fileList 的內容
+
+  if (fileListAva.length === 0) {
+    console.log('沒有大頭照檔案被選中');
+    return;
+  }
+
+  // 確保能從 fileList 中正確取得檔案
+  const avatarFile = fileListAva[0]?.file;
+  console.log('選中的大頭照檔案:', avatarFile);
+
+  if (!avatarFile) {
+    console.log('大頭照檔案對象不存在');
+    return;
+  }
+
+  if (avatarFile.size > 2 * 1024 * 1024) {  // 檢查檔案大小
+    message.error('上傳失敗！圖片大小不能超過 2MB 😭');
+    return;
+  }
+// 預覽圖片
+const reader = new FileReader()
+  reader.onload = (event) => {
+    user.value.photo_url = event.target.result
+  }
+  reader.readAsDataURL(avatarFile)
+
+  try {
+    // 設定圖片文件的存儲路徑
+    const filePath = `avatars/${Date.now()}_${avatarFile.name}`;
+    const fileRef = storageRef(storage, filePath);
+
+    console.log('大頭照開始上傳檔案...', avatarFile.name);
+
+    const snapshot = await uploadBytes(fileRef, avatarFile);
+    const downloadURL = await getDownloadURL(snapshot.ref);
+
+    console.log('大頭照下載 URL:', downloadURL);
+
+    // 更新 user 中的圖片 URL
+    user.value.photo_url = downloadURL;
+    console.log('更新後的 user:', user.value);
+    // message.success('🎉 圖片上傳成功！');
+  } catch (error) {
+    console.error('大頭照上傳失敗:', error.message);
+    // message.error('😭 上傳圖片失敗，請稍後再試。');
+  }
+};
+
 //處理第一張照片
 const handleFileChange1 = async (fileList) => {
   console.log('檔案變更:', fileList);  // 輸出 fileList 的內容
@@ -99,7 +151,6 @@ const handleFileChange1 = async (fileList) => {
 // 預覽圖片
 const reader = new FileReader()
   reader.onload = (event) => {
-    // 本地圖片預覽
     user.value.life_photo_1 = event.target.result
   }
   reader.readAsDataURL(file)
@@ -255,7 +306,24 @@ const emit = defineEmits(['close', 'save'])
 
         <input type="checkbox" id="slide1" class="hidden" checked>
         <input type="checkbox" id="slide2" class="hidden">
+
         <div id="target1" class="innerPart_1"  v-if="!loading" v-show="currentRef === 1">
+          <p>大頭照專區</p>
+          <div class="avatar-area w-3/4">
+            <div class="w-full h-full overflow-hidden flex justify-center">
+              <img v-if="user.photo_url" :src="user.photo_url" alt="avatar"/>
+              <span v-else>大頭照還沒上傳</span>
+            </div>
+            <n-upload
+              accept="image/*"
+              :max="1"
+              :file-list="fileListAva"
+              :on-update:file-list="handleAvatarChange"
+              :show-file-list="false"
+              class="flex">
+            <n-button type="primary" round circle>+</n-button>
+            </n-upload>
+          </div>
           <div class="flex mt-5 flex-wrap">暱稱：<n-input v-model:value="user.display_name" placeholder="朋友都如何稱呼你？"/></div>
           <div class="flex mt-5 flex-wrap">年齡：<n-input-number v-model:value="user.age" clearable placeholder="年齡不是問題"/></div>
           <div class="flex mt-5 flex-wrap">所在地：</div>
@@ -269,7 +337,8 @@ const emit = defineEmits(['close', 'save'])
         <div id="target2" class="innerPart_2" v-show="currentRef === 2">
           <div class="photosupload" >
             <p>生活照上傳區</p>
-            <div class="w-full h-full rounded-full overflow-hidden border border-gray-300 bg-gray-100 flex items-center justify-center">
+            <div class="life-photos-area grid grid-cols-10">
+              <div class="col-span-4 w-full h-full overflow-hidden border flex items-center border-gray-300 bg-gray-100 ">
               <img v-if="user.life_photo_1" :src="user.life_photo_1" alt="life_photo"/>
               <span v-else>第一張照片還沒上傳</span>
             </div>
@@ -277,10 +346,11 @@ const emit = defineEmits(['close', 'save'])
               accept="image/*"
               :max="1"
               :file-list="[]"
-              :on-update:file-list="handleFileChange1">
+              :on-update:file-list="handleFileChange1"
+              class="row-start-2 col-start-5">
               <n-button type="primary" round circle>+</n-button>
               </n-upload>
-            <div class="w-full h-full rounded-full overflow-hidden border border-gray-300 bg-gray-100 flex items-center justify-center">
+            <div class="col-start-6 col-span-4 w-full h-full overflow-hidden border flex items-center border-gray-300 bg-gray-100">
               <img v-if="user.life_photo_2" :src="user.life_photo_2" alt="life_photo"/>
               <span v-else>第二張照片還沒上傳</span>
             </div>
@@ -288,11 +358,14 @@ const emit = defineEmits(['close', 'save'])
               accept="image/*"
               :max="1"
               :file-list="fileListSec"
-              :on-update:file-list="handleFileChange2">
-              <n-button type="primary" round circle>+</n-button>
+              :on-update:file-list="handleFileChange2"
+              class="row-start-2 col-start-10">
+              <n-button class="col-span-1" type="primary" round circle>+</n-button>
             </n-upload>
 
           </div>
+            </div>
+
           <div class="selfIntro">
             <n-space vertical>
             <div class="flex mt-5 flex-wrap">自我介紹：
@@ -349,6 +422,10 @@ const emit = defineEmits(['close', 'save'])
 
 </template>
 <style scoped>
+
+.life-photo-area{
+  grid-template-rows: 100px 50px
+}
 .stepsArea{
   justify-content: center !important
 }
