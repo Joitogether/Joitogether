@@ -16,9 +16,11 @@ import SignupSuccess from '@/views/Login/SignupSuccess.vue'
 import ResetPassword from '@/views/Login/ResetPassword.vue'
 import forgotPassword from '@/views/Login/ForgotPassword.vue'
 import testPost from '../views/Post/component/testPostAPI.vue'
+import PostDetail from '@/views/Post/component/PostDetail.vue'
 import { onAuthStateChanged } from 'firebase/auth'
 import { auth } from '@/utils/firebaseConfig.js'
 import { useUserStore } from '@/stores/userStore'
+
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -81,6 +83,11 @@ const router = createRouter({
       name: 'post',
       component: Post,
     },
+    {
+      path: '/PostDetail',
+      name: 'PostDetail',
+      component: PostDetail,
+      },
     {
       path: '/testpost',
       name: 'testpost',
