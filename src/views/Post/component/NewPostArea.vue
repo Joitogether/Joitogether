@@ -1,13 +1,49 @@
 <script setup>
 import { ref, watch } from 'vue'
 import { useUserStore } from '@/stores/userStore'
+import { submitPost } from '../services/postService'
+import { useMessage, NButton, NModal } from 'naive-ui'
 
+// 樣式
 const showModal = ref(false)
 const value = ref(null)
-const titleText = ref('')
-const articleContent = ref('')
 const currentSmallTalk = ref('')
 const userStore = useUserStore()
+const message = useMessage()
+
+// 打進後端的資料
+const newPostTitle = ref('')
+const articleContent = ref('')
+const newPostCategory = ref(null) // 不用 null 的話就不會顯示選擇文章分類
+const postCategories = [
+  { label: '美食', value: 'food' },
+  { label: '購物', value: 'shopping' },
+  { label: '旅遊', value: 'travel' },
+  { label: '運動', value: 'sports' },
+  { label: '教育', value: 'education' },
+  { label: '其他', value: 'others' },
+]
+
+// 新增文章
+const handleSubmit = async () => {
+  // 檢查是否有文章分類
+
+  const postData = {
+    post_title: newPostTitle.value,
+    post_content: articleContent.value,
+    uid: 'HWDIppnENgcdS3Ml9F0For7kQwv1',
+    post_category: newPostCategory.value,
+    post_status: 'onEdit',
+  }
+  try {
+    await submitPost(postData)
+    message.success('文章新增成功')
+    console.log('傳送')
+  } catch (error) {
+    console.log(error)
+  }
+  // showModal.value = false
+}
 
 const smallTalk = [
   '沒靈感嗎？🤔 試著寫下第一個想到的想法吧～有時靈感就是這麼突然！✨',
@@ -31,35 +67,6 @@ const bodyStyle = {
 }
 const segmented = {
   content: 'soft',
-}
-
-const options = [
-  {
-    label: '餐廳 Restaurant',
-    value: '餐廳 Restaurant',
-  },
-  {
-    label: '購物 Shopping',
-    value: '購物 Shopping',
-  },
-  {
-    label: '旅遊 Travel',
-    value: '旅遊 Travel',
-  },
-  {
-    label: '運動 Sports',
-    value: '運動 Sports',
-  },
-  {
-    label: '娛樂 Entertainment',
-    value: '娛樂 Entertainment',
-  },
-]
-
-// 送出按鈕
-const handleSubmit = () => {
-  console.log('送出資料:')
-  showModal.value = false
 }
 
 // 更新 Small Talk
@@ -109,7 +116,7 @@ watch(showModal, (newValue) => {
       <div>
         <n-h1 prefix="bar" align-text type="success">
           <n-text type="success">
-            <span>{{ titleText || '✏️ 標題' }}</span>
+            <span>{{ newPostTitle || '✏️ 標題' }}</span>
           </n-text>
         </n-h1>
       </div>
@@ -130,30 +137,22 @@ watch(showModal, (newValue) => {
         <div class="flex flex-col space-y-4">
           <n-h1 prefix="bar" align-text type="success">
             <n-input
-              v-model:value="titleText"
+              v-model:value="newPostTitle"
               size="large"
               round
               placeholder="🌟 輸入你的超棒標題吧！(๑•̀ㅂ•́)و✧"
             />
           </n-h1>
-
-          <div class="relative">
-            <n-popselect
-              v-model:value="value"
-              :options="options"
-              trigger="click"
-              placement="bottom-start"
-            >
-              <div class="flex items-center space-x-2">
-                <n-button class="px-4 py-2 rounded-md text-gray-700">
-                  {{ value || '類別' }}
-                </n-button>
-                <span class="small-talk lg:inline-block text-sm font-medium text-gray-400">
-                  {{ currentSmallTalk }}</span
-                >
-              </div>
-            </n-popselect>
-          </div>
+          <n-space vertical>
+            <n-select
+              placeholder="請選擇文章分類"
+              v-model:value="newPostCategory"
+              :options="postCategories"
+            />
+          </n-space>
+          <span class="small-talk lg:inline-block text-sm font-medium text-gray-400">
+            {{ currentSmallTalk }}</span
+          >
         </div>
       </div>
 
