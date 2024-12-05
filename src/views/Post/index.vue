@@ -125,9 +125,9 @@ const selectValue = ref()
         </n-select>
       </n-space>
     </div>
-
     <div class="post-posts-area">
       <div v-for="post in postList" :key="post.id" class="post-onepost">
+        <router-link :to="{ name: 'PostDetail' }">
         <div class="hidden post-onepost-top md:flex pt-5 items-center cursor-pointer">
           <img class="w-14 aspect-square rounded-full" :src="post.img" alt="" />
           <div class="ml-3 relative w-full h-14">
@@ -174,7 +174,10 @@ const selectValue = ref()
             </div>
           </div>
         </div>
+      </router-link>
       </div>
+      
+
     </div>
   </div>
 </template>

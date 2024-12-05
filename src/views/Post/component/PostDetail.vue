@@ -1,5 +1,15 @@
 <script setup>
 import { reactive } from 'vue';
+import NaveBar from '@/views/Home/components/NavbarComponent.vue'
+import { NavArrowLeft } from '@iconoir/vue'
+import { getPosts } from '@/apis/postAPIs';
+import { getPostComments } from '@/apis/postCommentAPIs';
+
+
+
+
+
+
 const postList = reactive([
   {
     id: '01',
@@ -10,14 +20,19 @@ const postList = reactive([
     img: 'https://i0.wp.com/www.tripresso.com/blog/wp-content/uploads/2021/02/7.jpeg?resize=616%2C347'
   },
 ])
+
 </script>
 
 <template>
-<div class=" bg-white">
+  <NaveBar/>
+  <div class=" bg-white">
   <!-- 發文者的資訊區 -->
-  <div class="m-6 flex items-center p-4 border border-gray-300 rounded-md">
-    <div class="w-40 mx-6 justify-center">
-      <img class="w-full rounded-full" :src=postList[0].img alt="">
+  <div class=" flex items-center p-4 border border-gray-300 rounded-md">
+    <router-link :to="{ name: 'post' }">
+            <NavArrowLeft  stroke-width="2" class="w-8 h-8 "></NavArrowLeft>
+    </router-link>
+    <div class="aspect-square w-20 mx-6 justify-center">
+      <img class="w-3/4 h-3/4 rounded-full" :src=postList[0].img alt="">
     </div>
     <div>
       <div class="p-2 text-xl">{{ postList[0].name}}</div>
@@ -28,14 +43,14 @@ const postList = reactive([
   <div class="m-6 items-center p-4 border border-gray-300 rounded-md">
     <div class="m-1 items-center p-4 border border-gray-300 rounded-md">
         <div class="flex">
-          <div>
-            <img class="mx-1 w-32" :src=postList[0].img alt="">
+          <div class="rounded-md aspect-square  max-w-24">
+            <img class="w-3/4 h-3/4 rounded-md " :src=postList[0].img alt="">
           </div>
-          <div>
-            <img class="mx-1 w-32" :src=postList[0].img alt="">
+          <div class="rounded-md aspect-square  max-w-24">
+            <img class="w-3/4 h-3/4 rounded-md " :src=postList[0].img alt="">
           </div>
-          <div>
-            <img class="mx-1 w-32" :src=postList[0].img alt="">
+          <div class="rounded-md aspect-square  max-w-24">
+            <img class="w-3/4 h-3/4 rounded-md " :src=postList[0].img alt="">
           </div>
         </div>
     </div>
@@ -70,8 +85,8 @@ const postList = reactive([
     <div class="my-3">
       <!-- 目前使用者 -->
       <div class="flex">
-        <div class="w-20 rounded-full">
-          <img class="w-full rounded-full" :src=postList[0].img alt="">
+        <div class="aspect-square w-20 rounded-full">
+          <img class="w-3/4 h-3/4 rounded-full" :src=postList[0].img alt="">
         </div>
         <div>
           <input type="text" placeholder="說說你的看法" class="flex-grow p-3 border-none focus:outline-none  text-base">
@@ -80,8 +95,8 @@ const postList = reactive([
       </div>
       <!-- 其他使用者留言 -->
       <div class="flex my-3">
-        <div class="w-20 rounded-full">
-          <img class="w-full rounded-full"  :src=postList[0].img  alt="">
+        <div class="aspect-square w-20 rounded-full">
+          <img class="w-3/4 h-3/4 rounded-full"  :src=postList[0].img  alt="">
         </div>
         <div class="items-center p-2 border border-gray-300 rounded-md w-56">
           <div class="text-sm">留言者名稱</div>
