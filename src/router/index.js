@@ -15,6 +15,7 @@ import ActivityReview from '@/views/Activity/components/ActivityReview.vue'
 import SignupSuccess from '@/views/Login/SignupSuccess.vue'
 import ResetPassword from '@/views/Login/ResetPassword.vue'
 import forgotPassword from '@/views/Login/ForgotPassword.vue'
+import testPost from '../views/Post/component/testPostAPI.vue'
 import { onAuthStateChanged } from 'firebase/auth'
 import { auth } from '@/utils/firebaseConfig.js'
 import { useUserStore } from '@/stores/userStore'
@@ -79,6 +80,11 @@ const router = createRouter({
       path: '/post',
       name: 'post',
       component: Post,
+    },
+    {
+      path: '/testpost',
+      name: 'testpost',
+      component: testPost,
     },
     {
       path: '/',
