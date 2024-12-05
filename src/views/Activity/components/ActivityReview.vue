@@ -381,9 +381,13 @@ const sendReplies = async () => {
     >
       <div id="review" class="m-5 max-w-[768px]">
         <div class="flex my-2">
-          <div @click="$router.push({ name: 'activityDetail', params: { id: $route.params.activity_id } })"
-          class="hover:bg-yellow-300 rounded-full mr-2 transition-all">
-            <NavArrowLeft width="32px" height="32"/>
+          <div
+            @click="
+              $router.push({ name: 'activityDetail', params: { id: $route.params.activity_id } })
+            "
+            class="hover:bg-yellow-300 rounded-full mr-2 transition-all"
+          >
+            <NavArrowLeft width="32px" height="32" />
           </div>
 
           <div class="text-2xl font-bold text-gray-700">審核列表</div>
