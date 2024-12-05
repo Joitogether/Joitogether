@@ -331,7 +331,7 @@ const handleDropSelect = async (key, comment_id) => {
             <span class="block mt-10 mb-2 text-lg">留言</span>
           </div>
           <div class="comment-section border-b border-gray-300 pb-4" >
-            <NInput size="large" show-count="true" maxlength="50" class="bg-transparent aspect-[5/1]" v-model:value="userComment" type="textarea" placeholder="留下你想說的話吧!"></NInput>
+            <NInput :autosize="{ minRows: 3, maxRows: 5 }" size="large" show-count="true" maxlength="50" class="bg-transparent aspect-[5/1]" v-model:value="userComment" type="textarea" placeholder="留下你想說的話吧!"></NInput>
             <div class="text-end mt-2">
               <NButton secondary @click="clearComment">取消</NButton>
               <NButton :disabled="userComment.length == 0" @click="submitComment" type="primary" class="ml-2">留言</NButton> 
@@ -388,7 +388,7 @@ const handleDropSelect = async (key, comment_id) => {
           aria-modal="true"
         >
 
-          <NInput :show-count="true" v-model:value="registerComment" :maxlength="50" :clearable="true" type="textarea" placeholder="告訴團主你為什麼想參加吧！"></NInput>
+          <NInput :autosize="{ minRows: 3, maxRows: 5 }" :show-count="true" v-model:value="registerComment" :maxlength="50" :clearable="true" type="textarea" placeholder="告訴團主你為什麼想參加吧！"></NInput>
           <template #footer>
             <NButton @click="registerActivity" type="primary" round class="font-bold w-full">報名</NButton>
             <NButton type="secondary" round class="font-bold mt-2 w-full" @click="toggleRegisterModal">取消</NButton> 
@@ -406,6 +406,7 @@ const handleDropSelect = async (key, comment_id) => {
   margin: 0 auto;
   width: 85%;
 }
+
 
 
 @media screen and (width > 768px) {
