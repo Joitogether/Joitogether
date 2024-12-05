@@ -653,7 +653,12 @@ const previewActivity = () => {
           <MapPin height="32" width="32"></MapPin>
           <span class="text-lg ml-5">{{ inputElement.value }}</span>
         </div>
-        <div  id="map" class="border h-56 text-5xl font-bold">GOOGLE 地圖
+        <div  id="map" class="border h-56 text-5xl font-bold  flex items-center justify-center">
+          <div class="flex items-center justify-center ">
+            <n-space>
+              <n-spin size="large" />
+            </n-space>
+          </div>
         </div>
 
         <div class="my-6 flex items-center justify-center ">
