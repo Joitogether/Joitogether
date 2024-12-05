@@ -64,7 +64,7 @@ if (userStore.user.isLogin) {
         <img :src="user.life_photo_2 || 'default_image_path.jpg'" alt="lifePhoto1-2" class="rounded-3xl">
       </div>
     </div>
-    <div class="contentArea sm:leading-loose sm:text-xl text-sm mx-5 mt-5 px-5">
+    <div class="contentArea sm:leading-loose sm:text-xl text-sm mt-5">
       <p class="bg-orange-200">自我介紹：{{ user.self_introduction || '自我介紹還未填寫唷👀'}}</p>
       <p class="bg-red-200">星座：{{ user.zodiac || '星座還未填寫唷👀'}}</p>
       <p class="bg-yellow-200">嗜好：{{ user.hobby || '嗜好還未填寫唷👀'}}</p>
