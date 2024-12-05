@@ -1,8 +1,10 @@
 <script setup>
 import { onMounted, ref } from 'vue';
 import { NEllipsis } from 'naive-ui';
-import { activityGetAPI } from '@/apis/ActivityApi';
+import { UserGetActivityApi } from '@/apis/UserApi';
 import { useUserStore } from '@/stores/userStore';
+import dayjs from 'dayjs';
+
 
 const userStore = useUserStore();
 const loading = ref(true);
@@ -10,18 +12,30 @@ const errorMessage = ref(null);
 const activity = ref([]);
 const afterToday = ref([])
 const beforeToday = ref([])
+const formatDate = (dateString) => {
+  return dayjs(dateString).format('YYYY-MM-DD HH:mm');
+};
 
 const fetchActivityData = async () => {
   try {
-    const UID = userStore.user.uid;
-    const result = await activityGetAPI();
+    const result = await UserGetActivityApi(userStore.user.uid);
     console.log('活動資料：', result);
 
     if (result) {
-      const userActivities = result.filter(activity => activity && activity.host_id === UID);
-      console.log(userActivities);
 
-      afterToday.value = userActivities.filter(item => {
+      activity.value = result
+      console.log(activity.value)
+      let allActivities = [];
+
+      activity.value.forEach(item => {
+        if (item.activities) {
+          const activityData = item.activities;
+          console.log('活動:', activityData);
+
+          allActivities.push(activityData);
+        }
+      });
+      afterToday.value = allActivities.filter(item => {
         const itemDate = new Date(item.event_time);
         return itemDate > new Date();
       });
@@ -29,21 +43,21 @@ const fetchActivityData = async () => {
       console.log('afterToday資料', afterToday.value);
       loading.value = false;
 
-      beforeToday.value = userActivities.filter(item => {
+      beforeToday.value = allActivities.filter(item => {
         const itemDate = new Date(item.event_time);
         return itemDate < new Date();
       })
       console.log('beforeToday資料', beforeToday.value);
       loading.value = false
 
-      if (userActivities.length > 0) {
-        activity.value = userActivities;
-        loading.value = false;
-        console.log('活動資料', activity.value);
-        return activity.value;
-      } else {
-        console.log('該用戶還沒有活動');
-      }
+      // if (result.length > 0) {
+      //   activity.value = result;
+      //   loading.value = false;
+      //   console.log('活動資料', activity.value);
+      //   return activity.value;
+      // } else {
+      //   console.log('該用戶還沒有活動');
+      // }
 
     }
   } catch (err) {
@@ -56,13 +70,6 @@ const fetchActivityData = async () => {
 
 // activity.value.sort((a, b) => new Date(b.event_time) - new Date(a.event_time));
 
-// const beforeToday = activity.value.filter(item => {
-//   const itemDate = new Date(item.event_time);
-//   console.log(itemDate);
-
-//   return itemDate < today;
-// });
-// console.log(beforeToday);
 
 
 onMounted(() => {
@@ -89,7 +96,7 @@ onMounted(() => {
       </n-ellipsis>
       <br/>
       <n-ellipsis expand-trigger="click" line-clamp="1" :tooltip="false">
-        <div class="text-xl">{{ future_activity.event_time }}</div>
+        <div class="text-xl">{{ formatDate(future_activity.event_time) }}</div>
       </n-ellipsis>
     </div>
   </div>
@@ -109,7 +116,7 @@ onMounted(() => {
       </n-ellipsis>
       <br/>
       <n-ellipsis expand-trigger="click" line-clamp="1" :tooltip="false">
-        <div class="text-xl">{{ pre_activity.event_time }}</div>
+        <div class="text-xl">{{ formatDate(pre_activity.event_time) }}</div>
       </n-ellipsis>
     </div>
   </div>
