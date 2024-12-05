@@ -65,8 +65,8 @@ const selectValue = ref()
 </script>
 <template>
   <NaveBar />
-  <NewPostArea />
   <div class="postsArea max-w-[1140px] mx-auto px-4">
+    <NewPostArea />
     <div class="md:flex justify-between w-full md:py-7">
       <div class="flex w-full md:flex md:w-[35%] md:min-w-[550px] md:justify-between">
         <p

@@ -71,7 +71,7 @@ watch(showModal, (newValue) => {
 </script>
 
 <template>
-  <div class="flex justify-between items-center p-4 border border-gray-300 rounded-md">
+  <div class="flex justify-between items-center p-4 border border-gray-300 rounded-md mt-3">
     <div class="w-1/3 flex justify-center">
       <n-avatar
         round
@@ -191,11 +191,4 @@ watch(showModal, (newValue) => {
 h1 {
   margin: 0 0 0 0;
 }
-
-/* .small-talk {
-  display: block;
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: rgba(103, 103, 103, 0.693);
-} */
 </style>

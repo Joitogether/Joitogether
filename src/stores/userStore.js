@@ -1,5 +1,4 @@
 import { defineStore } from 'pinia'
-import { onAuthStateChanged } from 'firebase/auth'
 import { auth } from '@/utils/firebaseConfig.js'
 // import axios from 'axios'
 
