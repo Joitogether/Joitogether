@@ -192,8 +192,8 @@ const handleLogout = async () => {
         v-else
         id="login-menu"
         class="hidden md:hidden w-1/4 bg-gray-50 text-black p-6 space-y-4 absolute top-10 right-0">
-        <div v-if="userStore.user.isLogin" class="rounded-full overflow-hidden flex justify-self-center">
-          <img :src="user.photo_url || 'default_image_path.jpg'" alt="userPhoto" />
+        <div v-if="userStore.user.isLogin" class="rounded-full w-1/2 h-1/2 aspect-square overflow-hidden flex justify-self-center">
+          <img :src="user.photo_url || 'default_image_path.jpg'" alt="userPhoto" class="w-full"/>
         </div>
         <div v-if="userStore.user.isLogin" class="text-center font-bold text-xl">{{ user.display_name || '暱稱'}}</div>
         <div v-if="userStore.user.isLogin" class="text-md font-bold text-center">
