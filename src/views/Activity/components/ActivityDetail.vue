@@ -344,10 +344,10 @@ const handleDropSelect = async (key, comment_id) => {
                   <p class="absolute bottom-0 text-md">{{`${comment.location} • ${comment.age} • ${comment.career}`}}</p>
                   <p class="absolute bottom-0 text-sm right-0">{{ dayjs(comment.created_at).fromNow() }}</p>
                 </div>
-                <n-dropdown :on-select="(key) => handleDropSelect(key, comment.comment_id)" :options="options" placement="bottom" trigger="hover">
+                <n-dropdown :disabled="comment.uid !== userStore.user.uid" :on-select="(key) => handleDropSelect(key, comment.comment_id)" :options="options" placement="bottom" trigger="hover">
                   <n-button class="self-start" text>
                     <n-icon  size="20">
-                      <MoreVert  ></MoreVert>
+                      <MoreVert ></MoreVert>
                     </n-icon>
                   </n-button>
                 </n-dropdown>
