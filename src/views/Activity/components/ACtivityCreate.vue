@@ -44,10 +44,9 @@ const ActivityDataPush = async () => {
     event_time: isoEventTime.value,  // **
     approval_deadline: isoDeadLine.value || null, // **
     max_participants: participants.value,
-    min_participants: 2 || null,
+    min_participants: 1 || null,
     pay_type: paymentMethod.value,
     price: eventCost.value,
-    // img_url:uploadedImage.value || DefaultImage,
     location: searchQuery.value ||null,
     category: inputValues.value.category ||null,
     require_approval: inputValues.value.requireApproval ? 1:0,
@@ -55,6 +54,7 @@ const ActivityDataPush = async () => {
     status:'registrationOpen',
   };
 
+ 
   try {
     const result = await userActivityCreateAPI(selectedFile.value || null, activityData);
     console.log('成功回應:', result);
@@ -291,8 +291,8 @@ const focusInput = () => {
         : ""
     );
       const isoDeadLine = computed(() =>
-      inputValues.value.eventTime
-        ? formatToISOWithTimezone(inputValues.value.eventTime)
+      inputValues.value.deadline
+        ? formatToISOWithTimezone(inputValues.value.deadline)
         : ""
     );
 

@@ -22,17 +22,14 @@ export const userActivityCreateAPI = async (file, otherData) => {
       // 如果沒有上傳文件，使用預設圖片的 URL
       imgUrl = DefaultImage;
     }
-
     // 組合發送的資料
     const activityData = {
       img_url: imgUrl,
       ...otherData, // 包含其他活動資訊
     };
-
     console.log('活動資料:', activityData);
     // 將資料發送到後端
     const response = await apiAxios.post('/activities', activityData);
-
     if (response.status >= 200 && response.status < 300) {
       console.log('活動資料送出成功:', response.data);
       return response.data; // 返回成功響應
