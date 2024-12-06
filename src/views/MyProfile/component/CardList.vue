@@ -1,5 +1,5 @@
 <script setup>
-import { NButton, NSpin } from 'naive-ui';
+import { NButton, NSpin } from 'naive-ui'
 import { UserGetApi } from '../../../apis/UserApi'
 import { ref } from 'vue';
 import { useUserStore } from '@/stores/userStore';
@@ -14,24 +14,23 @@ defineProps({
       age: '年齡加載中',
       career: '職業加載中',
       favorite_sentence: '喜愛的句子加載中',
-      tag: '標籤加載中'
-    })
+      tag: '標籤加載中',
+    }),
   },
   type: {
     type: String,
     required: true,
-  }
+  },
 })
-const user = ref(null);  // 儲存使用者資料
-const loading = ref(true);
-const errorMessage = ref(null);
-const userStore = useUserStore();
-const showModal = ref(false);  // 控制 modal 顯示
-
+const user = ref(null) // 儲存使用者資料
+const loading = ref(true)
+const errorMessage = ref(null)
+const userStore = useUserStore()
+const showModal = ref(false) // 控制 modal 顯示
 if (userStore.user.isLogin) {
   const fetchUserData = async () => {
-  try {
-    const result = await UserGetApi(userStore.user.uid);
+    try {
+      const result = await UserGetApi(userStore.user.uid)
 
     if (result) {
       user.value = result;
@@ -49,13 +48,13 @@ if (userStore.user.isLogin) {
     errorMessage.value = err.message || '資料加載錯誤';
     loading.value = false;  // 發生錯誤時也關閉加載狀態
   }
-    };
-    fetchUserData();
+  fetchUserData()
+}
 }
 // 控制 modal 開啟
 const openModal = () => {
-  showModal.value = true;
-};
+  showModal.value = true
+}
 
 const emit = defineEmits(['edit', 'close'])
 </script>
@@ -66,22 +65,20 @@ const emit = defineEmits(['edit', 'close'])
   </div>
   <div v-else class="card-container border rounded-lg overflow-hidden bg-white">
     <div class="img-container w-full">
-      <img
-        class="card-img w-full h-full object-cover"
-        :src="user.photo_url"
-        alt="personImg"
-      />
+      <img class="card-img w-full h-full object-cover" :src="user.photo_url" alt="personImg" />
     </div>
 
     <div class="card-content-container">
-      <h3 class="user-name text-2xl text-center font-bold">{{ user.display_name || "大名還未填寫唷👀" }}</h3>
+      <h3 class="user-name text-2xl text-center font-bold">
+        {{ user.display_name || '大名還未填寫唷👀' }}
+      </h3>
       <div class="text-md font-bold">
-        <span>{{ user.city || "所在地還未填寫唷👀"}}</span>
-        <span> • {{ user.age || "年齡還未填寫唷👀"}}</span>
-        <span> • {{ user.career || "職業還未填寫唷👀" }}</span>
+        <span>{{ user.city || '所在地還未填寫唷👀' }}</span>
+        <span> • {{ user.age || '年齡還未填寫唷👀' }}</span>
+        <span> • {{ user.career || '職業還未填寫唷👀' }}</span>
       </div>
       <p class="user-description text-2xl font-bold mt-1 md:mb-5">
-        : {{ user.favorite_sentence || "座右銘還未填寫唷👀"}}
+        : {{ user.favorite_sentence || '座右銘還未填寫唷👀' }}
       </p>
 
       <n-button @click="emit('edit', 'close',user)" @open-modal="openModal" type="primary" ghost round >編輯檔案</n-button>
@@ -92,7 +89,6 @@ const emit = defineEmits(['edit', 'close'])
       </div>
     </div>
   </div>
-
 </template>
 <style scope>
 @media screen and (width >= 768px) {
@@ -148,5 +144,4 @@ const emit = defineEmits(['edit', 'close'])
     justify-content: space-between;
   }
 }
-
 </style>

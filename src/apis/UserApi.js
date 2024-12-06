@@ -3,7 +3,7 @@ import { apiAxios } from '../utils/request.js';
 
 export const UserGetApi = async (uid) => {
   try {
-    const response = await apiAxios.get(`/users/${uid}`);
+    const response = await apiAxios.get(`/users/${uid}`)
 
     if (response && response.status === 200) {
       return response.data.data
@@ -11,7 +11,7 @@ export const UserGetApi = async (uid) => {
   } catch (err) {
     return err.response.message
   }
-};
+}
 
 export const UserGetFollowerApi = async (uid) => {
   try {
@@ -54,23 +54,17 @@ export const UserGetActivityApi = async (uid) => {
 
 export const UserPutApi = async(uid, data) => {
   try {
-    const response = await apiAxios.put(`/users/update/${uid}`, data);
+    const response = await apiAxios.put(`/users/update/${uid}`, data)
     return response
   } catch (err) {
     return err.response.data
-
   }
-
 }
 
-
-export const UserPostApi = async(uid, data) => {
+export const UserPostApi = async (uid, data) => {
   try {
-    return await apiAxios.post(`/users/register/${uid}`, data);
-
+    return await apiAxios.post(`/users/register/${uid}`, data)
   } catch (err) {
     return err.response.data
-
   }
 }
-

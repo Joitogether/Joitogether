@@ -7,8 +7,7 @@ import { useUserStore } from '@/stores/userStore';
 import { storage } from '@/utils/firebaseConfig';
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage'
 
-
-const showModal = ref(false);
+const showModal = ref(false)
 const user = ref(null)
 const userStore = useUserStore()
 const errorMessage = ref(null);
@@ -130,22 +129,23 @@ const handleFileChange1 = async (fileList) => {
   console.log('檔案變更:', fileList);  // 輸出 fileList 的內容
 
   if (fileList.length === 0) {
-    console.log('沒有檔案被選中');
-    return;
+    console.log('沒有檔案被選中')
+    return
   }
 
   // 確保能從 fileList 中正確取得檔案
-  const file = fileList[0]?.file;
-  console.log('選中的檔案:', file);
+  const file = fileList[0]?.file
+  console.log('選中的檔案:', file)
 
   if (!file) {
-    console.log('檔案對象不存在');
-    return;
+    console.log('檔案對象不存在')
+    return
   }
 
-  if (file.size > 2 * 1024 * 1024) {  // 檢查檔案大小
-    message.error('上傳失敗！圖片大小不能超過 2MB 😭');
-    return;
+  if (file.size > 2 * 1024 * 1024) {
+    // 檢查檔案大小
+    message.error('上傳失敗！圖片大小不能超過 2MB 😭')
+    return
   }
 // 預覽圖片
 const reader = new FileReader()
@@ -156,22 +156,22 @@ const reader = new FileReader()
 
   try {
     // 設定圖片文件的存儲路徑
-    const filePath = `lifephoto/${Date.now()}_${file.name}`;
-    const fileRef = storageRef(storage, filePath);
+    const filePath = `lifephoto/${Date.now()}_${file.name}`
+    const fileRef = storageRef(storage, filePath)
 
-    console.log('開始上傳檔案...', file.name);
+    console.log('開始上傳檔案...', file.name)
 
-    const snapshot = await uploadBytes(fileRef, file);
-    const downloadURL = await getDownloadURL(snapshot.ref);
+    const snapshot = await uploadBytes(fileRef, file)
+    const downloadURL = await getDownloadURL(snapshot.ref)
 
-    console.log('圖片下載 URL:', downloadURL);
+    console.log('圖片下載 URL:', downloadURL)
 
     // 更新 user 中的圖片 URL
     user.value.life_photo_1 = downloadURL;
     console.log('更新後的 user:', user.value);
     // message.success('🎉 圖片上傳成功！');
   } catch (error) {
-    console.error('圖片上傳失敗:', error.message);
+    console.error('圖片上傳失敗:', error.message)
     // message.error('😭 上傳圖片失敗，請稍後再試。');
   }
 };
@@ -225,54 +225,53 @@ const reader = new FileReader()
     console.error('第二張圖片上傳失敗:', error.message);
     // message.error('😭 上傳圖片失敗，請稍後再試。');
   }
-};
+}
 
 
 // 監聽 tagsArray，當 tagsArray 變動時更新 user.tags
 watch(tagsArray, (newTags) => {
-  user.value.tags = newTags.join(',');
-});
+  user.value.tags = newTags.join(',')
+})
 
 onMounted(() => {
   if (userStore.user.isLogin) {
-    fetchUserData();
+    fetchUserData()
   }
-});
-
+})
 
 const currentRef = ref(1)
-const currentStatus = ref("process");
+const currentStatus = ref('process')
 // `next` 方法
 const next = () => {
   if (currentRef.value === 1) {
-    currentRef.value = 2;
+    currentRef.value = 2
   } else if (currentRef.value === 2) {
-    currentRef.value = 1;
+    currentRef.value = 1
   }
-};
+}
 
 // `prev` 方法
 const prev = () => {
   if (currentRef.value === 1) {
-    currentRef.value = 2;
+    currentRef.value = 2
   } else if (currentRef.value === 2) {
-    currentRef.value = 1;
+    currentRef.value = 1
   }
-};
+}
 
 // 控制 modal 開啟
 const openModal = () => {
-  showModal.value = true;
-};
+  showModal.value = true
+}
 
 const handleSave = () => {
   // 確保保存資料前的使用者資料
-  console.log('保存前的資料:', user.value);
+  console.log('保存前的資料:', user.value)
 
   // 假設你有一個保存 API
   UserPutApi(userStore.user.uid, user.value)
-    .then(response => {
-      console.log('保存成功:', response);
+    .then((response) => {
+      console.log('保存成功:', response)
       // 資料保存後再打印更新過的資料
       console.log('更新後的資料:', user.value);
       emit('save');
@@ -281,17 +280,16 @@ const handleSave = () => {
       showModal.value = false;
 
     })
-    .catch(error => {
-      console.error('資料保存錯誤:', error);
-    });
-};
+    .catch((error) => {
+      console.error('資料保存錯誤:', error)
+    })
+}
 // 用來關閉視窗的函數
 const closeModal = () => {
   showModal.value = false;
   emit('close');  // 向父組件發送事件，通知關閉
 };
 const emit = defineEmits(['close', 'save'])
-
 </script>
 <template>
 <div class="btn-container flex gap-2 mt-8 mb-8">
@@ -386,41 +384,33 @@ const emit = defineEmits(['close', 'save'])
           </div>
         </div>
 
-
-      <div class="footer mt-10">
-        <n-space vertical class="stepsArea">
-          <n-steps size="small" :current="currentRef" :status="currentStatus">
-            <n-step
-              title="50%"
-              description="完成一半囉！"
-            />
-            <n-step
-              title="99.99%"
-              description="就剩一點點了"
-            />
-          </n-steps>
-        </n-space>
-        <div class="arrowArea justify-center mt-10 custom-arrow flex gap-3">
-          <div class="arrowLeft border-2 border-solid rounded-full border-slate-500">
-            <label for="slide1" class="slide1 cursor-pointer">
-              <ArrowLeft @click="prev"/>
-            </label>
+        <div class="footer mt-10">
+          <n-space vertical class="stepsArea">
+            <n-steps size="small" :current="currentRef" :status="currentStatus">
+              <n-step title="50%" description="完成一半囉！" />
+              <n-step title="99.99%" description="就剩一點點了" />
+            </n-steps>
+          </n-space>
+          <div class="arrowArea justify-center mt-10 custom-arrow flex gap-3">
+            <div class="arrowLeft border-2 border-solid rounded-full border-slate-500">
+              <label for="slide1" class="slide1 cursor-pointer">
+                <ArrowLeft @click="prev" />
+              </label>
+            </div>
+            <div class="arrowRight border-2 border-solid rounded-full border-slate-500">
+              <label for="slide2" class="slide2 cursor-pointer">
+                <ArrowRight @click="next" />
+              </label>
+            </div>
           </div>
-          <div class="arrowRight border-2 border-solid rounded-full border-slate-500">
-            <label for="slide2" class="slide2 cursor-pointer">
-              <ArrowRight @click="next"/>
-            </label>
+          <div class="save flex gap-3 justify-end">
+            <n-button tertiary @click="$emit('close')">改天再填</n-button>
+            <n-button strong secondary type="primary" @click="handleSave">填好啦！</n-button>
           </div>
         </div>
-        <div class="save flex gap-3 justify-end">
-          <n-button tertiary @click="$emit('close')">改天再填</n-button>
-          <n-button strong secondary type="primary" @click="handleSave">填好啦！</n-button>
-        </div>
-      </div>
-    </n-card>
-  </n-modal>
-</div>
-
+      </n-card>
+    </n-modal>
+  </div>
 </template>
 <style scoped>
 
@@ -432,19 +422,18 @@ const emit = defineEmits(['close', 'save'])
 }
 
 /* 当前显示的内容 */
-.innerPart_1[v-show="currentRef === 1"],
-.innerPart_2[v-show="currentRef === 2"] {
+.innerPart_1[v-show='currentRef === 1'],
+.innerPart_2[v-show='currentRef === 2'] {
   opacity: 1;
-  transform: translateX(0);  /* 滑入效果 */
-  z-index: 100;  /* 保证显示的部分在最前 */
+  transform: translateX(0); /* 滑入效果 */
+  z-index: 100; /* 保证显示的部分在最前 */
 }
 
 /* 隐藏的内容 */
-.innerPart_1[v-show="currentRef !== 1"],
-.innerPart_2[v-show="currentRef !== 2"] {
+.innerPart_1[v-show='currentRef !== 1'],
+.innerPart_2[v-show='currentRef !== 2'] {
   opacity: 0;
   transform: translateX(100%); /* 滑出效果 */
   z-index: 0;
 }
-
 </style>

@@ -1,8 +1,8 @@
 <script setup>
-import { UserGetApi } from '../../../apis/UserApi';
-import { ref, onMounted } from 'vue';
-import { NSpin } from 'naive-ui';
-import { useUserStore } from '@/stores/userStore';
+import { UserGetApi } from '../../../apis/UserApi'
+import { ref, onMounted } from 'vue'
+import { NSpin } from 'naive-ui'
+import { useUserStore } from '@/stores/userStore'
 
 defineProps({
   items: {
@@ -15,42 +15,39 @@ defineProps({
       zodiac: '星座加載中',
       hobby: '興趣加載中',
       expertise: '專長加載中',
-      interested_in: '興趣活動加載中'
-    })
+      interested_in: '興趣活動加載中',
+    }),
   },
   type: {
     type: String,
     required: true,
-  }
+  },
 })
-const user = ref(null);
-const loading = ref(true);
-const errorMessage = ref(null);
+const user = ref(null)
+const loading = ref(true)
+const errorMessage = ref(null)
 const userStore = useUserStore()
 if (userStore.user.isLogin) {
   const fetchUserData = async () => {
-  try {
-    const result = await UserGetApi(userStore.user.uid);
-    console.log('API回傳資料:', result);
+    try {
+      const result = await UserGetApi(userStore.user.uid)
+      console.log('API回傳資料:', result)
 
-    if (result) {
-      user.value = result;
-      loading.value = false;
-      return user.value
+      if (result) {
+        user.value = result
+        loading.value = false
+        return user.value
+      }
+    } catch (err) {
+      errorMessage.value = err.message || '資料加載錯誤'
+      loading.value = false
     }
-  } catch (err) {
-    errorMessage.value = err.message || '資料加載錯誤';
-    loading.value = false;
   }
-    }
-    fetchUserData();
-
+  fetchUserData()
 }
-
-
 </script>
 <template>
-
+  <<<<<<< HEAD ======= >>>>>>> 5df42387e1f129fbdbf5849a34b1393b6256b00c
   <div v-if="loading">
     <n-spin size="medium" />
     資料正在跑來的路上...
@@ -58,10 +55,19 @@ if (userStore.user.isLogin) {
   <div v-else class="personInfo mx-8 my-5">
     <div class="photoArea grid grid-cols-2 gap-4 overflow-hidden">
       <div class="firstPhoto justify-self-center self-center">
-        <img :src="user.life_photo_1 || 'default_image_path.jpg'" alt="lifePhoto-1" class="rounded-3xl">
+        <<<<<<< HEAD
+        <img
+          :src="user.life_photo_1 || 'default_image_path.jpg'"
+          alt="lifePhoto-1"
+          class="rounded-3xl"
+        />
       </div>
       <div class="secondPhoto justify-self-center self-center">
-        <img :src="user.life_photo_2 || 'default_image_path.jpg'" alt="lifePhoto1-2" class="rounded-3xl">
+        <img
+          :src="user.life_photo_2 || 'default_image_path.jpg'"
+          alt="lifePhoto1-2"
+          class="rounded-3xl"
+        />
       </div>
     </div>
     <div class="contentArea sm:leading-loose sm:text-xl text-sm mt-5">
@@ -72,7 +78,6 @@ if (userStore.user.isLogin) {
       <p class="bg-violet-200">興趣的活動：{{ user.interested_in || '興趣的活動還未填寫唷👀'}}</p>
     </div>
   </div>
-
 </template>
 
 <style scoped>
@@ -93,7 +98,6 @@ if (userStore.user.isLogin) {
   padding: 0 15px;
   line-height: 2.5;
   text-align: center;
-  border-radius: 9999px
+  border-radius: 9999px;
 }
-
 </style>
