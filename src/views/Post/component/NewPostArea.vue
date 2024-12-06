@@ -2,19 +2,21 @@
 import { ref, watch } from 'vue'
 import { useUserStore } from '@/stores/userStore'
 import { submitPost } from '../services/postService'
-import { useMessage, NButton, NModal } from 'naive-ui'
+import { useMessage, NButton, NModal, NAvatar } from 'naive-ui'
+import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage'
 
-// 樣式
+// 版面欄位
 const showModal = ref(false)
-const value = ref(null)
 const currentSmallTalk = ref('')
 const userStore = useUserStore()
 const message = useMessage()
 
 // 打進後端的資料
 const newPostTitle = ref('')
-const articleContent = ref('')
+const newPostContent = ref('')
 const newPostCategory = ref(null) // 不用 null 的話就不會顯示選擇文章分類
+const imageUrl = ref(null)
+
 const postCategories = [
   { label: '美食', value: 'food' },
   { label: '購物', value: 'shopping' },
@@ -26,23 +28,88 @@ const postCategories = [
 
 // 新增文章
 const handleSubmit = async () => {
-  // 檢查是否有文章分類
+  if (!userStore.user.isLogin) {
+    message.error('請先登入後再發文！')
+    return
+  }
 
   const postData = {
     post_title: newPostTitle.value,
-    post_content: articleContent.value,
-    uid: 'HWDIppnENgcdS3Ml9F0For7kQwv1',
+    post_content: newPostContent.value,
+    uid: userStore.user.uid,
     post_category: newPostCategory.value,
-    post_status: 'onEdit',
+    post_status: 'posted',
+    post_img: imageUrl.value || '',
   }
   try {
     await submitPost(postData)
     message.success('文章新增成功')
     console.log('傳送')
+    showModal.value = true
+    setTimeout(() => {
+      showModal.value = false
+      newPostTitle.value = ''
+      newPostContent.value = ''
+      newPostCategory.value = null
+    }, 1500) // 設置 1.5 秒後關閉
   } catch (error) {
     console.log(error)
   }
-  // showModal.value = false
+}
+
+// 圖片功能
+const selectedFile = ref(null)
+const uploadedImage = ref(null)
+const imagePreview = ref(null)
+const fileInput = ref(null)
+
+// 觸發文件選擇
+const triggerFileInput = () => {
+  if (fileInput.value) {
+    fileInput.value.click() // 觸發文件選擇框
+  }
+}
+
+const uploadFile = async (file) => {
+  try {
+    const storage = getStorage()
+    const fileRef = storageRef(storage, `postImages/${file.name}`)
+    const result = await uploadBytes(fileRef, file) // 上傳檔案
+    const downloadURL = await getDownloadURL(result.ref) // 獲取下載連結
+    console.log('上傳成功，下載連結:', downloadURL)
+    imageUrl.value = downloadURL
+    return downloadURL // 傳回下載連結
+  } catch (error) {
+    console.error('圖片上傳失敗')
+    throw error
+  }
+}
+
+// 處理圖片上傳與預覽
+const handleImageUpload = async (event) => {
+  const file = event.target.files[0]
+  if (file) {
+    selectedFile.value = file
+
+    // 建立圖片預覽
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      imagePreview.value = e.target.result // 設定預覽 URL
+    }
+    reader.readAsDataURL(file)
+    // 上傳圖片
+    try {
+      await uploadFile(file)
+    } catch (error) {
+      console.error('圖片上傳失敗:', error)
+      message.error('圖片上傳失敗，請檢查檔案格式或網路連線')
+    }
+  }
+}
+// 移除圖片
+const removeImage = () => {
+  imagePreview.value = null
+  uploadedImage.value = null
 }
 
 const smallTalk = [
@@ -122,7 +189,7 @@ watch(showModal, (newValue) => {
       </div>
     </template>
     <template #default>
-      <div class="flex flex-col lg:flex-row p-3">
+      <div class="flex flex-col lg:flex-row">
         <div class="flex-shrink-0 mb-4 lg:mb-0 lg:mr-20">
           <n-avatar
             round
@@ -155,20 +222,44 @@ watch(showModal, (newValue) => {
           >
         </div>
       </div>
+      <div class="p-4 bg-white border border-gray-300 rounded-lg mt-4 mb-4">
+        <!-- 上傳圖片按鈕 -->
+        <div class="flex justify-center">
+          <button
+            class="mt-2 bg-green-600 text-white font-bold py-2 px-4 rounded-full hover:bg-green-700 focus:outline-none focus:ring focus:ring-green-600"
+            @click="triggerFileInput"
+          >
+            上傳圖片
+          </button>
+          <input
+            ref="fileInput"
+            type="file"
+            class="hidden"
+            multiple
+            accept="image/*"
+            @change="handleImageUpload"
+          />
+        </div>
 
-      <div class="p-3">
-        <n-upload
-          action="https://www.mocky.io/v2/5e4bafc63100007100d8b70f"
-          :default-file-list="previewFileList"
-          list-type="image-card"
-          @preview="handlePreview"
-        />
+        <!-- 圖片預覽 -->
+        <div v-if="imagePreview" class="mt-4 flex justify-center">
+          <div
+            class="relative bg-gray-100 border border-gray-300 rounded-lg overflow-hidden w-32 h-32"
+          >
+            <img :src="imagePreview" alt="圖片預覽" class="w-full h-full object-cover" />
+            <button
+              class="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm hover:bg-red-600 focus:outline-none"
+              @click="removeImage"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
       </div>
-
-      <div class="p-3">
+      <div>
         <n-input
           type="textarea"
-          v-model:value="articleContent"
+          v-model:value="newPostContent"
           round
           placeholder="📝 快來寫下你的精彩內容吧～ (｡♥‿♥｡)"
           :autosize="{
