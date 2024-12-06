@@ -77,14 +77,13 @@ const fetchUserData = async () => {
 
 //處理大頭照
 const handleAvatarChange = async (fileListAva) => {
-  console.log('大頭照檔案變更:', fileListAva);  // 輸出 fileList 的內容
+  console.log('大頭照檔案變更:', fileListAva);
 
   if (fileListAva.length === 0) {
     console.log('沒有大頭照檔案被選中');
     return;
   }
 
-  // 確保能從 fileList 中正確取得檔案
   const avatarFile = fileListAva[0]?.file;
   console.log('選中的大頭照檔案:', avatarFile);
 
@@ -93,7 +92,7 @@ const handleAvatarChange = async (fileListAva) => {
     return;
   }
 
-  if (avatarFile.size > 2 * 1024 * 1024) {  // 檢查檔案大小
+  if (avatarFile.size > 2 * 1024 * 1024) {
     message.error('上傳失敗！圖片大小不能超過 2MB 😭');
     return;
   }
@@ -202,7 +201,6 @@ const handleFileChange2 = async (fileListSec) => {
 // 預覽圖片
 const reader = new FileReader()
   reader.onload = (event) => {
-    // 本地圖片預覽
     user.value.life_photo_2 = event.target.result
   }
   reader.readAsDataURL(file2)
@@ -278,7 +276,10 @@ const handleSave = () => {
       // 資料保存後再打印更新過的資料
       console.log('更新後的資料:', user.value);
       emit('save');
+      fetchUserData();
+
       showModal.value = false;
+
     })
     .catch(error => {
       console.error('資料保存錯誤:', error);

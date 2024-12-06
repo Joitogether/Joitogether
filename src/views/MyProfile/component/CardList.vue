@@ -36,8 +36,15 @@ if (userStore.user.isLogin) {
     if (result) {
       user.value = result;
       loading.value = false;  // 資料加載完成，關閉加載狀態
+      // console.log(user.value.tags);
       return user.value
     }
+    if ( !user.value.tags ) {
+    user.value.tags = '未填寫';     // 如果 tags 不存在或為空，賦予預設值
+    console.log(user.value.tags);
+
+    return user.value.tags;
+  }
   } catch (err) {
     errorMessage.value = err.message || '資料加載錯誤';
     loading.value = false;  // 發生錯誤時也關閉加載狀態
@@ -79,7 +86,8 @@ const emit = defineEmits(['edit', 'close'])
 
       <n-button @click="emit('edit', 'close',user)" @open-modal="openModal" type="primary" ghost round >編輯檔案</n-button>
       <div class="tag-container flex gap-3 flex-wrap">
-        <span v-for="(item, index) in user.tags.split(',')" :key="index"  class="border-2 px-3 py-1 rounded">
+        <span v-if="!user.tags">還沒有標籤喔</span>
+        <span v-else v-for="(item, index) in (user.tags || '').split(',')" :key="index" class="border-2 px-3 py-1 rounded">
           # {{ item || "未填寫" }}</span>
       </div>
     </div>
