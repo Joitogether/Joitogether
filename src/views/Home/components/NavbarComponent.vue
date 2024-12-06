@@ -49,32 +49,7 @@ const handleLogout = async () => {
 const showPopover = ref(false)
 
 
-const notifications = ref([
-  {
-    users_notifications_actor_idTousers: {
-      display_name: "王嘉駿"
-    },
-    photo_url: "https://lh3.googleusercontent.com/a/ACg8ocI7pR5mtzW0YreJrC28pxDYACNwMdQlgbC7USsv41dq-kT8Hg=s96-c",
-      message: "報名了你的活動",
-      action: "register",
-      is_read: 0,
-      created_at: "2024-12-06T09:27:44.000Z",
-      id: 3,
-      link: "/activity/detail/36"
-  },
-  {
-    users_notifications_actor_idTousers: {
-      display_name: "王嘉駿"
-    },
-    photo_url: "https://lh3.googleusercontent.com/a/ACg8ocI7pR5mtzW0YreJrC28pxDYACNwMdQlgbC7USsv41dq-kT8Hg=s96-c",
-    message: "報名",
-    action: "register",
-    is_read: 1,
-    created_at: "2024-12-06T09:27:44.000Z",
-    id: 4,
-    link: "/activity/detail/36"
-  },
-])
+const notifications = ref([])
 
 // 應該根據未讀的更新
 const notificationCount = computed(() => { 
@@ -97,7 +72,7 @@ const handleNotificationRead = async (value) => {
     if(unreadList.length > 0) {
       // 調用 API 更新未讀的通知狀態
       const res = await userUpdateNotificationAPI(userStore.user.uid, unreadList)
-      if(!res){
+      if(res){
         await getNotification(userStore.user.uid)
       }
     }
@@ -110,7 +85,6 @@ async function getNotification(uid){
     return notifications.value = []
   }
   notifications.value = response.data.data
-  console.log(notifications.value)
 }
 
 onMounted(async () => {
