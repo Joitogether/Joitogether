@@ -96,8 +96,10 @@ const handleNotificationRead = async (value) => {
     // 如果未讀就把未讀的狀態都更新
     if(unreadList.length > 0) {
       // 調用 API 更新未讀的通知狀態
-      await userUpdateNotificationAPI(userStore.user.uid, unreadList)
-      await getNotification(userStore.user.uid)
+      const res = await userUpdateNotificationAPI(userStore.user.uid, unreadList)
+      if(!res){
+        await getNotification(userStore.user.uid)
+      }
     }
 }
 }
