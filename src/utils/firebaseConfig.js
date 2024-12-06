@@ -1,7 +1,8 @@
 // firebase 初始化配置
 import { initializeApp } from 'firebase/app'
-import { getAuth } from 'firebase/auth'
+import { getAuth, onAuthStateChanged } from 'firebase/auth'
 import { getStorage } from 'firebase/storage'
+import { useSocketStore } from '@/stores/socketStore'
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -17,4 +18,19 @@ const app = initializeApp(firebaseConfig)
 const auth = getAuth(app)
 const storage = getStorage(app)
 
-export { auth, storage }
+const getCurrentUser = () => {
+
+  return new Promise((resolve, reject) => {
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        const socketStore = useSocketStore()
+        socketStore.initSocket(user.uid)
+        resolve(user)
+      } else {
+        reject()
+      }
+    })
+  })
+
+}
+export { auth, storage, getCurrentUser }

@@ -1,17 +1,22 @@
 <script setup>
-import { Search, User, Menu, Sweep3d } from '@iconoir/vue'
-import { NButton, NDivider } from 'naive-ui'
+import { Search, User, Menu, Sweep3d, BellNotificationSolid } from '@iconoir/vue'
+import { NButton, NDivider, NBadge, NPopover } from 'naive-ui'
 import userInfo from '../../MyProfile/component/person'
 import { RouterLink } from 'vue-router'
 import { useMessage } from 'naive-ui'
 import { useUserStore } from '/src/stores/userStore.js'
 import { auth } from '@/utils/firebaseConfig.js'
 import { useRouter } from 'vue-router'
-
+import { computed, onMounted, ref } from 'vue'
+import 'dayjs/locale/zh-tw.js'
+import relativeTime from 'dayjs/plugin/relativeTime'
+import dayjs from 'dayjs'
+import { userGetNotificationAPI, userUpdateNotificationAPI } from '@/apis/userAPIs'
 const message = useMessage()
 const userStore = useUserStore()
 const router = useRouter()
-
+dayjs.locale('zh-tw') 
+dayjs.extend(relativeTime)
 // 註冊/登入按鈕跳轉
 const navigateToLogin = () => {
   router.push({ name: 'login' })
@@ -40,6 +45,75 @@ const handleLogout = async () => {
     console.error('登出錯誤：', error)
   }
 }
+
+const showPopover = ref(false)
+
+
+const notifications = ref([
+  {
+    users_notifications_actor_idTousers: {
+      display_name: "王嘉駿"
+    },
+    photo_url: "https://lh3.googleusercontent.com/a/ACg8ocI7pR5mtzW0YreJrC28pxDYACNwMdQlgbC7USsv41dq-kT8Hg=s96-c",
+      message: "報名了你的活動",
+      action: "register",
+      is_read: 0,
+      created_at: "2024-12-06T09:27:44.000Z",
+      id: 3,
+      link: "/activity/detail/36"
+  },
+  {
+    users_notifications_actor_idTousers: {
+      display_name: "王嘉駿"
+    },
+    photo_url: "https://lh3.googleusercontent.com/a/ACg8ocI7pR5mtzW0YreJrC28pxDYACNwMdQlgbC7USsv41dq-kT8Hg=s96-c",
+    message: "報名",
+    action: "register",
+    is_read: 1,
+    created_at: "2024-12-06T09:27:44.000Z",
+    id: 4,
+    link: "/activity/detail/36"
+  },
+])
+
+// 應該根據未讀的更新
+const notificationCount = computed(() => { 
+  if(notifications.value.length === 0) {
+    return 0
+  }
+  return notifications.value.reduce((count, notification) => notification.is_read === 0 ? count + 1 : count , 0)
+})
+
+const handleNotificationRead = async (value) => {
+  // 掌握開關
+  showPopover.value = value
+  // 關起來的話做檢查
+  if(value === false){
+    // 有哪些是原本未讀的
+    const unreadList = notifications.value
+      .filter((notification) =>  notification.is_read === 0 )
+      .map(notification => notification.id)
+    // 如果未讀就把未讀的狀態都更新
+    if(unreadList.length > 0) {
+      // 調用 API 更新未讀的通知狀態
+      await userUpdateNotificationAPI(userStore.user.uid, unreadList)
+      await getNotification(userStore.user.uid)
+    }
+}
+}
+
+async function getNotification(uid){
+  const response = await userGetNotificationAPI(uid)
+  if(!response || response.length === 0) {
+    return notifications.value = []
+  }
+  notifications.value = response.data.data
+  console.log(notifications.value)
+}
+
+onMounted(async () => {
+  await getNotification(userStore.user.uid)
+})
 </script>
 
 <template>
@@ -137,7 +211,28 @@ const handleLogout = async () => {
       </ul>
     </div>
     <!-- 登入/註冊 -->
-    <div class="flex">
+    <div class="flex items-center">
+      <n-popover :disabled="notifications.length === 0" :on-update:show="handleNotificationRead" placement="bottom-end" :on-clickoutside="() => showPopover = false" style="width: 400px; padding: 0px" trigger="click" :show="showPopover">
+        <template #trigger>
+          <n-badge :max="15"  :value="notificationCount" class="mr-3 cursor-pointer">
+            <BellNotificationSolid></BellNotificationSolid>
+          </n-badge>
+        </template>
+        <div class="flex flex-col ">
+          <div   v-for="notification in notifications" :key="notification.id" >
+            <router-link :to="notification.link">
+              <div :class="{ 'bg-yellow-100' : !notification.is_read}" class="hover:bg-yellow-100  hover:transition-colors post-onepost-top flex py-2 px-5  items-center	cursor-pointer">
+                <img class="w-14 aspect-square rounded-full" :src="notification.users_notifications_actor_idTousers.photo_url" alt="">
+                <div class="ml-3 relative w-full h-14">
+                  <p class="font-bold text-lg absolute top-0"> {{notification.users_notifications_actor_idTousers.display_name }}<span class="pl-1 font-normal">{{ notification.message}}</span> </p>
+                  <p class="absolute bottom-0 text-md">{{dayjs(notification.created_at).fromNow()}}</p>
+                </div>
+              </div>
+             
+            </router-link>
+          </div>
+        </div>
+      </n-popover>
       <div class="hidden md:flex min-w-20 items-center">登入/註冊</div>
 
       <input type="checkbox" id="login-toggle" class="hidden" />
@@ -216,7 +311,7 @@ const handleLogout = async () => {
     </div>
   </div>
 
-  <!-- <!-- 登入/註冊顯示選單 -->
+<!-- 登入/註冊顯示選單 -->
 </template>
 
 <style scoped>

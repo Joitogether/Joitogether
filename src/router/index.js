@@ -15,8 +15,7 @@ import ActivityReview from '@/views/Activity/components/ActivityReview.vue'
 import SignupSuccess from '@/views/Login/SignupSuccess.vue'
 import ResetPassword from '@/views/Login/ResetPassword.vue'
 import forgotPassword from '@/views/Login/ForgotPassword.vue'
-import { onAuthStateChanged } from 'firebase/auth'
-import { auth } from '@/utils/firebaseConfig.js'
+import { getCurrentUser } from '@/utils/firebaseConfig'
 import { useUserStore } from '@/stores/userStore'
 
 
@@ -114,19 +113,17 @@ const router = createRouter({
 
 
 
-router.beforeEach( (to, from, next) => {
+router.beforeEach( async (to, from, next) => {
   const userStore = useUserStore()
-  onAuthStateChanged(auth, (user) => {
+  const user = await getCurrentUser()
     if (user) {
       userStore.setUser(user)
       next()
     } else {
       // next('/login')
-      console.log('尚未登入')
       userStore.clearUser()
       next()
     }
-  })
 })
 
 export default router

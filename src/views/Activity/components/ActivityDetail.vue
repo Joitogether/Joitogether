@@ -10,6 +10,7 @@ import router from '@/router';
 import { useRoute } from 'vue-router';
 import { useUserStore } from '@/stores/userStore';
 import { activityCancelRegisterAPI, activityGetDetailAPI, activityRegisterAPI, activityCancelAPI, activityNewCommentAPI, activityDeleteCommentAPI } from '@/apis/activityApi';
+import { useSocketStore } from '@/stores/socketStore';
 
 dayjs.locale('zh-tw') 
 dayjs.extend(relativeTime)
@@ -26,14 +27,16 @@ async function getActivityDetail(){
     // 這裡應該要針對沒有拿到id的狀態處理
     return
   }
+
   activity.value = activityDetail
   host.value = activityDetail.host_id
   comments.value = activityDetail.comments
 }
 
+
 const userStore = useUserStore()
 const message = useMessage()
-
+const socketStore = useSocketStore()
 
 const activity = ref({
   id: 'unique-activity-id',
@@ -90,7 +93,6 @@ const clearComment = () => {
 const comments = ref({
   uid: 'zm5skjX4z7WTal4x6m7f6Ae0zzE2',
   user_comment: '一起去吧!',
-  uid: 'zm5skjX4z7WTal4x6m7f6Ae0zzE2',
   photo_url: 'https://via.placeholder.com/150',
   display_name: '小明123',
 })
@@ -121,6 +123,17 @@ const registerActivity = async () => {
   await getActivityDetail()
   //報名成功
   message.success('報名成功！')
+  const notiData = {
+    actor_id: userStore.user.uid,
+    user_id: activity.value.host_id,
+    target_id: activity.value.id,
+    action: 'register',
+    target_type: 'activity',
+    message: '報名'
+  }
+
+  socketStore.sendNotification(notiData)
+  
   toggleRegisterModal()
 }
 // 根據活動判斷當前使用者是否為主辦者

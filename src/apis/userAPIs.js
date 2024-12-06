@@ -1,4 +1,5 @@
 import { apiAxios } from '@/utils/request.js'
+import { useId } from 'vue'
 
 export const userRegisterAPI = async (data) => {
   try {
@@ -55,5 +56,28 @@ export const userAuthLoginAPI = async (data) => {
 
     console.error('第三方登入資料 API 呼叫失敗：', error.message)
     throw error
+  }
+}
+
+export const userGetNotificationAPI = async (uid) => {
+  try {
+    const response = await  apiAxios.get(`/users/notifications/${uid}`)
+    return response
+  }catch(error){
+    if(error){
+      return null
+    }
+  }
+}
+
+
+export const userUpdateNotificationAPI = async (uid, unreadList) => {
+  try{
+    const response = await apiAxios.put(`/users/notifications/${uid}`, { unreadList})
+    return response
+  }catch(error){
+    if(error){
+      return null
+    }
   }
 }
