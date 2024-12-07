@@ -1,7 +1,7 @@
 <script setup>
 import { NButton, NSpin } from 'naive-ui'
 import { UserGetApi } from '../../../apis/UserApi'
-import { ref, defineEmits } from 'vue'
+import { ref } from 'vue'
 import { useUserStore } from '@/stores/userStore'
 
 defineProps({
@@ -22,11 +22,12 @@ defineProps({
     required: true,
   },
 })
-const user = ref(null) // 儲存使用者資料
+const user = ref(null)
 const loading = ref(true)
 const errorMessage = ref(null)
 const userStore = useUserStore()
 const showModal = ref(false) // 控制 modal 顯示
+
 if (userStore.user.isLogin) {
   const fetchUserData = async () => {
     try {
@@ -34,12 +35,12 @@ if (userStore.user.isLogin) {
 
       if (result) {
         user.value = result
-        loading.value = false // 資料加載完成，關閉加載狀態
+        loading.value = false
         return user.value
       }
     } catch (err) {
       errorMessage.value = err.message || '資料加載錯誤'
-      loading.value = false // 發生錯誤時也關閉加載狀態
+      loading.value = false
     }
   }
   fetchUserData()
@@ -74,10 +75,24 @@ const emit = defineEmits(['edit', 'close'])
       <p class="user-description text-2xl font-bold mt-1 md:mb-5">
         : {{ user.favorite_sentence || '座右銘還未填寫唷👀' }}
       </p>
-      <n-button @click="openModal" type="primary" ghost round>編輯檔案</n-button>
+
+      <n-button
+        @click="emit('edit', 'close', user)"
+        @open-modal="openModal"
+        type="primary"
+        ghost
+        round
+        >編輯檔案</n-button
+      >
       <div class="tag-container flex gap-3 flex-wrap">
-        <span v-for="(item, index) in user.tags" :key="index" class="border-2 px-3 py-1 rounded">
-          # {{ item.split(',') || '未填寫' }}</span
+        <span v-if="!user.tags">還沒有標籤喔</span>
+        <span
+          v-else
+          v-for="(item, index) in (user.tags || '').split(',')"
+          :key="index"
+          class="border-2 px-3 py-1 rounded"
+        >
+          # {{ item || '未填寫' }}</span
         >
       </div>
     </div>
@@ -114,12 +129,6 @@ const emit = defineEmits(['edit', 'close'])
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-  }
-
-  .btn-container {
-    margin-bottom: 0.5rem;
-    margin-top: 0;
-    width: 70%;
   }
 
   .user-name {

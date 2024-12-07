@@ -1,90 +1,99 @@
 <script setup>
-import { UserGetApi } from '@/apis/UserApi'
-import { reactive, ref } from 'vue'
-import { NTabs, NTabPane, NDivider } from 'naive-ui'
+import { onMounted, ref } from 'vue'
+import { NTabs, NTabPane, NSpin } from 'naive-ui'
+import { UserGetFollowerApi, UserGetFollowingApi } from '../../../apis/UserApi'
+import { useUserStore } from '@/stores/userStore';
 
-const followingList = reactive([
-  {
-    userId: 1,
-    imgUrl: 'https://img.lovepik.com/element/40080/7463.png_300.png',
-    userName: '王大錘',
-    think: '我好帥',
-  },
-  {
-    userId: 2,
-    imgUrl: 'https://img.lovepik.com/element/40116/7316.png_300.png',
-    userName: '張大仙',
-    think: '想交朋友',
-  },
-  {
-    userId: 3,
-    imgUrl: 'https://img.lovepik.com/element/40253/7513.png_300.png',
-    userName: '劉大吉',
-    think: '請多多追隨',
-  },
-])
+const follower = ref(null);
+const following = ref(null)
+const loading = ref(true);
+const errorMessage = ref(null);
+const userStore = useUserStore()
+const followerList = ref([])
+const followingList = ref([])
 
-const followerList = reactive([
-  {
-    userId: 1,
-    imgUrl:
-      'https://img.lovepik.com/free_png/32/25/61/59758PIC7z1fa7i86bqr58PIC_PIC2018.png_300.png',
-    userName: '彭大海',
-    think: '今天很想跟朋友一起出門',
-  },
-  {
-    userId: 2,
-    imgUrl: 'https://img.lovepik.com/photo/45014/5426.jpg_wh300.jpg',
-    userName: '謝小夜',
-    think: '大家好像都玩得很開心',
-  },
-  {
-    userId: 3,
-    imgUrl:
-      'https://img.lovepik.com/png/20231023/Cute-cartoon-pink-hairball-pig-rabbit-monster-tooth-ear_322945_wh300.png',
-    userName: '蔡大雞',
-    think: '跨年要做什麼呢～？',
-  },
-])
+
+const fetchFollowerData = async () => {
+  try {
+    const result = await UserGetFollowerApi(userStore.user.uid)
+    if (result) {
+      follower.value = result.data
+
+      follower.value.map((item) => {
+      if (item.users_followers_follower_idTousers){
+        const followerData = JSON.parse(JSON.stringify(item.users_followers_follower_idTousers));
+        followerList.value.push(followerData)
+      } else {
+        return errorMessage.value
+      }
+    })
+    }
+  } catch (err) {
+    errorMessage.value = err.message || '資料加載錯誤';
+    loading.value = false;
+  }
+    }
+
+const fetchFollowingData = async () => {
+  try {
+    const result = await UserGetFollowingApi(userStore.user.uid);
+
+    if (result) {
+      following.value = result.data
+      following.value.map((item) => {
+        if(item.users_followers_user_idTousers) {
+          const followingData = JSON.parse(JSON.stringify(item.users_followers_user_idTousers));
+          followingList.value.push(followingData)
+          loading.value = false
+        } else {
+          return errorMessage.value
+        }
+      })
+
+    }
+  } catch (err) {
+  errorMessage.value = err.message || '資料加載錯誤';
+  loading.value = false;
+  }
+}
+
+
+onMounted(() => {
+  fetchFollowingData()
+  fetchFollowerData();
+
+})
+
+
 </script>
 
 <template>
-  <n-divider />
-  <div class="mx-6">
+  <div v-if="loading">
+    <n-spin size="medium" />
+    資料正在跑來的路上...
+  </div>
+  <div v-else-if="errorMessage">{{ errorMessage }}</div>
+  <div v-else class="mx-6 py-6">
     <n-tabs type="segment" animated>
       <n-tab-pane name="chap1" tab="關注中">
-        <div>
-          <div
-            class="my-5"
-            v-for="userFollowingList in followingList"
-            :key="userFollowingList.userId"
-          >
-            <div>
-              <a class="flex" href="">
-                <div class="me-5 max-w-[44px] max-h-[44px]">
-                  <img :src="userFollowingList.imgUrl" class="rounded-full self-center" />
-                </div>
-                <div>
-                  <div>{{ userFollowingList.userName }}</div>
-                  <div>{{ userFollowingList.think }}</div>
-                </div>
-              </a>
+        <div v-for="(following, index) in followingList" :key="index" class="followingArea my-5 flex">
+            <div class="me-5 max-w-[44px] max-h-[44px]">
+              <img :src="following.photo_url" class="rounded-full self-center" />
             </div>
-          </div>
+            <div>
+              <div>{{ following.display_name }}</div>
+              <div>{{ following.favorite_sentence }}</div>
+            </div>
         </div>
       </n-tab-pane>
       <n-tab-pane name="chap2" tab="粉絲">
-        <div>
-          <div class="my-5" v-for="userFollowerList in followerList" :key="userFollowerList.userId">
-            <div class="flex">
-              <div class="me-5 max-w-[44px] max-h-[44px]">
-                <img :src="userFollowerList.imgUrl" class="rounded-full" />
-              </div>
-              <div>
-                <div>{{ userFollowerList.userName }}</div>
-                <div>{{ userFollowerList.think }}</div>
-              </div>
-            </div>
+        <div v-for="follower in followerList" :key="follower.follower_id" class="followerArea my-5 flex">
+          <div class="me-5 max-w-[44px] max-h-[44px]">
+            <img :src="follower.photo_url" class="rounded-full" />
+          </div>
+          <div>
+            <div>{{ follower.display_name }}</div>
+            <div>{{ follower.favorite_sentence }}</div>
           </div>
         </div>
       </n-tab-pane>
@@ -93,7 +102,5 @@ const followerList = reactive([
 </template>
 
 <style scoped>
-.card-tabs .n-tabs-nav--bar-type {
-  padding-left: 4px;
-}
+
 </style>
