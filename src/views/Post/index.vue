@@ -4,6 +4,7 @@ import NewPostArea from './component/NewPostArea.vue'
 import { onMounted, reactive, ref } from 'vue'
 import { NSpace, NSelect } from 'naive-ui'
 import { getPostsByCategory } from '@/apis/postAPIs'
+import { getPostComments } from '@/apis/postCommentAPIs'
 
 import dayjs from 'dayjs'
 import 'dayjs/locale/zh-tw.js'
@@ -11,6 +12,7 @@ import relativeTime from 'dayjs/plugin/relativeTime'
 
 dayjs.locale('zh-tw')
 dayjs.extend(relativeTime)
+
 const options = [
   {
     label: '最新',
@@ -30,6 +32,23 @@ const options = [
   },
 ]
 
+const selectValue = ref('newest')
+
+const handleFilterSelect = (value) => {
+  // 這裡可以針對點擊事件做後續處理
+  console.log(value)
+  selectValue.value = value
+
+  postList.sort((a, b) => {
+    if (value === 'newest') {
+      return new Date(b.time) - new Date(a.time)
+    } else if (value === 'oldest') {
+      return new Date(a.time) - new Date(b.time)
+    }
+    return 0
+  })
+}
+
 //預設是美食
 const selectedTag = ref('food')
 const handleTagSelect = (tag) => {
@@ -38,15 +57,11 @@ const handleTagSelect = (tag) => {
   selectedTag.value = tag
 
   fetchPostsByCategory()
-}
-
-const handleFilterSelect = (value) => {
-  // 這裡可以針對點擊事件做後續處理
-  console.log(value)
+  fetchCommentsCount()
 }
 
 const postList = reactive([])
-const selectValue = ref()
+
 const fetchPostsByCategory = async () => {
   try {
     const res = await getPostsByCategory(selectedTag.value)
@@ -57,21 +72,40 @@ const fetchPostsByCategory = async () => {
       title: post.post_title,
       content: post.post_content,
       name: post.uid,
-      time: post.updated_time,
+      time: post.updated_at,
       img: post.post_img,
     }))
 
     // 更新postList
     postList.splice(0, postList.length, ...formattedPosts)
+
+    handleFilterSelect(selectValue.value)
+
     console.log(`分類 ${selectedTag.value}文章已更新：`, postList)
   } catch (error) {
     console.error(`撈取分類 ${selectedTag.value} 文章失敗：`, error)
   }
 }
 
-onMounted(() => {
-  // 將 fetchPostsByCategory 綁定到 window.onload
-  window.onload = fetchPostsByCategory()
+const fetchCommentsCount = async () => {
+  for (const post of postList) {
+    console.log(`取得文章 ${post.id} 的留言`)
+
+    try {
+      const comments = await getPostComments(post.id)
+      console.log(`Comments for post ${post.id}:`, comments)
+      post.commentsCount = comments.data.length || '0' // 設定留言數
+    } catch (error) {
+      console.error(`無法取得文章 ${post.id} 的留言數`)
+      post.commentsCount = '0' // 預設為 0
+    }
+  }
+
+  console.log(`留言數已更新：`, postList)
+}
+onMounted(async () => {
+  await fetchPostsByCategory() // 確保先撈取分類文章
+  await fetchCommentsCount() // 再撈取留言數
 })
 </script>
 <template>
@@ -143,6 +177,7 @@ onMounted(() => {
           class="flex flex-col justify-between md:flex-row bg-gray-100 p-4 cursor-pointer border-b border-gray-400"
         >
           <!-- 左邊區塊 -->
+          <!-- <div :class="post.img ? 'w-full md:w-9/12' : 'w-full'" class="flex flex-col space-y-2"> -->
           <div class="flex flex-col w-full md:w-9/12 space-y-2">
             <!-- 文章圖片與使用者名稱區塊，包含時間 -->
             <div class="flex items-center justify-between space-x-3">
@@ -154,24 +189,19 @@ onMounted(() => {
                 <!-- 使用者名稱 -->
                 <p class="font-bold text-sm">{{ post.name }}</p>
               </div>
-
               <!-- 發佈時間，顯示相對時間 -->
               <p class="text-sm text-gray-500">{{ dayjs(post.time).fromNow() }}</p>
             </div>
-
             <!-- 文章標題 -->
             <h2 class="text-lg font-bold truncate">{{ post.title }}</h2>
-
             <!-- 文章內容 -->
             <p class="text-sm text-gray-700 line-clamp-2">{{ post.content }}</p>
-
             <!-- 讚與留言 -->
             <div class="flex space-x-8 text-sm text-gray-600">
               <div>👍🏻 {{ post.likes }} 讚</div>
-              <div>💬 {{ post.comments }} 留言</div>
+              <div>💬 {{ post.commentsCount }} 留言</div>
             </div>
           </div>
-
           <!-- 右邊區塊（文章圖片） -->
           <div
             v-if="post.img"
