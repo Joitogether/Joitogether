@@ -47,7 +47,6 @@ if (userStore.user.isLogin) {
 }
 </script>
 <template>
-  <<<<<<< HEAD ======= >>>>>>> 5df42387e1f129fbdbf5849a34b1393b6256b00c
   <div v-if="loading">
     <n-spin size="medium" />
     資料正在跑來的路上...
@@ -55,16 +54,15 @@ if (userStore.user.isLogin) {
   <div v-else class="personInfo mx-8 my-5">
     <div class="photoArea grid grid-cols-2 gap-4 overflow-hidden">
       <div class="firstPhoto justify-self-center self-center">
-        <<<<<<< HEAD
         <img
-          :src="user.life_photo_1 || 'default_image_path.jpg'"
+          :src="user.life_photo_1 || 'https://firebasestorage.googleapis.com/v0/b/login-demo1-9d3cb.firebasestorage.app/o/lifephoto%2F1733574359943_defaultimg.jpg?alt=media&token=c5486472-dadd-4276-8666-97a538e46e5f'"
           alt="lifePhoto-1"
           class="rounded-3xl"
         />
       </div>
       <div class="secondPhoto justify-self-center self-center">
         <img
-          :src="user.life_photo_2 || 'default_image_path.jpg'"
+          :src="user.life_photo_2 || 'https://firebasestorage.googleapis.com/v0/b/login-demo1-9d3cb.firebasestorage.app/o/lifephoto%2F1733574359943_defaultimg.jpg?alt=media&token=c5486472-dadd-4276-8666-97a538e46e5f'"
           alt="lifePhoto1-2"
           class="rounded-3xl"
         />
