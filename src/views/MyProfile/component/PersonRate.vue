@@ -21,7 +21,7 @@ const fetchUserRatings = async () => {
     const result = await getRatings(userStore.user.uid)
     console.log('API回傳資料:', result.data)
     userRatings.value = result.data
-    // console.log(result.data[0].rating_heart)
+    // console.log(result.length)
     if (result.data.length > 0) {
       const total = result.data.reduce((sum, rating) => sum + rating.rating_heart, 0)
       averageRating.value = parseFloat(total / result.data.length).toFixed(1)

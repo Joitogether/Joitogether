@@ -3,34 +3,34 @@ import { ref, onMounted } from 'vue'
 import { NEllipsis, NDivider } from 'naive-ui'
 import { getPosts } from '@/apis/postsApi'
 import { useUserStore } from '@/stores/userStore'
+import { getPostsComment } from '@/apis/postsApi'
+import { getPostsLike } from '@/apis/postsApi'
 
 const userStore = useUserStore()
 const loading = ref(true)
 const errorMessage = ref(null)
 const userPostList = ref([])
+// const userPostComment = ref('')
+// const userPostLike = ref('')
 
 const fetchUserPosts = async () => {
   try {
     const result = await getPosts(userStore.user.uid)
-    console.log('貼文資料：', result.data)
+    console.log('貼文資料：', result)
 
     userPostList.value = result.data
+    await Promise.all(
+      userPostList.value.map(async (post) => {
+        // 獲取留言數據
+        const commentsResult = await getPostsComment(post.post_id)
+        post.commentCount = commentsResult.data.length // 儲存留言數量
 
-    // userPostList.forEach((post) => {
-    //   console.log(`貼文標題: ${post.post_title}`)
-    //   console.log(`貼文內容: ${post.post_content}`)
-    // })
-    // if (result) {
-    //   const userPosts = result.filter((posts) => posts && posts.uid === UID)
-    //   console.log(userPosts)
-    // }
-    // if (result.length > 0) {
-    // posts.value = result
-    // loading.value = false
-    // console.log('貼文資料', posts.value)
-    // console.log(posts.value.post_title)
-
-    // } else {
+        // 獲取按讚數據
+        const likesResult = await getPostsLike(post.post_id)
+        post.likeCount = likesResult.data.length // 儲存按讚數量
+      }),
+    )
+    console.log(post.likeCount)
     console.log('該用戶還沒有活動')
   } catch (err) {
     errorMessage.value = err.message || '資料加載錯誤'
@@ -43,7 +43,6 @@ const fetchUserPosts = async () => {
 onMounted(() => {
   fetchUserPosts()
 })
-// postList.sort((a, b) => new Date(b.time) - new Date(a.time))
 </script>
 
 <template>
@@ -72,14 +71,13 @@ onMounted(() => {
     </div>
     <NDivider />
     <div class="post-bottom-bottom flex leading-loose mt-6 mx-6">
-      <div class="mr-8">👍🏻 20 讚</div>
-      <div>💬 9 留言</div>
+      <div class="mr-8">👍🏻 {{ post.likeCount || 0 }} 讚</div>
+      <div>💬 {{ post.commentCount || 0 }} 留言</div>
     </div>
   </div>
 </template>
 <style scoped>
-.blockArea{
-  display: block
-
+.blockArea {
+  display: block;
 }
 </style>
