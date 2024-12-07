@@ -7,14 +7,18 @@ import { useMessage } from 'naive-ui'
 import { useUserStore } from '/src/stores/userStore.js'
 import { auth } from '@/utils/firebaseConfig.js'
 import { useRouter } from 'vue-router'
-import { computed, onMounted, ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import 'dayjs/locale/zh-tw.js'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import dayjs from 'dayjs'
-import { userGetNotificationAPI, userUpdateNotificationAPI } from '@/apis/userAPIs'
+import { useNotificationStore } from '@/stores/notificationStore'
+import { storeToRefs } from 'pinia'
 const message = useMessage()
 const userStore = useUserStore()
 const router = useRouter()
+const notificationSotre = useNotificationStore()
+const { notifications, unreadCount, unreadList } = storeToRefs(notificationSotre)
+const {  updateNotifications } = notificationSotre
 dayjs.locale('zh-tw') 
 dayjs.extend(relativeTime)
 // 註冊/登入按鈕跳轉
@@ -49,47 +53,20 @@ const handleLogout = async () => {
 const showPopover = ref(false)
 
 
-const notifications = ref([])
-
-// 應該根據未讀的更新
-const notificationCount = computed(() => { 
-  if(notifications.value.length === 0) {
-    return 0
-  }
-  return notifications.value.reduce((count, notification) => notification.is_read === 0 ? count + 1 : count , 0)
-})
-
 const handleNotificationRead = async (value) => {
   // 掌握開關
   showPopover.value = value
   // 關起來的話做檢查
-  if(value === false){
-    // 有哪些是原本未讀的
-    const unreadList = notifications.value
-      .filter((notification) =>  notification.is_read === 0 )
-      .map(notification => notification.id)
-    // 如果未讀就把未讀的狀態都更新
-    if(unreadList.length > 0) {
+  if(!value){
+    console.log('yes')
+    if(unreadList.value.length > 0) {
       // 調用 API 更新未讀的通知狀態
-      const res = await userUpdateNotificationAPI(userStore.user.uid, unreadList)
-      if(res){
-        await getNotification(userStore.user.uid)
-      }
+      await updateNotifications(userStore.user.uid, unreadList.value)
     }
 }
 }
 
-async function getNotification(uid){
-  const response = await userGetNotificationAPI(uid)
-  if(!response || response.length === 0) {
-    return notifications.value = []
-  }
-  notifications.value = response.data.data
-}
 
-onMounted(async () => {
-  await getNotification(userStore.user.uid)
-})
 </script>
 
 <template>
@@ -190,7 +167,7 @@ onMounted(async () => {
     <div class="flex items-center">
       <n-popover :disabled="notifications.length === 0" :on-update:show="handleNotificationRead" placement="bottom-end" :on-clickoutside="() => showPopover = false" style="width: 400px; padding: 0px" trigger="click" :show="showPopover">
         <template #trigger>
-          <n-badge :max="15"  :value="notificationCount" class="mr-3 cursor-pointer">
+          <n-badge :max="15"  :value="unreadCount" class="mr-3 cursor-pointer">
             <BellNotificationSolid></BellNotificationSolid>
           </n-badge>
         </template>

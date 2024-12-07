@@ -3,6 +3,7 @@ import { initializeApp } from 'firebase/app'
 import { getAuth, onAuthStateChanged } from 'firebase/auth'
 import { getStorage } from 'firebase/storage'
 import { useSocketStore } from '@/stores/socketStore'
+import { useNotificationStore } from '@/stores/notificationStore'
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -19,12 +20,13 @@ const auth = getAuth(app)
 const storage = getStorage(app)
 
 const getCurrentUser = () => {
-
   return new Promise((resolve, reject) => {
     onAuthStateChanged(auth, (user) => {
       if (user) {
         const socketStore = useSocketStore()
+        const notificationStore = useNotificationStore()
         socketStore.initSocket(user.uid)
+        notificationStore.getNotifications(user.uid)
         resolve(user)
       } else {
         reject()
