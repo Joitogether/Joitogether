@@ -57,10 +57,10 @@ onMounted(() => {
         class="post-bottom-left leading-normal lg:col-span-5 sm:col-span-4 col-span-3 overflow-hidden mb-5"
       >
         <p class="text-slate-300 text-sm h-8 mt-6">{{ post.created_at }}</p>
-        <n-ellipsis expand-trigger="click" line-clamp="1" :tooltip="false">
+        <n-ellipsis class="blockArea" expand-trigger="click" line-clamp="1" :tooltip="false">
           <h3 class="text-xl font-bold leading-loose">{{ post.post_title }}</h3>
         </n-ellipsis>
-        <n-ellipsis expand-trigger="click" line-clamp="2" :tooltip="false">
+        <n-ellipsis class="blockArea" expand-trigger="click" line-clamp="2" :tooltip="false">
           <p class="post-content text-[16px] text-slate-600">{{ post.post_content }}</p>
         </n-ellipsis>
       </div>
@@ -77,3 +77,9 @@ onMounted(() => {
     </div>
   </div>
 </template>
+<style scoped>
+.blockArea{
+  display: block
+
+}
+</style>
