@@ -464,14 +464,7 @@ const emit = defineEmits(['close', 'save'])
             </div>
           </div>
           <div class="save flex gap-3 justify-end">
-            <n-button
-              tertiary
-              @click="
-                warning()
-                close()
-              "
-              >改天再填</n-button
-            >
+            <n-button tertiary @click="warning() ; close()">改天再填</n-button>
             <n-button strong secondary type="primary" @click="handleSave">填好啦！</n-button>
           </div>
         </div>
