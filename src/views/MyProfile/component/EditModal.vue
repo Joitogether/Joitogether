@@ -1,7 +1,7 @@
 <script setup>
 import { NButton, NModal, NCard, NUpload, NInput, NStep, NSpace, NSteps, NInputNumber, NDynamicTags, NSelect } from 'naive-ui';
 import { ArrowLeft, ArrowRight } from '@iconoir/vue';
-import { ref, computed, watch, onMounted } from 'vue';
+import { ref, watch, onMounted } from 'vue';
 import { UserPutApi, UserGetApi } from '../../../apis/UserApi';
 import { useUserStore } from '@/stores/userStore';
 import { storage } from '@/utils/firebaseConfig';
@@ -61,11 +61,18 @@ const fetchUserData = async () => {
     const result = await UserGetApi(userStore.user.uid);
     if (result) {
       user.value = result;
-      // 將 tags 字符串轉換為陣列並更新 tagsArray
-      tagsArray.value = result.tags.split(',');
-      console.log('資料加載完成:', result);
-      loading.value = false;
-      showModal.value = true;  // 當資料加載完成後顯示 Modal
+      if(user.value.tags){
+        tagsArray.value = user.value.tags.split(',');
+        console.log('資料加載完成:', result);
+        loading.value = false;
+        showModal.value = true;
+
+      } else {
+        user.value.tags = '未填寫'
+        loading.value = false;
+        showModal.value = true;
+      }
+
     }
   } catch (err) {
     errorMessage.value = err.message || '資料加載錯誤';
@@ -73,6 +80,15 @@ const fetchUserData = async () => {
     console.error('資料加載錯誤:', err);
   }
 };
+//標籤部分阻止按Enter就送出
+const handleEnter = (event) => {
+  const inputValue = event.target.value.trim()
+  if (inputValue && !tagsArray.value.includes(inputValue)) {
+    tagsArray.value.push(inputValue)
+    event.target.value = ''
+  }
+}
+
 
 //處理大頭照
 const handleAvatarChange = async (fileListAva) => {
@@ -133,7 +149,6 @@ const handleFileChange1 = async (fileList) => {
     return
   }
 
-  // 確保能從 fileList 中正確取得檔案
   const file = fileList[0]?.file
   console.log('選中的檔案:', file)
 
@@ -169,10 +184,8 @@ const reader = new FileReader()
     // 更新 user 中的圖片 URL
     user.value.life_photo_1 = downloadURL;
     console.log('更新後的 user:', user.value);
-    // message.success('🎉 圖片上傳成功！');
   } catch (error) {
     console.error('圖片上傳失敗:', error.message)
-    // message.error('😭 上傳圖片失敗，請稍後再試。');
   }
 };
 
@@ -220,10 +233,8 @@ const reader = new FileReader()
     // 更新 user 中的圖片 URL
     user.value.life_photo_2 = downloadURL;
     console.log('第二張上傳後更新後的 user:', user.value);
-    // message.success('🎉 圖片上傳成功！');
   } catch (error) {
     console.error('第二張圖片上傳失敗:', error.message);
-    // message.error('😭 上傳圖片失敗，請稍後再試。');
   }
 }
 
@@ -258,25 +269,14 @@ const prev = () => {
     currentRef.value = 1
   }
 }
-
-// 控制 modal 開啟
-const openModal = () => {
-  showModal.value = true
-}
-
+//編輯完保存
 const handleSave = () => {
-  // 確保保存資料前的使用者資料
-  console.log('保存前的資料:', user.value)
-
-  // 假設你有一個保存 API
   UserPutApi(userStore.user.uid, user.value)
     .then((response) => {
       console.log('保存成功:', response)
-      // 資料保存後再打印更新過的資料
       console.log('更新後的資料:', user.value);
       emit('save');
-      fetchUserData();
-
+      window.location.reload()
       showModal.value = false;
 
     })
@@ -284,6 +284,15 @@ const handleSave = () => {
       console.error('資料保存錯誤:', error)
     })
 }
+const warning = () => {
+  alert('警告: 是否確認改天再填?')
+
+  console.log('警告提示已顯示')
+}
+const close = () => {
+  emit('close')
+}
+
 // 用來關閉視窗的函數
 const closeModal = () => {
   showModal.value = false;
@@ -331,7 +340,13 @@ const emit = defineEmits(['close', 'save'])
             </n-space>
           <div class="flex mt-5 flex-wrap">職業：<n-input v-model:value="user.career" placeholder="什麼領域的呢？" /></div>
           <div class="flex mt-5 flex-wrap">座右銘：<n-input v-model:value="user.favorite_sentence" placeholder="例如：我要發大財" /></div>
-          <div class="flex mt-5 flex-wrap">個性標籤：<n-dynamic-tags v-model:value="tagsArray" :max="6" /></div>
+          <div class="flex mt-5 flex-wrap">個性標籤：
+            <n-dynamic-tags
+            v-model:value="tagsArray"
+            :max="6"
+            @keydown.enter.prevent="handleEnter"
+            />
+          </div>
         </div>
         <div id="target2" class="innerPart_2" v-show="currentRef === 2">
           <div class="photosupload" >
@@ -394,17 +409,17 @@ const emit = defineEmits(['close', 'save'])
           <div class="arrowArea justify-center mt-10 custom-arrow flex gap-3">
             <div class="arrowLeft border-2 border-solid rounded-full border-slate-500">
               <label for="slide1" class="slide1 cursor-pointer">
-                <ArrowLeft @click="prev" />
+                <ArrowLeft @click="prev()" />
               </label>
             </div>
             <div class="arrowRight border-2 border-solid rounded-full border-slate-500">
               <label for="slide2" class="slide2 cursor-pointer">
-                <ArrowRight @click="next" />
+                <ArrowRight @click="next()" />
               </label>
             </div>
           </div>
           <div class="save flex gap-3 justify-end">
-            <n-button tertiary @click="$emit('close')">改天再填</n-button>
+            <n-button tertiary @click="warning() ; close()">改天再填</n-button>
             <n-button strong secondary type="primary" @click="handleSave">填好啦！</n-button>
           </div>
         </div>
