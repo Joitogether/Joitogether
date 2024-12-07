@@ -22,11 +22,12 @@ defineProps({
     required: true,
   },
 })
-const user = ref(null) // 儲存使用者資料
+const user = ref(null)
 const loading = ref(true)
 const errorMessage = ref(null)
 const userStore = useUserStore()
 const showModal = ref(false) // 控制 modal 顯示
+
 if (userStore.user.isLogin) {
   const fetchUserData = async () => {
     try {
@@ -34,22 +35,17 @@ if (userStore.user.isLogin) {
 
     if (result) {
       user.value = result;
-      loading.value = false;  // 資料加載完成，關閉加載狀態
-      // console.log(user.value.tags);
+      loading.value = false;
       return user.value
     }
-    if ( !user.value.tags ) {
-    user.value.tags = '未填寫';     // 如果 tags 不存在或為空，賦予預設值
-    console.log(user.value.tags);
 
-    return user.value.tags;
-  }
   } catch (err) {
     errorMessage.value = err.message || '資料加載錯誤';
-    loading.value = false;  // 發生錯誤時也關閉加載狀態
+    loading.value = false;
   }
-  fetchUserData()
 }
+fetchUserData()
+
 }
 // 控制 modal 開啟
 const openModal = () => {
@@ -85,7 +81,7 @@ const emit = defineEmits(['edit', 'close'])
       <div class="tag-container flex gap-3 flex-wrap">
         <span v-if="!user.tags">還沒有標籤喔</span>
         <span v-else v-for="(item, index) in (user.tags || '').split(',')" :key="index" class="border-2 px-3 py-1 rounded">
-          # {{ item || "未填寫" }}</span>
+          # {{ item || '未填寫' }}</span>
       </div>
     </div>
   </div>
