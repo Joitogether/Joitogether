@@ -2,31 +2,25 @@
 import { ref, onMounted } from 'vue'
 import { ProfileCircle, BrightStar, Heart, Post, Group } from '@iconoir/vue'
 import { RouterLink, RouterView } from 'vue-router'
-import axios from 'axios'
 import CardList from './component/CardList.vue'
 import EditModal from './component/EditModal.vue'
-import { UserGetApi } from '../../apis/UserApi'
 
 const showModal = ref(false)
 const editingItem = ref(null)
 const editingType = ref(null)
-const currentUser = ref(null);
-const user = ref(null);
-const loading = ref(true);
-const errorMessage = ref(null);
 
 
 const isEditModalOpen = ref(false)
 // 開啟編輯視窗
 const openEditModal = (param) => {
   console.log(param) // 查看傳遞的參數
-  console.log(JSON.stringify(user.value, null, 2))
   isEditModalOpen.value = true // 顯示編輯視窗
 }
 
 // 關閉編輯視窗
 const closeEditModal = () => {
   isEditModalOpen.value = false
+
 }
 
 // 編輯
@@ -36,20 +30,11 @@ const handleEdit = (item, type) => {
   showModal.value = true
 }
 
-
-// 清除訊息
-// const clearMessage = () => {
-//   error.value = ''
-//   message.value = ''
-// }
 </script>
 
 <template>
   <div class="container mx-auto">
-    <CardList :items="currentUser" type="users" @edit="openEditModal" @close="closeEditModal" />
-    <!-- <EditModal v-if="editingItem" v-model="editingItem" :type="editingType" @save="handleSave"
-  @cancel="editingItem = null"/> -->
-    <!-- <EditModal :modelValue="editingItem" :type="'users'" @save="handleSave" /> -->
+    <CardList type="users" @edit="openEditModal" @close="closeEditModal" />
     <EditModal v-if="isEditModalOpen" @close="closeEditModal" @edit="openEditModal" />
 
   <div>
