@@ -23,6 +23,73 @@ const activity_id = route.params.activity_id
 //   const response = await ActivityGetApplicationsAPI(10)
 //   console.log(response)
 // })
+
+const notificationMessage = useMessage()
+const attendees = ref([]) // 報名者列表
+const loading = ref(true) // 加載狀態
+const isHost = ref(false) // 判斷是否為團主
+// 格式化後端數據的函數
+const formatAttendees = (data) => {
+  return data.map((item) => ({
+    id: item.application_id,
+    name: item.participant_info.full_name,
+    avatar: item.participant_info.photo_url || defaultAvatar,
+    number: `@${item.participant_id}` || '未提供 ID',
+    message: item.comment || '這位參加者尚無留言',
+    date: new Date().toLocaleDateString(),
+    approved: item.status === 'approved',
+    host_declined: item.status === 'host_declined',
+    registered: item.status === 'registered',
+    participant_cancelled: item.status === 'participant_cancelled',
+    replies: '',
+  }))
+}
+
+const fetchAttendees = async () => {
+  try {
+    const response = await ActivityGetApplicationsAPI(activity_id)
+    if (response.status === 200) {
+      attendees.value = formatAttendees(response.data.data) // 格式化數據
+      notificationMessage.success('成功載入報名者資料')
+    } else {
+      notificationMessage.warning('無法獲取報名者資料')
+    }
+  } catch (err) {
+    console.error('Error fetching attendees:', err)
+    notificationMessage.error('載入報名者資料失敗')
+  }
+}
+
+const checkHost = async () => {
+  try {
+    // 調用用戶 API 獲取當前登錄用戶的 UID
+    const userResponse = await apiAxios.get('/users') // 假設後端提供此 API
+    const currentUserUID = 'gPS5yuIou0Z0yS8MWdK2ATm4CPY2' // 動態獲取 UID
+    // const currentUserUID = userResponse.data.uid // 動態獲取 UID
+
+    // 調用活動 API 獲取活動的 host_id
+    const activityResponse = await apiAxios.get(`/activities/${activity_id}`)
+    if (activityResponse.status === 200) {
+      const hostId = activityResponse.data.data.host_id
+
+      // 判斷是否為團主
+      isHost.value = hostId === currentUserUID
+      console.log('當前用戶是否為團主:', isHost.value)
+    } else {
+      notificationMessage.error('無法檢查團主身份')
+    }
+  } catch (error) {
+    console.error('檢查團主身份失敗:', error)
+    notificationMessage.error('無法檢查團主身份')
+  }
+}
+
+onMounted(async () => {
+  await checkHost()
+  await fetchAttendees()
+  loading.value = false
+})
+
 const refreshAttendees = async () => {
   try {
     const response = await ActivityGetApplicationsAPI(activity_id)
@@ -195,7 +262,7 @@ const handleApproveClick = async (id) => {
         const response = await ActivityReviewApplicationsAPI(id, 'approved')
         if (response && response.status === 200) {
           message.success(`${attendeeToUpdate.name} 已被允許參加`)
-          await refreshAttendees()
+          await fetchAttendees()
         } else {
           message.error('操作失敗，請稍後再試！')
         }
@@ -381,7 +448,13 @@ const sendReplies = async () => {
 </script>
 
 <template>
-  <div class="flex justify-center min-w-[400px] items-center min-h-screen bg-gray-200 shadow-2xl">
+  <div v-if="loading" class="flex justify-center items-center min-h-screen">
+    <p>正在載入中...</p>
+  </div>
+  <div
+    v-if="isHost"
+    class="flex justify-center min-w-[400px] items-center min-h-screen bg-gray-200 shadow-2xl"
+  >
     <div
       class="m-auto p-2 rounded-xl bg-gray-50 border-gray-300 border-solid border-2 w-full max-w-[768px] sm:w-full"
     >
@@ -652,6 +725,22 @@ const sendReplies = async () => {
         </div>
       </div>
     </div>
+  </div>
+  <div
+    v-else
+    class="flex flex-col items-center justify-center min-h-screen bg-gray-100 text-gray-800"
+  >
+    <h1 class="text-9xl font-extrabold text-red-500 animate-bounce">404</h1>
+    <p class="mt-4 text-2xl font-semibold">Oops! Page not found</p>
+    <p class="mt-2 text-lg text-gray-600">
+      Sorry, the page you are looking for doesn't exist or has been moved.
+    </p>
+    <router-link
+      to="/"
+      class="mt-6 px-6 py-3 bg-blue-500 text-white text-lg font-medium rounded-lg shadow-lg hover:bg-blue-600 transition"
+    >
+      Go Back Home
+    </router-link>
   </div>
 </template>
 
