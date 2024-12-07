@@ -1,100 +1,120 @@
 <script setup>
-import { reactive, ref } from 'vue';
-import { NEllipsis } from 'naive-ui';
+import { onMounted, ref } from 'vue'
+import { NEllipsis } from 'naive-ui'
+import { activityGetAPI } from '@/apis/activityApi'
+import { useUserStore } from '@/stores/userStore'
 
+const userStore = useUserStore()
+const loading = ref(true)
+const errorMessage = ref(null)
+const activity = ref([])
+const afterToday = ref([])
+const beforeToday = ref([])
 
-const today = new Date()
+const fetchActivityData = async () => {
+  try {
+    const UID = userStore.user.uid
+    const result = await activityGetAPI()
+    console.log('活動資料：', result)
 
-const activityList = reactive([
-  {
-    id: 1,
-    name: "電腦遊戲比賽",
-    location: "臺北市大安區忠孝東路四段178號8樓",
-    startDate: "2024-12-16",
-    startTime: "19:40",
-    imageUrl: "https://www.lifetoutiao.news/wp-content/uploads/2022/10/%E5%9C%963.jpg"
-  },
-  {
-    id: 2,
-    name: "一起玩大富翁",
-    location: "臺北市大安區忠孝東路四段178號8樓",
-    startDate: "2024-11-10",
-    startTime: "10:00",
-    imageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcReUu0_Pm778GeJv1D5MmDBiY5EMY2M_9wzNw&s"
-  },
-  {
-    id: 3,
-    name: "一起去shopping",
-    location: "臺北市大安區忠孝東路四段178號8樓",
-    startDate: "2024-11-15",
-    startTime: "08:30",
-    imageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQI6JPRunS3CpvVKggiR9PjqG3SS-qpqANw_g&s"
-  },
-  {
-    id: 4,
-    name: "一起去新北耶誕城",
-    location: "板橋區新北市政府",
-    startDate: "2024-12-25",
-    startTime: "18:00",
-    imageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRr-DCWj5LTt1sMyo1R-m3P7T36oQoKU1a-lQ&s"
+    if (result) {
+      const userActivities = result.filter((activity) => activity && activity.host_id === UID)
+      console.log(userActivities)
+
+      afterToday.value = userActivities.filter((item) => {
+        const itemDate = new Date(item.event_time)
+        return itemDate > new Date()
+      })
+
+      console.log('afterToday資料', afterToday.value)
+      loading.value = false
+
+      beforeToday.value = userActivities.filter((item) => {
+        const itemDate = new Date(item.event_time)
+        return itemDate < new Date()
+      })
+      console.log('beforeToday資料', beforeToday.value)
+      loading.value = false
+
+      if (userActivities.length > 0) {
+        activity.value = userActivities
+        loading.value = false
+        console.log('活動資料', activity.value)
+        return activity.value
+      } else {
+        console.log('該用戶還沒有活動')
+      }
+    }
+  } catch (err) {
+    errorMessage.value = err.message || '資料加載錯誤'
+    loading.value = false
+    console.error('Error:', err)
   }
-])
-activityList.sort((a, b) => new Date(b.startDate) - new Date(a.startDate));
+}
 
-const beforeToday = activityList.filter(item => {
-  const itemDate = new Date(item.startDate);
-  return itemDate < today;
-});
-const afterToday = ref(activityList.filter(item => {
-  const itemDate = new Date(item.startDate);
-  return itemDate > today;
-}));
+// activity.value.sort((a, b) => new Date(b.event_time) - new Date(a.event_time));
 
+// const beforeToday = activity.value.filter(item => {
+//   const itemDate = new Date(item.event_time);
+//   console.log(itemDate);
+
+//   return itemDate < today;
+// });
+// console.log(beforeToday);
+
+onMounted(() => {
+  fetchActivityData()
+})
 </script>
 
 <template>
-<div class="partyArea pb-10">
-  <div class="h-20 content-center text-center bg-slate-100 text-lg">即將參加</div>
-  <div v-for="item in afterToday" :key="item.id" class="future-party grid grid-cols-3 gap-10 mt-10 sm:px-14 px-9">
-    <div class="future-party-photo overflow-hidden flex max-h-40">
-      <img :src="item.imageUrl" alt="future-party-photo" class="object-contain">
+  <div class="partyArea pb-10">
+    <div class="h-20 content-center text-center bg-slate-100 text-lg">即將參加</div>
+    <div
+      v-for="(future_activity, id) in afterToday"
+      :key="id"
+      class="future-party grid grid-cols-3 gap-10 mt-10 sm:px-14 px-9"
+    >
+      <div class="future-party-photo overflow-hidden flex max-h-40">
+        <img :src="future_activity.img_url" alt="future-party-photo" class="object-contain" />
+      </div>
+      <div class="future-party-detail col-span-2">
+        <n-ellipsis expand-trigger="click" line-clamp="1" :tooltip="false">
+          <h3 class="text-3xl font-bold">{{ future_activity.name }}</h3>
+        </n-ellipsis>
+        <br />
+        <n-ellipsis expand-trigger="click" line-clamp="1" :tooltip="false">
+          <div class="text-xl">{{ future_activity.location }}</div>
+        </n-ellipsis>
+        <br />
+        <n-ellipsis expand-trigger="click" line-clamp="1" :tooltip="false">
+          <div class="text-xl">{{ future_activity.event_time }}</div>
+        </n-ellipsis>
+      </div>
     </div>
-    <div class="future-party-detail col-span-2">
-      <n-ellipsis expand-trigger="click" line-clamp="1" :tooltip="false">
-        <h3 class="text-3xl font-bold">{{ item.name }}</h3>
-      </n-ellipsis>
-      <br/>
-      <n-ellipsis expand-trigger="click" line-clamp="1" :tooltip="false">
-        <div class="text-xl">{{ item.location }}</div>
-      </n-ellipsis>
-      <br/>
-      <n-ellipsis expand-trigger="click" line-clamp="1" :tooltip="false">
-        <div class="text-xl">{{ item.startDate }}</div>
-      </n-ellipsis>
-      <div class="text-xl">{{ item.startTime }}</div>
+
+    <div class="h-20 content-center text-center bg-slate-100 text-lg mt-10">聚會紀錄</div>
+    <div
+      v-for="(pre_activity, id) in beforeToday"
+      :key="id"
+      class="past-party grid grid-cols-3 gap-10 mt-10 sm:px-14 px-9 overflow-hidden"
+    >
+      <div class="past-party-photo overflow-hidden flex max-h-40">
+        <img :src="pre_activity.img_url" alt="past-party-photo" class="object-contain" />
+      </div>
+      <div class="past-party-detail col-span-2">
+        <n-ellipsis expand-trigger="click" line-clamp="1" :tooltip="false">
+          <h3 class="text-3xl font-bold">{{ pre_activity.name }}</h3>
+        </n-ellipsis>
+        <br />
+        <n-ellipsis expand-trigger="click" line-clamp="1" :tooltip="false">
+          <div class="text-xl">{{ pre_activity.location }}</div>
+        </n-ellipsis>
+        <br />
+        <n-ellipsis expand-trigger="click" line-clamp="1" :tooltip="false">
+          <div class="text-xl">{{ pre_activity.event_time }}</div>
+        </n-ellipsis>
+      </div>
     </div>
   </div>
-
-  <div class="h-20 content-center text-center bg-slate-100 text-lg mt-10">聚會紀錄</div>
-  <div v-for="item in beforeToday" :key="item.id" class="past-party grid grid-cols-3 gap-10 mt-10 sm:px-14 px-9 overflow-hidden">
-    <div class="past-party-photo overflow-hidden flex max-h-40">
-      <img :src="item.imageUrl" alt="past-party-photo" class="object-contain">
-    </div>
-    <div class="past-party-detail col-span-2">
-      <n-ellipsis expand-trigger="click" line-clamp="1" :tooltip="false">
-        <h3 class="text-3xl font-bold">{{ item.name }}</h3>
-      </n-ellipsis>
-      <br/>
-      <n-ellipsis expand-trigger="click" line-clamp="1" :tooltip="false">
-        <div class="text-xl">{{ item.location }}</div>
-      </n-ellipsis>
-      <br/>
-      <n-ellipsis expand-trigger="click" line-clamp="1" :tooltip="false">
-        <div class="text-xl">{{ item.startDate }}</div>
-      </n-ellipsis>
-      <div class="text-xl">{{ item.startTime }}</div>
-    </div>
-  </div>
-</div>
-
 </template>

@@ -88,7 +88,7 @@ const fetchUserData = async () => {
   } catch (err) {
     errorMessage.value = err.message || '資料加載錯誤'
     loading.value = false
-    console.error('資料加載錯誤:', err)
+    // console.error('資料加載錯誤:', err)
   }
 }
 
@@ -126,6 +126,7 @@ const prev = () => {
 // 控制 modal 開啟
 const openModal = () => {
   showModal.value = true
+  emit('edit', user.value)
 }
 
 const handleSave = () => {

@@ -47,6 +47,7 @@ if (userStore.user.isLogin) {
 // 控制 modal 開啟
 const openModal = () => {
   showModal.value = true
+  emit('edit', user.value)
 }
 
 const emit = defineEmits(['edit', 'close'])
@@ -73,21 +74,10 @@ const emit = defineEmits(['edit', 'close'])
       <p class="user-description text-2xl font-bold mt-1 md:mb-5">
         : {{ user.favorite_sentence || '座右銘還未填寫唷👀' }}
       </p>
-      <n-button
-        @click="emit('edit', 'close', user)"
-        @open-modal="openModal"
-        type="primary"
-        ghost
-        round
-        >編輯檔案</n-button
-      >
+      <n-button @click="openModal" type="primary" ghost round>編輯檔案</n-button>
       <div class="tag-container flex gap-3 flex-wrap">
-        <span
-          v-for="(item, index) in user.tags.split(',')"
-          :key="index"
-          class="border-2 px-3 py-1 rounded"
-        >
-          # {{ item || '未填寫' }}</span
+        <span v-for="(item, index) in user.tags" :key="index" class="border-2 px-3 py-1 rounded">
+          # {{ item.split(',') || '未填寫' }}</span
         >
       </div>
     </div>

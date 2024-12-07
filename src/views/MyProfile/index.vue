@@ -14,27 +14,26 @@ const currentUser = ref(null)
 const user = ref(null)
 const loading = ref(true)
 const errorMessage = ref(null)
-// const userUid = '3cfhvjbkjk89ddgi6699jk';
 
-// const fetchUserData = async () => {
-//   try {
-//     const result = await UserGetApi(userUid);
-//     console.log('API回傳資料:', result);
+const fetchUserData = async () => {
+  try {
+    const result = await UserGetApi(userUid)
+    console.log('API回傳資料:', result)
 
-//     if (result) {
-//       user.value = result;
-//       loading.value = false;
-//       return user.value
-//     }
-//   } catch (err) {
-//     errorMessage.value = err.message || '資料加載錯誤';
-//     loading.value = false;
-//   }
-//     };
+    if (result) {
+      user.value = result
+      loading.value = false
+      return user.value
+    }
+  } catch (err) {
+    errorMessage.value = err.message || '資料加載錯誤'
+    loading.value = false
+  }
+}
 
-//     onMounted(() => {
-//       fetchUserData();
-//     });
+onMounted(() => {
+  fetchUserData()
+})
 
 const isEditModalOpen = ref(false)
 // 開啟編輯視窗
