@@ -22,7 +22,6 @@ const fetchActivityData = async () => {
     console.log('活動資料：', result);
 
     if (result) {
-
       activity.value = result
       console.log(activity.value)
       let allActivities = [];
@@ -50,14 +49,8 @@ const fetchActivityData = async () => {
       console.log('beforeToday資料', beforeToday.value);
       loading.value = false
 
-      // if (result.length > 0) {
-      //   activity.value = result;
-      //   loading.value = false;
-      //   console.log('活動資料', activity.value);
-      //   return activity.value;
-      // } else {
-      //   console.log('該用戶還沒有活動');
-      // }
+    } else {
+      console.log('該用戶還沒有活動');
 
     }
   } catch (err) {
@@ -65,12 +58,8 @@ const fetchActivityData = async () => {
     loading.value = false;
     console.error('Error:', err);
   }
+
 };
-
-
-// activity.value.sort((a, b) => new Date(b.event_time) - new Date(a.event_time));
-
-
 
 onMounted(() => {
   fetchActivityData();
@@ -82,7 +71,7 @@ onMounted(() => {
 <template>
 <div class="partyArea pb-10">
   <div class="h-20 content-center text-center bg-slate-100 text-lg">即將參加</div>
-  <div v-for="(future_activity, id) in afterToday" :key="id" class="future-party grid grid-cols-3 gap-10 mt-10 sm:px-14 px-9">
+  <div v-if="beforeToday.length > 0" v-for="(future_activity, id) in afterToday" :key="id" class="future-party grid grid-cols-3 gap-10 mt-10 sm:px-14 px-9">
     <div class="future-party-photo overflow-hidden flex max-h-40">
       <img :src="future_activity.img_url" alt="future-party-photo" class="object-contain">
     </div>
@@ -100,26 +89,29 @@ onMounted(() => {
       </n-ellipsis>
     </div>
   </div>
+  <div v-else>用戶沒有即將參加的活動</div>
+
 
   <div class="h-20 content-center text-center bg-slate-100 text-lg mt-10">聚會紀錄</div>
-  <div v-for="(pre_activity, id) in beforeToday" :key="id" class="past-party grid grid-cols-3 gap-10 mt-10 sm:px-14 px-9 overflow-hidden">
-    <div class="past-party-photo overflow-hidden flex max-h-40">
-      <img :src="pre_activity.img_url" alt="past-party-photo" class="object-contain">
+    <div v-if="beforeToday.length > 0" v-for="(pre_activity, id) in beforeToday" :key="id" class="past-party grid grid-cols-3 gap-10 mt-10 sm:px-14 px-9 overflow-hidden">
+      <div class="past-party-photo overflow-hidden flex max-h-40">
+        <img :src="pre_activity.img_url" alt="past-party-photo" class="object-contain">
+      </div>
+      <div class="past-party-detail col-span-2">
+        <n-ellipsis expand-trigger="click" line-clamp="1" :tooltip="false">
+          <h3 class="text-3xl font-bold">{{ pre_activity.name }}</h3>
+        </n-ellipsis>
+        <br/>
+        <n-ellipsis expand-trigger="click" line-clamp="1" :tooltip="false">
+          <div class="text-xl">{{ pre_activity.location }}</div>
+        </n-ellipsis>
+        <br/>
+        <n-ellipsis expand-trigger="click" line-clamp="1" :tooltip="false">
+          <div class="text-xl">{{ formatDate(pre_activity.event_time) }}</div>
+        </n-ellipsis>
+      </div>
     </div>
-    <div class="past-party-detail col-span-2">
-      <n-ellipsis expand-trigger="click" line-clamp="1" :tooltip="false">
-        <h3 class="text-3xl font-bold">{{ pre_activity.name }}</h3>
-      </n-ellipsis>
-      <br/>
-      <n-ellipsis expand-trigger="click" line-clamp="1" :tooltip="false">
-        <div class="text-xl">{{ pre_activity.location }}</div>
-      </n-ellipsis>
-      <br/>
-      <n-ellipsis expand-trigger="click" line-clamp="1" :tooltip="false">
-        <div class="text-xl">{{ formatDate(pre_activity.event_time) }}</div>
-      </n-ellipsis>
-    </div>
-  </div>
+    <div v-else>用戶沒有過去的活動</div>
 </div>
 
 </template>
