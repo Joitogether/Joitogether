@@ -40,6 +40,8 @@ const refreshAttendees = async () => {
         participant_cancelled: item.status === 'participant_cancelled',
         replies: '',
       }))
+    } else {
+      console.error('拉取參加者資料失敗:', response.data)
     }
   } catch (error) {
     console.error('數據刷新失敗:', error)
@@ -66,12 +68,16 @@ onMounted(async () => {
         replies: '',
       }))
       console.log('格式化後的 attendee:', attendee.value)
+
+      // 為每個 item 調用 API
+      for (const item of response.data.data) {
+        const res = await ActivityReviewApplicationsAPI(item.application_id, item.status)
+        // console.log('單個審核 API 返回:', res)
+      }
     }
   } catch (error) {
     console.error('獲取後端資料失敗:', error)
   }
-  const res = await ActivityReviewApplicationsAPI(4)
-  console.log(res)
 })
 
 const dialog = useDialog()
