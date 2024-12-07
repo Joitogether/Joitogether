@@ -18,7 +18,7 @@ export const UserGetFollowerApi = async (uid) => {
     const response = await apiAxios.get(`/users/userFollowers/${uid}`);
 
     if (response && response.status === 200) {
-      return response.data.data
+      return response.data
     }
   } catch (err) {
 
@@ -32,7 +32,7 @@ export const UserGetFollowingApi = async (uid) => {
     const response = await apiAxios.get(`/users/following/${uid}`);
 
     if (response && response.status === 200) {
-      return response.data.data
+      return response.data
     }
   } catch (err) {
     return err.response.message
