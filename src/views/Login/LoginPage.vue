@@ -353,10 +353,8 @@ const loginRules = {
 
 const loginGoogle = async () => {
   try {
-    const user = await loginWithGoogle()
-    console.log(user)
+    await loginWithGoogle()
     console.log('Google 登入成功！')
-    console.log(userStore.user)
     // 更新 userStore 狀態
 
     message.success(`🎉 歡迎，${userStore.user.displayName}！登入成功，太棒了！🎉`)

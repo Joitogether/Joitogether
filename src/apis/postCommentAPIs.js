@@ -13,18 +13,18 @@ export const createPostComment = async (postId, commentData) => {
 // 取得文章的所有留言
 export const getPostComments = async (postId) => {
   try {
-    const response = await apiAxios.get(`/posts/comment/${postId}`)
+    const response = await apiAxios.get(`/posts/comments/${postId}`)
     return response.data
   } catch (error) {
-    console.error('取得文章留言失敗:', error)
+    // console.error('取得文章留言失敗:', error)
     throw error
   }
 }
 
 // 刪除留言
-export const deletePostComment = async (postId, commentId) => {
+export const deletePostComment = async (commentId) => {
   try {
-    const response = await apiAxios.delete(`/posts/comment/${postId}/${commentId}`)
+    const response = await apiAxios.delete(`/posts/comment/${commentId}`)
     return response.data
   } catch (error) {
     console.error('刪除留言失敗:', error)

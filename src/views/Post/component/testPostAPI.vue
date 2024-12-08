@@ -155,7 +155,6 @@ const submitPost = async () => {
     }
     let imageUrl = ''
     if (selectedFile.value) {
-      const storage = getStorage()
       const fileRef = storageRef(storage, `postImages/${selectedFile.value.name}`) // 使用 postImages 資料夾
       const snapshot = await uploadBytes(fileRef, selectedFile.value)
       imageUrl = await getDownloadURL(snapshot.ref) // 取得圖片 URL

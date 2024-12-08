@@ -22,6 +22,17 @@ export const getPosts = async () => {
   }
 }
 
+// 取得分類文章
+export const getPostsByCategory = async (category) => {
+  try {
+    const response = await apiAxios.get(`/posts/category/${category}`)
+    return response.data
+  } catch (error) {
+    console.error('找不到分類文章', error)
+    throw error
+  }
+}
+
 // 取得單一文章
 export const getPostById = async (postId) => {
   try {
