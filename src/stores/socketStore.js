@@ -39,6 +39,7 @@ export const useSocketStore = defineStore('socket', () => {
     socket.value.on('newNotification', (notification) => {
       addNotification(notification)
       console.log(notification)
+      console.log(notifications.value)
     })
   }
 

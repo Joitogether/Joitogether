@@ -115,7 +115,6 @@ const registerActivity = async () => {
 
   const res = await activityRegisterAPI(activityId, data)
   if(res.status !== 201){
-    console.log(res)
     message.error('報名失敗')
     toggleRegisterModal()
     return
@@ -129,7 +128,8 @@ const registerActivity = async () => {
     target_id: activity.value.id,
     action: 'register',
     target_type: 'activity',
-    message: '報名'
+    message: '報名了你的活動',
+    link: `/activity/detail/${activity.value.id}`
   }
 
   socketStore.sendNotification(notiData)
@@ -164,7 +164,6 @@ const onNegativeClick = () => {
 // 取消報名
 const onPositiveClick = async() => {
     const res = await activityCancelRegisterAPI(activity.value.id, userStore.user.uid)
-    console.log(res)
     if(res.status != 200){
       toggleConfirmModal()
       return message.error('取消報名失敗')
@@ -197,7 +196,6 @@ const onCancelNegativeClick = () => {
 
 const onCancelPositiveClick = async () => {
   const res = await activityCancelAPI(activity.value.id)
-  console.log(res)
   if(res.status !== 200){
     toggleCancelModal()
     return message.error('取消活動失敗')    
