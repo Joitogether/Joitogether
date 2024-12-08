@@ -1,6 +1,6 @@
 <script setup>
 import { Search, User, Menu, Sweep3d, BellNotificationSolid } from '@iconoir/vue'
-import { NButton, NDivider, NBadge, NPopover } from 'naive-ui'
+import { NButton, NDivider, NBadge, NPopover, NScrollbar } from 'naive-ui'
 import userInfo from '../../MyProfile/component/person'
 import { RouterLink } from 'vue-router'
 import { useMessage } from 'naive-ui'
@@ -171,25 +171,29 @@ const handleNotificationRead = async (value) => {
             <BellNotificationSolid></BellNotificationSolid>
           </n-badge>
         </template>
-        <div class="flex flex-col ">
-          <p class="pl-2 text-xl font-bold">通知</p>
-          <div   v-for="notification in notifications" :key="notification.id" >
-            <router-link :to="notification.link">
-              <div :class="{ 'bg-yellow-100' : !notification.is_read}" class="hover:bg-yellow-100 overflow-hidden hover:transition-colors post-onepost-top flex py-2 pl-2 rounded-md items-center	cursor-pointer ">
-                <img class="w-14 aspect-square rounded-full" :src="notification.users_notifications_actor_idTousers.photo_url" alt="">
-                <div class="ml-3 relative w-full h-14 ">
-                  <p class="font-bold text-lg absolute top-0"> {{notification.users_notifications_actor_idTousers.display_name }}<span class="pl-1 font-normal">{{ notification.message}}</span> </p>
-                  <p class="absolute bottom-0 w-full text-md truncate">{{dayjs(notification.created_at).fromNow()}}
-                    <span v-if="notification.target_type === 'activity'"  class="pl-1 font-normal text-lg ">{{ notification.target_detail.name }}</span>
-                    <span v-else-if="notification.target_type === 'post'"  class="pl-1 font-normal text-lg ">{{ notification.target_detail.post_title }}</span>
-                    <span v-else-if="notification.target_type === 'rating'"  class="pl-1 font-normal text-lg ">{{ notification.target_detail.user_comment }}</span>
-                  </p>
+        <n-scrollbar style="max-height: 500px">
+          <div class="flex flex-col ">
+            <p class="pl-2 text-xl font-bold">通知</p>
+            <div   v-for="notification in notifications" :key="notification.id" >
+              <router-link :to="notification.link">
+
+                <div :class="{ 'bg-yellow-100' : !notification.is_read}" class="hover:bg-yellow-100 overflow-hidden hover:transition-colors post-onepost-top flex py-2 pl-2 rounded-md items-center	cursor-pointer ">
+                  <img class="w-14 aspect-square rounded-full" :src="notification.users_notifications_actor_idTousers.photo_url" alt="">
+                  <div class="ml-3 relative w-full h-14 ">
+                    <p class="font-bold text-lg absolute top-0"> {{notification.users_notifications_actor_idTousers.display_name }}<span class="pl-1 font-normal">{{ notification.message}}</span> </p>
+                    <p class="absolute bottom-0 w-full text-md truncate">{{dayjs(notification.created_at).fromNow()}}
+                      <span v-if="notification.target_type === 'activity'"  class="pl-1 font-normal text-lg ">{{ notification.target_detail.name }}</span>
+                      <span v-else-if="notification.target_type === 'post'"  class="pl-1 font-normal text-lg ">{{ notification.target_detail.post_title }}</span>
+                      <span v-else-if="notification.target_type === 'rating'"  class="pl-1 font-normal text-lg ">{{ notification.target_detail.user_comment }}</span>
+                    </p>
+                  </div>
                 </div>
-              </div>
-             
-            </router-link>
+              
+              </router-link>
+            </div>
           </div>
-        </div>
+        </n-scrollbar>
+
       </n-popover>
       <div class="hidden md:flex min-w-20 items-center">登入/註冊</div>
 
