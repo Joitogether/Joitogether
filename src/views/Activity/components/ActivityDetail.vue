@@ -218,6 +218,15 @@ const submitComment = async () => {
   }
   await getActivityDetail()
   message.success('新增留言成功')
+  socketStore.sendNotification({
+    actor_id: userStore.user.uid,
+    user_id: activity.value.host_id,
+    target_id: activity.value.id,
+    action: 'comment',
+    target_type: 'activity',
+    message: '在你的活動新增了留言',
+    link: `/activity/detail/${activity.value.id}`
+  })
   clearComment()
 }
 
