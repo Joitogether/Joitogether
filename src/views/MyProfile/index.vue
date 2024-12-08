@@ -87,10 +87,10 @@ const handleEdit = (item, type) => {
         <li
           class="hover:cursor-pointer w-24"
           :class="{
-            'border-b-4 border-solid border-green-600': $route.path === '/profile/personalfocus',
+            'border-b-4 border-solid border-green-600': $route.path === '/profile/personfollow',
           }"
         >
-          <RouterLink to="/profile/personalfocus">
+          <RouterLink to="/profile/personfollow">
             <Heart class="justify-self-center" />
           </RouterLink>
         </li>
