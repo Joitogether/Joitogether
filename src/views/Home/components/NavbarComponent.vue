@@ -6,6 +6,10 @@ import { auth } from '@/utils/firebaseConfig.js'
 import { useRouter, RouterLink } from 'vue-router'
 import { UserGetApi } from '@/apis/UserApi'
 import { ref, onMounted } from 'vue'
+import { getPosts } from '@/apis/postsApi'
+import { UserGetFollowerApi } from '@/apis/UserApi'
+import { UserGetActivityApi } from '@/apis/UserApi';
+
 
 const message = useMessage()
 const userStore = useUserStore()
@@ -14,6 +18,9 @@ const user = ref(null);  // 儲存使用者資料
 const loading = ref(true);
 const errorMessage = ref(null);
 const isMenuOpen = ref(false); // 用來控制選單顯示狀態
+const postNumber = ref(null)
+const followerNumber = ref(null)
+const activityNumber = ref(null)
 
 defineProps({
   items: {
@@ -45,11 +52,45 @@ const fetchUserData = async () => {
     loading.value = false;
   }
 };
+const getPostCount = async() => {
+      try {
+        const result = await getPosts(userStore.user.uid).catch(() => ({ data: []}))
+        postNumber.value = result.data.length
+      } catch(err) {
+        console.log('抓取文章數量發生錯誤',err)
+          postNumber.value = 0
 
+      }
+    }
+const getFollowerCount = async() => {
+  try {
+    const result = await UserGetFollowerApi(userStore.user.uid).catch(() => ({ data: []}))
+    followerNumber.value = result.data.length
+  } catch(err) {
+    console.log('抓取粉絲數量發生錯誤',err)
+      followerNumber.value = 0
+
+  }
+}
+const getActivityCount = async() => {
+  try{
+    const result = await UserGetActivityApi(userStore.user.uid);
+    console.log('活動資料：', result);
+    console.log(result.length);
+
+    activityNumber.value = result.length
+  } catch (err) {
+    console.log('抓取活動數量發生錯誤', err);
+    activityNumber.value = 0
+  }
+}
 // 註冊登入邏輯
 onMounted(() => {
   if (userStore.user.isLogin) {
     fetchUserData();
+    getPostCount();
+    getFollowerCount();
+    getActivityCount()
   } else {
     loading.value = false;
   }
@@ -177,8 +218,6 @@ const handleLogout = async () => {
     </div>
     <!-- 登入/註冊 -->
     <div class="flex">
-      <!-- <div class="hidden md:flex min-w-20 items-center">登入/註冊</div> -->
-
       <input type="checkbox" id="login-toggle" class="hidden" />
       <label
         for="login-toggle"
@@ -191,33 +230,34 @@ const handleLogout = async () => {
       <div
         v-else
         id="login-menu"
-        class="hidden md:hidden w-1/4 bg-gray-50 text-black p-6 space-y-4 absolute top-10 right-0">
-        <div v-if="userStore.user.isLogin" class="rounded-full w-1/2 h-1/2 aspect-square overflow-hidden flex justify-self-center">
+        class="hidden w-1/4 bg-gray-50 text-black p-6 space-y-4 absolute top-10 right-0">
+        <div v-if="userStore.user.isLogin" class="user-photo rounded-full w-1/2 h-1/2 aspect-square overflow-hidden flex justify-self-center">
           <img :src="user.photo_url || 'default_image_path.jpg'" alt="userPhoto" class="w-full"/>
         </div>
-        <div v-if="userStore.user.isLogin" class="text-center font-bold text-xl">{{ user.display_name || '暱稱'}}</div>
-        <div v-if="userStore.user.isLogin" class="text-md font-bold text-center">
+        <div v-if="userStore.user.isLogin" class="user-name text-center font-bold text-xl">{{ user.display_name || '暱稱'}}</div>
+        <div v-if="userStore.user.isLogin" class="user-info text-md font-bold text-center">
           <span>{{ user.city  || '所在地'}}</span>
           <span> • {{ user.age || '年齡'}}</span>
           <span> • {{ user.career || '職業' }}</span>
         </div>
         <div v-if="userStore.user.isLogin" class="flex justify-center">
           <RouterLink to="/profile">
-            <n-button type="primary" ghost round> 查看個人頁面 </n-button>
+            <n-button type="primary" ghost round class="goinfo-pc"> 查看個人頁面 </n-button>
+            <n-button type="primary" ghost class="hidden goinfo-mob"> 查看個人頁面 </n-button>
           </RouterLink>
         </div>
 
-        <div v-if="userStore.user.isLogin" class="flex justify-center gap-10">
+        <div v-if="userStore.user.isLogin" class="user-more-info flex justify-center gap-10">
           <div class="grid text-center">
-            <span>0</span>
+            <span>{{ activityNumber || 0 }}</span>
             <span>聚會</span>
           </div>
           <div class="grid text-center">
-            <span>0</span>
-            <span>收藏</span>
+            <span>{{ followerNumber || 0 }}</span>
+            <span>粉絲</span>
           </div>
           <div class="grid text-center">
-            <span>0</span>
+            <span>{{ postNumber || 0 }}</span>
             <span>文章</span>
           </div>
         </div>
@@ -238,6 +278,31 @@ const handleLogout = async () => {
 </template>
 
 <style scoped>
+@media screen and (width < 768px) {
+  .user-photo,
+  .user-name,
+  .user-info,
+  .user-more-info{
+    display: none
+  }
+  .goinfo-mob {
+    display: contents;
+    writing-mode: vertical-lr; /* 使文字垂直顯示，從右到左 */
+    transform: rotate(360deg);  /* 旋轉180度，讓文字從上到下排列 */
+    white-space: nowrap;        /* 防止文字換行 */
+    text-align: center;         /* 讓文字在按鈕內部居中 */
+  }
+  .goinfo-pc{
+    display: none
+  }
+}
+.user-name{
+  text-align: center
+}
+.user-photo{
+  justify-content: center
+}
+
 /* 當checkbox被選中時顯示選單 */
 #menu-toggle:checked + label + #menu {
   display: block;
