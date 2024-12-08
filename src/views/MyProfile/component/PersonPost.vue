@@ -27,7 +27,7 @@ const fetchUserPosts = async () => {
     const result = await getPosts(userStore.user.uid)
 
     if (!result?.data?.length) {
-      console.log('該用戶還沒有活動')
+      console.log('該用戶還沒有文章')
       userPostList.value = []
       return
     }
