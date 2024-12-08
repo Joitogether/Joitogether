@@ -395,6 +395,24 @@ const hideQuickReply = () => {
   message.info('已取消操作')
 }
 
+const deleteReply = (attendeeId, replyIndex) => {
+  const attendeeToModify = attendee.value.find((item) => item.id === attendeeId)
+  if (!attendeeToModify) {
+    message.error('找不到該參加者！')
+    return
+  }
+
+  // 刪除指定回覆
+  attendeeToModify.replies.splice(replyIndex, 1)
+
+  // 更新 localStorage
+  const storedReplies = JSON.parse(localStorage.getItem('attendeeReplies')) || {}
+  storedReplies[attendeeId] = attendeeToModify.replies
+  localStorage.setItem('attendeeReplies', JSON.stringify(storedReplies))
+
+  message.success('回覆已成功刪除')
+}
+
 const sendReplies = async () => {
   const attendeeToReply = attendee.value.find((item) => item.id === currentAttendeeId.value)
   if (attendeeToReply) {
@@ -623,16 +641,18 @@ const sendReplies = async () => {
           </div>
           <div
             v-if="item.replies.length"
-            class="flex flex-col bg-yellow-100 p-2 m-1 mt-1 rounded-xl"
+            class="flex flex-col bg-yellow-50 p-4 m-1 mt-1 rounded-xl border-[1.5px] border-yellow-600"
           >
             <div
-              v-if="item.replies.length"
-              class="flex flex-col bg-yellow-100 p-2 m-1 mt-1 rounded-xl"
+              class="flex justify-between items-center text-xs font-semibold text-yellow-700 mb-1"
             >
-              <div class="text-xs font-semibold text-yellow-700 mb-1">團主回覆：</div>
-              <div v-for="(reply, idx) in item.replies" :key="idx" class="text-xs text-yellow-800">
-                {{ reply }}
-              </div>
+              團主回覆：
+              <n-button type="error" size="tiny" @click="deleteReply(item.id, idx)">
+                刪除
+              </n-button>
+            </div>
+            <div v-for="(reply, idx) in item.replies" :key="idx" class="text-xs text-yellow-800">
+              {{ reply }}
             </div>
           </div>
         </div>
@@ -676,18 +696,19 @@ const sendReplies = async () => {
           </div>
         </div>
 
-        <!-- 顯示送出的內容 -->
+        <!-- 顯示送出的內容
         <div
           v-if="sentReplies.length"
           class="w-full my-2 p-3 border-[1px] bg-gray-50 border-solid rounded-xl"
         >
           <h3 class="font-semibold text-sm mb-1 text-gray-600">團主回覆：</h3>
+
           <div v-for="(reply, index) in sentReplies" :key="index" class="">
             <div class="rounded-full w-96 text-sm text-gray-600">
               {{ reply }}
             </div>
           </div>
-        </div>
+        </div> -->
       </div>
     </div>
   </div>
