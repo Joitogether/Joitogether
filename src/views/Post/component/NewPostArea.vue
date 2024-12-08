@@ -51,6 +51,8 @@ const handleSubmit = async () => {
       newPostTitle.value = ''
       newPostContent.value = ''
       newPostCategory.value = null
+      imagePreview.value = null
+      uploadedImage.value = null
     }, 1500) // 設置 1.5 秒後關閉
   } catch (error) {
     console.log(error)

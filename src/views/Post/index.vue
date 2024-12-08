@@ -3,8 +3,9 @@
 import NewPostArea from './component/NewPostArea.vue'
 import { onMounted, reactive, ref } from 'vue'
 import { NSpace, NSelect } from 'naive-ui'
-import { getPostsByCategory } from '@/apis/postAPIs'
+import { getPostById, getPostsByCategory } from '@/apis/postAPIs'
 import { getPostComments } from '@/apis/postCommentAPIs'
+import { getPostLikes } from '@/apis/postLikeAPIs'
 
 import dayjs from 'dayjs'
 import 'dayjs/locale/zh-tw.js'
@@ -44,6 +45,10 @@ const handleFilterSelect = (value) => {
       return new Date(b.time) - new Date(a.time)
     } else if (value === 'oldest') {
       return new Date(a.time) - new Date(b.time)
+    } else if (value === 'mostComment') {
+      return b.commentsCount - a.commentsCount
+    } else if (value === 'hotest') {
+      return b.likesCount - a.likesCount
     }
     return 0
   })
@@ -53,11 +58,9 @@ const handleFilterSelect = (value) => {
 const selectedTag = ref('food')
 const handleTagSelect = (tag) => {
   // 這裡可以針對點擊事件做後續處理
-  console.log(tag)
   selectedTag.value = tag
 
   fetchPostsByCategory()
-  fetchCommentsCount()
 }
 
 const postList = reactive([])
@@ -67,45 +70,73 @@ const fetchPostsByCategory = async () => {
     const res = await getPostsByCategory(selectedTag.value)
     const posts = res.data
 
-    const formattedPosts = posts.map((post) => ({
-      id: post.post_id,
-      title: post.post_title,
-      content: post.post_content,
-      name: post.uid,
-      time: post.updated_at,
-      img: post.post_img,
-    }))
+    const formattedPosts = await Promise.all(
+      posts.map(async (post) => {
+        const userRes = await getPostById(post.post_id)
+        const user = userRes.data
+
+        return {
+          id: post.post_id,
+          title: post.post_title,
+          content: post.post_content,
+          name: user.users.display_name,
+          avatar: user.users.photo_url,
+          time: post.updated_at,
+          img: post.post_img,
+        }
+      }),
+    )
 
     // 更新postList
     postList.splice(0, postList.length, ...formattedPosts)
 
     handleFilterSelect(selectValue.value)
-
+    fetchCommentsCount()
+    fetchPostLikes()
     console.log(`分類 ${selectedTag.value}文章已更新：`, postList)
   } catch (error) {
     console.error(`撈取分類 ${selectedTag.value} 文章失敗：`, error)
   }
 }
 
+// 取得留言數
 const fetchCommentsCount = async () => {
   for (const post of postList) {
-    console.log(`取得文章 ${post.id} 的留言`)
+    // console.log(`取得文章 ${post.id} 的留言`)
 
     try {
       const comments = await getPostComments(post.id)
-      console.log(`Comments for post ${post.id}:`, comments)
+      // console.log(`取得文章 ${post.id} 的留言成功`, comments)
       post.commentsCount = comments.data.length || '0' // 設定留言數
     } catch (error) {
-      console.error(`無法取得文章 ${post.id} 的留言數`)
+      console.error(`${post.id} 沒有任何留言`)
+
+      // console.error(`無法取得文章 ${post.id} 的留言數`)
       post.commentsCount = '0' // 預設為 0
     }
   }
-
-  console.log(`留言數已更新：`, postList)
 }
+
+// 取得按讚數
+const fetchPostLikes = async () => {
+  for (const post of postList) {
+    // console.log(`取得文章 ${post.id} 的按讚數`)
+
+    try {
+      const likes = await getPostLikes(post.id)
+      // console.log(`取得文章 ${post.id} 的按讚數成功`, likes)
+      post.likesCount = likes.data.length || '0'
+    } catch (error) {
+      console.error(`${post.id}沒有任何按讚紀錄`)
+      post.likesCount = '0'
+    }
+  }
+}
+
 onMounted(async () => {
   await fetchPostsByCategory() // 確保先撈取分類文章
   await fetchCommentsCount() // 再撈取留言數
+  await fetchPostLikes()
 })
 </script>
 <template>
@@ -172,9 +203,9 @@ onMounted(async () => {
       </n-space>
     </div>
     <div class="post-posts-area">
-      <div v-for="post in postList" :key="post.id" class="post-onepost">
+      <div v-for="post in postList" :key="post.id" class="">
         <div
-          class="flex flex-col justify-between md:flex-row bg-gray-100 p-4 cursor-pointer border-b border-gray-400"
+          class="flex flex-col justify-between md:flex-row bg-slate-50 p-4 cursor-pointer border-b border-gray-400"
         >
           <!-- 左邊區塊 -->
           <!-- <div :class="post.img ? 'w-full md:w-9/12' : 'w-full'" class="flex flex-col space-y-2"> -->
@@ -184,7 +215,13 @@ onMounted(async () => {
               <div class="flex flex-row items-center gap-3">
                 <!-- 大頭貼 -->
                 <div class="w-10 h-10 rounded-full overflow-hidden">
-                  <img class="w-full h-full object-cover bg-blue-500" />
+                  <img
+                    :src="
+                      post.avatar ||
+                      'https://i.pinimg.com/736x/20/3e/d7/203ed7d8550c2c1c145a2fb24b6fbca3.jpg'
+                    "
+                    class="w-full h-full object-cover"
+                  />
                 </div>
                 <!-- 使用者名稱 -->
                 <p class="font-bold text-sm">{{ post.name }}</p>
@@ -198,7 +235,7 @@ onMounted(async () => {
             <p class="text-sm text-gray-700 line-clamp-2">{{ post.content }}</p>
             <!-- 讚與留言 -->
             <div class="flex space-x-8 text-sm text-gray-600">
-              <div>👍🏻 {{ post.likes }} 讚</div>
+              <div>👍🏻 {{ post.likesCount }} 讚</div>
               <div>💬 {{ post.commentsCount }} 留言</div>
             </div>
           </div>
