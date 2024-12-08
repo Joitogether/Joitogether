@@ -58,33 +58,24 @@ const emit = defineEmits(['edit', 'close'])
     <n-spin size="medium" />
     資料正在跑來的路上...
   </div>
-  <div v-else class="card-container border rounded-lg overflow-hidden bg-white">
+  <div v-else class="card-container py-8 border rounded-lg overflow-hidden bg-white">
     <div class="img-container w-full">
       <img class="card-img w-full h-full object-cover" :src="user.photo_url" alt="personImg" />
     </div>
 
-    <div class="card-content-container">
+    <div class="card-content-container ml-5">
       <h3 class="user-name text-2xl text-center font-bold">
         {{ user.display_name || '大名還未填寫唷👀' }}
       </h3>
-      <div class="text-md font-bold">
+      <div class="user-detail text-md font-bold text-center">
         <span>{{ user.city || '所在地還未填寫唷👀' }}</span>
         <span> • {{ user.age || '年齡還未填寫唷👀' }}</span>
         <span> • {{ user.career || '職業還未填寫唷👀' }}</span>
       </div>
-      <p class="user-description text-2xl font-bold mt-1 md:mb-5">
+      <p class="user-description text-2xl font-bold mt-1">
         : {{ user.favorite_sentence || '座右銘還未填寫唷👀' }}
       </p>
-
-      <n-button
-        @click="emit('edit', 'close', user)"
-        @open-modal="openModal"
-        type="primary"
-        ghost
-        round
-        >編輯檔案</n-button
-      >
-      <div class="tag-container flex gap-3 flex-wrap">
+      <div class="tag-container flex gap-3 flex-wrap my-4">
         <span v-if="!user.tags">還沒有標籤喔</span>
         <span
           v-else
@@ -95,6 +86,16 @@ const emit = defineEmits(['edit', 'close'])
           # {{ item || '未填寫' }}</span
         >
       </div>
+      <n-button
+        @click="emit('edit', 'close', user)"
+        @open-modal="openModal"
+        type="primary"
+        ghost
+        round
+        >編輯檔案
+      </n-button>
+
+
     </div>
   </div>
 </template>
@@ -106,7 +107,7 @@ const emit = defineEmits(['edit', 'close'])
 
   .card-container {
     display: flex;
-    padding: 2rem;
+    /* padding: 2rem; */
   }
 
   .img-container {
@@ -125,13 +126,15 @@ const emit = defineEmits(['edit', 'close'])
   .card-content-container {
     flex: 3;
     padding: 0;
-    padding-left: 2rem;
+    margin-left: 2rem;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
   }
 
-  .user-name {
+  .user-name,
+  .user-detail
+  {
     text-align: start;
   }
 
