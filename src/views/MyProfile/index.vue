@@ -6,10 +6,7 @@ import CardList from './component/CardList.vue'
 import EditModal from './component/EditModal.vue'
 import NavbarComponent from '../Home/components/NavbarComponent.vue'
 
-const showModal = ref(false)
-const editingItem = ref(null)
-const editingType = ref(null)
-const currentUser = ref(null)
+
 const user = ref(null)
 const loading = ref(true)
 const errorMessage = ref(null)
@@ -46,12 +43,7 @@ const closeEditModal = () => {
   isEditModalOpen.value = false
 }
 
-// 編輯
-const handleEdit = (item, type) => {
-  editingItem.value = { ...item }
-  editingType.value = type
-  showModal.value = true
-}
+
 </script>
 
 <template>
