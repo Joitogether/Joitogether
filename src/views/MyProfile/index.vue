@@ -4,6 +4,7 @@ import { ProfileCircle, BrightStar, Heart, Post, Group } from '@iconoir/vue'
 import { RouterLink, RouterView } from 'vue-router'
 import CardList from './component/CardList.vue'
 import EditModal from './component/EditModal.vue'
+import NavbarComponent from '../Home/components/NavbarComponent.vue'
 
 const showModal = ref(false)
 const editingItem = ref(null)
@@ -54,6 +55,9 @@ const handleEdit = (item, type) => {
 </script>
 
 <template>
+  <header>
+    <NavbarComponent/>
+  </header>
   <div class="container mx-auto">
     <CardList type="users" @edit="openEditModal" @close="closeEditModal" />
     <EditModal v-if="isEditModalOpen" @close="closeEditModal" @edit="openEditModal" />
@@ -125,6 +129,9 @@ const handleEdit = (item, type) => {
 }
 
 @media screen and (width >= 768px) {
+  header{
+    margin-bottom: 2%;
+  }
   .container {
     max-width: 80%;
   }
