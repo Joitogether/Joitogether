@@ -1,4 +1,5 @@
 <script setup>
+import defaultImage from '@/assets/UserUpdata1.jpg';
 
 
 const props = defineProps({
@@ -21,8 +22,8 @@ const props = defineProps({
 </script>
 <template>
   <div class="rounded-2xl bg-transparent  overflow-hidden  ">
-    <router-link :to="{ 
-      name: 'activityDetail', 
+    <router-link :to="{
+      name: 'activityDetail',
       params: {
         id: '123'
     }}" :class="{ ['flex' ] : props.horizontal }">
@@ -39,9 +40,9 @@ const props = defineProps({
                   <span>{{ props.host }}</span>
               </div>
               <div class="flex items-center">
-                報名人數:{{ props.participants }}
+                可報名人數:{{ props.participants }}
               </div>
-          </div>                            
+          </div>
       </div>
     </router-link>
   </div>

@@ -1,111 +1,89 @@
 <script setup>
 import ActivityCard from '@/views/components/ActivityCard.vue';
-
-import { reactive } from 'vue'
-const items = reactive([
-    {
-        id: 1,
-        image: "/src/assets/UserUpdata1.jpg",
-        name: "吃竹子",
-        location: "110 臺北市信義區光復南路14號",
-        dateTime: "星期六, 十一月 23日 15:00",
-        userImage: "/src/assets/25231.png",
-        user: "竹子",
-        participants: 1,
-    },
-    {
-        id: 2,
-        image: "/src/assets/UserUpdata1.jpg",
-        name: "吃桃子",
-        location: "266 宜蘭縣三星鄉大隱十六路19號",
-        dateTime: "星期六, 十一月 23日 15:00",
-        userImage: "/src/assets/25231.png",
-        user: "桃子",
-        participants: 2,
-    },
-    {
-        id: 3,
-        image: "/src/assets/UserUpdata1.jpg",
-        name: "吃李子",
-        location: "981 花蓮縣玉里鎮建國四街15號",
-        dateTime: "星期六, 十一月 23日 15:00",
-        userImage: "/src/assets/25231.png",
-        user: "李子",
-        participants: 3,
-    },
-    {
-        id: 4,
-        image: "/src/assets/UserUpdata1.jpg",
-        name: "吃瓜子",
-        location: "台北市北投區",
-        dateTime: "星期六, 十一月 23日 15:00",
-        userImage: "/src/assets/25231.png",
-        user: "瓜子",
-        participants: 4,
-    },
-    {
-        id: 5,
-        image: "/src/assets/UserUpdata1.jpg",
-        name: "看孫子",
-        location: "台北市文山區",
-        dateTime: "星期六, 十一月 23日 15:00",
-        userImage: "/src/assets/25231.png",
-        user: "孫子",
-        participants: 5,
-    },
-    {
-        id: 6,
-        image: "/src/assets/UserUpdata1.jpg",
-        name: "吃西瓜",
-        location: "台北市中正區",
-        dateTime: "星期六, 十一月 23日 15:00",
-        userImage: "/src/assets/25231.png",
-        user: "西瓜",
-        participants: 6,
-    },
-    {
-        id: 7,
-        image: "/src/assets/UserUpdata1.jpg",
-        name: "吃蘋果",
-        location: "台北市大安區",
-        dateTime: "星期六, 十一月 23日 15:00",
-        userImage: "/src/assets/25231.png",
-        user: "蘋果",
-        participants: 7,
-    },
-    {
-        id: 8,
-        image: "/src/assets/UserUpdata1.jpg",
-        name: "吃芒果",
-        location: "台北市大安區",
-        dateTime: "星期六, 十一月 23日 15:00",
-        userImage: "/src/assets/25231.png",
-        user: "芒果",
-        participants: 8,
-    },
-    {
-        id: 9,
-        image: "/src/assets/UserUpdata1.jpg",
-        name: "活動名稱2",
-        location: "台北市大安區",
-        dateTime: "星期六, 十一月 23日 15:00",
-        userImage: "/src/assets/25231.png",
-        user: "葡萄",
-        participants: 9,
-    },
-    {
-        id: 10,
-        image: "/src/assets/UserUpdata1.jpg",
-        name: "活動名稱2",
-        location: "台北市大安區",
-        dateTime: "星期六, 十一月 23日 15:00",
-        userImage: "/src/assets/25231.png",
-        user: "蘋果",
-        participants: 10,
-    },
+import { ActivityComponentApi, ActivityUseApi } from '@/apis/useActivityComponentApi';
+import {ref, onMounted, computed } from 'vue'
+import { formatToISOWithTimezone } from '@/stores/useDateTime'
 
 
-])
+const allActivities = ref([]);    // 存放所有活動資料（未篩選）
+const userMap = ref({});
+
+// 計算今天日期的字串
+const today = new Date();
+const yyyy = today.getFullYear();
+const mm = String(today.getMonth() + 1).padStart(2, '0');
+const dd = String(today.getDate()).padStart(2, '0');
+const todayString = `${yyyy}-${mm}-${dd}`;
+
+// 篩選條件
+const selectedCategory = ref('');      // 預設顯示全部
+const selectedStartDate = ref('');     // 使用者選擇的開始篩選日期
+
+// 定義篩選函式
+const selectCategory = (category) => {
+  selectedCategory.value = category;
+};
+
+const setStartDate = (dateStr) => {
+  selectedStartDate.value = dateStr;
+};
+
+// 使用 computed 來動態取得符合條件的 items
+const filteredItems = computed(() => {
+  const today = new Date();
+  const startFilterDate = selectedStartDate.value ? new Date(selectedStartDate.value) : today;
+
+  return allActivities.value
+    .filter(activity => {
+      const eventDate = new Date(activity.event_time);
+      if (eventDate < today) return false;
+      if (eventDate < startFilterDate) return false;
+      if (selectedCategory.value && activity.category !== selectedCategory.value) return false;
+      return true;
+    })
+    .sort((a, b) =>new Date(a.event_time) -new Date(b.event_time))
+    .map(activity => ({
+      id: activity.id,
+      name: activity.name,
+      img_url: activity.img_url || '/src/assets/UserUpdata1.jpg',
+      location: activity.location || '未知地點',
+      dateTime: formatToISOWithTimezone(activity.event_time),
+      user: userMap.value[activity.host_id] || '未知用戶',
+      participants: activity.max_participants || 0,
+    }));
+});
+
+
+
+const fetchActivitiesAndUsers = async () => {
+  try {
+    const [activities,users] =await Promise.all([
+      ActivityComponentApi(),
+      ActivityUseApi()
+    ]) ;
+
+    console.log("API 返回的活動資料:", activities);
+    console.log("API 返回使用者資訊:", users);
+
+    if(users.status === 200 && Array.isArray(users.data)){
+      userMap.value =Object.fromEntries(
+        users.data.map((user) => [user.uid, user.display_name])
+      )
+    }
+
+    if (activities.status === 200 && Array.isArray(activities.data)) {
+      allActivities.value = activities.data;
+    } else {
+      console.error("活動資料格式錯誤:", activities,users);
+    }
+  } catch (err) {
+    console.error("取得活動資料失敗:", err);
+  }
+};
+
+onMounted(() => {
+  fetchActivitiesAndUsers();
+});
 
 
 
@@ -116,32 +94,84 @@ const items = reactive([
         <div class="text-3xl pt-40 font-bold leading-10	">啾團活動 </div>
         <div class="inline-flex	w-full pb-7 pt-7">
             <div class="inline-flex flex-wrap">
-                <div class="mr-7 py-6 pl-3 text-sm " ><a href="#">美食</a></div>
-                <div class="mr-7 py-6 pl-3 text-sm " ><a href="#">購物</a></div>
-                <div class="mr-7 py-6 pl-3 text-sm " ><a href="#">旅遊</a></div>
-                <div class="mr-7 py-6 pl-3 text-sm " ><a href="#">運動</a></div>
-                <div class="mr-7 py-6 pl-3 text-sm " ><a href="#">娛樂</a></div>
-                <div class="mr-7 py-6 pl-3 text-sm " ><a href="#">其他</a></div>
+                <!-- 預設顯示全部 -->
+                <div class="mr-7 py-6 pl-3 text-sm">
+                  <button
+                  class="p-2"
+                  @click="selectCategory('')"
+                  :class=" {'bg-gray-300 rounded-md' : selectedCategory === '' }"
+                  >全部
+                </button>
+                </div>
+                <div class="mr-7 py-6 pl-3 text-sm">
+                  <button
+                  class="p-2"
+                  @click="selectCategory('food')"
+                  :class=" {'bg-gray-300 rounded-md' : selectedCategory === 'food' }"
+                  >美食
+                </button>
+                </div>
+                <div class="mr-7 py-6 pl-3 text-sm">
+                  <button
+                  class="p-2"
+                  @click="selectCategory('shopping')"
+                  :class=" {'bg-gray-300 rounded-md' : selectedCategory === 'shopping' }"
+                  >購物
+                </button>
+                </div>
+                <div class="mr-7 py-6 pl-3 text-sm">
+                  <button
+                  class="p-2"
+                  @click="selectCategory('travel')"
+                  :class=" {'bg-gray-300 rounded-md' : selectedCategory === 'travel' }"
+                  >旅遊
+                </button>
+                </div>
+                <div class="mr-7 py-6 pl-3 text-sm">
+                  <button
+                  class="p-2"
+                  @click="selectCategory('sports')"
+                  :class=" {'bg-gray-300 rounded-md' : selectedCategory === 'sports' }"
+                  >運動
+                </button>
+                </div>
+                <div class="mr-7 py-6 pl-3 text-sm">
+                  <button
+                  class="p-2"
+                  @click="selectCategory('education')"
+                  :class=" {'bg-gray-300 rounded-md' : selectedCategory === 'education' }"
+                  >教育
+                </button>
+                </div>
+                <div class="mr-7 py-6 pl-3 text-sm">
+                  <button
+                  class="p-2"
+                  @click="selectCategory('others')"
+                  :class=" {'bg-gray-300 rounded-md' : selectedCategory === 'others' }"
+                  >其他
+                </button>
+                </div>
+
             </div>
         </div>
         <hr>
         <!-- 篩選器 -->
         <div class="mt-7 flex justify-between items-center">
-            <div class="text-xl flex items-center  ">地區
-                <span class="ml-1">▼</span>
+            <div class="text-xl flex items-center  ">
+                <span class="ml-1"></span>
             </div>
-            <div class="text-xl flex items-center">篩選器
-                <span class="ml-1">▼</span>
+            <div class="text-xl flex items-center">篩選日期
+                <span class="ml-1"> <input type="date" :min="todayString" @change="setStartDate($event.target.value)" /></span>
             </div>
        </div>
 
         <!-- 卡片區域 -->
-        <div class="mt-7">
+        <div class="mt-7 mb-7">
             <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-                <ActivityCard 
-                    v-for="item in items" :key="item.id"
+                <ActivityCard
+                    v-for="item in filteredItems" :key="item.id"
                     :title="item.name"
-                    :actImgUrl="item.image"
+                    :actImgUrl="item.img_url"
                     :location="item.location"
                     :date-time="item.dateTime"
                     :participants="item.participants"
