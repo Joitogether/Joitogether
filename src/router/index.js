@@ -21,7 +21,6 @@ import { onAuthStateChanged } from 'firebase/auth'
 import { auth } from '@/utils/firebaseConfig.js'
 import { useUserStore } from '@/stores/userStore'
 
-
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -84,10 +83,10 @@ const router = createRouter({
       component: Post,
     },
     {
-      path: '/PostDetail',
+      path: '/post/:postId',
       name: 'PostDetail',
-      component: PostDetail,
-      },
+      component: () => import('@/views/Post/component/PostDetail.vue'),
+    },
     {
       path: '/testpost',
       name: 'testpost',

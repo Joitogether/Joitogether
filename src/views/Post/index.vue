@@ -6,6 +6,7 @@ import { NSpace, NSelect } from 'naive-ui'
 import { getPostById, getPostsByCategory } from '@/apis/postAPIs'
 import { getPostComments } from '@/apis/postCommentAPIs'
 import { getPostLikes } from '@/apis/postLikeAPIs'
+import { useRouter } from 'vue-router'
 
 import dayjs from 'dayjs'
 import 'dayjs/locale/zh-tw.js'
@@ -138,6 +139,12 @@ onMounted(async () => {
   await fetchCommentsCount() // 再撈取留言數
   await fetchPostLikes()
 })
+
+const router = useRouter()
+
+const handlePostClick = (postId) => {
+  router.push({ name: 'PostDetail', params: { postId } })
+}
 </script>
 <template>
   <!-- <NaveBar /> -->
@@ -202,10 +209,11 @@ onMounted(async () => {
         </n-select>
       </n-space>
     </div>
-    <div class="post-posts-area">
+    <div class="post-posts-area mt-2">
       <div v-for="post in postList" :key="post.id" class="">
         <div
           class="flex flex-col justify-between md:flex-row bg-slate-50 p-4 cursor-pointer border-b border-gray-400"
+          @click="handlePostClick(post.id)"
         >
           <!-- 左邊區塊 -->
           <!-- <div :class="post.img ? 'w-full md:w-9/12' : 'w-full'" class="flex flex-col space-y-2"> -->
@@ -247,10 +255,7 @@ onMounted(async () => {
             <img class="w-full h-full object-cover" :src="post.img" alt="文章照片" />
           </div>
         </div>
-      </router-link>
       </div>
-
-
     </div>
   </div>
 </template>
