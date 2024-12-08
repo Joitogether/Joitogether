@@ -93,7 +93,7 @@ const handleLogout = async () => {
 <template>
   <div id="navbar" class="flex items-center space-x-2 justify-evenly">
     <div>
-      <a href="#"><Sweep3d /></a>
+      <a href="/"><Sweep3d /></a>
     </div>
     <div class="flex items-center space-x-6">
       <div class="hidden md:flex min-w-12">找聚會</div>
