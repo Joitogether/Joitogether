@@ -15,14 +15,58 @@ import defaultAvatar from '@/assets/avatar.png'
 
 import { useDialog, useMessage } from 'naive-ui'
 import { apiAxios } from '@/utils/request'
-import { ActivityGetApplicationsAPI, ActivityReviewApplicationsAPI } from '@/apis/activityApi'
+import {
+  ActivityGetApplicationsAPI,
+  ActivityReviewApplicationsAPI,
+  ActivityGetActivitiesAPI,
+} from '@/apis/activityApi'
 import { useRoute } from 'vue-router'
+import { useUserStore } from '@/stores/userStore'
+
 const route = useRoute()
 const activity_id = route.params.activity_id
 // onMounted(async () => {
 //   const response = await ActivityGetApplicationsAPI(10)
 //   console.log(response)
 // })
+const userStore = useUserStore()
+
+const activity = ref([null]) // 活動詳細資料
+const attendees = ref([]) // 參加者資料
+
+onMounted(async () => {
+  try {
+    const response = await ActivityGetActivitiesAPI(activity_id)
+    console.log(response)
+    if (response.status === 200 && response.data) {
+      activity.value = response.data // API 返回的活動資料
+      console.log('活動資料2:', activity.value)
+    }
+  } catch (error) {
+    console.error('無法獲取活動資料:', error)
+  }
+})
+
+onMounted(async () => {
+  try {
+    // 獲取參加者資料
+    const response = await ActivityGetApplicationsAPI(activity_id)
+    if (response.status === 200 && response.data) {
+      attendees.value = response.data.data.map((item) => ({
+        id: item.application_id,
+        name: item.participant_info.full_name,
+        avatar: item.participant_info.photo_url || defaultAvatar,
+        message: item.comment || '無留言',
+      }))
+    } else {
+      console.error('拉取參加者資料失敗:', response.data)
+    }
+  } catch (error) {
+    console.error('API 請求失敗:', error)
+  }
+})
+console.log('Activity', activity.value)
+// console.log('活動資料UID:', activity.data)
 
 const refreshAttendees = async () => {
   try {
@@ -432,7 +476,10 @@ const sendReplies = async () => {
 </script>
 
 <template>
-  <div class="flex justify-center min-w-[400px] items-center min-h-screen bg-gray-200 shadow-2xl">
+  <div
+    v-if="userStore.user.uid === activity.host_info.uid"
+    class="flex justify-center min-w-[400px] items-center min-h-screen bg-gray-200 shadow-2xl"
+  >
     <div
       class="m-auto p-2 rounded-xl bg-gray-50 border-gray-300 border-solid border-2 w-full max-w-[768px] sm:w-full"
     >
@@ -695,22 +742,14 @@ const sendReplies = async () => {
             </div>
           </div>
         </div>
-
-        <!-- 顯示送出的內容
-        <div
-          v-if="sentReplies.length"
-          class="w-full my-2 p-3 border-[1px] bg-gray-50 border-solid rounded-xl"
-        >
-          <h3 class="font-semibold text-sm mb-1 text-gray-600">團主回覆：</h3>
-
-          <div v-for="(reply, index) in sentReplies" :key="index" class="">
-            <div class="rounded-full w-96 text-sm text-gray-600">
-              {{ reply }}
-            </div>
-          </div>
-        </div> -->
       </div>
     </div>
+  </div>
+
+  <div v-else>
+    <!-- 非主揪可以看到的內容 -->
+    <div>您不是該活動的主揪，僅能查看基本資訊。</div>
+    <div>{{ activity.host_id }}</div>
   </div>
 </template>
 
