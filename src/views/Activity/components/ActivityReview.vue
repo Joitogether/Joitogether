@@ -39,7 +39,7 @@ onMounted(async () => {
     const response = await ActivityGetActivitiesAPI(activity_id)
     console.log(response)
     if (response.status === 200 && response.data) {
-      activity.value = response.data // API 返回的活動資料
+      activity.value = response.data.data // API 返回的活動資料
       console.log('活動資料2:', activity.value)
     }
   } catch (error) {
@@ -477,7 +477,7 @@ const sendReplies = async () => {
 
 <template>
   <div
-    v-if="userStore.user.uid === activity.host_info.uid"
+    v-if="userStore.user.uid === activity.host_info?.uid"
     class="flex justify-center min-w-[400px] items-center min-h-screen bg-gray-200 shadow-2xl"
   >
     <div
@@ -747,9 +747,17 @@ const sendReplies = async () => {
   </div>
 
   <div v-else>
-    <!-- 非主揪可以看到的內容 -->
-    <div>您不是該活動的主揪，僅能查看基本資訊。</div>
-    <div>{{ activity.host_id }}</div>
+    <div class="flex flex-col items-center justify-center min-h-screen bg-gray-100 text-gray-800">
+      <h1 class="text-8xl font-extrabold text-red-500 animate-bounce">哎呀！真糟糕！</h1>
+      <p class="mt-4 text-2xl font-semibold">很抱歉</p>
+      <p class="mt-2 text-lg text-gray-600">很抱歉，您不是該活動的團主，無法查看此頁面</p>
+      <router-link
+        to="/"
+        class="mt-6 px-6 py-3 bg-blue-500 text-white text-lg font-medium rounded-lg shadow-lg hover:bg-blue-600 transition"
+      >
+        返回首頁
+      </router-link>
+    </div>
   </div>
 </template>
 
