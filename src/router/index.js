@@ -117,6 +117,7 @@ router.beforeEach( async (to, from, next) => {
   const userStore = useUserStore()
   const user = await getCurrentUser()
     if (user) {
+      console.log('這是router在看使用者狀態')
       userStore.setUser(user)
       next()
     } else {

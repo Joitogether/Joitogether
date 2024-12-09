@@ -66,6 +66,9 @@ const handleNotificationRead = async (value) => {
 }
 }
 
+const handleNotificationScroll = (e) => {
+  console.log(e)
+}
 
 </script>
 
@@ -171,7 +174,7 @@ const handleNotificationRead = async (value) => {
             <BellNotificationSolid></BellNotificationSolid>
           </n-badge>
         </template>
-        <n-scrollbar style="max-height: 500px">
+        <n-scrollbar :on-scroll="handleNotificationScroll" style="max-height: 500px">
           <div class="flex flex-col ">
             <p class="pl-2 text-xl font-bold">通知</p>
             <div   v-for="notification in notifications" :key="notification.id" >

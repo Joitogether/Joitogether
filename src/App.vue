@@ -15,6 +15,7 @@ onMounted( async () => {
   const userStore = useUserStore()
   const user = await getCurrentUser()
   if(user){
+    console.log('這是app.vue在監控使用者狀態')
     userStore.setUser(user)
   }else{
     userStore.clearUser()

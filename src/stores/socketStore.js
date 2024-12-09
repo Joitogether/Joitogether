@@ -38,8 +38,7 @@ export const useSocketStore = defineStore('socket', () => {
     // 接收通知事件
     socket.value.on('newNotification', (notification) => {
       addNotification(notification)
-      console.log(notification)
-      console.log(notifications.value)
+
     })
   }
 
@@ -49,16 +48,7 @@ export const useSocketStore = defineStore('socket', () => {
       socket.value.emit('sendNotification', data)
     }
   }
-  // data須包含以下
-  // {
-  //   user_id,
-  //   actor_id,
-  //   action,
-  //   target_type,
-  //   target_id,
-  //   message
-  // }
-  // 添加通知到 state
+
   function addNotification(notification) {
     notifications.value.unshift({
       ...notification,
@@ -67,18 +57,9 @@ export const useSocketStore = defineStore('socket', () => {
     })
   }
 
-  // 清除通知
-  function clearNotifications() {
-    notifications.value = []
-  }
 
-  // 標記通知為已讀
-  function markNotificationAsRead(notificationId) {
-    const index = notifications.value.findIndex(n => n.id === notificationId)
-    if (index !== -1) {
-      notifications.value[index].isRead = true
-    }
-  }
+
+
 
   return {
     socket,
@@ -87,7 +68,5 @@ export const useSocketStore = defineStore('socket', () => {
     initSocket,
     sendNotification,
     addNotification,
-    clearNotifications,
-    markNotificationAsRead
   }
 })
