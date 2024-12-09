@@ -1,110 +1,148 @@
 <script setup>
-import { reactive } from 'vue'
-import NaveBar from '@/views/Home/components/NavbarComponent.vue'
+import { onMounted, reactive, ref } from 'vue'
+// import NaveBar from '@/views/Home/components/NavbarComponent.vue'
 import { NavArrowLeft } from '@iconoir/vue'
-import { useRoute } from 'vue-router'
-import { getPosts } from '@/apis/postAPIs'
-import { getPostComments } from '@/apis/postCommentAPIs'
+import { useRoute, useRouter } from 'vue-router'
+import { getPostById } from '@/apis/postAPIs'
 
 const route = useRoute()
+const router = useRouter()
 
-const postList = reactive([
-  {
-    id: '01',
-    name: 'user-1',
-    title: '台北第一高峰@七星山👍還是半天的輕旅行最可愛',
-    content:
-      '天氣很可以的早上👌滿滿的芬多精，吸好吸滿😄好山友👌旅伴🏔攝影咖📷美食獵人🥗人生好隊友在哪呢？😆完美360度的完美展望👍看山望海）',
-    time: '2024-11-18 10:00',
-    img: 'https://i0.wp.com/www.tripresso.com/blog/wp-content/uploads/2021/02/7.jpeg?resize=616%2C347',
-  },
-])
+const postId = Number(route.params.post_id) // 轉換為數字
+console.log('postId:', postId)
+
+const postDetails = reactive({
+  title: '',
+  content: '',
+  time: '',
+  img: '',
+  name: '',
+  avatar: '',
+})
+
+const fetchPostDetails = async () => {
+  console.log('發送 API 請求到:', `/posts/${postId}`)
+
+  try {
+    const post = await getPostById(postId)
+    console.log(`API回傳的文章：`, post)
+
+    const userRes = await getPostById(postId)
+    const user = userRes.data
+
+    postDetails.title = post.data.post_title
+    postDetails.content = post.data.post_content
+    postDetails.time = post.data.updated_at
+    postDetails.img = post.data.post_img
+    postDetails.name = user.users.display_name // 文章發佈者的名稱
+    postDetails.avatar = user.users.photo_url // 文章發佈者的頭像 URL
+  } catch (error) {
+    console.error(`獲取 ${postId}文章資料失敗`, error.response?.data || error.message)
+  }
+}
+const goPostPage = () => {
+  router.push('/post')
+}
+
+onMounted(() => {
+  console.log('正在加載文章', postId)
+
+  fetchPostDetails()
+})
 </script>
 
 <template>
-  <NaveBar />
-  <div class="bg-white">
-    <!-- 發文者的資訊區 -->
-    <div class="flex items-center p-4 border border-gray-300 rounded-md">
-      <router-link :to="{ name: 'post' }">
-        <NavArrowLeft stroke-width="2" class="w-8 h-8"></NavArrowLeft>
-      </router-link>
-      <div class="aspect-square w-20 mx-6 justify-center">
-        <img class="w-3/4 h-3/4 rounded-full" :src="postList[0].img" alt="" />
-      </div>
-      <div>
-        <div class="p-2 text-xl">{{ postList[0].name }}</div>
-        <div class="p-2 text-sm">{{ postList[0].time }}</div>
-      </div>
+  <!-- <NaveBar /> -->
+  <div class="bg-gray-100 h-12 flex items-center p-4 relative">
+    <NavArrowLeft
+      stroke-width="2"
+      class="w-6 h-6 cursor-pointer"
+      @click="goPostPage"
+    ></NavArrowLeft>
+    <p class="text-lg absolute left-1/2 transform -translate-x-1/2">美食</p>
+  </div>
+  <div class="p-6">
+    <div class="">
+      <p class="text-xl font-bold">{{ postDetails.title }}</p>
     </div>
-    <!-- 文章資訊區 -->
-    <div class="m-6 items-center p-4 border border-gray-300 rounded-md">
-      <div class="m-1 items-center p-4 border border-gray-300 rounded-md">
-        <div class="flex">
-          <div class="rounded-md aspect-square max-w-24">
-            <img class="w-3/4 h-3/4 rounded-md" :src="postList[0].img" alt="" />
-          </div>
-          <div class="rounded-md aspect-square max-w-24">
-            <img class="w-3/4 h-3/4 rounded-md" :src="postList[0].img" alt="" />
-          </div>
-          <div class="rounded-md aspect-square max-w-24">
-            <img class="w-3/4 h-3/4 rounded-md" :src="postList[0].img" alt="" />
-          </div>
-        </div>
-      </div>
-      <div class="mb-6 p-2">文章內容{{ postList[0].content }}</div>
-      <div class="flex justify-between mb-6">
-        <div class="flex">
-          <div class="px-2">👍🏻 20</div>
-          <div class="px-2">💰 10</div>
-        </div>
-        <div class="px-2">💬 5</div>
-      </div>
-      <hr />
-      <!-- 功能操作區 -->
-      <div class="flex justify-around">
-        <div class="mx-4 items-center p-4 overflow-hidden">
-          <button>讚👍🏻</button>
-        </div>
-        <div class="mx-4 items-center p-4">
-          <button>留言💬</button>
-        </div>
-        <div class="mx-4 items-center p-4">
-          <button>分享↪️</button>
-        </div>
-        <div class="mx-4 items-center p-4">
-          <button>打賞💰</button>
-        </div>
-      </div>
-      <hr />
-      <!-- 留言區 -->
-      <div class="my-3">
-        <!-- 目前使用者 -->
-        <div class="flex">
-          <div class="aspect-square w-20 rounded-full">
-            <img class="w-3/4 h-3/4 rounded-full" :src="postList[0].img" alt="" />
-          </div>
-          <div>
-            <input
-              type="text"
-              placeholder="說說你的看法"
-              class="flex-grow p-3 border-none focus:outline-none text-base"
-            />
-            <button>留言</button>
-          </div>
-        </div>
-        <!-- 其他使用者留言 -->
-        <div class="flex my-3">
-          <div class="aspect-square w-20 rounded-full">
-            <img class="w-3/4 h-3/4 rounded-full" :src="postList[0].img" alt="" />
-          </div>
-          <div class="items-center p-2 border border-gray-300 rounded-md w-56">
-            <div class="text-sm">留言者名稱</div>
-            <div class="text-sm">留言內容</div>
-          </div>
+    <div class="">
+      <!-- 發文者的資訊區 -->
+      <div class="flex flex-row items-center mt-4 mb-4">
+        <div class="w-16 h-16 rounded-full overflow-hidden mr-4">
+          <img
+            class="w-full h-full object-cover"
+            alt=""
+            :src="
+              postDetails.avatar ||
+              'https://i.pinimg.com/736x/20/3e/d7/203ed7d8550c2c1c145a2fb24b6fbca3.jpg'
+            "
+          />
         </div>
         <div>
-          <button>查看更多留言.....</button>
+          <div class="text-lg">{{ postDetails.name }}</div>
+          <div class="text-sm text-gray-400">{{ postDetails.time }}</div>
+        </div>
+      </div>
+      <!-- 文章資訊區 -->
+      <div class="items-center">
+        <div class="mb-6 text-base">文章內容{{ postDetails.content }}</div>
+        <div v-if="postDetails.img" class="w-full h-full rounded-lg overflow-hidden">
+          <img class="w-full h-full object-cover" :src="postDetails.img" alt="發文者圖片" />
+        </div>
+        <div class="flex justify-between my-6">
+          <div class="flex">
+            <div class="px-2 text-sm">👍🏻 20 讚</div>
+            <div class="px-2 text-sm">💬 10 留言</div>
+          </div>
+        </div>
+        <!-- <hr /> -->
+        <!-- 功能操作區 -->
+        <div class="flex justify-between gap-4 items-center h-12">
+          <button class="w-1/2 h-full flex justify-center items-center bg-yellow-300 rounded-full">
+            讚
+          </button>
+          <button class="w-1/2 h-full flex justify-center items-center bg-yellow-300 rounded-full">
+            留言
+          </button>
+        </div>
+        <!-- <hr /> -->
+        <!-- 留言區 -->
+        <div class="my-3">
+          <!-- 目前使用者 -->
+          <div class="flex">
+            <div class="aspect-square w-20 rounded-full">
+              <img
+                class="w-3/4 h-3/4 rounded-full"
+                alt=""
+                :src="'https://i.pinimg.com/736x/20/3e/d7/203ed7d8550c2c1c145a2fb24b6fbca3.jpg'"
+              />
+            </div>
+            <div>
+              <input
+                type="text"
+                placeholder="說說你的看法"
+                class="flex-grow p-3 border-none focus:outline-none text-base"
+              />
+              <button>留言</button>
+            </div>
+          </div>
+          <!-- 其他使用者留言 -->
+          <div class="flex my-3">
+            <div class="aspect-square w-20 rounded-full">
+              <img
+                class="w-3/4 h-3/4 rounded-full"
+                alt=""
+                :src="'https://i.pinimg.com/736x/20/3e/d7/203ed7d8550c2c1c145a2fb24b6fbca3.jpg'"
+              />
+            </div>
+            <div class="items-center p-2 border border-gray-300 rounded-md w-56">
+              <div class="text-sm">留言者名稱</div>
+              <div class="text-sm">留言內容</div>
+            </div>
+          </div>
+          <div>
+            <button>查看更多留言.....</button>
+          </div>
         </div>
       </div>
     </div>

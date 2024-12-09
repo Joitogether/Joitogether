@@ -83,9 +83,9 @@ const router = createRouter({
       component: Post,
     },
     {
-      path: '/post/:postId',
+      path: '/post/:post_id',
       name: 'PostDetail',
-      component: () => import('@/views/Post/component/PostDetail.vue'),
+      component: PostDetail,
     },
     {
       path: '/testpost',

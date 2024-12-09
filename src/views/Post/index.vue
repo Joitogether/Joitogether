@@ -143,7 +143,7 @@ onMounted(async () => {
 const router = useRouter()
 
 const handlePostClick = (postId) => {
-  router.push({ name: 'PostDetail', params: { postId } })
+  router.push(`/post/${postId}`)
 }
 </script>
 <template>
