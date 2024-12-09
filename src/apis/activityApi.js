@@ -36,6 +36,18 @@ export const activityCancelAPI = async (activityId) => {
   }
 }
 
+export const activityGetAPI = async () => {
+  try {
+    const response = await apiAxios.get(`/activities`)
+    if (response && response.status === 200) {
+      return response.data.data
+    }
+  } catch (err) {
+    //沒抓到
+    return null
+  }
+}
+
 export const activityNewCommentAPI = async (activity_id, data) => {
   try {
     return await apiAxios.post(`/activities/comment/${activity_id}`, data)
@@ -43,6 +55,8 @@ export const activityNewCommentAPI = async (activity_id, data) => {
     return err.response.data
   }
 }
+
+
 
 export const activityDeleteCommentAPI = async (comment_id) => {
   try {
@@ -73,3 +87,4 @@ export const ActivityReviewApplicationsAPI = async (application_id, status) => {
     throw err
   }
 }
+

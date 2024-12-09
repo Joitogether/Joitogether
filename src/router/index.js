@@ -7,7 +7,7 @@ import PersonActivity from '@/views/MyProfile/component/PersonActivity.vue'
 import PersonPost from '@/views/MyProfile/component/PersonPost.vue'
 import Post from '../views/Post/index.vue'
 import PersonRate from '@/views/MyProfile/component/PersonRate.vue'
-import PersonalFocus from '@/views/MyProfile/component/PersonalFocus.vue'
+import PersonFollow from '@/views/MyProfile/component/PersonFollow.vue'
 import Activity from '@/views/Activity/index.vue'
 import ActivityDetail from '@/views/Activity/components/ActivityDetail.vue'
 import ActivityCreate from '@/views/Activity/components/ActivityCreate.vue'
@@ -65,9 +65,9 @@ const router = createRouter({
           component: PersonPost,
         },
         {
-          path: 'personalfocus',
-          name: 'personalfocus',
-          component: PersonalFocus,
+          path: 'personfollow',
+          name: 'personfollow',
+          component: PersonFollow,
         },
         {
           path: 'personActivity',
