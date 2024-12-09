@@ -137,9 +137,9 @@ const isHost = computed(() => {
 
 
 onMounted(async() => {
+  await getActivityDetail()
   searchQuery.value = activity.value.location;
   await previewMap(searchQuery.value);
-  await getActivityDetail()
   user.value = userStore.user
 })
 // 根據抓取回來的資料判斷使用者是否已註冊該活動
