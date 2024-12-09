@@ -93,59 +93,59 @@ onMounted(() => {
     <main class="block max-w-7xl m-auto">
         <div class="text-3xl pt-40 font-bold leading-10	">啾團活動 </div>
         <div class="inline-flex	w-full pb-7 pt-7">
-            <div class="inline-flex flex-wrap">
+            <div class="flex flex-wrap gap-3 justify-start">
                 <!-- 預設顯示全部 -->
-                <div class="mr-7 py-6 pl-3 text-sm">
+                <div class="mr-7 py-3 pl-3 text-sm">
                   <button
-                  class="p-2"
+                  class="p-1 md:p-2 w-full md:w-auto text-center"
                   @click="selectCategory('')"
                   :class=" {'bg-gray-300 rounded-md' : selectedCategory === '' }"
                   >全部
                 </button>
                 </div>
-                <div class="mr-7 py-6 pl-3 text-sm">
+                <div class="mr-7 py-3 pl-3 text-sm">
                   <button
-                  class="p-2"
+                  class="p-1 md:p-2 w-full md:w-auto text-center"
                   @click="selectCategory('food')"
                   :class=" {'bg-gray-300 rounded-md' : selectedCategory === 'food' }"
                   >美食
                 </button>
                 </div>
-                <div class="mr-7 py-6 pl-3 text-sm">
+                <div class="mr-7 py-3 pl-3 text-sm">
                   <button
-                  class="p-2"
+                  class="p-1 md:p-2 w-full md:w-auto text-center"
                   @click="selectCategory('shopping')"
                   :class=" {'bg-gray-300 rounded-md' : selectedCategory === 'shopping' }"
                   >購物
                 </button>
                 </div>
-                <div class="mr-7 py-6 pl-3 text-sm">
+                <div class="mr-7 py-3 pl-3 text-sm">
                   <button
-                  class="p-2"
+                  class="p-1 md:p-2 w-full md:w-auto text-center"
                   @click="selectCategory('travel')"
                   :class=" {'bg-gray-300 rounded-md' : selectedCategory === 'travel' }"
                   >旅遊
                 </button>
                 </div>
-                <div class="mr-7 py-6 pl-3 text-sm">
+                <div class="mr-7 py-3 pl-3 text-sm">
                   <button
-                  class="p-2"
+                  class=" p-1 md:p-2 w-full md:w-auto text-center"
                   @click="selectCategory('sports')"
                   :class=" {'bg-gray-300 rounded-md' : selectedCategory === 'sports' }"
                   >運動
                 </button>
                 </div>
-                <div class="mr-7 py-6 pl-3 text-sm">
+                <div class="mr-7 py-3 pl-3 text-sm">
                   <button
-                  class="p-2"
+                  class="p-1 md:p-2 w-full md:w-auto text-center"
                   @click="selectCategory('education')"
                   :class=" {'bg-gray-300 rounded-md' : selectedCategory === 'education' }"
                   >教育
                 </button>
                 </div>
-                <div class="mr-7 py-6 pl-3 text-sm">
+                <div class="mr-7 py-3 pl-3 text-sm">
                   <button
-                  class="p-2"
+                  class="p-1 md:p-2 w-full md:w-auto text-center"
                   @click="selectCategory('others')"
                   :class=" {'bg-gray-300 rounded-md' : selectedCategory === 'others' }"
                   >其他
