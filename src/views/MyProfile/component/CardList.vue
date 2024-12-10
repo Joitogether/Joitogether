@@ -1,6 +1,6 @@
 <script setup>
 import { NButton, NSpin } from 'naive-ui'
-import { UserGetApi } from '../../../apis/UserApi'
+import { UserGetApi } from '../../../apis/userAPIs'
 import { ref } from 'vue'
 import { useUserStore } from '@/stores/userStore'
 
