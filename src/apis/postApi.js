@@ -1,5 +1,25 @@
 import { apiAxios } from '@/utils/request'
-import axios from 'axios'
-export const HomePostGetUsersAPI = async () => {
-  return await axios.get('/post')
+
+// export const HomePostGetUserAPI = async () => {
+//   try {
+//     const response = await apiAxios.get('/posts')
+//     if (response && response.status === 200) {
+//       console.log('成功獲取資料', response.data.data)
+//       return response.data
+//     }
+//   } catch (err) {
+//     return null
+//   }
+// }
+
+export const HomePostGetUserAPI = async () => {
+  try {
+    const response = await apiAxios.get('/posts')
+    if (response && response.status === 200) {
+      console.log('成功', response.data.data)
+      return response.data
+    }
+  } catch (err) {
+    return null
+  }
 }
