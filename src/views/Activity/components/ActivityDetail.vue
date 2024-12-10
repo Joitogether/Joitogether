@@ -20,7 +20,6 @@ const registerComment = ref('')
 const activityId = route.params.id
 async function getActivityDetail(){
   const activityDetail = await activityGetDetailAPI(activityId)
-  
   // 有資料或null
   if(!activityDetail){
     message.error('獲取活動失敗')
