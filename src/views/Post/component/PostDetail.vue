@@ -4,7 +4,14 @@ import { onMounted, reactive, ref } from 'vue'
 import { NavArrowLeft } from '@iconoir/vue'
 import { useRoute, useRouter } from 'vue-router'
 import { getPostById } from '@/apis/postAPIs'
+import { getPostComments } from '@/apis/postCommentAPIs'
 
+import dayjs from 'dayjs'
+import 'dayjs/locale/zh-tw.js'
+import relativeTime from 'dayjs/plugin/relativeTime'
+
+dayjs.locale('zh-tw')
+dayjs.extend(relativeTime)
 const route = useRoute()
 const router = useRouter()
 
@@ -12,6 +19,7 @@ const postId = Number(route.params.post_id) // 轉換為數字
 console.log('postId:', postId)
 
 const postDetails = reactive({
+  category: '',
   title: '',
   content: '',
   time: '',
@@ -20,9 +28,19 @@ const postDetails = reactive({
   avatar: '',
 })
 
-const fetchPostDetails = async () => {
-  console.log('發送 API 請求到:', `/posts/${postId}`)
+const categoryMap = {
+  food: '美食',
+  shopping: '購物',
+  travel: '旅遊',
+  sports: '運動',
+  education: '教育',
+  others: '其他',
+}
 
+const commentList = ref([])
+const commentCount = ref(0)
+
+const fetchPostDetails = async () => {
   try {
     const post = await getPostById(postId)
     console.log(`API回傳的文章：`, post)
@@ -30,6 +48,7 @@ const fetchPostDetails = async () => {
     const userRes = await getPostById(postId)
     const user = userRes.data
 
+    postDetails.category = categoryMap[post.data.post_category] || '未分類'
     postDetails.title = post.data.post_title
     postDetails.content = post.data.post_content
     postDetails.time = post.data.updated_at
@@ -40,6 +59,34 @@ const fetchPostDetails = async () => {
     console.error(`獲取 ${postId}文章資料失敗`, error.response?.data || error.message)
   }
 }
+
+const fetchComments = async () => {
+  try {
+    const res = await getPostComments(postId)
+
+    const comments = res.data
+
+    console.log(`API回傳的留言：`, comments)
+
+    commentCount.value = comments.length || 0
+
+    const formattedComments = comments.map((comment) => ({
+      id: comment.comment_id,
+      content: comment.comment_content,
+      time: comment.created_at,
+      name: comment.uid,
+      // avatar: user.users.photo_url || '',
+    }))
+
+    commentList.value = formattedComments
+
+    console.log(`文章 ${postId} 的留言已更新：`, commentList.value)
+    console.log(`文章 ${postId} 的留言數量：`, commentCount.value)
+  } catch (error) {
+    console.error(`取得使用者資料失敗`, error)
+  }
+}
+
 const goPostPage = () => {
   router.push('/post')
 }
@@ -48,6 +95,7 @@ onMounted(() => {
   console.log('正在加載文章', postId)
 
   fetchPostDetails()
+  fetchComments()
 })
 </script>
 
@@ -59,7 +107,7 @@ onMounted(() => {
       class="w-6 h-6 cursor-pointer"
       @click="goPostPage"
     ></NavArrowLeft>
-    <p class="text-lg absolute left-1/2 transform -translate-x-1/2">美食</p>
+    <p class="text-lg absolute left-1/2 transform -translate-x-1/2">{{ postDetails.category }}</p>
   </div>
   <div class="p-6">
     <div class="">
@@ -85,63 +133,71 @@ onMounted(() => {
       </div>
       <!-- 文章資訊區 -->
       <div class="items-center">
-        <div class="mb-6 text-base">文章內容{{ postDetails.content }}</div>
+        <div class="mb-6 text-base">{{ postDetails.content }}</div>
         <div v-if="postDetails.img" class="w-full h-full rounded-lg overflow-hidden">
           <img class="w-full h-full object-cover" :src="postDetails.img" alt="發文者圖片" />
         </div>
         <div class="flex justify-between my-6">
           <div class="flex">
             <div class="px-2 text-sm">👍🏻 20 讚</div>
-            <div class="px-2 text-sm">💬 10 留言</div>
+            <div class="px-2 text-sm">💬 {{ commentCount }} 留言</div>
           </div>
         </div>
         <!-- <hr /> -->
         <!-- 功能操作區 -->
-        <div class="flex justify-between gap-4 items-center h-12">
-          <button class="w-1/2 h-full flex justify-center items-center bg-yellow-300 rounded-full">
+        <div class="flex justify-between gap-4 items-center h-12 mb-4">
+          <button
+            class="w-1/2 h-full flex justify-center items-center bg-yellow-300 rounded-full hover:bg-yellow-400"
+          >
             讚
           </button>
-          <button class="w-1/2 h-full flex justify-center items-center bg-yellow-300 rounded-full">
+          <button
+            class="w-1/2 h-full flex justify-center items-center bg-yellow-300 rounded-full hover:bg-yellow-400"
+          >
             留言
           </button>
         </div>
         <!-- <hr /> -->
         <!-- 留言區 -->
-        <div class="my-3">
-          <!-- 目前使用者 -->
-          <div class="flex">
-            <div class="aspect-square w-20 rounded-full">
-              <img
-                class="w-3/4 h-3/4 rounded-full"
-                alt=""
-                :src="'https://i.pinimg.com/736x/20/3e/d7/203ed7d8550c2c1c145a2fb24b6fbca3.jpg'"
-              />
-            </div>
-            <div>
-              <input
-                type="text"
-                placeholder="說說你的看法"
-                class="flex-grow p-3 border-none focus:outline-none text-base"
-              />
-              <button>留言</button>
-            </div>
-          </div>
-          <!-- 其他使用者留言 -->
-          <div class="flex my-3">
-            <div class="aspect-square w-20 rounded-full">
-              <img
-                class="w-3/4 h-3/4 rounded-full"
-                alt=""
-                :src="'https://i.pinimg.com/736x/20/3e/d7/203ed7d8550c2c1c145a2fb24b6fbca3.jpg'"
-              />
-            </div>
-            <div class="items-center p-2 border border-gray-300 rounded-md w-56">
-              <div class="text-sm">留言者名稱</div>
-              <div class="text-sm">留言內容</div>
+        <div class="p-6 bg-gray-100 rounded-lg shadow-md">
+          <!-- 留言列表 -->
+          <div v-if="commentList.length" class="space-y-6">
+            <div
+              v-for="comment in commentList"
+              :key="comment.id"
+              class="flex items-start space-x-3 border-b pb-4"
+            >
+              <div class="w-14 h-14 rounded-full overflow-hidden flex items-center justify-center">
+                <img alt="User Avatar" class="w-full h-full bg-yellow-200 object-cover" />
+              </div>
+              <div>
+                <p class="font-semibold text-gray-800 text-sm">{{ comment.name }}</p>
+                <p class="text-gray-600 text-base">{{ comment.content }}</p>
+                <p class="text-gray-400 text-sm">{{ dayjs(comment.time).fromNow() }}</p>
+              </div>
             </div>
           </div>
-          <div>
-            <button>查看更多留言.....</button>
+          <p v-else class="text-gray-500">目前沒有留言，快來留下第一則吧！</p>
+
+          <!-- 新增留言 -->
+          <div class="mt-6 flex justify-between space-x-3">
+            <div class="w-14 h-14 rounded-full overflow-hidden flex-shrink-0">
+              <img alt="User Avatar" class="w-full h-full bg-yellow-200 object-cover" />
+            </div>
+            <textarea
+              rows="3"
+              class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
+              placeholder="原本想說點什麼 但想想還是算了"
+              style="resize: none"
+            ></textarea>
+          </div>
+          <div class="flex justify-end">
+            <button
+              @click="addComment"
+              class="mt-2 px-6 py-2 bg-yellow-300 text-black rounded-full hover:bg-yellow-400 focus:outline-none"
+            >
+              送出
+            </button>
           </div>
         </div>
       </div>

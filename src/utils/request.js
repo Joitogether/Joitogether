@@ -3,9 +3,9 @@ import axios from 'axios'
 // import { auth } from './firebaseConfig'
 
 const apiAxios = axios.create({
-  baseURL: 'http://localhost:3030',
+  baseURL: 'https://82f1-2001-b011-3006-5720-da5e-d3ff-fe28-daa2.ngrok-free.app',
   timeout: 1000,
-  headers: { 'X-Custom-Header': 'foobar' },
+  headers: { 'ngrok-skip-browser-warning': '69420' },
 })
 
 apiAxios.interceptors.request.use(

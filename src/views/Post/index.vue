@@ -172,7 +172,7 @@ const handlePostClick = (postId) => {
           :class="{ 'activated-tag': selectedTag === 'travel' }"
           class="text-gray-400 border-transparent text-center pb-1 md:pb-0 border-b-[2px] md: md:rounded-full flex-1 cursor-pointer md:leading-0 leading-9 md:bg-yellow-300 text-base py-1 md:py-0 md:px-4 md:mr-3"
         >
-          旅行
+          旅遊
         </p>
         <p
           @click="handleTagSelect('sports')"
