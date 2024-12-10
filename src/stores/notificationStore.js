@@ -3,9 +3,9 @@ import { ref, computed } from "vue";
 import { userGetNotificationAPI, userUpdateNotificationAPI } from "@/apis/userAPIs";
 
 export const useNotificationStore = defineStore('notification', () => {
-
   const notifications = ref([]) 
-
+  const loadCount = ref(0)
+  const hideLoadBtn = ref(false)
   // 未讀的提醒
   const unreadCount = computed(() => { 
     if(notifications.value.length === 0) {
@@ -20,14 +20,30 @@ export const useNotificationStore = defineStore('notification', () => {
       .map(notification => notification.id)
   })
 
-  const getNotifications = async (uid) => {
-    const response = await userGetNotificationAPI(uid)
-    if(!response || response.length === 0) {
-      return notifications.value = []
+  const getNotifications = async (uid, page, pageSize) => {
+    if(page === 1){
+      loadCount.value = 1
+      hideLoadBtn.value = false
     }
-    notifications.value = response.data.data
+    const response = await userGetNotificationAPI(uid, page, pageSize)
+    if(!response || response.data.length === 0) {
+      notifications.value = []
+      hideLoadBtn.value = true
+      return
+    }
+    notifications.value = response.data
+    loadCount.value++
   }
 
+  const getMoreNotifications = async (uid) => {
+    const response = await userGetNotificationAPI(uid, loadCount.value, 3)
+    if(!response || response.data.length === 0) {
+      hideLoadBtn.value = true
+      return
+    }
+    notifications.value.push(...response.data)
+    loadCount.value++
+  }
 
   const updateNotifications = async (uid, unreadList) => {
    const res = await userUpdateNotificationAPI(uid, unreadList)
@@ -41,6 +57,8 @@ export const useNotificationStore = defineStore('notification', () => {
     unreadCount,
     unreadList,
     getNotifications,
-    updateNotifications
+    updateNotifications,
+    getMoreNotifications,
+    hideLoadBtn
   }
 })

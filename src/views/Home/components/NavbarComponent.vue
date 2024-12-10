@@ -1,6 +1,6 @@
 <script setup>
 import { Search, User, Menu, Sweep3d, BellNotificationSolid } from '@iconoir/vue'
-import { NButton, NDivider, NBadge, NPopover, NScrollbar } from 'naive-ui'
+import { NButton, NDivider, NBadge, NPopover, NScrollbar, NSpin } from 'naive-ui'
 import userInfo from '../../MyProfile/component/person'
 import { RouterLink } from 'vue-router'
 import { useMessage } from 'naive-ui'
@@ -16,9 +16,9 @@ import { storeToRefs } from 'pinia'
 const message = useMessage()
 const userStore = useUserStore()
 const router = useRouter()
-const notificationSotre = useNotificationStore()
-const { notifications, unreadCount, unreadList } = storeToRefs(notificationSotre)
-const {  updateNotifications } = notificationSotre
+const notificationStore = useNotificationStore()
+const { notifications, unreadCount, unreadList } = storeToRefs(notificationStore)
+const {  updateNotifications } = notificationStore
 dayjs.locale('zh-tw') 
 dayjs.extend(relativeTime)
 // 註冊/登入按鈕跳轉
@@ -70,6 +70,12 @@ const handleNotificationScroll = (e) => {
   console.log(e)
 }
 
+const handleLoadClick = async () => {
+  showLoading.value = true
+  await notificationStore.getMoreNotifications(userStore.user.uid)
+  showLoading.value = false
+}
+const showLoading = ref(false)
 </script>
 
 <template>
@@ -194,6 +200,9 @@ const handleNotificationScroll = (e) => {
               
               </router-link>
             </div>
+            <n-spin v-if="!notificationStore.hideLoadBtn" :show="showLoading">
+              <n-button @click="handleLoadClick" class="w-full h-12 mt-2 text-lg font-bold">加載更多</n-button>
+            </n-spin>
           </div>
         </n-scrollbar>
 

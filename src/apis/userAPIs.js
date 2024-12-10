@@ -1,5 +1,4 @@
 import { apiAxios } from '@/utils/request.js'
-import { useId } from 'vue'
 
 export const userRegisterAPI = async (data) => {
   try {
@@ -59,10 +58,11 @@ export const userAuthLoginAPI = async (data) => {
   }
 }
 
-export const userGetNotificationAPI = async (uid) => {
+export const userGetNotificationAPI = async (uid, page, pageSize) => {
   try {
-    const response = await  apiAxios.get(`/users/notifications/${uid}`)
-    return response
+
+    const { data } = await apiAxios.get(`/users/notifications/${uid}`, { params: {  page, pageSize } })
+    return data
   }catch(error){
     if(error){
       return null

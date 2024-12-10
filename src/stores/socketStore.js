@@ -57,7 +57,11 @@ export const useSocketStore = defineStore('socket', () => {
     })
   }
 
-
+  function disconnectSocket () {
+    socket.value.disconnect()
+    isConnected.value = false
+    notifications.value = []
+  }
 
 
 
@@ -68,5 +72,6 @@ export const useSocketStore = defineStore('socket', () => {
     initSocket,
     sendNotification,
     addNotification,
+    disconnectSocket
   }
 })
