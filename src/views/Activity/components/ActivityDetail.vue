@@ -12,7 +12,7 @@ import { useRoute } from 'vue-router';
 import { useUserStore } from '@/stores/userStore';
 import { activityCancelRegisterAPI, activityGetDetailAPI, activityRegisterAPI, activityCancelAPI, activityNewCommentAPI, activityDeleteCommentAPI } from '@/apis/activityApi';
 
-dayjs.locale('zh-tw') 
+dayjs.locale('zh-tw')
 dayjs.extend(relativeTime)
 const route = useRoute()
 const userComment = ref('')
@@ -20,7 +20,7 @@ const registerComment = ref('')
 const activityId = route.params.id
 async function getActivityDetail(){
   const activityDetail = await activityGetDetailAPI(activityId)
-  
+
   // 有資料或null
   if(!activityDetail){
     message.error('獲取活動失敗')
@@ -195,7 +195,7 @@ const onCancelPositiveClick = async () => {
   console.log(res)
   if(res.status !== 200){
     toggleCancelModal()
-    return message.error('取消活動失敗')    
+    return message.error('取消活動失敗')
   }
   await getActivityDetail()
   // 取消活動是不是要改一夏夜面
@@ -342,7 +342,7 @@ const handleDropSelect = async (key, comment_id) => {
             <NInput size="large" show-count="true" maxlength="50" class="bg-transparent aspect-[5/1]" v-model:value="userComment" type="textarea" placeholder="留下你想說的話吧!"></NInput>
             <div class="text-end mt-2">
               <NButton secondary @click="clearComment">取消</NButton>
-              <NButton :disabled="userComment.length == 0" @click="submitComment" type="primary" class="ml-2">留言</NButton> 
+              <NButton :disabled="userComment.length == 0" @click="submitComment" type="primary" class="ml-2">留言</NButton>
             </div>
             <div v-for="comment in comments" :key="comment.comment_id">
               <div class="flex h-full  justify-start  w-full   mt-10">
@@ -363,7 +363,7 @@ const handleDropSelect = async (key, comment_id) => {
               <p class="pl-[66px] pt-2 text-md">{{ comment.user_comment }}</p>
             </div>
           </div>
-     
+
         </div>
       </div>
       <div class="cards-container  px-[2%] ">
@@ -379,10 +379,11 @@ const handleDropSelect = async (key, comment_id) => {
           :dateTime="dayjs(activity.event_time).format('YYYY年MM月DD日')"
           :participants="registerCount"
           :host="activity.hostId"
-          class="mb-[3%]"
+          :imageHeight="'100px'"
+          class="mb-[3%] md:h-[150px]"
         ></ActivityCard>
       </div>
-      <NModal 
+      <NModal
         class="rounded-lg"
         v-model:show="showRegisterModal"
         :auto-focus="false"
@@ -399,7 +400,7 @@ const handleDropSelect = async (key, comment_id) => {
           <NInput :show-count="true" v-model:value="registerComment" :maxlength="50" :clearable="true" type="textarea" placeholder="告訴團主你為什麼想參加吧！"></NInput>
           <template #footer>
             <NButton @click="registerActivity" type="primary" round class="font-bold w-full">報名</NButton>
-            <NButton type="secondary" round class="font-bold mt-2 w-full" @click="toggleRegisterModal">取消</NButton> 
+            <NButton type="secondary" round class="font-bold mt-2 w-full" @click="toggleRegisterModal">取消</NButton>
           </template>
         </n-card>
       </NModal>

@@ -16,8 +16,11 @@ const props = defineProps({
   },
   horizontal: {
     default: false
+  },
+  imageHeight: {
+    type: String,
+    default: '200px' // 預設高度
   }
-
 })
 </script>
 <template>
@@ -27,8 +30,8 @@ const props = defineProps({
       params: {
         id: '123'
     }}" :class="{ ['flex' ] : props.horizontal }">
-      <div :class="{'flex-1' : props.horizontal}">
-          <img :class="{ 'horizontal-layout-img' : true}" class="w-full h-48 object-cover" :src="props.actImgUrl" alt="死圖">
+      <div :class="{'flex-1' : props.horizontal}" class="w-full h-28 md:h-72 overflow-hidden relative" :style="{ height: imageHeight }">
+          <img :class="{ 'horizontal-layout-img' : true}" class="w-full h-full absolute top-0 left-0 object-cover" :src="props.actImgUrl" alt="死圖">
       </div>
       <div :class="{ 'horizontal-layout-container' : props.horizontal}" class="flex flex-col py-[3%] truncate">
           <div class=" text-lg font-semibold mb-2 truncate 	">活動名稱:{{ props.title }}</div>
