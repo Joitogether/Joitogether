@@ -19,102 +19,101 @@ import { onAuthStateChanged } from 'firebase/auth'
 import { auth } from '@/utils/firebaseConfig.js'
 import { useUserStore } from '@/stores/userStore'
 
-
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
-      path: '/login',
-      name: 'login',
-      component: Login,
-    },
-    {
-      path: '/signup-success',
-      name: 'signupSuccess',
-      component: SignupSuccess,
-    },
-    {
-      path: '/forgot-password',
-      name: 'forgotPassword',
-      component: forgotPassword,
-    },
-    {
-      path: '/reset-password',
-      name: 'resetPassword',
-      component: ResetPassword,
-    },
-    {
-      path: '/profile',
-      name: 'profile',
-      component: Profile,
-      redirect: { name: 'personInfo' },
-      children: [
-        {
-          path: 'personInfo',
-          name: 'personInfo',
-          component: PersonInfo,
-        },
-        {
-          path: 'personalrate',
-          name: 'personalrate',
-          component: PersonRate,
-        },
-        {
-          path: 'personpost',
-          name: 'personpost',
-          component: PersonPost,
-        },
-        {
-          path: 'personfollow',
-          name: 'personfollow',
-          component: PersonFollow,
-        },
-        {
-          path: 'personActivity',
-          name: 'personActivity',
-          component: PersonActivity,
-        },
-      ],
-    },
-    {
-      path: '/post',
-      name: 'post',
-      component: Post,
-    },
-    {
       path: '/',
       name: 'home',
       component: Home,
-    },
-    {
-      path: '/activity',
-      name: 'activity',
-      component: Activity,
       children: [
         {
-          path: 'detail/:id',
-          name: 'activityDetail',
-          component: ActivityDetail,
+          path: '/login',
+          name: 'login',
+          component: Login,
         },
         {
-          path: 'create',
-          name: 'activityCreate',
-          component: ActivityCreate,
+          path: '/signup-success',
+          name: 'signupSuccess',
+          component: SignupSuccess,
         },
+        {
+          path: '/forgot-password',
+          name: 'forgotPassword',
+          component: forgotPassword,
+        },
+        {
+          path: '/reset-password',
+          name: 'resetPassword',
+          component: ResetPassword,
+        },
+        {
+          path: '/profile',
+          name: 'profile',
+          component: Profile,
+          redirect: { name: 'personInfo' },
+          children: [
+            {
+              path: 'personInfo',
+              name: 'personInfo',
+              component: PersonInfo,
+            },
+            {
+              path: 'personalrate',
+              name: 'personalrate',
+              component: PersonRate,
+            },
+            {
+              path: 'personpost',
+              name: 'personpost',
+              component: PersonPost,
+            },
+            {
+              path: 'personfollow',
+              name: 'personfollow',
+              component: PersonFollow,
+            },
+            {
+              path: 'personActivity',
+              name: 'personActivity',
+              component: PersonActivity,
+            },
+          ],
+        },
+        {
+          path: '/post',
+          name: 'post',
+          component: Post,
+        },
+        {
+          path: '/activity',
+          name: 'activity',
+          component: Activity,
+          children: [
+            {
+              path: 'detail/:id',
+              name: 'activityDetail',
+              component: ActivityDetail,
+            },
+            {
+              path: 'create',
+              name: 'activityCreate',
+              component: ActivityCreate,
+            },
 
-        {
-          path: 'review/:activity_id',
-          name: 'activityReview',
-          component: ActivityReview,
+            {
+              path: 'review/:activity_id',
+              name: 'activityReview',
+              component: ActivityReview,
+            },
+          ],
         },
       ],
     },
   ],
 })
 
-
-
-router.beforeEach( (to, from, next) => {
+router.beforeEach((to, from, next) => {
   const userStore = useUserStore()
   onAuthStateChanged(auth, (user) => {
     if (user) {
