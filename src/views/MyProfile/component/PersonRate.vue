@@ -1,10 +1,10 @@
 <script setup>
-import { UserGetApi } from '@/apis/UserApi'
+import { UserGetApi } from '@/apis/userAPIs'
 import { reactive, ref, onMounted } from 'vue'
 import { ArrowLeft, Heart, Search, HeartSolid } from '@iconoir/vue'
 import { NProgress, NDropdown, NButton, NRate } from 'naive-ui'
 import { useUserStore } from '@/stores/userStore'
-import { getRatings } from '@/apis/ratingsApi'
+import { getRatingsApi } from '@/apis/userAPIs'
 
 const userStore = useUserStore()
 const loading = ref(true)
@@ -18,7 +18,7 @@ const ratingDistribution = ref([0, 0, 0, 0, 0])
 
 const fetchUserRatings = async () => {
   try {
-    const result = await getRatings(userStore.user.uid)
+    const result = await getRatingsApi(userStore.user.uid)
     console.log('API回傳資料:', result.data)
     userRatings.value = result.data
     // console.log(result.length)

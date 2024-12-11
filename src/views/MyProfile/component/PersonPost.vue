@@ -1,10 +1,10 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { NEllipsis, NDivider } from 'naive-ui'
-import { getPosts } from '@/apis/postsApi'
+import { getPostsApi } from '@/apis/userAPIs'
 import { useUserStore } from '@/stores/userStore'
-import { getPostsComment } from '@/apis/postsApi'
-import { getPostsLike } from '@/apis/postsApi'
+import { getPostsCommentApi } from '@/apis/userAPIs'
+import { getPostsLikeApi } from '@/apis/userAPIs'
 import dayjs from 'dayjs';
 
 
@@ -24,7 +24,7 @@ const fetchUserPosts = async () => {
       return
     }
 
-    const result = await getPosts(userStore.user.uid)
+    const result = await getPostsApi(userStore.user.uid)
 
     if (!result?.data?.length) {
       console.log('該用戶還沒有文章')
@@ -38,8 +38,8 @@ const fetchUserPosts = async () => {
         try {
           // 同時獲取留言和按讚數
           const [commentsResult, likesResult] = await Promise.all([
-            getPostsComment(post.post_id).catch(() => ({ data: [] })),
-            getPostsLike(post.post_id).catch(() => ({ data: [] }))
+            getPostsCommentApi(post.post_id).catch(() => ({ data: [] })),
+            getPostsLikeApi(post.post_id).catch(() => ({ data: [] }))
           ])
 
           return {
