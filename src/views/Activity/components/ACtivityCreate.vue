@@ -7,7 +7,7 @@ import { useAutocomplete } from "@/stores/useAutocomplete";
 import { usePreviewMode } from "@/stores/usePreviewMode";
 import { useMessage } from "naive-ui"
 import dayjs from 'dayjs'
-import { userActivityCreateAPI } from '@/apis/userActivityCreateAPI';
+import { userActivityCreateAPI } from '@/apis/activityApi';
 import { taiwanTime, formatToISOWithTimezone} from '@/stores/useDateTime'
 import { useUserStore } from '@/stores/userStore';
 import { convertMarkdown } from "@/stores/useMarkdown";
@@ -38,6 +38,7 @@ const ActivityDataPush = async () => {
    isSubmitting.value =true;
 
   const hostId = userStore.user.uid;
+  // 組合資料
   const activityData  ={
     name: inputValues.value.name,
     description: inputValues.value.describe,
@@ -52,9 +53,14 @@ const ActivityDataPush = async () => {
     require_approval: inputValues.value.requireApproval ? 1:0,
     host_id:hostId,   //useUid
     status:'registrationOpen',
-  };
+  }
 
- 
+  if (!previewActivity()) {
+    message.error('請先完成所有必填項目！');
+    isSubmitting.value = false;
+    return;
+  }
+
   try {
     const result = await userActivityCreateAPI(selectedFile.value || null, activityData);
     console.log('成功回應:', result);
@@ -231,14 +237,14 @@ const checkPaymentMethod = () => {
 
 const uploadedImage = ref(null)
 const uploadError = ref("")
-const maxFileSize = 1 * 1024 * 1024
+const maxFileSize = 2 * 1024 * 1024
 
 const handleFileUpload = (event) => {
   const file = event.target.files[0];
 
  if(file){
     if (file.size > maxFileSize) {
-      uploadError.value = "檔案大小不可超過 1 MB";
+      uploadError.value = "檔案大小不可超過 2 MB";
       return;
     }
  }
