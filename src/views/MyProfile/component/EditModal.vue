@@ -14,7 +14,7 @@ import {
 } from 'naive-ui'
 import { ArrowLeft, ArrowRight } from '@iconoir/vue'
 import { ref, watch, onMounted } from 'vue'
-import { UserPutApi, UserGetApi } from '../../../apis/UserApi'
+import { UserPutApi, UserGetApi } from '../../../apis/userAPIs'
 import { useUserStore } from '@/stores/userStore'
 import { storage } from '@/utils/firebaseConfig'
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage'

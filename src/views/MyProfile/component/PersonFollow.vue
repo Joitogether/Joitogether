@@ -1,7 +1,7 @@
 <script setup>
 import { onMounted, ref } from 'vue'
 import { NTabs, NTabPane, NSpin } from 'naive-ui'
-import { UserGetFollowerApi, UserGetFollowingApi } from '../../../apis/UserApi'
+import { UserGetFollowerApi, UserGetFollowingApi } from '../../../apis/userAPIs'
 import { useUserStore } from '@/stores/userStore';
 
 const follower = ref(null);
