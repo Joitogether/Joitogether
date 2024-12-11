@@ -4,6 +4,7 @@ import { getAuth, onAuthStateChanged } from 'firebase/auth'
 import { getStorage } from 'firebase/storage'
 import { useSocketStore } from '@/stores/socketStore'
 import { useNotificationStore } from '@/stores/notificationStore'
+import { useUserStore } from '@/stores/userStore'
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -22,15 +23,17 @@ const storage = getStorage(app)
 const getCurrentUser = () => {
   return new Promise((resolve, reject) => {
     onAuthStateChanged(auth, (user) => {
+      const userStore = useUserStore()
       const socketStore = useSocketStore()
       if (user) {
         const notificationStore = useNotificationStore()
-
+        userStore.setUser(user)
         // 登入完就開啟socket去拿通知
         socketStore.initSocket(user.uid)
         notificationStore.getNotifications(user.uid, 1, 5)
       } else {
         socketStore.disconnectSocket()
+        userStore.clearUser()
       }
       resolve(user)
     })

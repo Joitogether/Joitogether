@@ -12,14 +12,8 @@ import { onMounted } from 'vue';
 
 
 onMounted( async () => {
-  const userStore = useUserStore()
-  const user = await getCurrentUser()
-  if(user){
-    console.log('這是app.vue在監控使用者狀態')
-    userStore.setUser(user)
-  }else{
-    userStore.clearUser()
-  }
+  console.log('app在看使用者登入狀態')
+  await getCurrentUser()
 })
 
 </script>
