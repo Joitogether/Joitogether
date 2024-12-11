@@ -104,7 +104,7 @@ export const ActivityComponentApi = async () => {
 }
 
 
-export const ActivityUseApi = async () => {
+export const ActivityUseAPI = async () => {
   try{
     const response =  await apiAxios.get(`/users/`)
     if(response && response.status === 200) {

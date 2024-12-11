@@ -1,6 +1,6 @@
 <script setup>
 import ActivityCard from '@/views/components/ActivityCard.vue';
-import { ActivityComponentApi, ActivityUseApi } from '@/apis/activityAPi.js';
+import { ActivityComponentApi, ActivityUseAPI } from '@/apis/activityAPi.js';
 import {ref, onMounted, computed } from 'vue'
 import { formatToISOWithTimezone } from '@/stores/useDateTime'
 
@@ -59,7 +59,7 @@ const fetchActivitiesAndUsers = async () => {
   try {
     const [activities,users] =await Promise.all([
       ActivityComponentApi(),
-      ActivityUseApi()
+      ActivityUseAPI()
     ]) ;
 
     console.log("API 返回的活動資料:", activities);
