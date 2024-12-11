@@ -1,6 +1,6 @@
 <script setup>
 import { NButton, NSpin } from 'naive-ui'
-import { UserGetApi } from '../../../apis/userAPIs'
+import { userGetAPI } from '../../../apis/userAPIs'
 import { ref } from 'vue'
 import { useUserStore } from '@/stores/userStore'
 
@@ -31,7 +31,7 @@ const showModal = ref(false) // 控制 modal 顯示
 if (userStore.user.isLogin) {
   const fetchUserData = async () => {
     try {
-      const result = await UserGetApi(userStore.user.uid)
+      const result = await userGetAPI(userStore.user.uid)
 
       if (result) {
         user.value = result

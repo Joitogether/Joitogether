@@ -58,7 +58,7 @@ export const userAuthLoginAPI = async (data) => {
   }
 }
 
-export const UserGetApi = async (uid) => {
+export const userGetAPI = async (uid) => {
   try {
     const response = await apiAxios.get(`/users/${uid}`)
 
@@ -70,7 +70,7 @@ export const UserGetApi = async (uid) => {
   }
 }
 
-export const UserGetFollowerApi = async (uid) => {
+export const userGetFollowerAPI = async (uid) => {
   try {
     const response = await apiAxios.get(`/users/userFollowers/${uid}`);
 
@@ -84,7 +84,7 @@ export const UserGetFollowerApi = async (uid) => {
   }
 };
 
-export const UserGetFollowingApi = async (uid) => {
+export const userGetFollowingAPI = async (uid) => {
   try {
     const response = await apiAxios.get(`/users/following/${uid}`);
 
@@ -96,7 +96,7 @@ export const UserGetFollowingApi = async (uid) => {
   }
 };
 
-export const UserGetActivityApi = async (uid) => {
+export const userGetActivityAPI = async (uid) => {
   try {
     const response = await apiAxios.get(`/users/applications/${uid}`);
 
@@ -109,7 +109,7 @@ export const UserGetActivityApi = async (uid) => {
 };
 
 
-export const UserPutApi = async(uid, data) => {
+export const userPutAPI = async(uid, data) => {
   try {
     const response = await apiAxios.put(`/users/update/${uid}`, data)
     return response
@@ -118,7 +118,7 @@ export const UserPutApi = async(uid, data) => {
   }
 }
 
-export const UserPostApi = async (uid, data) => {
+export const userPostAPI = async (uid, data) => {
   try {
     return await apiAxios.post(`/users/register/${uid}`, data)
   } catch (err) {
@@ -126,7 +126,7 @@ export const UserPostApi = async (uid, data) => {
   }
 }
 
-export const getPostsApi = async (uid) => {
+export const getPostsAPI = async (uid) => {
   try {
     const response = await apiAxios.get(`/users/posts/${uid}`)
     return response.data
@@ -136,7 +136,7 @@ export const getPostsApi = async (uid) => {
   }
 }
 
-export const getPostsCommentApi = async (post_id) => {
+export const getPostsCommentAPI = async (post_id) => {
   try {
     const response = await apiAxios.get(`/posts/comments/${post_id}`)
     return response.data
@@ -146,7 +146,7 @@ export const getPostsCommentApi = async (post_id) => {
   }
 }
 
-export const getPostsLikeApi = async (post_id) => {
+export const getPostsLikeAPI = async (post_id) => {
   try {
     const response = await apiAxios.get(`/posts/likes/${post_id}`)
     return response.data
@@ -156,7 +156,7 @@ export const getPostsLikeApi = async (post_id) => {
   }
 }
 
-export const getRatingsApi = async (user_id) => {
+export const getRatingsAPI = async (user_id) => {
   try {
     const response = await apiAxios.get(`/ratings/userDetails/${user_id}`)
     return response.data

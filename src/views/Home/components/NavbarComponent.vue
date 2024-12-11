@@ -4,11 +4,11 @@ import { NButton, NDivider, useMessage } from 'naive-ui'
 import { useUserStore } from '/src/stores/userStore.js'
 import { auth } from '@/utils/firebaseConfig.js'
 import { useRouter, RouterLink } from 'vue-router'
-import { UserGetApi } from '@/apis/userAPIs'
+import { userGetAPI } from '@/apis/userAPIs'
 import { ref, onMounted } from 'vue'
-import { getPostsApi } from '@/apis/userAPIs'
-import { UserGetFollowerApi } from '@/apis/userAPIs'
-import { UserGetActivityApi } from '@/apis/userAPIs';
+import { getPostsAPI } from '@/apis/userAPIs'
+import { userGetFollowerAPI } from '@/apis/userAPIs'
+import { userGetActivityAPI } from '@/apis/userAPIs';
 
 
 const message = useMessage()
@@ -42,7 +42,7 @@ defineProps({
 // 檢查用戶登入狀態並獲取用戶資料
 const fetchUserData = async () => {
   try {
-    const result = await UserGetApi(userStore.user.uid);
+    const result = await userGetAPI(userStore.user.uid);
     if (result) {
       user.value = result;
       loading.value = false;
@@ -54,7 +54,7 @@ const fetchUserData = async () => {
 };
 const getPostCount = async() => {
       try {
-        const result = await getPostsApi(userStore.user.uid).catch(() => ({ data: []}))
+        const result = await getPostsAPI(userStore.user.uid).catch(() => ({ data: []}))
         postNumber.value = result.data.length
       } catch(err) {
         console.log('抓取文章數量發生錯誤',err)
@@ -64,7 +64,7 @@ const getPostCount = async() => {
     }
 const getFollowerCount = async() => {
   try {
-    const result = await UserGetFollowerApi(userStore.user.uid).catch(() => ({ data: []}))
+    const result = await userGetFollowerAPI(userStore.user.uid).catch(() => ({ data: []}))
     followerNumber.value = result.data.length
   } catch(err) {
     console.log('抓取粉絲數量發生錯誤',err)
@@ -74,7 +74,7 @@ const getFollowerCount = async() => {
 }
 const getActivityCount = async() => {
   try{
-    const result = await UserGetActivityApi(userStore.user.uid);
+    const result = await userGetActivityAPI(userStore.user.uid);
     console.log('活動資料：', result);
     console.log(result.length);
 
