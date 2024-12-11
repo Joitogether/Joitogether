@@ -36,7 +36,8 @@ export const useNotificationStore = defineStore('notification', () => {
   }
 
   const getMoreNotifications = async (uid) => {
-    const response = await userGetNotificationAPI(uid, loadCount.value, 3)
+    const additionalSkip = notifications.value.length - 3
+    const response = await userGetNotificationAPI(uid, loadCount.value, 3, additionalSkip)
     if(!response || response.data.length === 0) {
       hideLoadBtn.value = true
       return
