@@ -25,6 +25,7 @@ const getCurrentUser = () => {
     onAuthStateChanged(auth, (user) => {
       const userStore = useUserStore()
       const socketStore = useSocketStore()
+      const notificationStore = useNotificationStore()
       if (user) {
         const notificationStore = useNotificationStore()
         userStore.setUser(user)
@@ -34,6 +35,7 @@ const getCurrentUser = () => {
       } else {
         socketStore.disconnectSocket()
         userStore.clearUser()
+        notificationStore.clearNotifications()
       }
       resolve(user)
     })

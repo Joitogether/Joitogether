@@ -53,6 +53,9 @@ export const useNotificationStore = defineStore('notification', () => {
    }
   }  
 
+  const clearNotifications = () => {
+    notifications.value = []
+  }
   return {
     notifications,
     unreadCount,
@@ -60,6 +63,7 @@ export const useNotificationStore = defineStore('notification', () => {
     getNotifications,
     updateNotifications,
     getMoreNotifications,
-    hideLoadBtn
+    hideLoadBtn,
+    clearNotifications
   }
 })

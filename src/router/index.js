@@ -16,7 +16,6 @@ import SignupSuccess from '@/views/Login/SignupSuccess.vue'
 import ResetPassword from '@/views/Login/ResetPassword.vue'
 import forgotPassword from '@/views/Login/ForgotPassword.vue'
 import { getCurrentUser } from '@/utils/firebaseConfig'
-import { useUserStore } from '@/stores/userStore'
 
 
 const router = createRouter({
@@ -111,7 +110,11 @@ const router = createRouter({
   ],
 })
 
-
+router.beforeEach(async (to, from, next) => {
+  await getCurrentUser()
+  console.log('router觸發了')
+  next()
+})
 
 
 

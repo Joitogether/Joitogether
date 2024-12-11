@@ -58,7 +58,6 @@ const handleNotificationRead = async (value) => {
   showPopover.value = value
   // 關起來的話做檢查
   if(!value){
-    console.log('yes')
     if(unreadList.value.length > 0) {
       // 調用 API 更新未讀的通知狀態
       await updateNotifications(userStore.user.uid, unreadList.value)
@@ -66,9 +65,7 @@ const handleNotificationRead = async (value) => {
 }
 }
 
-const handleNotificationScroll = (e) => {
-  console.log(e)
-}
+
 
 const handleLoadClick = async () => {
   showLoading.value = true
@@ -174,31 +171,37 @@ const showLoading = ref(false)
     </div>
     <!-- 登入/註冊 -->
     <div class="flex items-center">
-      <n-popover :disabled="notifications.length === 0" :on-update:show="handleNotificationRead" placement="bottom-end" :on-clickoutside="() => showPopover = false" class="w-[400px]" style="padding: 10px"  trigger="click" :show="showPopover">
+      <n-popover  :on-update:show="handleNotificationRead" placement="bottom-end" :on-clickoutside="() => showPopover = false" class="w-[400px]" style="padding: 10px"  trigger="click" :show="showPopover">
         <template #trigger>
           <n-badge :max="15"  :value="unreadCount" class="mr-3 cursor-pointer">
             <BellNotificationSolid></BellNotificationSolid>
           </n-badge>
         </template>
-        <n-scrollbar :on-scroll="handleNotificationScroll" style="max-height: 500px">
-          <div class="flex flex-col ">
-            <p class="pl-2 text-xl font-bold">通知</p>
-            <div   v-for="notification in notifications" :key="notification.id" >
-              <router-link :to="notification.link">
-
-                <div :class="{ 'bg-yellow-100' : !notification.is_read}" class="hover:bg-yellow-100 overflow-hidden hover:transition-colors post-onepost-top flex py-2 pl-2 rounded-md items-center	cursor-pointer ">
-                  <img class="w-14 aspect-square rounded-full" :src="notification.users_notifications_actor_idTousers.photo_url" alt="">
-                  <div class="ml-3 relative w-full h-14 ">
-                    <p class="font-bold text-lg absolute top-0"> {{notification.users_notifications_actor_idTousers.display_name }}<span class="pl-1 font-normal">{{ notification.message}}</span> </p>
-                    <p class="absolute bottom-0 w-full text-md truncate">{{dayjs(notification.created_at).fromNow()}}
-                      <span v-if="notification.target_type === 'activity'"  class="pl-1 font-normal text-lg ">{{ notification.target_detail.name }}</span>
-                      <span v-else-if="notification.target_type === 'post'"  class="pl-1 font-normal text-lg ">{{ notification.target_detail.post_title }}</span>
-                      <span v-else-if="notification.target_type === 'rating'"  class="pl-1 font-normal text-lg ">{{ notification.target_detail.user_comment }}</span>
-                    </p>
+        <n-scrollbar  style="max-height: 500px">
+          <div class="flex pl-2 flex-col ">
+            <p class=" text-xl font-bold">通知</p>
+            <div v-if="notifications.length > 0 && userStore.user.uid">
+              <div  v-for="notification in notifications" :key="notification.id" >
+                <router-link :to="notification.link">
+                  <div :class="{ 'bg-yellow-100' : !notification.is_read}" class="hover:bg-yellow-100 overflow-hidden hover:transition-colors post-onepost-top flex py-2  rounded-md items-center	cursor-pointer ">
+                    <img class="w-14 aspect-square rounded-full" :src="notification.users_notifications_actor_idTousers.photo_url" alt="">
+                    <div class="ml-3 relative w-full h-14 ">
+                      <p class="font-bold text-lg absolute top-0"> {{notification.users_notifications_actor_idTousers.display_name }}<span class="pl-1 font-normal">{{ notification.message}}</span> </p>
+                      <p class="absolute bottom-0 w-full text-md truncate">{{dayjs(notification.created_at).fromNow()}}
+                        <span v-if="notification.target_type === 'activity'"  class="pl-1 font-normal text-lg ">{{ notification.target_detail.name }}</span>
+                        <span v-else-if="notification.target_type === 'post'"  class="pl-1 font-normal text-lg ">{{ notification.target_detail.post_title }}</span>
+                        <span v-else-if="notification.target_type === 'rating'"  class="pl-1 font-normal text-lg ">{{ notification.target_detail.user_comment }}</span>
+                      </p>
+                    </div>
                   </div>
-                </div>
-              
-              </router-link>
+                </router-link>
+              </div>
+            </div>
+            <div v-else-if="userStore.user.uid && notifications.length === 0">
+              暫無通知
+            </div>
+            <div v-else>
+              登入以查看通知
             </div>
             <n-spin v-if="!notificationStore.hideLoadBtn" :show="showLoading">
               <n-button @click="handleLoadClick" class="w-full h-12 mt-2 text-lg font-bold">加載更多</n-button>
