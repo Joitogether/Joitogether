@@ -10,7 +10,7 @@ export const getPosts = async (uid) => {
   }
 }
 
-export const getPostsComment = async (post_id) => {
+export const getPostsCommentAPI = async (post_id) => {
   try {
     const response = await apiAxios.get(`/posts/comments/${post_id}`)
     return response.data
@@ -20,7 +20,7 @@ export const getPostsComment = async (post_id) => {
   }
 }
 
-export const getPostsLike = async (post_id) => {
+export const getPostsLikeAPI = async (post_id) => {
   try {
     const response = await apiAxios.get(`/posts/likes/${post_id}`)
     return response.data

@@ -3,19 +3,17 @@ import { ref, onMounted } from 'vue'
 import { NEllipsis, NDivider } from 'naive-ui'
 import { getPosts } from '@/apis/postsApi'
 import { useUserStore } from '@/stores/userStore'
-import { getPostsComment } from '@/apis/postsApi'
-import { getPostsLike } from '@/apis/postsApi'
-import dayjs from 'dayjs';
-
-
+import { getPostsCommentAPI } from '@/apis/postsApi'
+import { getPostsLikeAPI } from '@/apis/postsApi'
+import dayjs from 'dayjs'
 
 const userStore = useUserStore()
 const loading = ref(true)
 const errorMessage = ref(null)
 const userPostList = ref([])
 const formatDate = (dateString) => {
-  return dayjs(dateString).format('YYYY-MM-DD HH:mm');
-};
+  return dayjs(dateString).format('YYYY-MM-DD HH:mm')
+}
 
 const fetchUserPosts = async () => {
   try {
@@ -38,24 +36,24 @@ const fetchUserPosts = async () => {
         try {
           // 同時獲取留言和按讚數
           const [commentsResult, likesResult] = await Promise.all([
-            getPostsComment(post.post_id).catch(() => ({ data: [] })),
-            getPostsLike(post.post_id).catch(() => ({ data: [] }))
+            getPostsCommentAPI(post.post_id).catch(() => ({ data: [] })),
+            getPostsLikeAPI(post.post_id).catch(() => ({ data: [] })),
           ])
 
           return {
             ...post,
             commentCount: commentsResult.data.length,
-            likeCount: likesResult.data.length
+            likeCount: likesResult.data.length,
           }
         } catch (postError) {
           console.error(`處理貼文 ${post.post_id} 時出錯:`, postError)
           return {
             ...post,
             commentCount: 0,
-            likeCount: 0
+            likeCount: 0,
           }
         }
-      })
+      }),
     )
 
     // 更新貼文列表
@@ -114,6 +112,4 @@ onMounted(() => {
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
-
-
 </style>

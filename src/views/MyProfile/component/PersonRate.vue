@@ -5,15 +5,12 @@ import { ArrowLeft, Heart, Search, HeartSolid } from '@iconoir/vue'
 import { NProgress, NDropdown, NButton, NRate } from 'naive-ui'
 import { useUserStore } from '@/stores/userStore'
 import { getRatings } from '@/apis/ratingsApi'
-
+import { computed } from 'vue'
 const userStore = useUserStore()
 const loading = ref(true)
 const errorMessage = ref(null)
 const userRatings = ref([])
 const averageRating = ref(0)
-const kindnessAverageRating = ref('')
-const abilityAverageRating = ref('')
-const creditAverageRating = ref('')
 const ratingDistribution = ref([0, 0, 0, 0, 0])
 
 const fetchUserRatings = async () => {
@@ -34,30 +31,38 @@ const fetchUserRatings = async () => {
     } else {
       averageRating.value = 0
     }
-    if (result.data.length > 0) {
-      const total = result.data.reduce((sum, rating) => sum + rating.rating_kindness, 0)
-      kindnessAverageRating.value = parseFloat(total / result.data.length).toFixed(1)
-    } else {
-      kindnessAverageRating.value = 0
-    }
-    if (result.data.length > 0) {
-      const total = result.data.reduce((sum, rating) => sum + rating.rating_ability, 0)
-      abilityAverageRating.value = parseFloat(total / result.data.length).toFixed(1)
-    } else {
-      abilityAverageRating.value = 0
-    }
-    if (result.data.length > 0) {
-      const total = result.data.reduce((sum, rating) => sum + rating.rating_credit, 0)
-      creditAverageRating.value = parseFloat(total / result.data.length).toFixed(1)
-    } else {
-      creditAverageRating.value = 0
-    }
     // console.log('平均 rating_heart:', average.toFixed(2))
   } catch (err) {
     errorMessage.value = err.message || '資料加載錯誤'
     loading.value = false
   }
 }
+
+const kindnessAverageRating = computed(() => {
+  if (userRatings.value.length > 0) {
+    const total = userRatings.value.reduce((sum, rating) => sum + rating.rating_kindness, 0)
+    return parseFloat(total / userRatings.value.length).toFixed(1)
+  } else {
+    return 0
+  }
+})
+
+const abilityAverageRating = computed(() => {
+  if (userRatings.value.length > 0) {
+    const total = userRatings.value.reduce((sum, rating) => sum + rating.rating_ability, 0)
+    return parseFloat(total / userRatings.value.length).toFixed(1)
+  } else {
+    abilityAverageRating.value = 0
+  }
+})
+const creditAverageRating = computed(() => {
+  if (result.data.length > 0) {
+    const total = userRatings.value.reduce((sum, rating) => sum + rating.rating_credit, 0)
+    return parseFloat(total / userRatings.value.length).toFixed(1)
+  } else {
+    creditAverageRating.value = 0
+  }
+})
 
 onMounted(() => {
   fetchUserRatings()
@@ -141,6 +146,7 @@ onMounted(() => {
               <div class="flex justify-between w-full">
                 <div>親切度</div>
                 <div>{{ kindnessAverageRating }}</div>
+                <div>{{ kindnessAverageRating1 }}</div>
               </div>
             </div>
             <div class="flex border-b-4 my-4">
