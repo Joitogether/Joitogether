@@ -1,12 +1,12 @@
 import { defineStore } from "pinia";
 import { io } from "socket.io-client";
 import { ref } from "vue";
+import { useNotificationStore } from "./notificationStore";
 
 export const useSocketStore = defineStore('socket', () => {
   let socket = ref(null)
   const isConnected = ref(false)
-  const notifications =  ref([])
-
+  const notificationStore = useNotificationStore()
 
   const initSocket = (userId) => {
     // 如果有先前連線，刪除先前連線
@@ -50,11 +50,8 @@ export const useSocketStore = defineStore('socket', () => {
   }
 
   function addNotification(notification) {
-    notifications.value.unshift({
-      ...notification,
-      id: Date.now(), // 臨時ID
-      isRead: false
-    })
+    notificationStore.notifications.unshift(notification)
+
   }
 
   function disconnectSocket () {
@@ -62,7 +59,7 @@ export const useSocketStore = defineStore('socket', () => {
       socket.value.disconnect()
     }
     isConnected.value = false
-    notifications.value = []
+    notificationStore.clearNotifications()
   }
 
 
@@ -70,7 +67,6 @@ export const useSocketStore = defineStore('socket', () => {
   return {
     socket,
     isConnected,
-    notifications,
     initSocket,
     sendNotification,
     addNotification,
