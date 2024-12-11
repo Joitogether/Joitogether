@@ -58,10 +58,10 @@ export const userAuthLoginAPI = async (data) => {
   }
 }
 
-export const userGetNotificationAPI = async (uid, page, pageSize) => {
+export const userGetNotificationAPI = async (uid, page, pageSize, additionalSkip) => {
   try {
 
-    const { data } = await apiAxios.get(`/users/notifications/${uid}`, { params: {  page, pageSize } })
+    const { data } = await apiAxios.get(`/users/notifications/${uid}`, { params: {  page, pageSize, additionalSkip } })
     return data
   }catch(error){
     if(error){
