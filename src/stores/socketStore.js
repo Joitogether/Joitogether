@@ -2,12 +2,13 @@ import { defineStore } from "pinia";
 import { io } from "socket.io-client";
 import { ref } from "vue";
 import { useNotificationStore } from "./notificationStore";
+import { useUserStore } from "./userStore";
 
 export const useSocketStore = defineStore('socket', () => {
   let socket = ref(null)
   const isConnected = ref(false)
   const notificationStore = useNotificationStore()
-
+  const userStore = useUserStore()
   const initSocket = (userId) => {
     // 如果有先前連線，刪除先前連線
     if(socket.value){
@@ -44,6 +45,9 @@ export const useSocketStore = defineStore('socket', () => {
 
   // 發送通知的方法
   function sendNotification(data) {
+    if(data.user_id === userStore.user.uid){
+      return
+    } 
     if (socket.value && isConnected.value) {
       socket.value.emit('sendNotification', data)
     }
