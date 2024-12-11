@@ -58,7 +58,9 @@ export const useSocketStore = defineStore('socket', () => {
   }
 
   function disconnectSocket () {
-    socket.value.disconnect()
+    if(socket.value){
+      socket.value.disconnect()
+    }
     isConnected.value = false
     notifications.value = []
   }

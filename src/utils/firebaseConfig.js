@@ -29,11 +29,10 @@ const getCurrentUser = () => {
         // 登入完就開啟socket去拿通知
         socketStore.initSocket(user.uid)
         notificationStore.getNotifications(user.uid, 1, 5)
-        resolve(user)
       } else {
         socketStore.disconnectSocket()
-        reject()
       }
+      resolve(user)
     })
   })
 
