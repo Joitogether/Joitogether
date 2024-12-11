@@ -1,10 +1,10 @@
 import { apiAxios } from '@/utils/request'
 
 // 新增按讚
-export const addLike = async (postId, userId) => {
+export const addLike = async (postId, uid) => {
   try {
     const response = await apiAxios.post(`/posts/like/${postId}`, {
-      user_id: uid,
+      uid,
     })
     console.log('新增按讚成功', response.data)
     return response.data
@@ -33,7 +33,7 @@ export const deleteLike = async (likeId) => {
     console.log('取消按讚成功', response.data)
     return response.data
   } catch (error) {
-    console.error('取消按讚失敗:', error)
+    console.error('取消按讚失敗:', error.response.data)
     throw error
   }
 }

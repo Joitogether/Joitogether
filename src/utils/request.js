@@ -3,10 +3,15 @@ import axios from 'axios'
 // import { auth } from './firebaseConfig'
 
 const apiAxios = axios.create({
-  baseURL: 'https://82f1-2001-b011-3006-5720-da5e-d3ff-fe28-daa2.ngrok-free.app',
+  baseURL: 'http://localhost:3030',
   timeout: 1000,
-  headers: { 'ngrok-skip-browser-warning': '69420' },
 })
+
+// const apiAxios = axios.create({
+//   baseURL: 'https://main-vervet-sincerely.ngrok-free.app',
+//   timeout: 1000,
+//   headers: { 'ngrok-skip-browser-warning': '69420' },
+// })
 
 apiAxios.interceptors.request.use(
   async function (config) {

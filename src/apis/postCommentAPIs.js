@@ -3,6 +3,7 @@ import { apiAxios } from '@/utils/request'
 // 新增留言
 export const createPostComment = async (postId, commentData) => {
   try {
+    console.log(commentData)
     const response = await apiAxios.post(`/posts/comment/${postId}`, commentData)
     return response.data
   } catch (error) {
