@@ -7,27 +7,41 @@ import { useAutocomplete } from '@/stores/useAutocomplete'
 import { usePreviewMode } from '@/stores/usePreviewMode'
 import { useMessage } from 'naive-ui'
 import dayjs from 'dayjs'
-import { userActivityCreateAPI } from '@/apis/userActivityCreateAPI'
-import { taiwanTime, formatToISOWithTimezone } from '@/stores/useDateTime'
-import { useUserStore } from '@/stores/userStore'
-import { convertMarkdown } from '@/stores/useMarkdown'
+import { activityUserCreateAPI } from '@/apis/activityApi.js';
+import { taiwanTime, formatToISOWithTimezone} from '@/stores/useDateTime'
+import { useUserStore } from '@/stores/userStore';
+import { convertMarkdown } from "@/stores/useMarkdown";
+import { UserGetApi } from '@/apis/userAPIs'
 
-const apiKey = import.meta.env.VITE_GOOGLE_KEY
-const {
-  searchQuery,
-  suggestions,
-  initializeAutocomplete,
-  triggerInputChange,
-  isLoading: loadingState,
-  isLoadOK: loadStateOK,
-} = useAutocomplete(apiKey)
-const { map, previewMap } = useGoogleMaps(apiKey)
-const { isPreviewMode, enterPreviewMode, exitPreviewMode } = usePreviewMode(previewMap, map)
-const { minTime, maxTime } = taiwanTime()
-const selectedFile = ref(null)
-const isSubmitting = ref(false) // 控制按鈕狀態
-const router = useRouter()
-const userStore = useUserStore()
+
+
+const apiKey = import.meta.env.VITE_GOOGLE_KEY;
+const { searchQuery, suggestions, initializeAutocomplete, triggerInputChange,isLoading:loadingState ,isLoadOK: loadStateOK } = useAutocomplete(apiKey);
+const { map, previewMap } = useGoogleMaps(apiKey);
+const { isPreviewMode, enterPreviewMode, exitPreviewMode } = usePreviewMode(previewMap, map);
+const { minTime, maxTime } = taiwanTime();
+const selectedFile  = ref(null);
+const isSubmitting = ref(false); // 控制按鈕狀態
+const router = useRouter();
+const userStore = useUserStore();
+const user =ref(null)
+
+
+if (userStore.user.isLogin) {
+  const fetchUserData = async () => {
+    try {
+      const result = await UserGetApi(userStore.user.uid)
+
+      if (result) {
+        user.value = result
+        return user.value
+      }
+    } catch (err) {
+    }
+  }
+  fetchUserData()
+}
+  
 
 const markdownPreview = computed(() => convertMarkdown(inputValues.value.describe))
 
@@ -39,28 +53,35 @@ const ActivityDataPush = async () => {
   if (isSubmitting.value) return
   isSubmitting.value = true
 
-  const hostId = userStore.user.uid
-  const activityData = {
+  const hostId = userStore.user.uid;
+  // 組合資料
+  const activityData  ={
     name: inputValues.value.name,
     description: inputValues.value.describe,
     event_time: isoEventTime.value, // **
     approval_deadline: isoDeadLine.value || null, // **
     max_participants: participants.value,
-    min_participants: 1 || null,
+    min_participants: 1 ,
     pay_type: paymentMethod.value,
     price: eventCost.value,
-    location: searchQuery.value || null,
-    category: inputValues.value.category || null,
-    require_approval: inputValues.value.requireApproval ? 1 : 0,
-    host_id: hostId, //useUid
-    status: 'registrationOpen',
+    location: searchQuery.value ||null,
+    category: inputValues.value.category ||null,
+    require_approval: inputValues.value.requireApproval ? 1:0,
+    host_id:hostId,   //useUid
+    status:'registrationOpen',
+  }
+
+  if (!previewActivity()) {
+    message.error('請先完成所有必填項目！');
+    isSubmitting.value = false;
+    return;
   }
 
   try {
-    const result = await userActivityCreateAPI(selectedFile.value || null, activityData)
-    console.log('成功回應:', result)
-    // 成功後導向首頁
-    router.replace('/')
+    const result = await activityUserCreateAPI(selectedFile.value || null, activityData);
+    console.log('成功回應:', result);
+     // 成功後導向首頁
+     router.replace('/');
   } catch (err) {
     console.error('錯誤回應:', err)
   } finally {
@@ -222,16 +243,16 @@ const checkPaymentMethod = () => {
 }
 
 const uploadedImage = ref(null)
-const uploadError = ref('')
-const maxFileSize = 1 * 1024 * 1024
+const uploadError = ref("")
+const maxFileSize = 2 * 1024 * 1024
 
 const handleFileUpload = (event) => {
   const file = event.target.files[0]
 
   if (file) {
     if (file.size > maxFileSize) {
-      uploadError.value = '檔案大小不可超過 1 MB'
-      return
+      uploadError.value = "檔案大小不可超過 2 MB";
+      return;
     }
   }
   uploadError.value = ''
@@ -562,82 +583,71 @@ const previewActivity = () => {
                 </p>
               </div>
 
-              <!-- 類型與費用 -->
-              <div class="grid grid-cols-1 gap-4">
-                <div>
-                  <label class="block font-medium mb-2 text-base"
-                    >活動類型 <span class="text-red-600">*</span></label
-                  >
-                  <select
-                    class="w-full p-3 border rounded-md text-base"
-                    v-model="inputValues.category"
-                    @blur="checkInput('category')"
-                  >
-                    <option value="" disabled selected>請選擇聚會類型</option>
-                    <option value="food">美食</option>
-                    <option value="shopping">購物</option>
-                    <option value="travel">旅遊</option>
-                    <option value="sports">運動</option>
-                    <option value="education">教育</option>
-                    <option value="others">其他</option>
-                  </select>
-                  <p class="text-sm text-red-600" v-if="userNotEnter.category">請選擇活動類型*</p>
-                </div>
-                <div>
-                  <label class="block font-medium mb-2"
-                    >付款方式 <span class="text-red-600">*</span></label
-                  >
-                  <select
-                    class="w-full p-3 border rounded-md text-base"
-                    v-model="paymentMethod"
-                    @change="checkPaymentMethod"
-                  >
-                    <option value="free">免費</option>
-                    <option value="AA">各付各的</option>
-                    <option value="host">團主請客</option>
-                  </select>
-                </div>
-                <div class="mb-6 grid grid-cols-2" v-if="showEventCost">
-                  <label class="block font-medium mb-2 p-2"
-                    >活動費用<span class="text-red-600">*</span></label
-                  >
-                  <input
-                    type="number"
-                    class="w-full p-3 border-b border-solid rounded-md focus:outline-none"
-                    v-model="eventCost"
-                    @input="eventCostInput"
-                    min="0"
-                    max="99999"
-                  />
-                  <p class="text-sm text-red-600" v-if="eventCostError">{{ eventCostError }} *</p>
-                </div>
-              </div>
-              <div class="my-6 flex items-center justify-center">
-                <button
-                  class="bg-yellow-200 rounded-md w-full mx-3 py-2 px-3 hover:bg-yellow-100"
-                  @click="handlePreviewClick"
-                >
-                  預覽活動
-                </button>
-              </div>
-            </div>
+        <!-- 類型與費用 -->
+      <div class="grid grid-cols-1 gap-4">
+          <div>
+          <label class="block  font-medium mb-2  text-base">活動類型 <span class="text-red-600">*</span></label>
+          <select  class="w-full p-3 border rounded-md  text-base"
+              v-model="inputValues.category"
+              @blur="checkInput('category')"
+              >
+              <option value="" disabled selected>請選擇聚會類型</option>
+              <option value="food">美食</option>
+              <option value="shopping">購物</option>
+              <option value="travel">旅遊</option>
+              <option value="sports">運動</option>
+              <option value="education">教育</option>
+              <option value="others">其他</option>
+          </select>
+          <p class="text-sm text-red-600"
+          v-if="userNotEnter.category"
+          >請選擇活動類型*</p>
           </div>
-          <!-- 活動預覽區 -->
-          <div v-else>
-            <h3 class="font-semibold text-lg mb-2 p-3">活動預覽</h3>
-            <div class="bg-white rounded-lg p-5 mb-3">
-              <!-- activityDetail.vue -->
-              <div class="flex h-full justify-start ml-[5%] w-full">
-                <img
-                  class="w-14 aspect-square rounded-full"
-                  src="/src/assets/UserUpdata1.jpg"
-                  alt=""
-                />
-                <div class="ml-3 relative w-full h-14">
-                  <p class="font-bold text-lg absolute top-0">Justin</p>
-                  <p class="absolute bottom-0">新北市 • 45 • 員工</p>
-                </div>
-              </div>
+          <div>
+          <label class="block  font-medium mb-2">付款方式 <span class="text-red-600">*</span></label>
+          <select  class="w-full p-3 border rounded-md  text-base"
+          v-model="paymentMethod"
+          @change="checkPaymentMethod"
+          >
+              <option value="free">免費</option>
+              <option value="AA">各付各的</option>
+              <option value="host">團主請客</option>
+          </select>
+          </div>
+            <div class="mb-6 grid grid-cols-2 "
+            v-if="showEventCost"
+            >
+              <label class="block  font-medium mb-2 p-2">活動費用<span class="text-red-600">*</span></label>
+              <input type="number"  class="w-full p-3  border-b border-solid rounded-md  focus:outline-none"
+              v-model="eventCost"
+              @input="eventCostInput"
+              min="0"
+              max="99999"
+              />
+              <p class="text-sm text-red-600"
+              v-if="eventCostError"
+              >{{ eventCostError }} *</p>
+            </div>
+        </div>
+        <div class="my-6 flex items-center justify-center ">
+          <button class=" bg-yellow-200 rounded-md  w-full mx-3 py-2 px-3 hover:bg-yellow-100"
+          @click="handlePreviewClick"
+          >預覽活動</button>
+        </div>
+      </div>
+      </div>
+      <!-- 活動預覽區 -->
+      <div v-else>
+        <h3 class="font-semibold text-lg mb-2 p-3">活動預覽</h3>
+        <div class="bg-white rounded-lg p-5 mb-3 ">
+          <!-- activityDetail.vue -->
+          <div class="flex h-full  justify-start ml-[5%] w-full">
+          <img class="w-14 aspect-square rounded-full" :src='user.photo_url' alt="">
+          <div class="ml-3 relative w-full h-14">
+            <p class="font-bold text-lg absolute top-0">{{user.display_name}}</p>
+            <p class="absolute bottom-0">{{ user.city  }} • {{ user.age }} • {{ user.career}}</p>
+          </div>
+        </div>
 
               <div class="aspect-square overflow-hidden rounded-md p-4">
                 <img class="w-full h-full object-cover rounded-md" :src="uploadedImage" alt="" />

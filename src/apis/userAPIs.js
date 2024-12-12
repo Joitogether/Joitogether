@@ -165,3 +165,26 @@ export const getRatingsAPI = async (user_id) => {
     throw error
   }
 }
+export const userGetNotificationAPI = async (uid, page, pageSize, additionalSkip) => {
+  try {
+
+    const { data } = await apiAxios.get(`/users/notifications/${uid}`, { params: {  page, pageSize, additionalSkip } })
+    return data
+  }catch(error){
+    if(error){
+      return null
+    }
+  }
+}
+
+
+export const userUpdateNotificationAPI = async (uid, unreadList) => {
+  try{
+    const response = await apiAxios.put(`/users/notifications/${uid}`, { unreadList})
+    return response
+  }catch(error){
+    if(error){
+      return null
+    }
+  }
+}
