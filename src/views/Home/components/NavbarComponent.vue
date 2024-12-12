@@ -30,6 +30,7 @@ const loading = ref(true);
 const postNumber = ref(null)
 const followerNumber = ref(null)
 const activityNumber = ref(null)
+const userLogin = ref(false); //檢查登入
 
 defineProps({
   items: {
@@ -55,10 +56,12 @@ const fetchUserData = async () => {
     if (result) {
       user.value = result;
       loading.value = false;
+      userLogin.value = true;
     }
   } catch (err) {
     message.error('載入用戶資料錯誤');
     loading.value = false;
+    userLogin.value = false
   }
 };
 const getPostCount = async() => {
@@ -292,7 +295,7 @@ const showLoading = ref(false)
 
       </n-popover>
       <div class="hidden md:flex min-w-20 items-center">登入/註冊</div>
-      <div class="hidden md:flex min-w-20 items-center" v-if="isUserLoggedIn">
+      <div class="hidden md:flex min-w-20 items-center" v-if="userLogin">
         <router-link :to="{ name: 'activityCreate' }">
           <button>活動創建</button>
         </router-link>

@@ -12,7 +12,6 @@ import { watch, ref, onMounted } from 'vue'
 const userStore = useUserStore()
 const message = useMessage()
 // 活動創建是否顯示
-const activityCreate = ref(false)
 
 // 判斷當前登入狀態彈窗顯示不同信息
 // 初始化完成標誌
@@ -45,19 +44,17 @@ watch(
         // message.success('🎉 歡迎回來～開心見到您！✨')
         message.success(`歡迎回來 ${userStore.user.displayName} 🎉`)
           // 活動創建顯示
-          activityCreate.value = true;
       } else {
         // 未登入提示
         message.warning('😵 您尚未登入，部分功能可能無法使用喔！💔')
         // 活動創建顯示
-        activityCreate.value = false;
       }
     }
   },
 )
 </script>
 <template>
-  <NavbarComponent :isUserLoggedIn="activityCreate"/>
+  <NavbarComponent/>
   <BannerComponent></BannerComponent>
   <PostComponent />
   <ActivityComponent />
