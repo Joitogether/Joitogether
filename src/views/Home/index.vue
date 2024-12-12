@@ -11,6 +11,8 @@ import { watch, ref, onMounted } from 'vue'
 // 初始化區域
 const userStore = useUserStore()
 const message = useMessage()
+// 活動創建是否顯示
+const activityCreate = ref(false)
 
 // 判斷當前登入狀態彈窗顯示不同信息
 // 初始化完成標誌
@@ -30,6 +32,8 @@ onMounted(() => {
     // 初始化時登入提示
     // message.success('🎉 歡迎回來～很高興見到您！✨')
     message.success(`歡迎回來 ${userStore.user.displayName}，很高興見到您！🎉`)
+    // 活動創建顯示
+    activityCreate.value = true;
   } else {
     // 初始化時未登入提示
     message.warning('😵 您尚未登入，部分功能可能無法使用喔！💔')
@@ -53,16 +57,20 @@ watch(
         // 登入提示
         // message.success('🎉 歡迎回來～開心見到您！✨')
         message.success(`歡迎回來 ${userStore.user.displayName} 🎉`)
+          // 活動創建顯示
+          activityCreate.value = true;
       } else {
         // 未登入提示
         message.warning('😵 您尚未登入，部分功能可能無法使用喔！💔')
+        // 活動創建顯示
+        activityCreate.value = false;
       }
     }
   },
 )
 </script>
 <template>
-  <NavbarComponent />
+  <NavbarComponent :isUserLoggedIn="activityCreate"/>
   <BannerComponent></BannerComponent>
   <PostComponent />
   <ActivityComponent />

@@ -1,5 +1,5 @@
 <script setup>
-import { UserGetApi } from '../../../apis/UserApi'
+import { UserGetApi } from '../../../apis/userAPIs'
 import { ref, onMounted } from 'vue'
 import { NSpin } from 'naive-ui'
 import { useUserStore } from '@/stores/userStore'

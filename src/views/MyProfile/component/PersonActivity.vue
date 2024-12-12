@@ -1,7 +1,7 @@
 <script setup>
 import { onMounted, ref } from 'vue';
 import { NEllipsis } from 'naive-ui';
-import { UserGetActivityApi } from '@/apis/UserApi';
+import { UserGetActivityApi } from '@/apis/userAPIs';
 import { useUserStore } from '@/stores/userStore';
 import dayjs from 'dayjs';
 

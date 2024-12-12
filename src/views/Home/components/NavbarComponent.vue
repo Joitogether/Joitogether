@@ -1,14 +1,14 @@
 <script setup>
-import { Search, User, Menu, Sweep3d } from '@iconoir/vue'
+import { Search, User, Menu, Sweep3d, Activity } from '@iconoir/vue'
 import { NButton, NDivider, useMessage } from 'naive-ui'
 import { useUserStore } from '/src/stores/userStore.js'
 import { auth } from '@/utils/firebaseConfig.js'
 import { useRouter, RouterLink } from 'vue-router'
-import { UserGetApi } from '@/apis/UserApi'
+import { UserGetApi } from '@/apis/userAPIs'
 import { ref, onMounted } from 'vue'
-import { getPosts } from '@/apis/postsApi'
-import { UserGetFollowerApi } from '@/apis/UserApi'
-import { UserGetActivityApi } from '@/apis/UserApi';
+import { getPostsApi } from '@/apis/userAPIs'
+import { UserGetFollowerApi } from '@/apis/userAPIs'
+import { UserGetActivityApi } from '@/apis/userAPIs';
 
 
 const message = useMessage()
@@ -54,7 +54,7 @@ const fetchUserData = async () => {
 };
 const getPostCount = async() => {
       try {
-        const result = await getPosts(userStore.user.uid).catch(() => ({ data: []}))
+        const result = await getPostsApi(userStore.user.uid).catch(() => ({ data: []}))
         postNumber.value = result.data.length
       } catch(err) {
         console.log('抓取文章數量發生錯誤',err)
@@ -218,6 +218,12 @@ const handleLogout = async () => {
     </div>
     <!-- 登入/註冊 -->
     <div class="flex">
+      <div class="hidden md:flex min-w-20 items-center">登入/註冊</div>
+      <div class="hidden md:flex min-w-20 items-center" v-if="isUserLoggedIn">
+        <router-link :to="{ name: 'activityCreate' }">
+          <button>活動創建</button>
+        </router-link>
+      </div>
       <input type="checkbox" id="login-toggle" class="hidden" />
       <label
         for="login-toggle"

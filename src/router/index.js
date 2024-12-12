@@ -19,10 +19,14 @@ import { onAuthStateChanged } from 'firebase/auth'
 import { auth } from '@/utils/firebaseConfig.js'
 import { useUserStore } from '@/stores/userStore'
 
-
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
+    {
+      path: '/',
+      name: 'home',
+      component: Home,
+    },
     {
       path: '/login',
       name: 'login',
@@ -82,11 +86,6 @@ const router = createRouter({
       component: Post,
     },
     {
-      path: '/',
-      name: 'home',
-      component: Home,
-    },
-    {
       path: '/activity',
       name: 'activity',
       component: Activity,
@@ -103,7 +102,7 @@ const router = createRouter({
         },
 
         {
-          path: 'review',
+          path: 'review/:activity_id',
           name: 'activityReview',
           component: ActivityReview,
         },
@@ -112,9 +111,7 @@ const router = createRouter({
   ],
 })
 
-
-
-router.beforeEach( (to, from, next) => {
+router.beforeEach((to, from, next) => {
   const userStore = useUserStore()
   onAuthStateChanged(auth, (user) => {
     if (user) {
@@ -122,6 +119,7 @@ router.beforeEach( (to, from, next) => {
       next()
     } else {
       // next('/login')
+      console.log('尚未登入')
       userStore.clearUser()
       next()
     }

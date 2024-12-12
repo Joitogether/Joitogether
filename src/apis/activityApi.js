@@ -28,6 +28,14 @@ export const activityGetDetailAPI = async (activityId) => {
   }
 }
 
+export const activityCancelAPI = async (activityId) => {
+  try {
+    return await apiAxios.put(`/activities/cancel/${activityId}`)
+  } catch (err) {
+    return err.response.data
+  }
+}
+
 export const activityGetAPI = async () => {
   try {
     const response = await apiAxios.get(`/activities`)
@@ -40,14 +48,6 @@ export const activityGetAPI = async () => {
   }
 }
 
-export const activityCancelAPI = async (activityId) => {
-  try {
-    return await apiAxios.put(`/activities/cancel/${activityId}`)
-  } catch (err) {
-    return err.response.data
-  }
-}
-
 export const activityNewCommentAPI = async (activity_id, data) => {
   try {
     return await apiAxios.post(`/activities/comment/${activity_id}`, data)
@@ -56,6 +56,8 @@ export const activityNewCommentAPI = async (activity_id, data) => {
   }
 }
 
+
+
 export const activityDeleteCommentAPI = async (comment_id) => {
   try {
     return await apiAxios.delete(`/activities/comment/${comment_id}`)
@@ -63,3 +65,26 @@ export const activityDeleteCommentAPI = async (comment_id) => {
     return err.response.data
   }
 }
+
+export const ActivityGetApplicationsAPI = async (activity_id) => {
+  return await apiAxios.get(`/applications/${activity_id}`)
+}
+
+export const ActivityGetActivitiesAPI = async (activity_id) => {
+  return await apiAxios.get(`/activities/${activity_id}`)
+}
+
+export const ActivityReviewApplicationsAPI = async (application_id, status) => {
+  try {
+    const res = await apiAxios.put(
+      `/applications/verify/${application_id}`,
+      { status },
+      { headers: { 'Content-Type': 'application/json' } },
+    )
+    return res
+  } catch (err) {
+    console.error('審核失敗:', err.response?.data || err.message)
+    throw err
+  }
+}
+

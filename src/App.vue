@@ -16,13 +16,15 @@ onAuthStateChanged(auth, (user) => {
     userStore.clearUser()
   }
 })
+
+
 </script>
 
 <template>
   <n-config-provider>
     <n-dialog-provider>
       <n-message-provider>
-      <RouterView />
+        <router-view />
       </n-message-provider>
     </n-dialog-provider>
   </n-config-provider>
