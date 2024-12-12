@@ -3,8 +3,8 @@ import { ref, onMounted } from 'vue'
 import { NEllipsis, NDivider } from 'naive-ui'
 import { getPostsAPI } from '@/apis/userAPIs'
 import { useUserStore } from '@/stores/userStore'
-import { getPostsCommentAPI } from '@/apis/postsApi'
-import { getPostsLikeAPI } from '@/apis/postsApi'
+import { getPostsCommentAPI } from '@/apis/userAPIs'
+import { getPostsLikeAPI } from '@/apis/userAPIs'
 import dayjs from 'dayjs'
 
 const userStore = useUserStore()

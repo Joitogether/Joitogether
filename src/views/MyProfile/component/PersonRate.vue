@@ -4,7 +4,7 @@ import { reactive, ref, onMounted } from 'vue'
 import { ArrowLeft, Heart, Search, HeartSolid } from '@iconoir/vue'
 import { NProgress, NDropdown, NButton, NRate } from 'naive-ui'
 import { useUserStore } from '@/stores/userStore'
-import { getRatings } from '@/apis/ratingsApi'
+import { getRatingsAPI } from '@/apis/userAPIs'
 import { computed } from 'vue'
 const userStore = useUserStore()
 const loading = ref(true)
@@ -19,13 +19,13 @@ const fetchUserRatings = async () => {
     console.log('API回傳資料:', result.data)
     userRatings.value = result.data
     // console.log(result.length)
-    if (result.data.length > 0) {
-      const total = result.data.reduce((sum, rating) => sum + rating.rating_heart, 0)
-      averageRating.value = parseFloat(total / result.data.length).toFixed(1)
+    if (userRatings.value.length > 0) {
+      const total = userRatings.value.reduce((sum, rating) => sum + rating.rating_heart, 0)
+      averageRating.value = parseFloat(total / userRatings.value.length).toFixed(1)
       const counts = [0, 0, 0, 0, 0]
-      result.data.forEach((rating) => {
+      userRatings.value.forEach((rating) => {
         counts[rating.rating_heart - 1] += 1
-        const totalRatings = result.data.length
+        const totalRatings = userRatings.value.length
         ratingDistribution.value = counts.map((count) => (count / totalRatings) * 100)
       })
     } else {
@@ -56,7 +56,7 @@ const abilityAverageRating = computed(() => {
   }
 })
 const creditAverageRating = computed(() => {
-  if (result.data.length > 0) {
+  if (userRatings.value.length > 0) {
     const total = userRatings.value.reduce((sum, rating) => sum + rating.rating_credit, 0)
     return parseFloat(total / userRatings.value.length).toFixed(1)
   } else {
