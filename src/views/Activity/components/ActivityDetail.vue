@@ -11,6 +11,7 @@ import router from '@/router';
 import { useRoute } from 'vue-router';
 import { useUserStore } from '@/stores/userStore';
 import { activityCancelRegisterAPI, activityGetDetailAPI, activityRegisterAPI, activityCancelAPI, activityNewCommentAPI, activityDeleteCommentAPI } from '@/apis/activityApi';
+import { useSocketStore } from '@/stores/socketStore';
 
 dayjs.locale('zh-tw')
 dayjs.extend(relativeTime)
@@ -27,14 +28,16 @@ async function getActivityDetail(){
     // 這裡應該要針對沒有拿到id的狀態處理
     return
   }
+
   activity.value = activityDetail
   host.value = activityDetail.host_id
   comments.value = activityDetail.comments
 }
 
+
 const userStore = useUserStore()
 const message = useMessage()
-
+const socketStore = useSocketStore()
 
 import { useGoogleMaps } from "@/stores/useGoogleMaps";
 const apiKey = import.meta.env.VITE_GOOGLE_KEY;
@@ -97,7 +100,6 @@ const clearComment = () => {
 const comments = ref({
   uid: 'zm5skjX4z7WTal4x6m7f6Ae0zzE2',
   user_comment: '一起去吧!',
-  uid: 'zm5skjX4z7WTal4x6m7f6Ae0zzE2',
   photo_url: 'https://via.placeholder.com/150',
   display_name: '小明123',
 })
@@ -120,7 +122,6 @@ const registerActivity = async () => {
 
   const res = await activityRegisterAPI(activityId, data)
   if(res.status !== 201){
-    console.log(res)
     message.error('報名失敗')
     toggleRegisterModal()
     return
@@ -128,6 +129,18 @@ const registerActivity = async () => {
   await getActivityDetail()
   //報名成功
   message.success('報名成功！')
+  const notiData = {
+    actor_id: userStore.user.uid,
+    user_id: activity.value.host_id,
+    target_id: activity.value.id,
+    action: 'register',
+    target_type: 'activity',
+    message: '報名了你的活動',
+    link: `/activity/detail/${activity.value.id}`
+  }
+
+  socketStore.sendNotification(notiData)
+  
   toggleRegisterModal()
 }
 // 根據活動判斷當前使用者是否為主辦者
@@ -159,7 +172,6 @@ const onNegativeClick = () => {
 // 取消報名
 const onPositiveClick = async() => {
     const res = await activityCancelRegisterAPI(activity.value.id, userStore.user.uid)
-    console.log(res)
     if(res.status != 200){
       toggleConfirmModal()
       return message.error('取消報名失敗')
@@ -192,7 +204,6 @@ const onCancelNegativeClick = () => {
 
 const onCancelPositiveClick = async () => {
   const res = await activityCancelAPI(activity.value.id)
-  console.log(res)
   if(res.status !== 200){
     toggleCancelModal()
     return message.error('取消活動失敗')
@@ -215,6 +226,15 @@ const submitComment = async () => {
   }
   await getActivityDetail()
   message.success('新增留言成功')
+  socketStore.sendNotification({
+    actor_id: userStore.user.uid,
+    user_id: activity.value.host_id,
+    target_id: activity.value.id,
+    action: 'comment',
+    target_type: 'activity',
+    message: '在你的活動新增了留言',
+    link: `/activity/detail/${activity.value.id}`
+  })
   clearComment()
 }
 
@@ -339,7 +359,7 @@ const handleDropSelect = async (key, comment_id) => {
             <span class="block mt-10 mb-2 text-lg">留言</span>
           </div>
           <div class="comment-section border-b border-gray-300 pb-4" >
-            <NInput size="large" show-count="true" maxlength="50" class="bg-transparent aspect-[5/1]" v-model:value="userComment" type="textarea" placeholder="留下你想說的話吧!"></NInput>
+            <NInput :autosize="{ minRows: 3, maxRows: 5 }" size="large" show-count="true" maxlength="50" class="bg-transparent aspect-[5/1]" v-model:value="userComment" type="textarea" placeholder="留下你想說的話吧!"></NInput>
             <div class="text-end mt-2">
               <NButton secondary @click="clearComment">取消</NButton>
               <NButton :disabled="userComment.length == 0" @click="submitComment" type="primary" class="ml-2">留言</NButton>
@@ -352,10 +372,10 @@ const handleDropSelect = async (key, comment_id) => {
                   <p class="absolute bottom-0 text-md">{{`${comment.location} • ${comment.age} • ${comment.career}`}}</p>
                   <p class="absolute bottom-0 text-sm right-0">{{ dayjs(comment.created_at).fromNow() }}</p>
                 </div>
-                <n-dropdown :on-select="(key) => handleDropSelect(key, comment.comment_id)" :options="options" placement="bottom" trigger="hover">
+                <n-dropdown :disabled="comment.uid !== userStore.user.uid" :on-select="(key) => handleDropSelect(key, comment.comment_id)" :options="options" placement="bottom" trigger="hover">
                   <n-button class="self-start" text>
                     <n-icon  size="20">
-                      <MoreVert  ></MoreVert>
+                      <MoreVert ></MoreVert>
                     </n-icon>
                   </n-button>
                 </n-dropdown>
@@ -397,7 +417,7 @@ const handleDropSelect = async (key, comment_id) => {
           aria-modal="true"
         >
 
-          <NInput :show-count="true" v-model:value="registerComment" :maxlength="50" :clearable="true" type="textarea" placeholder="告訴團主你為什麼想參加吧！"></NInput>
+          <NInput :autosize="{ minRows: 3, maxRows: 5 }" :show-count="true" v-model:value="registerComment" :maxlength="50" :clearable="true" type="textarea" placeholder="告訴團主你為什麼想參加吧！"></NInput>
           <template #footer>
             <NButton @click="registerActivity" type="primary" round class="font-bold w-full">報名</NButton>
             <NButton type="secondary" round class="font-bold mt-2 w-full" @click="toggleRegisterModal">取消</NButton>
@@ -415,6 +435,7 @@ const handleDropSelect = async (key, comment_id) => {
   margin: 0 auto;
   width: 85%;
 }
+
 
 
 @media screen and (width > 768px) {

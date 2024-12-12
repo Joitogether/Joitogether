@@ -262,7 +262,7 @@ import {
   useMessage,
   NModal,
 } from 'naive-ui'
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { storage } from '../../utils/firebaseConfig.js'
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage'
@@ -271,7 +271,6 @@ import registerUser from './services/registerService.js'
 import { validateFormFields } from './utils/formValidation.js'
 import loginUser from './services/loginService.js'
 import { useUserStore } from '/src/stores/userStore.js'
-import firebase from 'firebase/compat/app'
 import { getAuth, sendEmailVerification } from 'firebase/auth'
 
 // 初始化區域

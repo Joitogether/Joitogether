@@ -10,14 +10,12 @@ import PersonRate from '@/views/MyProfile/component/PersonRate.vue'
 import PersonFollow from '@/views/MyProfile/component/PersonFollow.vue'
 import Activity from '@/views/Activity/index.vue'
 import ActivityDetail from '@/views/Activity/components/ActivityDetail.vue'
-import ActivityCreate from '@/views/Activity/components/ActivityCreate.vue'
+import ActivityCreate from '@/views/Activity/components/ACtivityCreate.vue'
 import ActivityReview from '@/views/Activity/components/ActivityReview.vue'
 import SignupSuccess from '@/views/Login/SignupSuccess.vue'
 import ResetPassword from '@/views/Login/ResetPassword.vue'
 import forgotPassword from '@/views/Login/ForgotPassword.vue'
-import { onAuthStateChanged } from 'firebase/auth'
-import { auth } from '@/utils/firebaseConfig.js'
-import { useUserStore } from '@/stores/userStore'
+import { getCurrentUser } from '@/utils/firebaseConfig'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -111,19 +109,12 @@ const router = createRouter({
   ],
 })
 
-router.beforeEach((to, from, next) => {
-  const userStore = useUserStore()
-  onAuthStateChanged(auth, (user) => {
-    if (user) {
-      userStore.setUser(user)
-      next()
-    } else {
-      // next('/login')
-      console.log('尚未登入')
-      userStore.clearUser()
-      next()
-    }
-  })
+router.beforeEach(async (to, from, next) => {
+  await getCurrentUser()
+  console.log('router觸發了')
+  next()
 })
+
+
 
 export default router
