@@ -176,6 +176,7 @@ onMounted(() => {
                     :date-time="item.dateTime"
                     :participants="item.participants"
                     :host="item.user"
+                    :id="item.id"
                 ></ActivityCard>
             </div>
         </div>
