@@ -207,12 +207,10 @@ const handleLogout = async () => {
             class="block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-black dark:hover:text-white">
             活動中心</a>
         </li>
-        <li>
-          <a
-            href="#"
+        <li
             class="block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-black dark:hover:text-white">
-            儲值中心</a
-          >
+            <RouterLink to="/topup">儲值中心</RouterLink>
+
         </li>
       </ul>
     </div>
