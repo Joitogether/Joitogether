@@ -11,6 +11,8 @@ import {
   NInputNumber,
   NDynamicTags,
   NSelect,
+  useDialog,
+  useMessage
 } from 'naive-ui'
 import { ArrowLeft, ArrowRight } from '@iconoir/vue'
 import { ref, watch, onMounted } from 'vue'
@@ -27,6 +29,8 @@ const loading = ref(true)
 const tagsArray = ref([])
 const fileListSec = ref([])
 const fileListAva = ref([])
+const message = useMessage();
+const dialog = useDialog();
 
 const cityOptions = [
   { label: '基隆市', value: '基隆市' },
@@ -298,14 +302,27 @@ const handleSave = () => {
       console.error('資料保存錯誤:', error)
     })
 }
-const warning = () => {
-  alert('警告: 是否確認改天再填?')
+const handleConfirm = () => {
+  dialog.warning({
+    title: "確定下次再填嗎？",
+    content: "本次修改資料將不被保存喔！",
+    positiveText: "确定肯定一定",
+    negativeText: "好啦繼續填",
+    onPositiveClick: () => {
+      emit('close')
+      message.info("等你下次回來");
+      showModal.value = false
+    },
+    onNegativeClick: () => {
+      message.success("請繼續～～～");
+      showModal.value = true
+    }
+  });
 
-  console.log('警告提示已顯示')
 }
-const close = () => {
-  emit('close')
-}
+// const close = () => {
+//   emit('close')
+// }
 
 // 用來關閉視窗的函數
 const closeModal = () => {
@@ -464,7 +481,7 @@ const emit = defineEmits(['close', 'save'])
             </div>
           </div>
           <div class="save flex gap-3 justify-end">
-            <n-button tertiary @click="warning() ; close()">改天再填</n-button>
+            <n-button tertiary @click="handleConfirm() ; close()">改天再填</n-button>
             <n-button strong secondary type="primary" @click="handleSave">填好啦！</n-button>
           </div>
         </div>
