@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import {} from 'naive-ui'
-import { HomePostGetUserAPI } from '@/apis/postApi.js'
+import { HomePostGetPostAuthorAPI } from '@/apis/postApi.js'
 const currentPage = ref(1)
 const nextPage = () => {
   if (currentPage.value >= 5) {
@@ -16,7 +16,18 @@ const previousPage = () => {
   currentPage.value--
 }
 const posts = ref([])
-
+const formatDate = (isoString) => {
+  const date = new Date(isoString)
+  return date.toLocaleString('zh-TW', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false,
+  })
+}
 // const posts = ref([
 //   {
 //     id: 1,
@@ -27,46 +38,10 @@ const posts = ref([])
 //     likes: 20,
 //     comments: 5,
 //   },
-//   {
-//     id: 2,
-//     title: '文章標題 2',
-//     content: '內文內容 2',
-//     author: '發文者 2',
-//     date: '2024-11-17',
-//     likes: 15,
-//     comments: 10,
-//   },
-//   {
-//     id: 3,
-//     title: '文章標題 3',
-//     content: '內文內容 3',
-//     author: '發文者 3',
-//     date: '2024-11-18',
-//     likes: 10,
-//     comments: 8,
-//   },
-//   {
-//     id: 4,
-//     title: '文章標題 4',
-//     content: '內文內容 4',
-//     author: '發文者 4',
-//     date: '2024-11-19',
-//     likes: 30,
-//     comments: 12,
-//   },
-//   {
-//     id: 5,
-//     title: '文章標題 5',
-//     content: '內文內容 5',
-//     author: '發文者 5',
-//     date: '2024-11-20',
-//     likes: 25,
-//     comments: 6,
-//   },
-// ])
+
 // 從 API 獲取資料
 const fetchPosts = async () => {
-  const apiResponse = await HomePostGetUserAPI()
+  const apiResponse = await HomePostGetPostAuthorAPI()
   if (apiResponse) {
     posts.value = apiResponse.data.slice(0, 3) // 假設回傳的資料是 { data: [...] }
   } else {
@@ -121,14 +96,15 @@ const changePage = (page) => {
               class="object-cover w-full h-full"
             />
           </div>
-          <p class="ml-5 text-sm"></p>
+
+          <p class="ml-5 text-sm">{{ item.uid }}</p>
         </div>
         <div class="one-post-bottom mt-2.5 px-6 bg-white rounded-2xl pb-4 cursor-pointer">
           <div
             class="post-bottom-top flex h-[180px] border-b-[1px] border-solid border-[rgba(61,57,44,0.1)]"
           >
             <div class="post-bottom-left w-52 leading-loose">
-              <p class="text-slate-300 text-sm h-8 mt-6">2024-11-16 23:59</p>
+              <p class="text-slate-300 text-sm h-8 mt-6">{{ formatDate(item.created_at) }}</p>
               <h3 class="text-xl font-bold">{{ item.post_title }}</h3>
               <p class="post_content text-[16px]">
                 {{ item.post_content }}
