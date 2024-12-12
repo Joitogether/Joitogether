@@ -11,6 +11,8 @@ import { activityUserCreateAPI } from '@/apis/activityApi';
 import { taiwanTime, formatToISOWithTimezone} from '@/stores/useDateTime'
 import { useUserStore } from '@/stores/userStore';
 import { convertMarkdown } from "@/stores/useMarkdown";
+import { UserGetApi } from '../../../apis/UserApi'
+
 
 
 
@@ -23,7 +25,27 @@ const selectedFile  = ref(null);
 const isSubmitting = ref(false); // 控制按鈕狀態
 const router = useRouter();
 const userStore = useUserStore();
+const user =ref(null)
 
+
+if (userStore.user.isLogin) {
+  const fetchUserData = async () => {
+    try {
+      const result = await UserGetApi(userStore.user.uid)
+
+      if (result) {
+        user.value = result
+        loading.value = false
+        return user.value
+      }
+    } catch (err) {
+      errorMessage.value = err.message || '資料加載錯誤'
+      loading.value = false
+    }
+  }
+  fetchUserData()
+}
+  
 
 const markdownPreview = computed(() => convertMarkdown(inputValues.value.describe));
 
@@ -620,10 +642,10 @@ const previewActivity = () => {
         <div class="bg-white rounded-lg p-5 mb-3 ">
           <!-- activityDetail.vue -->
           <div class="flex h-full  justify-start ml-[5%] w-full">
-          <img class="w-14 aspect-square rounded-full" src="/src/assets/UserUpdata1.jpg" alt="">
+          <img class="w-14 aspect-square rounded-full" :src='user.photo_url' alt="">
           <div class="ml-3 relative w-full h-14">
-            <p class="font-bold text-lg absolute top-0">Justin</p>
-            <p class="absolute bottom-0">新北市 • 45 • 員工</p>
+            <p class="font-bold text-lg absolute top-0">{{user.display_name}}</p>
+            <p class="absolute bottom-0">{{ user.city  }} • {{ user.age }} • {{ user.career}}</p>
           </div>
         </div>
 
