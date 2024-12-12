@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { NEllipsis, NDivider } from 'naive-ui'
-import { getPostsApi } from '@/apis/userAPIs'
+import { getPostsAPI } from '@/apis/userAPIs'
 import { useUserStore } from '@/stores/userStore'
 import { getPostsCommentAPI } from '@/apis/postsApi'
 import { getPostsLikeAPI } from '@/apis/postsApi'
@@ -22,7 +22,7 @@ const fetchUserPosts = async () => {
       return
     }
 
-    const result = await getPostsApi(userStore.user.uid)
+    const result = await getPostsAPI(userStore.user.uid)
 
     if (!result?.data?.length) {
       console.log('該用戶還沒有文章')

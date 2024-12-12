@@ -14,7 +14,7 @@ import {
 } from 'naive-ui'
 import { ArrowLeft, ArrowRight } from '@iconoir/vue'
 import { ref, watch, onMounted } from 'vue'
-import { UserPutApi, UserGetApi } from '../../../apis/userAPIs'
+import { userPutAPI, userGetAPI } from '../../../apis/userAPIs'
 import { useUserStore } from '@/stores/userStore'
 import { storage } from '@/utils/firebaseConfig'
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage'
@@ -70,7 +70,7 @@ const zodiacOptions = [
 
 const fetchUserData = async () => {
   try {
-    const result = await UserGetApi(userStore.user.uid)
+    const result = await userGetAPI(userStore.user.uid)
     if (result) {
       user.value = result
       if (user.value.tags) {
@@ -286,7 +286,7 @@ const openModal = () => {
 }
 
 const handleSave = () => {
-  UserPutApi(userStore.user.uid, user.value)
+  userPutAPI(userStore.user.uid, user.value)
     .then((response) => {
       console.log('保存成功:', response)
       console.log('更新後的資料:', user.value)

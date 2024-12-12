@@ -1,7 +1,7 @@
 <script setup>
 import { onMounted, ref } from 'vue'
 import { NTabs, NTabPane, NSpin } from 'naive-ui'
-import { UserGetFollowerApi, UserGetFollowingApi } from '../../../apis/userAPIs'
+import { userGetFollowerAPI, userGetFollowingAPI } from '../../../apis/userAPIs'
 import { useUserStore } from '@/stores/userStore';
 
 const follower = ref(null);
@@ -15,7 +15,7 @@ const followingList = ref([])
 
 const fetchFollowerData = async () => {
   try {
-    const result = await UserGetFollowerApi(userStore.user.uid)
+    const result = await userGetFollowerAPI(userStore.user.uid)
     if (result) {
       follower.value = result.data
 
@@ -36,7 +36,7 @@ const fetchFollowerData = async () => {
 
 const fetchFollowingData = async () => {
   try {
-    const result = await UserGetFollowingApi(userStore.user.uid);
+    const result = await userGetFollowingAPI(userStore.user.uid);
 
     if (result) {
       following.value = result.data

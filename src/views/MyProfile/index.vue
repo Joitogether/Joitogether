@@ -5,7 +5,7 @@ import { RouterLink, RouterView } from 'vue-router'
 import CardList from './component/CardList.vue'
 import EditModal from './component/EditModal.vue'
 import NavbarComponent from '../Home/components/NavbarComponent.vue'
-
+import { userGetAPI } from '@/apis/userAPIs'
 
 const user = ref(null)
 const loading = ref(true)
@@ -13,7 +13,7 @@ const errorMessage = ref(null)
 
 const fetchUserData = async () => {
   try {
-    const result = await UserGetApi(userUid)
+    const result = await userGetAPI(userUid)
     console.log('API回傳資料:', result)
 
     if (result) {
