@@ -22,13 +22,13 @@ const storage = getStorage(app)
 
 const getCurrentUser = () => {
   return new Promise((resolve, reject) => {
-    onAuthStateChanged(auth, (user) => {
+    onAuthStateChanged(auth, async (user) => {
       const userStore = useUserStore()
       const socketStore = useSocketStore()
       const notificationStore = useNotificationStore()
       if (user) {
         const notificationStore = useNotificationStore()
-        userStore.setUser(user)
+        await userStore.getUser(user.uid)
         // 登入完就開啟socket去拿通知
         socketStore.initSocket(user.uid)
         notificationStore.getNotifications(user.uid, 1, 5)

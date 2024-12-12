@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { auth } from '@/utils/firebaseConfig.js'
+import { userGetAPI } from '@/apis/userAPIs'
 // import axios from 'axios'
 
 export const useUserStore = defineStore('user', {
@@ -14,31 +15,10 @@ export const useUserStore = defineStore('user', {
     },
   }),
   actions: {
-    // 初始化 Firebase 狀態監聽
-    // async initAuthState(callback) {
-    //   onAuthStateChanged(auth, (firebaseUser) => {
-    //     if (firebaseUser) {
-    //       console.log('Firebase 檢測到用戶已登入：', firebaseUser)
-
-    //       // 更新 user 狀態
-    //       this.user = {
-    //         uid: firebaseUser.uid,
-    //         email: firebaseUser.email,
-    //         emailVerified: firebaseUser.emailVerified,
-    //         displayName: firebaseUser.displayName || '使用者',
-    //         photoURL: firebaseUser.photoURL || '',
-    //         isLogin: true,
-    //       }
-    //     } else {
-    //       console.log('Firebase 檢測到用戶未登入')
-    //       this.clearUser() // 清空用戶狀態
-    //     }
-
-    //     // 初始化完成後執行回調
-    //     if (callback) callback()
-    //   })
-    // },
-
+    async getUser(uid){
+      const user =  await userGetAPI(uid)
+      this.setUser(user)
+    },
     // 設定用戶資料
     setUser(user) {
       this.user = {
