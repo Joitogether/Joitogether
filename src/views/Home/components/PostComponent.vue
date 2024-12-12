@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import {} from 'naive-ui'
-import { HomePostGetPostAuthorAPI } from '@/apis/postApi.js'
+import { userPostAPI, getPostsAPI, getAllPostAPI } from '@/apis/userAPIs'
 const currentPage = ref(1)
 const nextPage = () => {
   if (currentPage.value >= 5) {
@@ -15,7 +15,26 @@ const previousPage = () => {
   }
   currentPage.value--
 }
-const posts = ref([])
+const posts = ref([]) // 用來抓貼文
+const users = ref([]) // 用來抓使用者資料
+
+const fetchPosts = async () => {
+  try {
+    const response = await getAllPostAPI()
+    if (response && response.status === 200) {
+      posts.value = response.data
+      console.log('fetchPosts Success', response.data)
+    } else {
+      console.log('fetchPosts失敗')
+    }
+  } catch (err) {
+    console.error('fetchPosts沒有抓到資料', err)
+  }
+}
+onMounted(() => {
+  fetchPosts()
+})
+
 const formatDate = (isoString) => {
   const date = new Date(isoString)
   return date.toLocaleString('zh-TW', {
@@ -40,19 +59,7 @@ const formatDate = (isoString) => {
 //   },
 
 // 從 API 獲取資料
-const fetchPosts = async () => {
-  const apiResponse = await HomePostGetPostAuthorAPI()
-  if (apiResponse) {
-    posts.value = apiResponse.data.slice(0, 3) // 假設回傳的資料是 { data: [...] }
-  } else {
-    console.error('無法獲取貼文資料')
-  }
-}
 
-// 在組件加載時調用 fetchPosts
-onMounted(() => {
-  fetchPosts()
-})
 const postsPerPage = 3
 const totalPages = computed(() => Math.ceil(posts.value.length / postsPerPage))
 // 當前頁的貼文
