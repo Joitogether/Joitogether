@@ -1,9 +1,7 @@
 <script setup>
-import NaveBar from '@/views/Home/components/NavbarComponent.vue'
 import PostList from './component/PostList.vue'
 </script>
 <template>
-  <NaveBar/>
   <div class="postsArea">
     <div class="post-label-area flex py-7 border-b-[1px] border-solid border-[rgba(61,57,44,0.1)]">
       <div class="rounded-full cursor-pointer bg-yellow-300 text-base py-1 px-4 mr-4">最新</div>
