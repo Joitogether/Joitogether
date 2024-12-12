@@ -7,12 +7,11 @@ import { useAutocomplete } from '@/stores/useAutocomplete'
 import { usePreviewMode } from '@/stores/usePreviewMode'
 import { useMessage } from 'naive-ui'
 import dayjs from 'dayjs'
-import { activityUserCreateAPI } from '@/apis/activityApi';
+import { activityUserCreateAPI } from '@/apis/activityApi.js';
 import { taiwanTime, formatToISOWithTimezone} from '@/stores/useDateTime'
 import { useUserStore } from '@/stores/userStore';
 import { convertMarkdown } from "@/stores/useMarkdown";
-import { UserGetApi } from '../../../apis/UserApi'
-
+import { UserGetApi } from '@/apis/userAPIs'
 
 
 
