@@ -26,87 +26,85 @@ const router = createRouter({
       path: '/',
       name: 'home',
       component: Home,
+    },
+    {
+      path: '/login',
+      name: 'login',
+      component: Login,
+    },
+    {
+      path: '/signup-success',
+      name: 'signupSuccess',
+      component: SignupSuccess,
+    },
+    {
+      path: '/forgot-password',
+      name: 'forgotPassword',
+      component: forgotPassword,
+    },
+    {
+      path: '/reset-password',
+      name: 'resetPassword',
+      component: ResetPassword,
+    },
+    {
+      path: '/profile',
+      name: 'profile',
+      component: Profile,
+      redirect: { name: 'personInfo' },
       children: [
         {
-          path: '/login',
-          name: 'login',
-          component: Login,
+          path: 'personInfo',
+          name: 'personInfo',
+          component: PersonInfo,
         },
         {
-          path: '/signup-success',
-          name: 'signupSuccess',
-          component: SignupSuccess,
+          path: 'personalrate',
+          name: 'personalrate',
+          component: PersonRate,
         },
         {
-          path: '/forgot-password',
-          name: 'forgotPassword',
-          component: forgotPassword,
+          path: 'personpost',
+          name: 'personpost',
+          component: PersonPost,
         },
         {
-          path: '/reset-password',
-          name: 'resetPassword',
-          component: ResetPassword,
+          path: 'personfollow',
+          name: 'personfollow',
+          component: PersonFollow,
         },
         {
-          path: '/profile',
-          name: 'profile',
-          component: Profile,
-          redirect: { name: 'personInfo' },
-          children: [
-            {
-              path: 'personInfo',
-              name: 'personInfo',
-              component: PersonInfo,
-            },
-            {
-              path: 'personalrate',
-              name: 'personalrate',
-              component: PersonRate,
-            },
-            {
-              path: 'personpost',
-              name: 'personpost',
-              component: PersonPost,
-            },
-            {
-              path: 'personfollow',
-              name: 'personfollow',
-              component: PersonFollow,
-            },
-            {
-              path: 'personActivity',
-              name: 'personActivity',
-              component: PersonActivity,
-            },
-          ],
+          path: 'personActivity',
+          name: 'personActivity',
+          component: PersonActivity,
+        },
+      ],
+    },
+    {
+      path: '/post',
+      name: 'post',
+      component: Post,
+    },
+    {
+      path: '/activity',
+      name: 'activity',
+      component: Activity,
+      children: [
+        {
+          path: 'detail/:id',
+          name: 'activityDetail',
+          component: ActivityDetail,
         },
         {
-          path: '/post',
-          name: 'post',
-          component: Post,
+          path: 'create',
+          name: 'activityCreate',
+          component: ActivityCreate,
         },
-        {
-          path: '/activity',
-          name: 'activity',
-          component: Activity,
-          children: [
-            {
-              path: 'detail/:id',
-              name: 'activityDetail',
-              component: ActivityDetail,
-            },
-            {
-              path: 'create',
-              name: 'activityCreate',
-              component: ActivityCreate,
-            },
 
-            {
-              path: 'review/:activity_id',
-              name: 'activityReview',
-              component: ActivityReview,
-            },
-          ],
+        {
+          path: 'review/:activity_id',
+          name: 'activityReview',
+          component: ActivityReview,
         },
       ],
     },
