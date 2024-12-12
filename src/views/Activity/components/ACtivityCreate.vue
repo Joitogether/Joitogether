@@ -7,7 +7,7 @@ import { useAutocomplete } from "@/stores/useAutocomplete";
 import { usePreviewMode } from "@/stores/usePreviewMode";
 import { useMessage } from "naive-ui"
 import dayjs from 'dayjs'
-import { userActivityCreateAPI } from '@/apis/activityApi';
+import { activityUserCreateAPI } from '@/apis/activityApi';
 import { taiwanTime, formatToISOWithTimezone} from '@/stores/useDateTime'
 import { useUserStore } from '@/stores/userStore';
 import { convertMarkdown } from "@/stores/useMarkdown";
@@ -62,7 +62,7 @@ const ActivityDataPush = async () => {
   }
 
   try {
-    const result = await userActivityCreateAPI(selectedFile.value || null, activityData);
+    const result = await activityUserCreateAPI(selectedFile.value || null, activityData);
     console.log('成功回應:', result);
      // 成功後導向首頁
      router.replace('/');

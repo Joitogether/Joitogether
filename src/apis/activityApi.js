@@ -92,7 +92,7 @@ export const ActivityReviewApplicationsAPI = async (application_id, status) => {
 }
 
 
-export const ActivityComponentApi = async () => {
+export const activityGetAllAPI = async () => {
   try{
     const response =  await apiAxios.get(`/activities/`)
     if(response && response.status === 200) {
@@ -104,7 +104,7 @@ export const ActivityComponentApi = async () => {
 }
 
 
-export const ActivityUseAPI = async () => {
+export const activityGetUsersAPI = async () => {
   try{
     const response =  await apiAxios.get(`/users/`)
     if(response && response.status === 200) {
@@ -116,7 +116,7 @@ export const ActivityUseAPI = async () => {
 }
 
 
-export const userActivityCreateAPI = async (file, otherData) => {
+export const activityUserCreateAPI = async (file, otherData) => {
   try {
     const storage = getStorage();
     let imgUrl;
