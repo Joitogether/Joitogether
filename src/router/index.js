@@ -15,6 +15,7 @@ import ActivityReview from '@/views/Activity/components/ActivityReview.vue'
 import SignupSuccess from '@/views/Login/SignupSuccess.vue'
 import ResetPassword from '@/views/Login/ResetPassword.vue'
 import forgotPassword from '@/views/Login/ForgotPassword.vue'
+import TopUp from '@/views/TopUp/index.vue'
 import { onAuthStateChanged } from 'firebase/auth'
 import { auth } from '@/utils/firebaseConfig.js'
 import { useUserStore } from '@/stores/userStore'
@@ -107,6 +108,11 @@ const router = createRouter({
           component: ActivityReview,
         },
       ],
+    },
+    {
+      path:'/topup',
+      name: 'topup',
+      component: TopUp
     },
   ],
 })
