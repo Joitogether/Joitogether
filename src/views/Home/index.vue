@@ -3,7 +3,6 @@ import BannerComponent from './components/BannerComponent.vue'
 import FooterComponent from './components/FooterComponent.vue'
 import PostComponent from './components/PostComponent.vue'
 import ActivityComponent from './components/ActivityComponent.vue'
-import NavbarComponent from './components/NavbarComponent.vue'
 import { useUserStore } from '/src/stores/userStore.js'
 import { useMessage } from 'naive-ui'
 import { watch, ref, onMounted } from 'vue'
@@ -54,7 +53,6 @@ watch(
 )
 </script>
 <template>
-  <NavbarComponent/>
   <BannerComponent></BannerComponent>
   <PostComponent />
   <ActivityComponent />

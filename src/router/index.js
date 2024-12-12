@@ -16,6 +16,7 @@ import SignupSuccess from '@/views/Login/SignupSuccess.vue'
 import ResetPassword from '@/views/Login/ResetPassword.vue'
 import forgotPassword from '@/views/Login/ForgotPassword.vue'
 import { getCurrentUser } from '@/utils/firebaseConfig'
+import Layout from '@/views/Layout/index.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -46,66 +47,80 @@ const router = createRouter({
       component: ResetPassword,
     },
     {
-      path: '/profile',
-      name: 'profile',
-      component: Profile,
-      redirect: { name: 'personInfo' },
+      path: '/',
+      name: 'layout',
+      component: Layout,
+      redirect: { name: 'home'},
       children: [
         {
-          path: 'personInfo',
-          name: 'personInfo',
-          component: PersonInfo,
+          path: '/home',
+          name: 'home',
+          component: Home,
         },
         {
-          path: 'personalrate',
-          name: 'personalrate',
-          component: PersonRate,
+          path: '/profile',
+          name: 'profile',
+          component: Profile,
+          redirect: { name: 'personInfo' },
+          children: [
+            {
+              path: 'personInfo',
+              name: 'personInfo',
+              component: PersonInfo,
+            },
+            {
+              path: 'personalrate',
+              name: 'personalrate',
+              component: PersonRate,
+            },
+            {
+              path: 'personpost',
+              name: 'personpost',
+              component: PersonPost,
+            },
+            {
+              path: 'personfollow',
+              name: 'personfollow',
+              component: PersonFollow,
+            },
+            {
+              path: 'personActivity',
+              name: 'personActivity',
+              component: PersonActivity,
+            },
+          ],
         },
         {
-          path: 'personpost',
-          name: 'personpost',
-          component: PersonPost,
+          path: '/post',
+          name: 'post',
+          component: Post,
         },
         {
-          path: 'personfollow',
-          name: 'personfollow',
-          component: PersonFollow,
+          path: '/activity',
+          name: 'activity',
+          component: Activity,
+          children: [
+            {
+              path: 'detail/:id',
+              name: 'activityDetail',
+              component: ActivityDetail,
+            },
+            {
+              path: 'create',
+              name: 'activityCreate',
+              component: ActivityCreate,
+            },
+    
+            {
+              path: 'review/:activity_id',
+              name: 'activityReview',
+              component: ActivityReview,
+            },
+          ],
         },
-        {
-          path: 'personActivity',
-          name: 'personActivity',
-          component: PersonActivity,
-        },
-      ],
+      ]
     },
-    {
-      path: '/post',
-      name: 'post',
-      component: Post,
-    },
-    {
-      path: '/activity',
-      name: 'activity',
-      component: Activity,
-      children: [
-        {
-          path: 'detail/:id',
-          name: 'activityDetail',
-          component: ActivityDetail,
-        },
-        {
-          path: 'create',
-          name: 'activityCreate',
-          component: ActivityCreate,
-        },
 
-        {
-          path: 'review/:activity_id',
-          name: 'activityReview',
-          component: ActivityReview,
-        },
-      ],
-    },
   ],
 })
 

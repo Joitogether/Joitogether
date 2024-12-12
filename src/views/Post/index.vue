@@ -1,5 +1,4 @@
 <script setup>
-import NaveBar from '@/views/Home/components/NavbarComponent.vue'
 import { reactive, ref } from 'vue'
 import { NSpace, NSelect } from 'naive-ui';
 
@@ -57,7 +56,6 @@ const selectValue = ref()
 
 </script>
 <template>
-  <NaveBar/>
   <div class="postsArea max-w-[1140px] mx-auto px-4" >
     <div class="md:flex justify-between w-full  md:py-7">
       <div class="flex  w-full  md:flex md:w-[35%] md:min-w-[550px] md:justify-between">
