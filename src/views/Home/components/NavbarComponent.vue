@@ -1,13 +1,10 @@
 <script setup>
 import { Search, User, Menu, Sweep3d, BellNotificationSolid } from '@iconoir/vue'
 import { NButton, NDivider, NBadge, NPopover, NScrollbar, NSpin } from 'naive-ui'
-import userInfo from '../../MyProfile/component/person'
-import { RouterLink } from 'vue-router'
 import { useMessage } from 'naive-ui'
 import { useUserStore } from '/src/stores/userStore.js'
 import { auth } from '@/utils/firebaseConfig.js'
 import { useRouter, RouterLink } from 'vue-router'
-import {  ref } from 'vue'
 import 'dayjs/locale/zh-tw.js'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import dayjs from 'dayjs'
@@ -30,8 +27,6 @@ dayjs.locale('zh-tw')
 dayjs.extend(relativeTime)
 const user = ref(null);  // 儲存使用者資料
 const loading = ref(true);
-const errorMessage = ref(null);
-const isMenuOpen = ref(false); // 用來控制選單顯示狀態
 const postNumber = ref(null)
 const followerNumber = ref(null)
 const activityNumber = ref(null)
@@ -111,9 +106,7 @@ onMounted(() => {
 });
 
 // 切換選單顯示
-const toggleMenu = () => {
-  isMenuOpen.value = !isMenuOpen.value;
-};
+
 
 // 註冊/登入按鈕跳轉
 const navigateToLogin = () => {
