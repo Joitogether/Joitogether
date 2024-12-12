@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, watch, defineEmits } from 'vue'
 import { useUserStore } from '@/stores/userStore'
 import { submitPost } from '../services/postService'
 import { useMessage, NButton, NModal, NAvatar } from 'naive-ui'
@@ -44,6 +44,7 @@ const handleSubmit = async () => {
   try {
     await submitPost(postData)
     message.success('文章新增成功')
+    emit('update')
     console.log('傳送')
     showModal.value = true
     setTimeout(() => {
@@ -137,7 +138,7 @@ const bodyStyle = {
 const segmented = {
   content: 'soft',
 }
-
+const emit = defineEmits(['update'])
 // 更新 Small Talk
 watch(showModal, (newValue) => {
   if (newValue) {

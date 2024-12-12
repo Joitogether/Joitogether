@@ -47,11 +47,7 @@ export const getPostById = async (postId) => {
 // 更新文章
 export const updatePost = async (postId, updatePostData) => {
   try {
-    const response = await apiAxios.put(`/posts/${postId}`, updatePostData, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
+    const response = await apiAxios.put(`/posts/${postId}`, updatePostData)
     return response.data
   } catch (error) {
     console.error('更新文章失敗:', error)
@@ -62,11 +58,7 @@ export const updatePost = async (postId, updatePostData) => {
 // 刪除文章
 export const deletePost = async (postId) => {
   try {
-    const response = await apiAxios.delete(`/posts/${postId}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
+    const response = await apiAxios.delete(`/posts/${postId}`)
     return response.data
   } catch (error) {
     console.error('刪除文章失敗:', error)

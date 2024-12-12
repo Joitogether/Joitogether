@@ -5,10 +5,9 @@ import { NavArrowLeft, MoreVert } from '@iconoir/vue'
 import { useRoute, useRouter } from 'vue-router'
 import { getPostById, updatePost, deletePost } from '@/apis/postAPIs'
 import { getPostLikes, addLike, deleteLike } from '@/apis/postLikeAPIs'
-import { getPostComments, createPostComment } from '@/apis/postCommentAPIs'
+import { getPostComments, createPostComment, deletePostComment } from '@/apis/postCommentAPIs'
 import { useUserStore } from '@/stores/userStore'
 import { useMessage } from 'naive-ui'
-
 import dayjs from 'dayjs'
 import 'dayjs/locale/zh-tw.js'
 import relativeTime from 'dayjs/plugin/relativeTime'
@@ -68,8 +67,8 @@ const fetchPostDetails = async () => {
     const post = await getPostById(postId)
     console.log(`API回傳的文章：`, post)
 
-    const userRes = await getPostById(postId)
-    const user = userRes.data
+    // const userRes = await getPostById(postId)
+    const user = post.data
 
     postDetails.category = categoryMap[post.data.post_category] || '未分類'
     postDetails.title = post.data.post_title
@@ -89,6 +88,12 @@ const fetchComments = async () => {
     const res = await getPostComments(postId)
     const comments = res.data
 
+    // // 檢查是否有留言，如果沒有，顯示提示訊息
+    // if (comments.length === 0) {
+    //   commentList.value = [] // 清空留言列表
+    //   commentCount.value = 0 // 留言數量為 0
+    //   return
+    // }
     console.log(`API回傳的留言：`, comments)
 
     commentCount.value = comments.length || 0
@@ -141,11 +146,42 @@ const addComment = async () => {
     console.log(error)
   }
 }
+// 刪除留言
+const deleteComment = async (commentId) => {
+  try {
+    const confirmDelete = window.confirm('確定要刪除此留言嗎？')
+    if (confirmDelete) {
+      await deletePostComment(commentId)
+      message.success('留言刪除成功')
+      // 將刪除的最後一則留言從留言列表中移除
+      commentList.value = commentList.value.filter((comment) => comment.id !== commentId)
+      // 留言數歸零
+      if (commentList.value.length === 0) {
+        commentCount.value = 0
+      }
+    }
+  } catch (error) {
+    console.log(error)
+  }
+}
 
 // 編輯文章
 
 // 刪除文章
-
+const toggleDelete = async () => {
+  try {
+    await deletePost(postId)
+    message.success('文章刪除成功')
+    router.push('/post')
+  } catch (error) {
+    console.log(error)
+    if (error.message) {
+      message.error(error.message)
+    } else {
+      message.error('刪除失敗，請稍後再試！😞')
+    }
+  }
+}
 // 取得按讚數
 const fetchPostLikes = async () => {
   try {
@@ -156,14 +192,8 @@ const fetchPostLikes = async () => {
     likesList.value = res.data
     console.log(likesList.value)
     console.log(`取得文章 ${postId} 的按讚數成功`, likesList.value)
-    // likesCount.value = likes.data.length || 0
-
-    // 判斷使用者已按讚
-    // const isLiked = likes.data.some((like) => like.user_id === userStore.user.uid)
-    // hasLiked.value = isLiked
   } catch (error) {
     console.error(`${postId}沒有任何按讚紀錄`)
-    // likesCount.value = 0
   }
 }
 
@@ -229,7 +259,7 @@ onMounted(() => {
         <li @click="editArticle" class="cursor-pointer hover:bg-gray-200 p-2 rounded-md">
           編輯文章
         </li>
-        <li @click="deleteArticle" class="cursor-pointer hover:bg-gray-200 p-2 rounded-md">
+        <li @click="toggleDelete" class="cursor-pointer hover:bg-gray-200 p-2 rounded-md">
           刪除文章
         </li>
       </ul>
@@ -254,7 +284,9 @@ onMounted(() => {
         </div>
         <div>
           <div class="text-lg">{{ postDetails.name }}</div>
-          <div class="text-sm text-gray-400">{{ postDetails.time }}</div>
+          <div class="text-sm text-gray-400">
+            {{ dayjs(postDetails.time).format('YYYY-MM-DD HH:mm') }}
+          </div>
         </div>
       </div>
       <!-- 文章資訊區 -->
@@ -269,7 +301,7 @@ onMounted(() => {
             <div class="px-2 text-sm">💬 {{ commentCount }} 留言</div>
           </div>
         </div>
-        <!-- <hr /> -->
+
         <!-- 功能操作區 -->
         <div class="flex justify-between gap-4 items-center h-12 mb-4">
           <button
@@ -326,7 +358,7 @@ onMounted(() => {
             <div
               v-for="comment in commentList"
               :key="comment.id"
-              class="flex items-start space-x-3 border-b pb-4 mt-6"
+              class="flex items-start space-x-3 border-b pb-4 mt-6 relative"
             >
               <div class="w-14 h-14 rounded-full overflow-hidden flex items-center justify-center">
                 <img
@@ -343,6 +375,15 @@ onMounted(() => {
                 <p class="text-gray-600 text-base">{{ comment.content }}</p>
                 <p class="text-gray-400 text-sm">{{ dayjs(comment.time).fromNow() }}</p>
               </div>
+              <n-button
+                size="tiny"
+                secondary
+                strong
+                class="absolute top-0 right-0"
+                @click="deleteComment(comment.id, comment.uid)"
+              >
+                刪除
+              </n-button>
             </div>
           </div>
           <p v-else class="text-gray-500">目前沒有留言，快來留下第一則吧！</p>

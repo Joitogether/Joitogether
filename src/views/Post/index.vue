@@ -145,11 +145,15 @@ const router = useRouter()
 const handlePostClick = (postId) => {
   router.push(`/post/${postId}`)
 }
+
+const informPostUpdate = () => {
+  fetchPostsByCategory()
+}
 </script>
 <template>
   <!-- <NaveBar /> -->
   <div class="postsArea max-w-[1140px] mx-auto px-4">
-    <NewPostArea />
+    <NewPostArea @update="informPostUpdate" />
     <!-- <CategoryPosts /> -->
     <div class="md:flex justify-between w-full md:py-7">
       <div class="flex w-full md:flex md:w-[35%] md:min-w-[550px] md:justify-between">

@@ -29,9 +29,9 @@ export const getPostLikes = async (postId) => {
 }
 
 // 取消按讚
-export const deleteLike = async (likeId) => {
+export const deleteLike = async (postId) => {
   try {
-    const response = await apiAxios.delete(`/posts/like/${likeId}`)
+    const response = await apiAxios.delete(`/posts/like/${postId}`)
     console.log('取消按讚成功', response.data)
     return response.data
   } catch (error) {
