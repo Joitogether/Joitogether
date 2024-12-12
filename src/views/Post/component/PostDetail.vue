@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, reactive, ref } from 'vue'
+import { onMounted, reactive, ref, computed } from 'vue'
 // import NaveBar from '@/views/Home/components/NavbarComponent.vue'
 import { NavArrowLeft, MoreVert } from '@iconoir/vue'
 import { useRoute, useRouter } from 'vue-router'
@@ -20,15 +20,26 @@ const router = useRouter()
 const userStore = useUserStore()
 const commentList = ref([])
 const commentCount = ref(0)
-const likesCount = ref(0)
-const hasLiked = ref(false)
-const likeId = ref(null)
+// const likesCount = ref(0)
+// const hasLiked = ref(false)
 const isMenuVisible = ref(false)
+const likesList = ref([])
 
 // 留言打進後端的資料
 const newComment = ref('')
 const message = useMessage()
 
+const likesCount = computed(() => {
+  return likesList.value.length || 0
+})
+
+const likeId = computed(() => {
+  return likesList.value.find((like) => like.uid === userStore.user.uid)?.like_id
+})
+
+const hasLiked = computed(() => {
+  return likesList.value.some((like) => like.uid === userStore.user.uid)
+})
 const postId = Number(route.params.post_id) // 轉換為數字
 console.log('postId:', postId)
 
@@ -138,35 +149,43 @@ const addComment = async () => {
 // 取得按讚數
 const fetchPostLikes = async () => {
   try {
-    const likes = await getPostLikes(postId)
-    // console.log(`取得文章 ${postId)} 的按讚數成功`, likes)
-    likesCount.value = likes.data.length || 0
+    const res = await getPostLikes(postId)
+    if (res === null) {
+      likesList.value = []
+    }
+    likesList.value = res.data
+    console.log(likesList.value)
+    console.log(`取得文章 ${postId} 的按讚數成功`, likesList.value)
+    // likesCount.value = likes.data.length || 0
 
     // 判斷使用者已按讚
     // const isLiked = likes.data.some((like) => like.user_id === userStore.user.uid)
     // hasLiked.value = isLiked
   } catch (error) {
     console.error(`${postId}沒有任何按讚紀錄`)
-    likesCount.value = 0
+    // likesCount.value = 0
   }
 }
 
 // 新增 / 取消按讚
 const toggleLike = async () => {
+  if (!userStore.user.isLogin) {
+    message.error('請先登入後再按讚！')
+    return
+  }
+  const likeData = {
+    post_id: postId,
+    uid: userStore.user.uid,
+    status: hasLiked.value ? 'unlike' : 'liked',
+  }
   try {
     if (hasLiked.value) {
-      await deleteLike(likeId.value)
-      message.success('取消按讚成功')
-      hasLiked.value = false
-      likesCount.value--
+      await deleteLike(likeId.value, 'unlike')
     } else {
-      const res = await addLike(postId, userStore.user.uid)
-      message.success('按讚成功')
-      hasLiked.value = true
-      likesCount.value++
-      likeId.value = res.data.like_id
+      await addLike(postId, userStore.user.uid, 'liked')
     }
     fetchPostLikes()
+    return likeData
   } catch (error) {
     console.log('按讚失敗', error)
     message.error('按讚失敗')
