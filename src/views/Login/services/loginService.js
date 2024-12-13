@@ -6,11 +6,12 @@ import {
   browserSessionPersistence,
   // signOut,
 } from 'firebase/auth'
+import { useUserStore } from '@/stores/userStore.js'
 // import axios from 'axios'
-
 // 登入
 const loginUser = async (email, password, rememberMe) => {
   try {
+    const userStore = useUserStore()
     // 根據是否記住我設置持久性
     const persistence = rememberMe ? browserLocalPersistence : browserSessionPersistence
     await auth.setPersistence(persistence)
@@ -31,7 +32,7 @@ const loginUser = async (email, password, rememberMe) => {
 
     return {
       success: true,
-      message: `🎉 登入成功 ${user.displayName || '使用者'}！✨`,
+      message: `🎉 登入成功 ${userStore.user.display_name || '使用者'}！✨`,
       user,
     }
   } catch (error) {

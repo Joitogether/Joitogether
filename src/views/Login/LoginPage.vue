@@ -354,21 +354,14 @@ const loginGoogle = async () => {
   try {
     const user = await loginWithGoogle()
     console.log('Google 登入成功！')
-    message.success(`🎉 歡迎，${user.displayName}！登入成功，太棒了！🎉`)
-
+    message.success(`🎉 歡迎，${userStore.user.display_name}！登入成功，太棒了！🎉`)
+    userStore.setUser(user)
     // 更新 userStore 狀態
-    userStore.user = {
-      uid: user.uid,
-      email: user.email,
-      displayName: user.displayName || '使用者',
-      photoURL: user.photoURL,
-      isLogin: true,
-    }
 
     router.push('/')
   } catch (error) {
-    if (error.message.includes('displayName')) {
-      console.warn('靜默處理 displayName 錯誤')
+    if (error.message.includes('display_name')) {
+      console.warn('靜默處理 display_name 錯誤')
     } else {
       // 其他錯誤顯示彈窗
       message.error(`😭 哎呀！${error.message} 💔`)
@@ -380,21 +373,15 @@ const loginFacebook = async () => {
   try {
     const user = await loginWithFacebook()
     console.log('Facebook 登入成功！')
-    message.success(`🎉 歡迎，${user.displayName || user.email}！Facebook 登入成功，太棒了！🎉`)
-
+    message.success(`🎉 歡迎，${userStore.user.display_name || user.email}！Facebook 登入成功，太棒了！🎉`)
+    userStore.setUser(user)
     // 更新 userStore 狀態
-    userStore.user = {
-      uid: user.uid,
-      email: user.email,
-      displayName: user.displayName || '使用者',
-      photoURL: user.photoURL,
-      isLogin: true,
-    }
+
 
     router.push('/')
   } catch (error) {
-    if (error.message.includes('displayName')) {
-      console.warn('靜默處理 displayName 錯誤')
+    if (error.message.includes('display_name')) {
+      console.warn('靜默處理 display_name 錯誤')
     } else {
       // 其他錯誤顯示彈窗
       message.error(`😭 哎呀！${error.message} 💔`)

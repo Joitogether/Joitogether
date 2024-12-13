@@ -6,11 +6,6 @@ import { userGetAPI } from '@/apis/userAPIs'
 export const useUserStore = defineStore('user', {
   state: () => ({
     user: {
-      uid: '',
-      email: '',
-      emailVerified: false,
-      displayName: '',
-      photoURL: '',
       isLogin: false,
     },
   }),
@@ -22,7 +17,6 @@ export const useUserStore = defineStore('user', {
     // 設定用戶資料
     setUser(user) {
       this.user = {
-        ...this.user, // 保留現有屬性
         ...user, // 合併新的用戶資料
         isLogin: true, // 設定為已登入
       }
@@ -31,11 +25,6 @@ export const useUserStore = defineStore('user', {
     // 清空用戶資料
     clearUser() {
       this.user = {
-        uid: '',
-        email: '',
-        emailVerified: false,
-        displayName: '',
-        photoURL: '',
         isLogin: false,
       }
     },

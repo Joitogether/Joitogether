@@ -7,11 +7,11 @@ import { useAutocomplete } from '@/stores/useAutocomplete'
 import { usePreviewMode } from '@/stores/usePreviewMode'
 import { useMessage } from 'naive-ui'
 import dayjs from 'dayjs'
-import { activityUserCreateAPI } from '@/apis/activityApi.js';
 import { taiwanTime, formatToISOWithTimezone} from '@/stores/useDateTime'
 import { useUserStore } from '@/stores/userStore';
 import { convertMarkdown } from "@/stores/useMarkdown";
 import { userGetAPI } from '@/apis/userAPIs'
+import { activityUserCreateAPI } from '@/apis/activityApi.js'
 
 
 
@@ -41,7 +41,7 @@ if (userStore.user.isLogin) {
   }
   fetchUserData()
 }
-
+  
 
 const markdownPreview = computed(() => convertMarkdown(inputValues.value.describe))
 
