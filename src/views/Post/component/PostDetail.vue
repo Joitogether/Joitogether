@@ -67,7 +67,6 @@ const fetchPostDetails = async () => {
     const post = await getPostById(postId)
     console.log(`API回傳的文章：`, post)
 
-    // const userRes = await getPostById(postId)
     const user = post.data
 
     postDetails.category = categoryMap[post.data.post_category] || '未分類'
@@ -75,8 +74,9 @@ const fetchPostDetails = async () => {
     postDetails.content = post.data.post_content
     postDetails.time = post.data.updated_at
     postDetails.img = post.data.post_img
-    postDetails.name = user.users.display_name // 文章發佈者的名稱
-    postDetails.avatar = user.users.photo_url // 文章發佈者的頭像 URL
+    postDetails.name = user.users.display_name
+    postDetails.avatar = user.users.photo_url
+    postDetails.isPostAuthor = user.uid === userStore.user.uid
   } catch (error) {
     console.error(`獲取 ${postId}文章資料失敗`, error.response?.data || error.message)
   }
@@ -105,6 +105,7 @@ const fetchComments = async () => {
       name: comment.users.display_name,
       avatar: comment.users.photo_url,
       status: comment.status,
+      isCommentAuthor: comment.uid === userStore.user.uid,
     }))
 
     commentList.value = formattedComments
@@ -248,7 +249,11 @@ onMounted(() => {
       @click="goPostPage"
     ></NavArrowLeft>
     <p class="text-lg absolute left-1/2 transform -translate-x-1/2">{{ postDetails.category }}</p>
-    <MoreVert class="w-7 h-7 cursor-pointer absolute right-4" @click="toggleMenu" />
+    <MoreVert
+      v-if="postDetails.isPostAuthor"
+      class="w-7 h-7 cursor-pointer absolute right-4"
+      @click="toggleMenu"
+    />
 
     <!-- 彈窗內容 -->
     <div
@@ -376,6 +381,7 @@ onMounted(() => {
                 <p class="text-gray-400 text-sm">{{ dayjs(comment.time).fromNow() }}</p>
               </div>
               <n-button
+                v-if="comment.isCommentAuthor"
                 size="tiny"
                 secondary
                 strong
