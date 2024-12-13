@@ -57,3 +57,134 @@ export const userAuthLoginAPI = async (data) => {
     throw error
   }
 }
+
+export const userGetAPI = async (uid) => {
+  try {
+    const response = await apiAxios.get(`/users/${uid}`)
+
+    if (response && response.status === 200) {
+      return response.data.data
+    }
+  } catch (err) {
+    return err.response.message
+  }
+}
+
+export const userGetFollowerAPI = async (uid) => {
+  try {
+    const response = await apiAxios.get(`/users/userFollowers/${uid}`);
+
+    if (response && response.status === 200) {
+      return response.data
+    }
+  } catch (err) {
+
+    return err.response.message
+
+  }
+};
+
+export const userGetFollowingAPI = async (uid) => {
+  try {
+    const response = await apiAxios.get(`/users/following/${uid}`);
+
+    if (response && response.status === 200) {
+      return response.data
+    }
+  } catch (err) {
+    return err.response.message
+  }
+};
+
+export const userGetActivityAPI = async (uid) => {
+  try {
+    const response = await apiAxios.get(`/users/applications/${uid}`);
+
+    if (response && response.status === 200) {
+      return response.data.data
+    }
+  } catch (err) {
+    return err.response.message
+  }
+};
+
+
+export const userPutAPI = async(uid, data) => {
+  try {
+    const response = await apiAxios.put(`/users/update/${uid}`, data)
+    return response
+  } catch (err) {
+    return err.response.data
+  }
+}
+
+export const userPostAPI = async (uid, data) => {
+  try {
+    return await apiAxios.post(`/users/register/${uid}`, data)
+  } catch (err) {
+    return err.response.data
+  }
+}
+
+export const getPostsAPI = async (uid) => {
+  try {
+    const response = await apiAxios.get(`/users/posts/${uid}`)
+    return response.data
+  } catch (error) {
+    console.error('找不到文章', error)
+    throw error
+  }
+}
+
+export const getPostsCommentAPI = async (post_id) => {
+  try {
+    const response = await apiAxios.get(`/posts/comments/${post_id}`)
+    return response.data
+  } catch (error) {
+    console.error('沒有留言', error)
+    throw error
+  }
+}
+
+export const getPostsLikeAPI = async (post_id) => {
+  try {
+    const response = await apiAxios.get(`/posts/likes/${post_id}`)
+    return response.data
+  } catch (error) {
+    console.error('沒有人按讚', error)
+    throw error
+  }
+}
+
+export const getRatingsAPI = async (user_id) => {
+  try {
+    const response = await apiAxios.get(`/ratings/userDetails/${user_id}`)
+    return response.data
+  } catch (error) {
+    console.error('找不到留言者', error)
+    throw error
+  }
+}
+export const userGetNotificationAPI = async (uid, page, pageSize, additionalSkip) => {
+  try {
+
+    const { data } = await apiAxios.get(`/users/notifications/${uid}`, { params: {  page, pageSize, additionalSkip } })
+    return data
+  }catch(error){
+    if(error){
+      return null
+    }
+  }
+}
+
+
+export const userUpdateNotificationAPI = async (uid, unreadList) => {
+  try{
+    const response = await apiAxios.put(`/users/notifications/${uid}`, { unreadList})
+    return response
+  }catch(error){
+    if(error){
+      return null
+    }
+  }
+}

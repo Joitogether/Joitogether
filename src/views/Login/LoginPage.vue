@@ -271,7 +271,6 @@ import registerUser from './services/registerService.js'
 import { validateFormFields } from './utils/formValidation.js'
 import loginUser from './services/loginService.js'
 import { useUserStore } from '/src/stores/userStore.js'
-import firebase from 'firebase/compat/app'
 import { getAuth, sendEmailVerification } from 'firebase/auth'
 
 // 初始化區域
@@ -355,13 +354,14 @@ const loginGoogle = async () => {
   try {
     await loginWithGoogle()
     console.log('Google 登入成功！')
+    message.success(`🎉 歡迎，${userStore.user.display_name}！登入成功，太棒了！🎉`)
+    userStore.setUser(user)
     // 更新 userStore 狀態
 
-    message.success(`🎉 歡迎，${userStore.user.displayName}！登入成功，太棒了！🎉`)
     router.push('/')
   } catch (error) {
-    if (error.message.includes('displayName')) {
-      console.warn('靜默處理 displayName 錯誤')
+    if (error.message.includes('display_name')) {
+      console.warn('靜默處理 display_name 錯誤')
     } else {
       // 其他錯誤顯示彈窗
       message.error(`😭 哎呀！${error.message} 💔`)
@@ -373,21 +373,16 @@ const loginFacebook = async () => {
   try {
     const user = await loginWithFacebook()
     console.log('Facebook 登入成功！')
-    message.success(`🎉 歡迎，${user.displayName || user.email}！Facebook 登入成功，太棒了！🎉`)
-
+    message.success(
+      `🎉 歡迎，${userStore.user.display_name || user.email}！Facebook 登入成功，太棒了！🎉`,
+    )
+    userStore.setUser(user)
     // 更新 userStore 狀態
-    userStore.user = {
-      uid: user.uid,
-      email: user.email,
-      displayName: user.displayName || '使用者',
-      photoURL: user.photoURL,
-      isLogin: true,
-    }
 
     router.push('/')
   } catch (error) {
-    if (error.message.includes('displayName')) {
-      console.warn('靜默處理 displayName 錯誤')
+    if (error.message.includes('display_name')) {
+      console.warn('靜默處理 display_name 錯誤')
     } else {
       // 其他錯誤顯示彈窗
       message.error(`😭 哎呀！${error.message} 💔`)

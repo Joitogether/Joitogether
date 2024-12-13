@@ -1,51 +1,103 @@
 <script setup>
-import { NButton } from 'naive-ui';
+import { NButton, NSpin } from 'naive-ui'
+import { userGetAPI } from '../../../apis/userAPIs'
+import { ref } from 'vue'
+import { useUserStore } from '@/stores/userStore'
 
 defineProps({
   items: {
-    type: Array,
-    required: true
+    type: Object,
+    required: true,
+    default: () => ({
+      display_name: '名字加載中',
+      city: '城市加載中',
+      age: '年齡加載中',
+      career: '職業加載中',
+      favorite_sentence: '喜愛的句子加載中',
+      tag: '標籤加載中',
+    }),
   },
   type: {
     type: String,
     required: true,
-    // validator: value => ['hero', 'monster'].includes(value)
-  }
+  },
 })
+const user = ref(null)
+const loading = ref(true)
+const errorMessage = ref(null)
+const userStore = useUserStore()
+const showModal = ref(false) // 控制 modal 顯示
 
-const emit = defineEmits(['edit'])
+if (userStore.user.isLogin) {
+  const fetchUserData = async () => {
+    try {
+      const result = await userGetAPI(userStore.user.uid)
+
+      if (result) {
+        user.value = result
+        loading.value = false
+        return user.value
+      }
+    } catch (err) {
+      errorMessage.value = err.message || '資料加載錯誤'
+      loading.value = false
+    }
+  }
+  fetchUserData()
+}
+// 控制 modal 開啟
+const openModal = () => {
+  showModal.value = true
+  emit('edit', user.value)
+}
+
+const emit = defineEmits(['edit', 'close'])
 </script>
 <template>
-<div v-if="items" class="card-container border rounded-lg overflow-hidden bg-white">
-  <div class="img-container w-full">
-    <img
-      class="card-img w-full h-full object-cover"
-      :src="items.photo_url"
-      alt="personImg"
-    />
+  <div v-if="loading">
+    <n-spin size="medium" />
+    資料正在跑來的路上...
   </div>
+  <div v-else class="card-container py-8 border rounded-lg overflow-hidden bg-white">
+    <div class="img-container w-full">
+      <img class="card-img w-full h-full object-cover" :src="user.photo_url" alt="personImg" />
+    </div>
 
-  <div class="card-content-container p-5">
-    <h3 class="user-name text-2xl text-center font-bold">{{ items.display_name  }}</h3>
-    <div class="text-md font-bold">
-      <span>{{ items.city }}</span>
-      <span> • {{ items.age }}</span>
-      <span> • {{ items.career }}</span>
-    </div>
-    <p class="user-description text-2xl font-bold mt-1 md:mb-5">
-      : {{ items.favorite_sentence }}
-    </p>
-    <n-button @click="emit('edit', items, 'users')" type="primary" ghost class="flex-[2_2_0%]" round >編輯檔案</n-button>
-    <div class="tag-container flex gap-3 flex-wrap">
-      <span v-for="(item, index) in tags" :key="index"  class="border-2 px-3 py-1 rounded"
-        ># {{ item }}</span
-      >
+    <div class="card-content-container ml-5">
+      <h3 class="user-name text-2xl text-center font-bold">
+        {{ user.display_name || '大名還未填寫唷👀' }}
+      </h3>
+      <div class="user-detail text-md font-bold text-center">
+        <span>{{ user.city || '所在地還未填寫唷👀' }}</span>
+        <span> • {{ user.age || '年齡還未填寫唷👀' }}</span>
+        <span> • {{ user.career || '職業還未填寫唷👀' }}</span>
+      </div>
+      <p class="user-description text-2xl font-bold mt-1">
+        : {{ user.favorite_sentence || '座右銘還未填寫唷👀' }}
+      </p>
+      <div class="tag-container flex gap-3 flex-wrap my-4">
+        <span v-if="!user.tags">還沒有標籤喔</span>
+        <span
+          v-else
+          v-for="(item, index) in (user.tags || '').split(',')"
+          :key="index"
+          class="border-2 px-3 py-1 rounded"
+        >
+          # {{ item || '未填寫' }}</span
+        >
+      </div>
+      <n-button
+        @click="emit('edit', 'close', user)"
+        @open-modal="openModal"
+        type="primary"
+        ghost
+        round
+        >編輯檔案
+      </n-button>
+
+
     </div>
   </div>
-</div>
-<div v-else>
-  <p>正在加載資料...</p>
-</div>
 </template>
 <style scope>
 @media screen and (width >= 768px) {
@@ -55,7 +107,7 @@ const emit = defineEmits(['edit'])
 
   .card-container {
     display: flex;
-    padding: 2rem;
+    /* padding: 2rem; */
   }
 
   .img-container {
@@ -74,19 +126,15 @@ const emit = defineEmits(['edit'])
   .card-content-container {
     flex: 3;
     padding: 0;
-    padding-left: 2rem;
+    margin-left: 2rem;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
   }
 
-  .btn-container {
-    margin-bottom: 0.5rem;
-    margin-top: 0;
-    width: 70%;
-  }
-
-  .user-name {
+  .user-name,
+  .user-detail
+  {
     text-align: start;
   }
 
@@ -107,5 +155,4 @@ const emit = defineEmits(['edit'])
     justify-content: space-between;
   }
 }
-
 </style>

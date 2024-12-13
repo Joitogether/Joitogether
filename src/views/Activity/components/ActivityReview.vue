@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import {
   NavArrowLeft,
   ThumbsUp,
@@ -11,50 +11,52 @@ import {
   Search,
   XmarkCircle,
 } from '@iconoir/vue'
+import defaultAvatar from '@/assets/avatar.png'
 
 import { useDialog, useMessage } from 'naive-ui'
+import { apiAxios } from '@/utils/request'
+import {
+  ActivityGetApplicationsAPI,
+  ActivityReviewApplicationsAPI,
+  ActivityGetActivitiesAPI,
+} from '@/apis/activityApi'
+import { useRoute } from 'vue-router'
+import { useUserStore } from '@/stores/userStore'
+
+const route = useRoute()
+const activity_id = route.params.activity_id
+
+const userStore = useUserStore()
+const activity = ref([null]) // 活動詳細資料
+const attendees = ref([]) // 參加者資料
+
+onMounted(async () => {
+  try {
+    const response = await ActivityGetActivitiesAPI(activity_id)
+    if (response.status === 200 && response.data) {
+      activity.value = response.data.data
+      console.log('成功', response.data.data)
+    }
+  } catch (error) {
+    console.error('無法獲取活動資料:', error)
+  }
+})
+
+const refreshAttendees = async () => {
+  attendee.value = await ActivityGetApplicationsAPI(activity_id, defaultAvatar)
+}
+
+onMounted(async () => {
+  attendee.value = await ActivityGetApplicationsAPI(activity_id, defaultAvatar)
+})
+
 const dialog = useDialog()
 const message = useMessage()
-
-const attendee = ref([
-  {
-    id: 1,
-    name: '財哥',
-    avatar: '@/assets/avatar.png',
-    number: '@2af60e4cc341a435',
-    message: '好期待這次的遊戲類型會是什麼！',
-    date: '周一,11月18日 2024',
-    approved: false,
-    rejected: false,
-    replies: '',
-  },
-  {
-    id: 2,
-    name: '天橋下說書人',
-    avatar: '@/assets/avatar.png',
-    number: '@1ih499f304ja8v77',
-    message: '第一次參加，團主帶帶我！',
-    date: '周日,11月17日 2024',
-    approved: false,
-    rejected: false,
-    replies: '',
-  },
-  {
-    id: 3,
-    name: '泡泡勇士',
-    avatar: '@/assets/avatar.png',
-    number: '@a937vvyr49s7882p',
-    message: '已經參加第二次了，團主很活潑！',
-    date: '周日,11月19日 2024',
-    approved: false,
-    rejected: false,
-    replies: '',
-  },
-])
+const attendee = ref([])
 
 //切換報名,截止報名功能
 const registrationStatus = ref('open')
-const toggleRegistration = (status) => {
+const toggleRegistration = async (status) => {
   if (status === 'closed') {
     const checkClose = confirm('您是否確認截止報名？')
     if (!checkClose) return
@@ -64,6 +66,7 @@ const toggleRegistration = (status) => {
     if (!checkOpen) return
     registrationStatus.value = 'open'
   }
+  await refreshAttendees()
 }
 
 // 切換開放、截止報名的UI
@@ -96,36 +99,6 @@ const closeRegistration = () => {
   })
 }
 
-const allowAttendeeClick = () => {
-  dialog.warning({
-    title: '確認操作',
-    content: '`您確定要允許 ${approvalAttendee.name} 參加嗎？',
-    positiveText: '確認',
-    negativeText: '取消',
-    onPositiveClick: () => {
-      registrationStatus.value = 'open'
-    },
-    onNegativeClick: () => {
-      message.info('您已取消開放報名的操作')
-    },
-  })
-}
-const disabledAttendeeClick = () => {
-  dialog.warning({
-    title: '確認操作',
-    content: '`您確定要解除 ${approvalAttendee.name} 的參加資格嗎？',
-    positiveText: '確認',
-    negativeText: '取消',
-    onPositiveClick: () => {
-      registrationStatus.value = 'open'
-    },
-    onNegativeClick: () => {
-      message.info('您已取消開放報名的操作')
-    },
-  })
-}
-
-// 搜尋功能
 const searchQuery = ref('')
 const filteredAttendees = computed(() => {
   if (!searchQuery.value) {
@@ -139,13 +112,11 @@ const filteredAttendees = computed(() => {
 const handleAttendeeClick = (callback, id) => {
   const approvalAttendee = attendee.value.find((item) => item.id === id)
 
-  // 如果報名已截止，顯示提示
   if (registrationStatus.value === 'closed') {
     message.warning('目前報名已截止，無法操作。請返回開放報名繼續操作。')
     return
   }
 
-  // 如果用户已被拒绝，顯示提示
   if (approvalAttendee && approvalAttendee.rejected) {
     message.warning(`${approvalAttendee.name} 已經被拒絕參加，無法進行操作！`)
     return
@@ -153,33 +124,45 @@ const handleAttendeeClick = (callback, id) => {
 
   callback()
 }
+const handleApproveClick = async (id) => {
+  const attendeeToUpdate = attendee.value.find((item) => item.id === id)
+  if (!attendeeToUpdate) {
+    message.error('找不到該參加者！')
+    return
+  }
 
-const handleRejectClick = (id) => {
-  const attendeeToReject = attendee.value.find((item) => item.id === id)
-  if (!attendeeToReject) return
+  if (attendeeToUpdate.approved) {
+    message.warning(`${attendeeToUpdate.name} 已經被允許參加，無需再次操作！`)
+    return
+  }
+  if (approvedCount.value >= activity.value.max_participants) {
+    message.warning('該活動人數已滿，無法再允許更多用戶參加')
+    return
+  }
 
-  // 報名已截止提示
   if (registrationStatus.value === 'closed') {
     message.warning('目前報名已截止，無法操作。請返回開放報名繼續操作。')
     return
   }
 
-  // 已拒絕提示
-  if (attendeeToReject.rejected) {
-    message.warning(`${attendeeToReject.name} 已經被拒絕參加，無法再次操作！`)
-    return
-  }
-
   dialog.warning({
-    title: '確認拒絕',
-    content: `您確定要拒絕 ${attendeeToReject.name} 的參加申請嗎？`,
+    title: '確認允許參加',
+    content: `您確定要允許 ${attendeeToUpdate.name} 參加嗎？`,
     positiveText: '確認',
     negativeText: '取消',
-    onPositiveClick: () => {
-      attendeeToReject.rejected = true
-      attendeeToReject.approved = false
-
-      message.success(`${attendeeToReject.name} 的參加申請已被拒絕！`)
+    async onPositiveClick() {
+      try {
+        const response = await ActivityReviewApplicationsAPI(id, 'approved')
+        if (response && response.status === 200) {
+          message.success(`${attendeeToUpdate.name} 已被允許參加`)
+          await refreshAttendees()
+        } else {
+          message.error('操作失敗，請稍後再試！')
+        }
+      } catch (error) {
+        console.error('API 請求失敗:', error)
+        message.error('操作失敗，請稍後再試！')
+      }
     },
     onNegativeClick: () => {
       message.info('您已取消操作！')
@@ -187,22 +170,97 @@ const handleRejectClick = (id) => {
   })
 }
 
-const rejectAttendee = (id) => {
-  const attendeeToReject = attendee.value.find((item) => item.id === id)
-
-  if (!attendeeToReject) return
-
-  if (attendeeToReject.rejected) {
-    message.warning(`${attendeeToReject.name} 已經被拒絕參加，無需再次操作！`)
+const handleDeclinedClick = async (id) => {
+  const attendeeToDeclined = attendee.value.find((item) => item.id === id)
+  if (!attendeeToDeclined) {
+    message.error('找不到該參加者！')
     return
   }
 
-  const confirmReject = confirm(`您確定要拒絕 ${attendeeToReject.name} 的參加申請嗎？`)
-
-  if (confirmReject) {
-    attendeeToReject.rejected = true
-    attendeeToReject.approved = false
+  if (registrationStatus.value === 'closed') {
+    message.warning('目前報名已截止，無法操作。請返回開放報名繼續操作。')
+    return
   }
+
+  if (attendeeToDeclined.host_declined) {
+    message.warning(`${attendeeToDeclined.name} 已經被拒絕參加，無需再次操作！`)
+    return
+  }
+
+  dialog.warning({
+    title: '確認拒絕',
+    content: `您確定要拒絕 ${attendeeToDeclined.name} 的參加申請嗎？`,
+    positiveText: '確認',
+    negativeText: '取消',
+    async onPositiveClick() {
+      try {
+        const response = await ActivityReviewApplicationsAPI(id, 'host_declined')
+        if (response && response.status === 200) {
+          message.success(`${attendeeToDeclined.name} 的參加申請已被拒絕！`)
+          await refreshAttendees()
+        } else {
+          message.error('操作失敗，請稍後再試！')
+        }
+      } catch (error) {
+        console.error('API 請求失敗:', error)
+        message.error('操作失敗，請稍後再試！')
+      }
+    },
+    onNegativeClick: () => {
+      message.info('您已取消操作！')
+    },
+  })
+}
+
+const handleCancelClick = async (id) => {
+  const attendeeToCancel = attendee.value.find((item) => item.id === id)
+
+  if (!attendeeToCancel) {
+    message.error('找不到該參加者！')
+    return
+  }
+
+  if (registrationStatus.value === 'closed') {
+    message.warning('目前報名已截止，無法操作。請返回開放報名繼續操作。')
+    return
+  }
+
+  if (attendeeToCancel.rejected) {
+    message.warning(`${attendeeToCancel.name} 的參加資格已被取消，無需再次操作！`)
+    return
+  }
+
+  if (!attendeeToCancel.approved) {
+    message.warning(`${attendeeToCancel.name} 尚未被允許參加，無法取消參加資格！`)
+    return
+  }
+
+  dialog.warning({
+    title: '確認取消參加',
+    content: `您確定要取消 ${attendeeToCancel.name} 的參加資格嗎？`,
+    positiveText: '確認',
+    negativeText: '取消',
+    async onPositiveClick() {
+      try {
+        const response = await ActivityReviewApplicationsAPI(id, 'participant_cancelled')
+
+        if (response && response.status === 200) {
+          attendeeToCancel.approved = false
+          attendeeToCancel.rejected = true
+          message.success(`${attendeeToCancel.name} 的參加資格已被取消！`)
+          await refreshAttendees()
+        } else {
+          message.error('操作失敗，請稍後再試！')
+        }
+      } catch (error) {
+        console.error('API 請求失敗:', error)
+        message.error('操作失敗，請稍後再試！')
+      }
+    },
+    onNegativeClick: () => {
+      message.info('您已取消操作！')
+    },
+  })
 }
 
 // 切換審核狀態
@@ -237,16 +295,14 @@ const toggleApproval = (id) => {
   })
 }
 
-// 審核的人數計算
 const approvedCount = computed(() => {
   return attendee.value.filter((item) => item.approved).length
 })
 
 const rejectCount = computed(() => {
-  return attendee.value.filter((item) => item.rejected).length
+  return attendee.value.filter((item) => item.host_declined).length
 })
 
-// 快速回覆的視窗狀態和選擇
 const quickReplyVisible = ref(false)
 const selectedReplies = ref([])
 const sentReplies = ref([])
@@ -272,10 +328,34 @@ const hideQuickReply = () => {
   message.info('已取消操作')
 }
 
-const sendReplies = () => {
+const deleteReply = (attendeeId, replyIndex) => {
+  const attendeeToModify = attendee.value.find((item) => item.id === attendeeId)
+  if (!attendeeToModify) {
+    message.error('找不到該參加者！')
+    return
+  }
+
+  // 刪除指定回覆
+  attendeeToModify.replies.splice(replyIndex, 1)
+
+  // 更新 localStorage
+  const storedReplies = JSON.parse(localStorage.getItem('attendeeReplies')) || {}
+  storedReplies[attendeeId] = attendeeToModify.replies
+  localStorage.setItem('attendeeReplies', JSON.stringify(storedReplies))
+
+  message.success('回覆已成功刪除')
+}
+
+const sendReplies = async () => {
   const attendeeToReply = attendee.value.find((item) => item.id === currentAttendeeId.value)
   if (attendeeToReply) {
     attendeeToReply.replies = [...selectedReplies.value]
+
+    // 保存到 localStorage，key 為參加者 ID
+    const storedReplies = JSON.parse(localStorage.getItem('attendeeReplies')) || {}
+    storedReplies[currentAttendeeId.value] = attendeeToReply.replies
+    localStorage.setItem('attendeeReplies', JSON.stringify(storedReplies))
+
     message.success('已成功發送回覆內容')
   }
 
@@ -285,16 +365,22 @@ const sendReplies = () => {
 </script>
 
 <template>
-  <div class="flex justify-center min-w-[400px] items-center min-h-screen bg-gray-200 shadow-2xl">
+  <div
+    v-if="userStore.user.uid === activity.host_info?.uid"
+    class="flex justify-center min-w-[400px] items-center min-h-screen bg-gray-200 shadow-2xl"
+  >
     <div
       class="m-auto p-2 rounded-xl bg-gray-50 border-gray-300 border-solid border-2 w-full max-w-[768px] sm:w-full"
     >
       <div id="review" class="m-5 max-w-[768px]">
         <div class="flex my-2">
-          <div class="hover:bg-yellow-300 rounded-full mr-2 transition-all">
-            <a href="https://www.google.com/" class="hover:text-yellow-600"
-              ><NavArrowLeft width="32px" height="32"
-            /></a>
+          <div
+            @click="
+              $router.push({ name: 'activityDetail', params: { id: $route.params.activity_id } })
+            "
+            class="hover:bg-yellow-300 rounded-full mr-2 transition-all"
+          >
+            <NavArrowLeft width="32px" height="32" />
           </div>
 
           <div class="text-2xl font-bold text-gray-700">審核列表</div>
@@ -366,22 +452,31 @@ const sendReplies = () => {
           class="flex flex-col text-gray-500 bg-gray-100 border-[1px] border-gray-200 rounded-xl p-2 my-2 w-full"
         >
           <div
-            class="flex py-3 px-1 rounded-2xl bg-gray-200 transition-all duration-75"
+            class="flex py-3 px-1 rounded-2xl bg-gray-100 border-4 border-gray-400 transition-all duration-500"
             :class="[
-              item.approved
-                ? 'border-yellow-400 border-4 rounded-2xl  transition-all duration-75'
-                : 'border-4 border-solid border-gray-100  transition-all duration-200',
+              item.registered ? 'border-gray-500 bg-gray-100 transition-all duration-500' : '',
+              item.approved ? 'border-yellow-400 bg-yellow-100 transition-all duration-500' : '',
+              item.participant_cancelled
+                ? 'border-gray-600 bg-gray-200 transition-all duration-500'
+                : '',
+              item.host_declined ? 'border-red-700 bg-red-100 transition-all duration-500' : '',
+              ,
             ]"
           >
             <div class="mx-2 w-1/12">
-              <img src="@/assets/avatar.png" class="w-12 min-w-8 rounded-full" alt="Avatar" />
+              <img
+                :src="item.avatar || '/images/default-avatar.png'"
+                class="w-12 min-w-8 rounded-full"
+                alt="Avatar"
+                @error="(e) => (e.target.src = defaultAvatar)"
+              />
             </div>
             <div class="flex flex-col w-11/12 mx-2">
               <div class="text-sm">{{ item.name }}</div>
               <div class="my-1 text-xs max-sm:hidden">{{ item.number }}</div>
               <div class="flex">
                 <div
-                  class="flex flex-row justify-center items-center text-[10px] text-red-500 border-solid border-2 border-red-500 px-1 rounded-md"
+                  class="flex flex-row justify-center items-center text-[10px] text-red-500 border-solid border-2 border-red-500 bg-red-100 px-1 rounded-md"
                 >
                   <FireFlame width="13" height="13" />10
                 </div>
@@ -400,38 +495,47 @@ const sendReplies = () => {
 
             <div class="flex flex-col justify-center items-center w-52 px-4">
               <p
-                v-if="item.rejected"
-                class="flex items-center justify-center text-xs text-red-400 my-1 w-32"
+                v-if="item.registered"
+                class="flex justify-center text-xs text-gray-400 my-1 w-32 font-semibold"
               >
-                團主已拒絕用戶參加<XmarkCircle width="12" height="12" />
+                尚未審核
               </p>
               <p
                 v-else-if="item.approved"
-                class="flex justify-center items-center w-24 text-xs text-green-600 my-1"
+                class="flex justify-center items-center w-32 text-xs text-green-600 my-1 font-semibold"
               >
                 審核已通過<CheckCircleSolid width="14" height="14" />
               </p>
-              <p v-else class="flex justify-center text-xs text-gray-400 my-1 w-16">尚未審核</p>
-              <button
-                @click="handleAttendeeClick(() => toggleApproval(item.id), item.id)"
-                :class="[
-                  'flex justify-center items-center w-24 h-14 py-2 border-2 rounded-md text-sm transition-all duration-300',
-                  registrationStatus === 'closed'
-                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                    : item.rejected
-                      ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                      : item.approved
-                        ? 'bg-red-500 text-gray-100 border-red-600 font-semibold'
-                        : 'hover:bg-yellow-400 hover:text-yellow-700 border-gray-300 hover:border-yellow-500',
-                ]"
-                class="flex justify-center items-center max-sm:hidden w-full sm:w-30 h-8 py-2 border-2 rounded-md text-xs sm:text-sm transition-all"
+              <p
+                v-else-if="item.participant_cancelled"
+                class="flex justify-center items-center w-32 text-xs text-gray-600 my-1 font-semibold"
               >
-                <span v-if="item.rejected">已拒絕參加</span>
-                <span v-else>{{ item.approved ? '解除參加資格' : '允許參加' }}</span>
+                已取消用戶參加
+              </p>
+
+              <p
+                v-else-if="item.host_declined"
+                class="flex justify-center text-xs text-red-400 my-1 w-32 font-semibold"
+              >
+                團主已拒絕用戶參加<XmarkCircle width="12" height="12" />
+              </p>
+
+              <button
+                @click="handleApproveClick(item.id)"
+                v-if="!item.approved && !item.participant_cancelled && !item.host_declined"
+                :class="[
+                  'flex justify-center items-center w-32 h-8 py-2 mt-2 border-2 rounded-md text-sm transition-all duration-300',
+                  registrationStatus === 'closed' || item.approved
+                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    : 'bg-green-500 hover:bg-green-600 text-white',
+                ]"
+              >
+                <span>{{ item.approved ? '已允許參加' : '允許參加' }}</span>
               </button>
 
               <button
-                @click="handleRejectClick(item.id)"
+                @click="handleCancelClick(item.id)"
+                v-if="item.approved && !item.participant_cancelled && !item.host_declined"
                 :class="[
                   'flex justify-center items-center w-32 h-8 py-2 mt-2 border-2 rounded-md text-sm transition-all duration-300',
                   registrationStatus === 'closed' || item.rejected
@@ -439,7 +543,20 @@ const sendReplies = () => {
                     : 'bg-red-500 text-white border-red-600 hover:bg-red-600 hover:border-red-700',
                 ]"
               >
-                <span>{{ item.rejected ? '已拒絕參加' : '拒絕用戶參加' }}</span>
+                <span>{{ item.cancelled ? '已取消參加' : '取消用戶參加' }}</span>
+              </button>
+
+              <button
+                @click="handleDeclinedClick(item.id)"
+                v-if="!item.participant_cancelled && !item.approved && !item.host_declined"
+                :class="[
+                  'flex justify-center items-center w-32 h-8 py-2 mt-2 border-2 rounded-md text-sm transition-all duration-300',
+                  registrationStatus === 'closed' || item.rejected
+                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    : 'bg-red-500 text-white border-red-600 hover:bg-red-600 hover:border-red-700',
+                ]"
+              >
+                <span>{{ item.host_declined ? '已拒絕參加' : '拒絕用戶參加' }}</span>
               </button>
             </div>
           </div>
@@ -460,9 +577,16 @@ const sendReplies = () => {
           </div>
           <div
             v-if="item.replies.length"
-            class="flex flex-col bg-yellow-100 p-2 m-1 mt-1 rounded-xl"
+            class="flex flex-col bg-yellow-50 p-4 m-1 mt-1 rounded-xl border-[1.5px] border-yellow-600"
           >
-            <div class="text-xs font-semibold text-yellow-700 mb-1">團主回覆：</div>
+            <div
+              class="flex justify-between items-center text-xs font-semibold text-yellow-700 mb-1"
+            >
+              團主回覆：
+              <n-button type="error" size="tiny" @click="deleteReply(item.id, idx)">
+                刪除
+              </n-button>
+            </div>
             <div v-for="(reply, idx) in item.replies" :key="idx" class="text-xs text-yellow-800">
               {{ reply }}
             </div>
@@ -507,20 +631,21 @@ const sendReplies = () => {
             </div>
           </div>
         </div>
-
-        <!-- 顯示送出的內容 -->
-        <div
-          v-if="sentReplies.length"
-          class="w-full my-2 p-3 border-[1px] bg-gray-50 border-solid rounded-xl"
-        >
-          <h3 class="font-semibold text-sm mb-1 text-gray-600">團主回覆：</h3>
-          <div v-for="(reply, index) in sentReplies" :key="index" class="">
-            <div class="rounded-full w-96 text-sm text-gray-600">
-              {{ reply }}
-            </div>
-          </div>
-        </div>
       </div>
+    </div>
+  </div>
+
+  <div v-else>
+    <div class="flex flex-col items-center justify-center min-h-screen bg-gray-100 text-gray-800">
+      <h1 class="text-8xl font-extrabold text-red-500 animate-bounce">哎呀！真糟糕！</h1>
+      <p class="mt-4 text-2xl font-semibold">很抱歉</p>
+      <p class="mt-2 text-lg text-gray-600">很抱歉，您不是該活動的團主，無法查看此頁面</p>
+      <router-link
+        to="/"
+        class="mt-6 px-6 py-3 bg-blue-500 text-white text-lg font-medium rounded-lg shadow-lg hover:bg-blue-600 transition"
+      >
+        返回首頁
+      </router-link>
     </div>
   </div>
 </template>

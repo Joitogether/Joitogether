@@ -1,22 +1,17 @@
 <script setup>
 import { NConfigProvider, NDialogProvider, NMessageProvider } from 'naive-ui'
 import { useUserStore } from './stores/userStore'
-import { onAuthStateChanged } from 'firebase/auth'
-import { auth } from './utils/firebaseConfig'
-const userStore = useUserStore()
+import { getCurrentUser } from './utils/firebaseConfig'
+import { onMounted } from 'vue'
 
 // 「記住我」功能--初始化 Firebase 狀態
 // userStore.initAuthState(() => {
 // console.log('Firebase 狀態初始化完成')
 // })
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    userStore.setUser(user)
-    console.log('用戶已登入：', user)
-  } else {
-    userStore.clearUser()
-    console.log('用戶未登入')
-  }
+
+onMounted(async () => {
+  console.log('app在看使用者登入狀態')
+  await getCurrentUser()
 })
 </script>
 

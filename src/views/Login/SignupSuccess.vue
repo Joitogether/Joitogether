@@ -10,8 +10,8 @@
               class="w-full h-full rounded-full overflow-hidden border border-gray-300 bg-gray-100 flex items-center justify-center"
             >
               <img
-                v-if="userStore.user.photoURL"
-                :src="userStore.user.photoURL"
+                v-if="userStore.user.photo_url"
+                :src="userStore.user.photo_url"
                 alt="Avatar Preview"
                 class="w-full h-full object-cover"
               />
@@ -53,13 +53,11 @@
 import { NButton } from 'naive-ui'
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { getAuth, onAuthStateChanged } from 'firebase/auth'
 import { userUpdateEmailVerifiedAPI } from '@/apis/userAPIs'
 import { useUserStore } from '@/stores/userStore'
 
 const user = ref(null)
 const router = useRouter()
-const auth = getAuth()
 const countdown = ref(10)
 
 // 更新用戶的 emailVerified 狀態到後端
@@ -76,6 +74,7 @@ const updateEmailVerified = async (uid) => {
   }
 }
 const userStore = useUserStore()
+
 onMounted(async () => {
   // onAuthStateChanged(auth, async (currentUser) => {
   //   if (currentUser) {
@@ -85,9 +84,8 @@ onMounted(async () => {
 
   //     // 更新用戶資料
   //     user.value = refreshedUser
-  const userStore = useUserStore()
   // 檢查是否已驗證
-  if (userStore.user.emailVerified) {
+  if (userStore.user.email_verified) {
     console.log('用戶已驗證信箱！')
     // 調用模組化的更新函數
     await updateEmailVerified(userStore.user.uid)
