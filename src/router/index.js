@@ -12,6 +12,7 @@ import Activity from '@/views/Activity/index.vue'
 import ActivityDetail from '@/views/Activity/components/ActivityDetail.vue'
 import ActivityCreate from '@/views/Activity/components/ACtivityCreate.vue'
 import ActivityReview from '@/views/Activity/components/ActivityReview.vue'
+import ActivityRating from '@/views/Activity/components/ActivityRating.vue'
 import SignupSuccess from '@/views/Login/SignupSuccess.vue'
 import ResetPassword from '@/views/Login/ResetPassword.vue'
 import forgotPassword from '@/views/Login/ForgotPassword.vue'
@@ -50,7 +51,7 @@ const router = createRouter({
       path: '/',
       name: 'layout',
       component: Layout,
-      redirect: { name: 'home'},
+      redirect: { name: 'home' },
       children: [
         {
           path: '/home',
@@ -110,17 +111,20 @@ const router = createRouter({
               name: 'activityCreate',
               component: ActivityCreate,
             },
-    
             {
               path: 'review/:activity_id',
               name: 'activityReview',
               component: ActivityReview,
             },
+            {
+              path: 'rating',
+              name: 'activityRating',
+              component: ActivityRating,
+            },
           ],
         },
-      ]
+      ],
     },
-
   ],
 })
 
@@ -129,7 +133,5 @@ router.beforeEach(async (to, from, next) => {
   console.log('router觸發了')
   next()
 })
-
-
 
 export default router
