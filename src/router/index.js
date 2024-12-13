@@ -15,6 +15,7 @@ import ActivityReview from '@/views/Activity/components/ActivityReview.vue'
 import SignupSuccess from '@/views/Login/SignupSuccess.vue'
 import ResetPassword from '@/views/Login/ResetPassword.vue'
 import forgotPassword from '@/views/Login/ForgotPassword.vue'
+import CheckoutPage from '@/views/Payment/CheckoutPage.vue'
 import { getCurrentUser } from '@/utils/firebaseConfig'
 
 const router = createRouter({
@@ -106,6 +107,11 @@ const router = createRouter({
         },
       ],
     },
+    {
+      path: '/checkout',
+      name: 'checkout',
+      component: CheckoutPage,
+    },
   ],
 })
 
@@ -114,7 +120,5 @@ router.beforeEach(async (to, from, next) => {
   console.log('router觸發了')
   next()
 })
-
-
 
 export default router
