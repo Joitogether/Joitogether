@@ -32,6 +32,23 @@ const handleSubmit = async () => {
     message.error('請先登入後再發文！')
     return
   }
+  if (!newPostTitle.value) {
+    message.error('文章標題不可為空')
+    return
+  }
+  if (!newPostContent.value) {
+    message.error('文章內容不可為空')
+    return
+  }
+  if (!newPostCategory.value) {
+    message.error('請選擇文章分類')
+    return
+  }
+  // 檢查標題字數
+  if (newPostTitle.value.length > 10) {
+    message.error('標題不可超過 10 個字！')
+    return
+  }
 
   const postData = {
     post_title: newPostTitle.value,
@@ -93,6 +110,14 @@ const handleImageUpload = async (event) => {
   const file = event.target.files[0]
   if (file) {
     selectedFile.value = file
+
+    const maxFileSize = 2 * 1024 * 1024
+    if (file.size > maxFileSize) {
+      message.error('檔案大小不可超過 2 MB')
+      selectedFile.value = null
+      imagePreview.value = null
+      return
+    }
 
     // 建立圖片預覽
     const reader = new FileReader()

@@ -7,7 +7,8 @@ import { getPostById, updatePost, deletePost } from '@/apis/postAPIs'
 import { getPostLikes, addLike, deleteLike } from '@/apis/postLikeAPIs'
 import { getPostComments, createPostComment, deletePostComment } from '@/apis/postCommentAPIs'
 import { useUserStore } from '@/stores/userStore'
-import { useMessage } from 'naive-ui'
+import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage'
+import { useMessage, NButton } from 'naive-ui'
 import dayjs from 'dayjs'
 import 'dayjs/locale/zh-tw.js'
 import relativeTime from 'dayjs/plugin/relativeTime'
@@ -19,10 +20,12 @@ const router = useRouter()
 const userStore = useUserStore()
 const commentList = ref([])
 const commentCount = ref(0)
-// const likesCount = ref(0)
-// const hasLiked = ref(false)
 const isMenuVisible = ref(false)
 const likesList = ref([])
+const isEditing = ref(false)
+const editPostTitle = ref('')
+const editPostContent = ref('')
+const editPostImg = ref('')
 
 // 留言打進後端的資料
 const newComment = ref('')
@@ -88,12 +91,6 @@ const fetchComments = async () => {
     const res = await getPostComments(postId)
     const comments = res.data
 
-    // // 檢查是否有留言，如果沒有，顯示提示訊息
-    // if (comments.length === 0) {
-    //   commentList.value = [] // 清空留言列表
-    //   commentCount.value = 0 // 留言數量為 0
-    //   return
-    // }
     console.log(`API回傳的留言：`, comments)
 
     commentCount.value = comments.length || 0
@@ -104,7 +101,7 @@ const fetchComments = async () => {
       time: comment.created_at,
       name: comment.users.display_name,
       avatar: comment.users.photo_url,
-      status: comment.status,
+      status: comment.comment_status,
       isCommentAuthor: comment.uid === userStore.user.uid,
     }))
 
@@ -120,7 +117,7 @@ const fetchComments = async () => {
 // 新增留言
 const addComment = async () => {
   if (!userStore.user.isLogin) {
-    message.error('請先登入後再發文！')
+    message.error('請先登入後再留言！')
     return
   }
   if (!newComment.value) {
@@ -133,7 +130,7 @@ const addComment = async () => {
     uid: userStore.user.uid,
     comment_content: newComment.value,
     // created_at: dayjs().format('YYYY-MM-DD HH:mm:ss'),
-    status: 'active',
+    comment_status: 'active',
   }
 
   try {
@@ -166,14 +163,15 @@ const deleteComment = async (commentId) => {
   }
 }
 
-// 編輯文章
-
 // 刪除文章
 const toggleDelete = async () => {
   try {
     await deletePost(postId)
     message.success('文章刪除成功')
-    router.push('/post')
+
+    setTimeout(() => {
+      router.push('/post')
+    }, 1000)
   } catch (error) {
     console.log(error)
     if (error.message) {
@@ -231,6 +229,115 @@ const toggleMenu = () => {
   isMenuVisible.value = !isMenuVisible.value
 }
 
+// 編輯文章
+const saveEdit = async () => {
+  if (editPostTitle.value.length > 10) {
+    message.error('文章標題不可超過10個字')
+    return
+  }
+
+  try {
+    const originalPost = await getPostById(postId)
+    console.log(`API回傳的文章：`, originalPost)
+
+    await updatePost(postId, {
+      uid: userStore.user.uid,
+      post_title: editPostTitle.value || originalPost.data.post_title,
+      post_content: editPostContent.value || originalPost.data.post_content,
+      post_category: originalPost.data.post_category || '未分類',
+      post_status: 'posted',
+      post_img: editPostImg.value || '' || originalPost.data.post_img,
+    })
+
+    postDetails.title = updatePost.value
+    message.success('文章編輯成功')
+    isEditing.value = false
+
+    setTimeout(() => {
+      isMenuVisible.value = false
+    }, 500)
+
+    fetchPostDetails()
+  } catch (error) {
+    console.log(error)
+  }
+}
+
+const toggleEdit = () => {
+  isEditing.value = !isEditing.value
+
+  if (isEditing.value) {
+    editPostTitle.value = postDetails.title
+    editPostContent.value = postDetails.content
+    editPostImg.value = postDetails.img
+  }
+
+  setTimeout(() => {
+    isMenuVisible.value = false
+  }, 500)
+}
+
+// 圖片功能
+const selectedFile = ref(null)
+const uploadedImage = ref(null)
+const imagePreview = ref(null)
+const fileInput = ref(null)
+
+// 觸發文件選擇
+const triggerFileInput = () => {
+  if (fileInput.value) {
+    fileInput.value.click() // 觸發文件選擇框
+  }
+}
+
+const uploadFile = async (file) => {
+  try {
+    const storage = getStorage()
+    const fileRef = storageRef(storage, `postImages/${file.name}`)
+    const result = await uploadBytes(fileRef, file) // 上傳檔案
+    const downloadURL = await getDownloadURL(result.ref) // 獲取下載連結
+    console.log('上傳成功，下載連結:', downloadURL)
+    editPostImg.value = downloadURL
+    return downloadURL // 傳回下載連結
+  } catch (error) {
+    console.error('圖片上傳失敗')
+    throw error
+  }
+}
+
+// 處理圖片上傳與預覽
+const handleImageUpload = async (event) => {
+  const file = event.target.files[0]
+  if (file) {
+    selectedFile.value = file
+
+    const maxFileSize = 2 * 1024 * 1024
+    if (file.size > maxFileSize) {
+      message.error('檔案大小不可超過 2 MB')
+      selectedFile.value = null
+      imagePreview.value = null
+      return
+    }
+    // 建立圖片預覽
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      imagePreview.value = e.target.result // 設定預覽 URL
+    }
+    reader.readAsDataURL(file)
+    // 上傳圖片
+    try {
+      await uploadFile(file)
+    } catch (error) {
+      console.error('圖片上傳失敗:', error)
+      message.error('圖片上傳失敗，請檢查檔案格式或網路連線')
+    }
+  }
+}
+// 移除圖片
+const removeImage = () => {
+  imagePreview.value = null
+  uploadedImage.value = null
+}
 onMounted(() => {
   console.log('正在加載文章', postId)
 
@@ -253,7 +360,7 @@ onMounted(() => {
       v-if="postDetails.isPostAuthor"
       class="w-7 h-7 cursor-pointer absolute right-4"
       @click="toggleMenu"
-    />
+    ></MoreVert>
 
     <!-- 彈窗內容 -->
     <div
@@ -261,10 +368,21 @@ onMounted(() => {
       class="absolute right-4 top-12 bg-white shadow-md rounded-md p-2 z-10 w-40"
     >
       <ul>
-        <li @click="editArticle" class="cursor-pointer hover:bg-gray-200 p-2 rounded-md">
-          編輯文章
+        <li
+          v-if="isEditing"
+          @click="saveEdit"
+          class="cursor-pointer hover:bg-gray-200 p-2 rounded-md"
+        >
+          儲存文章
         </li>
-        <li @click="toggleDelete" class="cursor-pointer hover:bg-gray-200 p-2 rounded-md">
+        <li @click="toggleEdit" class="cursor-pointer hover:bg-gray-200 p-2 rounded-md">
+          {{ isEditing ? '取消編輯' : '編輯文章' }}
+        </li>
+        <li
+          v-if="!isEditing"
+          @click="toggleDelete"
+          class="cursor-pointer hover:bg-gray-200 p-2 rounded-md"
+        >
           刪除文章
         </li>
       </ul>
@@ -272,7 +390,15 @@ onMounted(() => {
   </div>
   <div class="p-6">
     <div class="">
-      <p class="text-xl font-bold">{{ postDetails.title }}</p>
+      <p v-if="!isEditing" class="text-xl font-bold">{{ postDetails.title }}</p>
+      <textarea
+        v-else
+        v-model.value="editPostTitle"
+        class="border p-2 rounded w-full focus:outline-none focus:ring-2 focus:ring-yellow-400"
+        rows="1"
+        style="resize: none"
+        :placeholder="postDetails.title"
+      ></textarea>
     </div>
     <div class="">
       <!-- 發文者的資訊區 -->
@@ -287,6 +413,7 @@ onMounted(() => {
             "
           />
         </div>
+
         <div>
           <div class="text-lg">{{ postDetails.name }}</div>
           <div class="text-sm text-gray-400">
@@ -296,9 +423,52 @@ onMounted(() => {
       </div>
       <!-- 文章資訊區 -->
       <div class="items-center">
-        <div class="mb-6 text-base">{{ postDetails.content }}</div>
-        <div v-if="postDetails.img" class="w-full h-full rounded-lg overflow-hidden">
+        <div v-if="!isEditing" class="mb-6 text-base">{{ postDetails.content }}</div>
+        <textarea
+          v-else
+          v-model.value="editPostContent"
+          class="border p-2 rounded w-full focus:outline-none focus:ring-2 focus:ring-yellow-400"
+          rows="5"
+          style="resize: none"
+          :placeholder="postDetails.content"
+        ></textarea>
+
+        <div v-if="!isEditing && postDetails.img" class="w-full h-full rounded-lg overflow-hidden">
           <img class="w-full h-full object-cover" :src="postDetails.img" alt="發文者圖片" />
+        </div>
+        <div v-if="isEditing" class="p-4 bg-white border border-gray-300 rounded-lg mt-4 mb-4">
+          <!-- 上傳圖片按鈕 -->
+          <div class="flex justify-center">
+            <button
+              class="mt-2 bg-yellow-300 py-2 px-4 rounded-full hover:bg-yellow-400 focus:outline-none"
+              @click="triggerFileInput"
+            >
+              上傳圖片
+            </button>
+            <input
+              ref="fileInput"
+              type="file"
+              class="hidden"
+              multiple
+              accept="image/*"
+              @change="handleImageUpload"
+            />
+          </div>
+
+          <!-- 圖片預覽 -->
+          <div v-if="imagePreview" class="mt-4 flex justify-center">
+            <div
+              class="relative bg-gray-100 border border-gray-300 rounded-lg overflow-hidden w-32 h-32"
+            >
+              <img :src="imagePreview" alt="圖片預覽" class="w-full h-full object-cover" />
+              <button
+                class="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm hover:bg-red-600 focus:outline-none"
+                @click="removeImage"
+              >
+                ✕
+              </button>
+            </div>
+          </div>
         </div>
         <div class="flex justify-between my-6">
           <div class="flex">
