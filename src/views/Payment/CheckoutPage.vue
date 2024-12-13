@@ -1,0 +1,565 @@
+<template>
+  <div class="w-[375px] bg-white shadow-lg rounded-lg flex flex-col gap-4 py-6 px-4">
+    <h2 class="text-center text-neutral-800">
+      ----------------------------<br />結帳畫面<br />----------------------------
+    </h2>
+    <div class="space-y-4">
+      <div class="flex items-center justify-between px-4 py-4 bg-gray-100 rounded-md">
+        <div class="flex items-center gap-4">
+          <div class="w-[50px] h-[50px] bg-gray-300 rounded-md"></div>
+          <div>
+            <h3 class="text-neutral-950">活動名稱</h3>
+            <p class="text-sm text-neutral-800 leading-tight">
+              活動付款內容活動付款內容活動付款內容活動付款內容活動付款內容
+            </p>
+          </div>
+        </div>
+        <span class="text-neutral-950 font-semibold">NT$ 300</span>
+      </div>
+      <div class="flex items-center justify-between px-4 py-4 bg-gray-100 rounded-md">
+        <div class="flex items-center gap-4">
+          <div class="w-[50px] h-[50px] bg-gray-300 rounded-md"></div>
+          <div>
+            <h3 class="text-neutral-950">活動名稱</h3>
+            <p class="text-sm text-neutral-800 leading-tight">
+              活動付款內容活動付款內容活動付款內容活動付款內容活動付款內容
+            </p>
+          </div>
+        </div>
+        <span class="text-neutral-950 font-semibold">NT$ 300</span>
+      </div>
+    </div>
+    <h2 class="text-center text-neutral-800">
+      ----------------------------<br />付款金額<br />----------------------------
+    </h2>
+    <div class="space-y-4 bg-gray-100 rounded-md px-4 py-4">
+      <div>
+        <label for="coupon" class="block text-sm text-neutral-800">優惠券</label>
+        <select
+          id="coupon"
+          class="mt-1 block w-full bg-white border border-gray-300 rounded-md px-3 py-2"
+        >
+          <option>下拉選單</option>
+        </select>
+      </div>
+      <div>
+        <label for="discount-code" class="block text-sm text-neutral-800">折扣碼</label>
+        <input
+          type="text"
+          id="discount-code"
+          placeholder="輸入欄位"
+          class="mt-1 block w-full bg-white border border-gray-300 rounded-md px-3 py-2"
+        />
+      </div>
+      <div>
+        <div class="flex justify-between text-sm py-1"><span>小計</span> <span>$300</span></div>
+        <div class="flex justify-between text-sm py-1">
+          <span>已使用優惠券</span> <span>-$20</span>
+        </div>
+        <div class="flex justify-between text-sm py-1">
+          <span>已使用折扣碼</span> <span>-$15</span>
+        </div>
+        <div class="flex justify-between text-sm font-semibold py-1">
+          <span>總計</span> <span>$265</span>
+        </div>
+      </div>
+      <div>
+        <div class="flex justify-between text-sm py-1">
+          <span>儲值金餘額</span> <span>$200</span>
+        </div>
+        <div class="flex justify-between text-sm font-semibold py-1">
+          <span>餘額不足</span> <span>-$65</span>
+        </div>
+      </div>
+    </div>
+    <div class="rounded-lg text-center text-sm text-red-500 bg-red-100 py-2 px-4">
+      餘額不足請前往儲值!
+    </div>
+    <div class="flex justify-between items-center gap-4">
+      <button class="flex-1 text-sm text-neutral-950 bg-gray-200 rounded-md py-2">上一步</button>
+      <button class="flex-1 text-sm text-white bg-red-500 rounded-md py-2">前往儲值頁</button>
+      <button class="flex-1 text-sm text-white bg-black rounded-md py-2">結帳</button>
+    </div>
+  </div>
+</template>
+
+<style scoped>
+@import url(https://fonts.googleapis.com/css2?family=Lato&display=swap);
+
+@import url(https://fonts.googleapis.com/css2?family=Open+Sans&display=swap);
+
+*,
+:after,
+:before {
+  border: 0 solid #e5e7eb;
+  box-sizing: border-box;
+}
+:after,
+:before {
+  --tw-content: '';
+}
+:host,
+html {
+  line-height: 1.5;
+  -webkit-text-size-adjust: 100%;
+  font-family:
+    Open Sans,
+    ui-sans-serif,
+    system-ui,
+    sans-serif,
+    Apple Color Emoji,
+    Segoe UI Emoji,
+    Segoe UI Symbol,
+    Noto Color Emoji;
+  font-feature-settings: normal;
+  font-variation-settings: normal;
+  -moz-tab-size: 4;
+  tab-size: 4;
+  -webkit-tap-highlight-color: transparent;
+}
+body {
+  line-height: inherit;
+  margin: 0;
+}
+hr {
+  border-top-width: 1px;
+  color: inherit;
+  height: 0;
+}
+abbr:where([title]) {
+  text-decoration: underline dotted;
+}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-size: inherit;
+  font-weight: inherit;
+}
+a {
+  color: inherit;
+  text-decoration: inherit;
+}
+b,
+strong {
+  font-weight: bolder;
+}
+code,
+kbd,
+pre,
+samp {
+  font-family:
+    ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    Monaco,
+    Consolas,
+    Liberation Mono,
+    Courier New,
+    monospace;
+  font-feature-settings: normal;
+  font-size: 1em;
+  font-variation-settings: normal;
+}
+small {
+  font-size: 80%;
+}
+sub,
+sup {
+  font-size: 75%;
+  line-height: 0;
+  position: relative;
+  vertical-align: baseline;
+}
+sub {
+  bottom: -0.25em;
+}
+sup {
+  top: -0.5em;
+}
+table {
+  border-collapse: collapse;
+  border-color: inherit;
+  text-indent: 0;
+}
+button,
+input,
+optgroup,
+select,
+textarea {
+  color: inherit;
+  font-family: inherit;
+  font-feature-settings: inherit;
+  font-size: 100%;
+  font-variation-settings: inherit;
+  font-weight: inherit;
+  letter-spacing: inherit;
+  line-height: inherit;
+  margin: 0;
+  padding: 0;
+}
+button,
+select {
+  text-transform: none;
+}
+button,
+input:where([type='button']),
+input:where([type='reset']),
+input:where([type='submit']) {
+  -webkit-appearance: button;
+  background-color: transparent;
+  background-image: none;
+}
+:-moz-focusring {
+  outline: auto;
+}
+:-moz-ui-invalid {
+  box-shadow: none;
+}
+progress {
+  vertical-align: baseline;
+}
+::-webkit-inner-spin-button,
+::-webkit-outer-spin-button {
+  height: auto;
+}
+[type='search'] {
+  -webkit-appearance: textfield;
+  outline-offset: -2px;
+}
+::-webkit-search-decoration {
+  -webkit-appearance: none;
+}
+::-webkit-file-upload-button {
+  -webkit-appearance: button;
+  font: inherit;
+}
+summary {
+  display: list-item;
+}
+blockquote,
+dd,
+dl,
+figure,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+hr,
+p,
+pre {
+  margin: 0;
+}
+fieldset {
+  margin: 0;
+}
+fieldset,
+legend {
+  padding: 0;
+}
+menu,
+ol,
+ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+dialog {
+  padding: 0;
+}
+textarea {
+  resize: vertical;
+}
+input::placeholder,
+textarea::placeholder {
+  color: #9ca3af;
+  opacity: 1;
+}
+[role='button'],
+button {
+  cursor: pointer;
+}
+:disabled {
+  cursor: default;
+}
+audio,
+canvas,
+embed,
+iframe,
+img,
+object,
+svg,
+video {
+  display: block;
+  vertical-align: middle;
+}
+img,
+video {
+  height: auto;
+  max-width: 100%;
+}
+[hidden] {
+  display: none;
+}
+*,
+:after,
+:before {
+  --tw-border-spacing-x: 0;
+  --tw-border-spacing-y: 0;
+  --tw-translate-x: 0;
+  --tw-translate-y: 0;
+  --tw-rotate: 0;
+  --tw-skew-x: 0;
+  --tw-skew-y: 0;
+  --tw-scale-x: 1;
+  --tw-scale-y: 1;
+  --tw-pan-x: ;
+  --tw-pan-y: ;
+  --tw-pinch-zoom: ;
+  --tw-scroll-snap-strictness: proximity;
+  --tw-gradient-from-position: ;
+  --tw-gradient-via-position: ;
+  --tw-gradient-to-position: ;
+  --tw-ordinal: ;
+  --tw-slashed-zero: ;
+  --tw-numeric-figure: ;
+  --tw-numeric-spacing: ;
+  --tw-numeric-fraction: ;
+  --tw-ring-inset: ;
+  --tw-ring-offset-width: 0px;
+  --tw-ring-offset-color: #fff;
+  --tw-ring-color: rgba(59, 130, 246, 0.5);
+  --tw-ring-offset-shadow: 0 0 #0000;
+  --tw-ring-shadow: 0 0 #0000;
+  --tw-shadow: 0 0 #0000;
+  --tw-shadow-colored: 0 0 #0000;
+  --tw-blur: ;
+  --tw-brightness: ;
+  --tw-contrast: ;
+  --tw-grayscale: ;
+  --tw-hue-rotate: ;
+  --tw-invert: ;
+  --tw-saturate: ;
+  --tw-sepia: ;
+  --tw-drop-shadow: ;
+  --tw-backdrop-blur: ;
+  --tw-backdrop-brightness: ;
+  --tw-backdrop-contrast: ;
+  --tw-backdrop-grayscale: ;
+  --tw-backdrop-hue-rotate: ;
+  --tw-backdrop-invert: ;
+  --tw-backdrop-opacity: ;
+  --tw-backdrop-saturate: ;
+  --tw-backdrop-sepia: ;
+  --tw-contain-size: ;
+  --tw-contain-layout: ;
+  --tw-contain-paint: ;
+  --tw-contain-style: ;
+}
+::backdrop {
+  --tw-border-spacing-x: 0;
+  --tw-border-spacing-y: 0;
+  --tw-translate-x: 0;
+  --tw-translate-y: 0;
+  --tw-rotate: 0;
+  --tw-skew-x: 0;
+  --tw-skew-y: 0;
+  --tw-scale-x: 1;
+  --tw-scale-y: 1;
+  --tw-pan-x: ;
+  --tw-pan-y: ;
+  --tw-pinch-zoom: ;
+  --tw-scroll-snap-strictness: proximity;
+  --tw-gradient-from-position: ;
+  --tw-gradient-via-position: ;
+  --tw-gradient-to-position: ;
+  --tw-ordinal: ;
+  --tw-slashed-zero: ;
+  --tw-numeric-figure: ;
+  --tw-numeric-spacing: ;
+  --tw-numeric-fraction: ;
+  --tw-ring-inset: ;
+  --tw-ring-offset-width: 0px;
+  --tw-ring-offset-color: #fff;
+  --tw-ring-color: rgba(59, 130, 246, 0.5);
+  --tw-ring-offset-shadow: 0 0 #0000;
+  --tw-ring-shadow: 0 0 #0000;
+  --tw-shadow: 0 0 #0000;
+  --tw-shadow-colored: 0 0 #0000;
+  --tw-blur: ;
+  --tw-brightness: ;
+  --tw-contrast: ;
+  --tw-grayscale: ;
+  --tw-hue-rotate: ;
+  --tw-invert: ;
+  --tw-saturate: ;
+  --tw-sepia: ;
+  --tw-drop-shadow: ;
+  --tw-backdrop-blur: ;
+  --tw-backdrop-brightness: ;
+  --tw-backdrop-contrast: ;
+  --tw-backdrop-grayscale: ;
+  --tw-backdrop-hue-rotate: ;
+  --tw-backdrop-invert: ;
+  --tw-backdrop-opacity: ;
+  --tw-backdrop-saturate: ;
+  --tw-backdrop-sepia: ;
+  --tw-contain-size: ;
+  --tw-contain-layout: ;
+  --tw-contain-paint: ;
+  --tw-contain-style: ;
+}
+#webcrumbs .mt-1 {
+  margin-top: 4px;
+}
+#webcrumbs .block {
+  display: block;
+}
+#webcrumbs .flex {
+  display: flex;
+}
+#webcrumbs .h-\[50px\] {
+  height: 50px;
+}
+#webcrumbs .w-\[375px\] {
+  width: 375px;
+}
+#webcrumbs .w-\[50px\] {
+  width: 50px;
+}
+#webcrumbs .w-full {
+  width: 100%;
+}
+#webcrumbs .flex-1 {
+  flex: 1 1 0%;
+}
+#webcrumbs .flex-row {
+  flex-direction: row;
+}
+#webcrumbs .flex-col {
+  flex-direction: column;
+}
+#webcrumbs .items-center {
+  align-items: center;
+}
+#webcrumbs .justify-between {
+  justify-content: space-between;
+}
+#webcrumbs .gap-4 {
+  gap: 16px;
+}
+#webcrumbs :is(.space-y-4 > :not([hidden]) ~ :not([hidden])) {
+  --tw-space-y-reverse: 0;
+  margin-bottom: calc(16px * var(--tw-space-y-reverse));
+  margin-top: calc(16px * (1 - var(--tw-space-y-reverse)));
+}
+#webcrumbs .rounded-lg {
+  border-radius: 5px;
+}
+#webcrumbs .rounded-md {
+  border-radius: 3.75px;
+}
+#webcrumbs .border {
+  border-width: 1px;
+}
+#webcrumbs .border-gray-300 {
+  --tw-border-opacity: 1;
+  border-color: rgb(209 213 219 / var(--tw-border-opacity));
+}
+#webcrumbs .bg-black {
+  --tw-bg-opacity: 1;
+  background-color: rgb(0 0 0 / var(--tw-bg-opacity));
+}
+#webcrumbs .bg-gray-100 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(243 244 246 / var(--tw-bg-opacity));
+}
+#webcrumbs .bg-gray-200 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(229 231 235 / var(--tw-bg-opacity));
+}
+#webcrumbs .bg-gray-300 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(209 213 219 / var(--tw-bg-opacity));
+}
+#webcrumbs .bg-red-100 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(254 226 226 / var(--tw-bg-opacity));
+}
+#webcrumbs .bg-red-500 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(239 68 68 / var(--tw-bg-opacity));
+}
+#webcrumbs .bg-white {
+  --tw-bg-opacity: 1;
+  background-color: rgb(255 255 255 / var(--tw-bg-opacity));
+}
+#webcrumbs .px-3 {
+  padding-left: 12px;
+  padding-right: 12px;
+}
+#webcrumbs .px-4 {
+  padding-left: 16px;
+  padding-right: 16px;
+}
+#webcrumbs .py-1 {
+  padding-bottom: 4px;
+  padding-top: 4px;
+}
+#webcrumbs .py-2 {
+  padding-bottom: 8px;
+  padding-top: 8px;
+}
+#webcrumbs .py-4 {
+  padding-bottom: 16px;
+  padding-top: 16px;
+}
+#webcrumbs .py-6 {
+  padding-bottom: 24px;
+  padding-top: 24px;
+}
+#webcrumbs .text-center {
+  text-align: center;
+}
+#webcrumbs .text-sm {
+  font-size: 14px;
+  line-height: 21px;
+}
+#webcrumbs .font-semibold {
+  font-weight: 600;
+}
+#webcrumbs .leading-tight {
+  line-height: 1.25;
+}
+#webcrumbs .text-neutral-800 {
+  --tw-text-opacity: 1;
+  color: rgb(84 84 84 / var(--tw-text-opacity));
+}
+#webcrumbs .text-neutral-950 {
+  --tw-text-opacity: 1;
+  color: rgb(40 40 40 / var(--tw-text-opacity));
+}
+#webcrumbs .text-red-500 {
+  --tw-text-opacity: 1;
+  color: rgb(239 68 68 / var(--tw-text-opacity));
+}
+#webcrumbs .text-white {
+  --tw-text-opacity: 1;
+  color: rgb(255 255 255 / var(--tw-text-opacity));
+}
+#webcrumbs .shadow-lg {
+  --tw-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+  --tw-shadow-colored: 0 10px 15px -3px var(--tw-shadow-color),
+    0 4px 6px -4px var(--tw-shadow-color);
+  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000),
+    var(--tw-shadow);
+}
+#webcrumbs {
+  font-family: Open Sans !important;
+  font-size: 16px !important;
+}
+</style>

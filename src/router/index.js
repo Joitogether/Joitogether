@@ -19,6 +19,7 @@ import ResetPassword from '@/views/Login/ResetPassword.vue'
 import forgotPassword from '@/views/Login/ForgotPassword.vue'
 import ShoppingCart from '@/views/CashFlow/index.vue'
 import Layout from '@/views/Layout/index.vue'
+import CheckoutPage from '@/views/Payment/CheckoutPage.vue'
 import { getCurrentUser } from '@/utils/firebaseConfig'
 
 const router = createRouter({
@@ -136,6 +137,11 @@ const router = createRouter({
           ],
         },
       ],
+    },
+    {
+      path: '/checkout',
+      name: 'checkout',
+      component: CheckoutPage,
     },
   ],
 })
