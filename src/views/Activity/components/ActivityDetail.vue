@@ -405,7 +405,8 @@ const handleDropSelect = async (key, comment_id) => {
           :dateTime="dayjs(activity.event_time).format('YYYY年MM月DD日')"
           :participants="registerCount"
           :host="activity.host_id"
-          class="mb-[3%] md:h-36"
+          :imageHeight="'100%'"
+          class="mb-[3%] h-36"
         ></ActivityCard>
       </div>
       <NModal
