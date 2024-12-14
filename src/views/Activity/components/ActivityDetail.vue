@@ -30,7 +30,7 @@ async function getActivityDetail(){
   }
 
   activity.value = activityDetail
-  host.value = activityDetail.host_id
+  host.value = activityDetail.host_info
   comments.value = activityDetail.comments
 }
 
@@ -90,7 +90,12 @@ const payment = computed(() => {
 })
 
 const registerCount = computed(() => {
-  return activity.value.participants.length
+  return activity.value.participants.reduce((count ,application) => {
+    if(application.status == 'registered' || application.status == 'approved'){
+      count++
+    }
+    return count
+  } ,0)
 })
 
 const clearComment = () => {
@@ -179,6 +184,7 @@ const onPositiveClick = async() => {
     await getActivityDetail()
     //  取消報名成功
     toggleConfirmModal()
+    
     message.success('取消報名成功')
 }
 
@@ -398,9 +404,8 @@ const handleDropSelect = async (key, comment_id) => {
           :location="activity.location"
           :dateTime="dayjs(activity.event_time).format('YYYY年MM月DD日')"
           :participants="registerCount"
-          :host="activity.hostId"
-          :imageHeight="'100px'"
-          class="mb-[3%] md:h-[150px]"
+          :host="activity.host_id"
+          class="mb-[3%] md:h-36"
         ></ActivityCard>
       </div>
       <NModal
@@ -440,27 +445,30 @@ const handleDropSelect = async (key, comment_id) => {
 
 @media screen and (width > 768px) {
   .container {
-    display: flex;
-    max-width: 990px;
+    width: 70%;
+    min-width: 700px;
     flex-wrap: wrap;
+    display: flex;
+  }
+  
+  .detail-container {
+    flex: 1 1 0;
+  }
+
+  .cards-container {
+    flex: 1 0 0;
+    padding-left: 2%;
+    padding-right: 2%;
   }
 }
 
 @media screen and (width >= 1024px) {
   .container {
-    max-width: 50%;
+    max-width: 850px;
   }
 
-  .detail-container {
-    flex: 1;
-  }
 
-  .cards-container {
-    flex: 1;
-    max-width: 40%;
-    padding-left: 5%;
-    padding-right: 2%;
-  }
+
 }
 
 :deep(.slide-left-enter-active),
