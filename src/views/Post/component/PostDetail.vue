@@ -1,11 +1,14 @@
 <script setup>
 import { onMounted, reactive, ref, computed } from 'vue'
-// import NaveBar from '@/views/Home/components/NavbarComponent.vue'
 import { NavArrowLeft, MoreVert } from '@iconoir/vue'
 import { useRoute, useRouter } from 'vue-router'
-import { getPostById, updatePost, deletePost } from '@/apis/postAPIs'
-import { getPostLikes, addLike, deleteLike } from '@/apis/postLikeAPIs'
-import { getPostComments, createPostComment, deletePostComment } from '@/apis/postCommentAPIs'
+import { getPostByIdAPI, updatePostAPI, deletePostAPI } from '@/apis/postAPIs'
+import { getPostLikesAPI, addLikeAPI, deleteLikeAPI } from '@/apis/postLikeAPIs'
+import {
+  getPostCommentsAPI,
+  createPostCommentAPI,
+  deletePostCommentAPI,
+} from '@/apis/postCommentAPIs'
 import { useUserStore } from '@/stores/userStore'
 import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage'
 import { useMessage, NButton } from 'naive-ui'
@@ -67,7 +70,7 @@ const categoryMap = {
 // 取得文章內容
 const fetchPostDetails = async () => {
   try {
-    const post = await getPostById(postId)
+    const post = await getPostByIdAPI(postId)
     console.log(`API回傳的文章：`, post)
 
     const user = post.data
@@ -88,7 +91,7 @@ const fetchPostDetails = async () => {
 // 取得文章留言
 const fetchComments = async () => {
   try {
-    const res = await getPostComments(postId)
+    const res = await getPostCommentsAPI(postId)
     const comments = res.data
 
     console.log(`API回傳的留言：`, comments)
@@ -134,7 +137,7 @@ const addComment = async () => {
   }
 
   try {
-    await createPostComment(postId, commentData)
+    await createPostCommentAPI(postId, commentData)
     message.success('留言新增成功')
     console.log('傳送', commentData)
     newComment.value = ''
@@ -149,7 +152,7 @@ const deleteComment = async (commentId) => {
   try {
     const confirmDelete = window.confirm('確定要刪除此留言嗎？')
     if (confirmDelete) {
-      await deletePostComment(commentId)
+      await deletePostCommentAPI(commentId)
       message.success('留言刪除成功')
       // 將刪除的最後一則留言從留言列表中移除
       commentList.value = commentList.value.filter((comment) => comment.id !== commentId)
@@ -166,7 +169,7 @@ const deleteComment = async (commentId) => {
 // 刪除文章
 const toggleDelete = async () => {
   try {
-    await deletePost(postId)
+    await deletePostAPI(postId)
     message.success('文章刪除成功')
 
     setTimeout(() => {
@@ -184,7 +187,7 @@ const toggleDelete = async () => {
 // 取得按讚數
 const fetchPostLikes = async () => {
   try {
-    const res = await getPostLikes(postId)
+    const res = await getPostLikesAPI(postId)
     if (res === null) {
       likesList.value = []
     }
@@ -209,9 +212,9 @@ const toggleLike = async () => {
   }
   try {
     if (hasLiked.value) {
-      await deleteLike(likeId.value, 'unlike')
+      await deleteLikeAPI(likeId.value, 'unlike')
     } else {
-      await addLike(postId, userStore.user.uid, 'liked')
+      await addLikeAPI(postId, userStore.user.uid, 'liked')
     }
     fetchPostLikes()
     return likeData
@@ -237,10 +240,10 @@ const saveEdit = async () => {
   }
 
   try {
-    const originalPost = await getPostById(postId)
+    const originalPost = await getPostByIdAPI(postId)
     console.log(`API回傳的文章：`, originalPost)
 
-    await updatePost(postId, {
+    await updatePostAPI(postId, {
       uid: userStore.user.uid,
       post_title: editPostTitle.value || originalPost.data.post_title,
       post_content: editPostContent.value || originalPost.data.post_content,
@@ -249,7 +252,7 @@ const saveEdit = async () => {
       post_img: editPostImg.value || '' || originalPost.data.post_img,
     })
 
-    postDetails.title = updatePost.value
+    postDetails.title = updatePostAPI.value
     message.success('文章編輯成功')
     isEditing.value = false
 
@@ -348,52 +351,57 @@ onMounted(() => {
 </script>
 
 <template>
-  <!-- <NaveBar /> -->
-  <div class="bg-gray-100 h-12 flex items-center p-4 relative">
-    <NavArrowLeft
-      stroke-width="2"
-      class="w-6 h-6 cursor-pointer"
-      @click="goPostPage"
-    ></NavArrowLeft>
-    <p class="text-lg absolute left-1/2 transform -translate-x-1/2">{{ postDetails.category }}</p>
-    <MoreVert
-      v-if="postDetails.isPostAuthor"
-      class="w-7 h-7 cursor-pointer absolute right-4"
-      @click="toggleMenu"
-    ></MoreVert>
+  <div class="bg-gray-100 w-full p-4">
+    <div class="flex items-center relative w-full md:w-3/4 mx-auto">
+      <NavArrowLeft
+        stroke-width="2"
+        class="w-6 h-6 cursor-pointer"
+        @click="goPostPage"
+      ></NavArrowLeft>
+      <p class="text-lg absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
+        {{ postDetails.category }}
+      </p>
+      <MoreVert
+        v-if="postDetails.isPostAuthor"
+        class="w-7 h-7 cursor-pointer absolute right-1 top-1/2 transform -translate-y-1/2"
+        @click="toggleMenu"
+      ></MoreVert>
 
-    <!-- 彈窗內容 -->
-    <div
-      v-if="isMenuVisible"
-      class="absolute right-4 top-12 bg-white shadow-md rounded-md p-2 z-10 w-40"
-    >
-      <ul>
-        <li
-          v-if="isEditing"
-          @click="saveEdit"
-          class="cursor-pointer hover:bg-gray-200 p-2 rounded-md"
+      <!-- 彈窗內容 -->
+      <transition name="fade-slide">
+        <div
+          v-if="isMenuVisible"
+          class="absolute right-2 top-12 bg-white shadow-md rounded-md p-2 z-10 w-40"
         >
-          儲存文章
-        </li>
-        <li @click="toggleEdit" class="cursor-pointer hover:bg-gray-200 p-2 rounded-md">
-          {{ isEditing ? '取消編輯' : '編輯文章' }}
-        </li>
-        <li
-          v-if="!isEditing"
-          @click="toggleDelete"
-          class="cursor-pointer hover:bg-gray-200 p-2 rounded-md"
-        >
-          刪除文章
-        </li>
-      </ul>
+          <ul>
+            <li
+              v-if="isEditing"
+              @click="saveEdit"
+              class="cursor-pointer hover:bg-gray-200 p-2 rounded-md"
+            >
+              儲存文章
+            </li>
+            <li @click="toggleEdit" class="cursor-pointer hover:bg-gray-200 p-2 rounded-md">
+              {{ isEditing ? '取消編輯' : '編輯文章' }}
+            </li>
+            <li
+              v-if="!isEditing"
+              @click="toggleDelete"
+              class="cursor-pointer hover:bg-gray-200 p-2 rounded-md"
+            >
+              刪除文章
+            </li>
+          </ul>
+        </div>
+      </transition>
     </div>
   </div>
-  <div class="p-6">
+  <div class="p-6 md:w-3/4 md:mx-auto">
     <div class="">
       <p v-if="!isEditing" class="text-xl font-bold">{{ postDetails.title }}</p>
       <textarea
         v-else
-        v-model.value="editPostTitle"
+        v-model="editPostTitle"
         class="border p-2 rounded w-full focus:outline-none focus:ring-2 focus:ring-yellow-400"
         rows="1"
         style="resize: none"
@@ -426,7 +434,7 @@ onMounted(() => {
         <div v-if="!isEditing" class="mb-6 text-base">{{ postDetails.content }}</div>
         <textarea
           v-else
-          v-model.value="editPostContent"
+          v-model="editPostContent"
           class="border p-2 rounded w-full focus:outline-none focus:ring-2 focus:ring-yellow-400"
           rows="5"
           style="resize: none"
@@ -440,7 +448,7 @@ onMounted(() => {
           <!-- 上傳圖片按鈕 -->
           <div class="flex justify-center">
             <button
-              class="mt-2 bg-yellow-300 py-2 px-4 rounded-full hover:bg-yellow-400 focus:outline-none"
+              class="mt-2 bg-green-500 text-white py-2 px-4 rounded-full hover:bg-green-600 focus:outline-none"
               @click="triggerFileInput"
             >
               上傳圖片
@@ -478,23 +486,23 @@ onMounted(() => {
         </div>
 
         <!-- 功能操作區 -->
-        <div class="flex justify-between gap-4 items-center h-12 mb-4">
+        <div class="gap-4 items-center h-12 mb-4">
           <button
-            class="w-1/2 h-full flex justify-center items-center bg-yellow-300 rounded-full hover:bg-yellow-400"
+            class="w-full h-full flex justify-center items-center text-white bg-green-500 rounded-full hover:bg-green-500"
             @click="toggleLike"
             :disabled="false"
           >
-            {{ hasLiked ? '取消按讚' : '按讚' }}
+            {{ hasLiked ? '太廢了要收回按讚' : '這篇文章太讚了' }}
           </button>
-          <button
+          <!-- <button
             class="w-1/2 h-full flex justify-center items-center bg-yellow-300 rounded-full hover:bg-yellow-400"
           >
             留言
-          </button>
+          </button> -->
         </div>
 
         <!-- 留言區 -->
-        <div class="p-6 bg-gray-100 rounded-lg shadow-md">
+        <div class="p-3 bg-gray-100 rounded-md shadow-sm">
           <!-- 新增留言 -->
           <div class="flex justify-between space-x-3 border-b border-gray-200">
             <div class="w-14 h-14 rounded-full overflow-hidden flex-shrink-0">
@@ -513,14 +521,14 @@ onMounted(() => {
               <textarea
                 rows="3"
                 v-model="newComment"
-                class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                class="w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-400"
                 placeholder="原本想說點什麼 但想想還是算了"
                 style="resize: none"
               ></textarea>
               <div class="">
                 <button
                   @click="addComment"
-                  class="mt-2 px-6 py-2 bg-yellow-300 text-black rounded-full hover:bg-yellow-400 focus:outline-none mb-3"
+                  class="mt-2 px-6 py-2 bg-green-500 text-white rounded-full hover:bg-yellow-400 focus:outline-none mb-3"
                 >
                   送出
                 </button>
@@ -562,10 +570,31 @@ onMounted(() => {
               </n-button>
             </div>
           </div>
-          <p v-else class="text-gray-500">目前沒有留言，快來留下第一則吧！</p>
+          <p v-else class="text-gray-500 mt-2">目前沒有留言，快來留下第一則吧！</p>
         </div>
       </div>
     </div>
   </div>
 </template>
-<style scoped></style>
+<style scoped>
+/* 動畫過渡的樣式 */
+.fade-slide-enter-active,
+.fade-slide-leave-active {
+  transition:
+    opacity 0.3s,
+    transform 0.3s;
+}
+
+/* 進入動畫：從上方滑入 */
+.fade-slide-enter,
+.fade-slide-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+/* 當彈窗顯示時，設置它的最終狀態 */
+.fade-slide-enter-to {
+  opacity: 1;
+  transform: translateY(0);
+}
+</style>

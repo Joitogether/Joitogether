@@ -1,7 +1,7 @@
 <script setup>
-import { ref, watch, defineEmits } from 'vue'
-import { useUserStore } from '@/stores/userStore'
-import { submitPost } from '../services/postService'
+import { ref, watch, defineEmits, onMounted, onBeforeUnmount } from 'vue'
+import { useUserStore } from '@/stores/userStore.js'
+import { createPostAPI } from '@/apis/postAPIs'
 import { useMessage, NButton, NModal, NAvatar } from 'naive-ui'
 import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage'
 
@@ -10,6 +10,15 @@ const showModal = ref(false)
 const currentSmallTalk = ref('')
 const userStore = useUserStore()
 const message = useMessage()
+const modalStyle = ref({
+  width: '100%',
+})
+
+// 圖片功能
+const selectedFile = ref(null)
+const uploadedImage = ref(null)
+const imagePreview = ref(null)
+const fileInput = ref(null)
 
 // 打進後端的資料
 const newPostTitle = ref('')
@@ -59,7 +68,7 @@ const handleSubmit = async () => {
     post_img: imageUrl.value || '',
   }
   try {
-    await submitPost(postData)
+    await createPostAPI(postData)
     message.success('文章新增成功')
     emit('update')
     console.log('傳送')
@@ -76,12 +85,6 @@ const handleSubmit = async () => {
     console.log(error)
   }
 }
-
-// 圖片功能
-const selectedFile = ref(null)
-const uploadedImage = ref(null)
-const imagePreview = ref(null)
-const fileInput = ref(null)
 
 // 觸發文件選擇
 const triggerFileInput = () => {
@@ -157,9 +160,27 @@ const smallTalk = [
   '靈感賴床了嗎？🛌 快喚醒它～寫點搞笑的內容，笑聲能激發更多靈感！✨',
 ]
 
-const bodyStyle = {
-  width: '1000px',
+// 彈窗寬度
+const updateWidth = () => {
+  const width = window.innerWidth
+
+  if (width >= 768) {
+    modalStyle.value = { width: '75%' } // 平板及大螢幕設備
+  } else {
+    modalStyle.value = { width: '100%' } // 手機設備
+  }
 }
+// 初始化時檢查並設置寬度
+onMounted(() => {
+  updateWidth() // 先執行一次
+  window.addEventListener('resize', updateWidth) // 監聽窗口大小變動
+})
+
+// 在組件銷毀時移除事件監聽
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', updateWidth)
+})
+
 const segmented = {
   content: 'soft',
 }
@@ -187,7 +208,7 @@ watch(showModal, (newValue) => {
 
     <div class="w-2/3 flex flex-col justify-center pl-4 mt-4">
       <div class="mb-0 text-lg font-xl ml-5">
-        (｡•̀ᴗ-)✧ {{ userStore.user.displayName || '訪客' }}
+        (｡•̀ᴗ-)✧ {{ userStore.user.display_name || '訪客' }}
       </div>
       <n-button @click="showModal = true" class="w-100 m-4 rounded-full">
         📝 記錄一刻，分享所有 🐾
@@ -199,36 +220,37 @@ watch(showModal, (newValue) => {
     v-model:show="showModal"
     class="custom-card overflow-y-scroll"
     preset="card"
-    :style="bodyStyle"
     size="huge"
+    :style="modalStyle"
     :bordered="false"
     :segmented="segmented"
   >
-    <template #header-extra
-      ><span class="hidden sm:block">👋 再見只是為了下一次見面～😊</span></template
-    >
-    <template #header>
-      <div>
-        <n-h1 prefix="bar" align-text type="success">
-          <n-text type="success">
-            <span>{{ newPostTitle || '✏️ 標題' }}</span>
-          </n-text>
-        </n-h1>
-      </div>
+    <template #header-extra>
+      <span class="hidden sm:block">👋 再見只是為了下一次見面～😊</span>
     </template>
-    <template #default>
-      <div class="flex flex-col lg:flex-row">
-        <div class="flex-shrink-0 mb-4 lg:mb-0 lg:mr-20">
+    <template #header>
+      <div class="flex flex-row items-center">
+        <div class="flex-shrink-0 hidden md:block md:mb-0 md:mr-8">
           <n-avatar
             round
-            :size="110"
+            :size="100"
             :src="
               userStore.user.photoURL ||
               'https://i.pinimg.com/736x/20/3e/d7/203ed7d8550c2c1c145a2fb24b6fbca3.jpg'
             "
           />
         </div>
-
+        <div class="w-3/4">
+          <n-h1 prefix="bar" align-text type="success">
+            <n-text type="success">
+              <span>{{ newPostTitle || '✏️ 標題' }}</span>
+            </n-text>
+          </n-h1>
+        </div>
+      </div>
+    </template>
+    <template #default>
+      <div class="flex flex-col md:flex-row">
         <div class="flex flex-col space-y-4">
           <n-h1 prefix="bar" align-text type="success">
             <n-input
@@ -307,6 +329,6 @@ watch(showModal, (newValue) => {
 
 <style scoped>
 h1 {
-  margin: 0 0 0 0;
+  margin: 0 0 0 15px;
 }
 </style>

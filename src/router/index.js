@@ -5,7 +5,7 @@ import Home from '@/views/Home/index.vue'
 import PersonInfo from '@/views/MyProfile/component/PersonInfo.vue'
 import PersonActivity from '@/views/MyProfile/component/PersonActivity.vue'
 import PersonPost from '@/views/MyProfile/component/PersonPost.vue'
-import Post from '../views/Post/index.vue'
+import PostHomePage from '../views/Post/postHomePage.vue'
 import PostDetail from '@/views/Post/component/PostDetail.vue'
 import PersonRate from '@/views/MyProfile/component/PersonRate.vue'
 import PersonFollow from '@/views/MyProfile/component/PersonFollow.vue'
@@ -94,7 +94,7 @@ const router = createRouter({
         {
           path: '/post',
           name: 'post',
-          component: Post,
+          component: PostHomePage,
         },
         {
           path: '/post/:post_id',
