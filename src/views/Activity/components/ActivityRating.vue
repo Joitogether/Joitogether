@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from 'vue'
-import { useMessage, useDialog } from 'naive-ui'
+import { useMessage, useDialog, NRate } from 'naive-ui'
 import { CheckCircle, CheckCircleSolid, Heart, HeartSolid } from '@iconoir/vue'
 
 const dialog = useDialog()
@@ -159,27 +159,27 @@ const clickTheFollowBtn = () => {
         </div>
         <div class="flex mt-3 px-14">
           <div class="text-base w-full">您對於本次揪團的評價為</div>
-          <div class="flex w-24 text-red-700">
-            <HeartSolid /><HeartSolid /><HeartSolid /><HeartSolid /><HeartSolid />
-          </div>
+          <n-rate color="#B91C1C" >
+            <HeartSolid class="w-5 h-5"/>
+          </n-rate>
         </div>
         <div class="flex mt-3 px-14">
           <div class="text-base w-full">團主的親切度，您願意給到幾分呢？</div>
-          <div class="flex w-24 text-red-700">
-            <HeartSolid /><HeartSolid /><HeartSolid /><HeartSolid /><HeartSolid />
-          </div>
+          <n-rate color="#B91C1C" >
+            <HeartSolid class="w-5 h-5"/>
+          </n-rate>
         </div>
         <div class="flex mt-3 px-14">
           <div class="text-base w-full">團主的主辦能力，您願意給到幾分呢？</div>
-          <div class="flex w-24 text-red-700">
-            <HeartSolid /><HeartSolid /><HeartSolid /><HeartSolid /><HeartSolid />
-          </div>
+          <n-rate color="#B91C1C" >
+            <HeartSolid class="w-5 h-5"/>
+          </n-rate>
         </div>
         <div class="flex mt-3 px-14">
           <div class="text-base w-full">團主的信用度，您願意給到幾分呢？</div>
-          <div class="flex w-24 text-red-700">
-            <HeartSolid /><HeartSolid /><HeartSolid /><HeartSolid /><HeartSolid />
-          </div>
+          <n-rate color="#B91C1C" >
+            <HeartSolid class="w-5 h-5"/>
+          </n-rate>
         </div>
 
         <div class="flex flex-col mt-5">
