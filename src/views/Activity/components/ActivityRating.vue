@@ -102,27 +102,27 @@ const step = ref(0)
             <div class="flex justify-between bg-gray-200 px-3 py-1 my-2 rounded-full">
               <div class="flex items-center">親切度</div>
               <div class="flex items-center">
-                <div class="flex w-20 text-red-700">
-                  <HeartSolid /><HeartSolid /><HeartSolid /><HeartSolid /><HeartSolid />
-                </div>
+                <n-rate readonly :default-value="5" color="#B91C1C"
+                  ><HeartSolid class="w-4"
+                /></n-rate>
                 <div class="mx-2 text-xs">4.8 / 5.0</div>
               </div>
             </div>
             <div class="flex justify-between bg-gray-200 px-3 py-1 mb-2 rounded-full">
               <div class="flex items-center">主辦能力</div>
               <div class="flex items-center">
-                <div class="flex w-20 text-red-700">
-                  <HeartSolid /><HeartSolid /><HeartSolid /><HeartSolid /><HeartSolid />
-                </div>
+                <n-rate readonly :default-value="5" color="#B91C1C"
+                  ><HeartSolid class="w-4"
+                /></n-rate>
                 <div class="mx-2 text-xs">4.8 / 5.0</div>
               </div>
             </div>
             <div class="flex justify-between bg-gray-200 px-3 py-1 mb-2 rounded-full">
               <div class="flex items-center">信用度</div>
               <div class="flex items-center">
-                <div class="flex w-20 text-red-700">
-                  <HeartSolid /><HeartSolid /><HeartSolid /><HeartSolid /><HeartSolid />
-                </div>
+                <n-rate readonly :default-value="5" color="#B91C1C"
+                  ><HeartSolid class="w-4"
+                /></n-rate>
                 <div class="mx-2 text-xs">4.8 / 5.0</div>
               </div>
             </div>
@@ -135,10 +135,10 @@ const step = ref(0)
                   <div class="mx-2 text-xs">東方快遞</div>
                 </div>
                 <div class="flex flex-col items-center">
-                  <div class="flex w-full px-1 h-4 text-red-700 justify-between items-center">
-                    <HeartSolid class="w-2.5" /><HeartSolid class="w-2.5" /><HeartSolid
-                      class="w-2.5"
-                    /><HeartSolid class="w-2.5" /><HeartSolid class="w-2.5" />
+                  <div class="flex items-center">
+                    <n-rate readonly :default-value="5" color="#B91C1C"
+                      ><HeartSolid class="w-2"
+                    /></n-rate>
                   </div>
                   <div class="mx-1 text-[10px]">2024/12/14</div>
                 </div>
@@ -162,26 +162,26 @@ const step = ref(0)
         </div>
         <div class="flex mt-3 px-14">
           <div class="text-base w-full">您對於本次揪團的評價為</div>
-          <n-rate color="#B91C1C" >
-            <HeartSolid class="w-5 h-5"/>
+          <n-rate color="#B91C1C">
+            <HeartSolid class="w-5 h-5" />
           </n-rate>
         </div>
         <div class="flex mt-3 px-14">
           <div class="text-base w-full">團主的親切度，您願意給到幾分呢？</div>
-          <n-rate color="#B91C1C" >
-            <HeartSolid class="w-5 h-5"/>
+          <n-rate color="#B91C1C">
+            <HeartSolid class="w-5 h-5" />
           </n-rate>
         </div>
         <div class="flex mt-3 px-14">
           <div class="text-base w-full">團主的主辦能力，您願意給到幾分呢？</div>
-          <n-rate color="#B91C1C" >
-            <HeartSolid class="w-5 h-5"/>
+          <n-rate color="#B91C1C">
+            <HeartSolid class="w-5 h-5" />
           </n-rate>
         </div>
         <div class="flex mt-3 px-14">
           <div class="text-base w-full">團主的信用度，您願意給到幾分呢？</div>
-          <n-rate color="#B91C1C" >
-            <HeartSolid class="w-5 h-5"/>
+          <n-rate color="#B91C1C">
+            <HeartSolid class="w-5 h-5" />
           </n-rate>
         </div>
 
@@ -234,9 +234,9 @@ const step = ref(0)
 
         <div class="flex items-center mt-3">
           <div class="text-base w-full">您對於本次揪團的評價為</div>
-          <div class="flex w-24 text-red-700">
-            <HeartSolid /><HeartSolid /><HeartSolid /><HeartSolid /><HeartSolid />
-          </div>
+          <n-rate color="#B91C1C">
+            <HeartSolid class="w-5 h-5" />
+          </n-rate>
         </div>
         <div class="flex items-center mt-3">
           <div class="text-base w-full">如果這次活動滿意，您想追蹤此團主嗎？</div>
@@ -261,13 +261,18 @@ const step = ref(0)
       <!-- 完成的介面 -->
       <div v-else-if="step == 2" class="flex flex-col justify-center items-center">
         <div class="flex flex-col items-center">
-          <div class="text-3xl text-gray-800 font-bold">感謝您本次的評價！</div>
-          <div class="text-3xl text-gray-800 font-bold my-3">積分將匯入您的帳戶中！</div>
+          <n-result
+            status="success"
+            title="您已經完成評價啦！！"
+            description="積分將匯入您的帳戶中！"
+            class="font-bold text-gray-400"
+          >
+          </n-result>
         </div>
         <div class="flex items-center w-2/3 h-20 justify-evenly">
-          <n-button type="info" class="w-32 tracking-widest text-base py-5">返回首頁</n-button>
-          <n-button type="info" class="w-32 tracking-widest text-base py-5">前往個人頁</n-button>
-          <n-button type="info" class="w-32 tracking-widest text-base py-5">前往任務中心</n-button>
+          <n-button type="info">返回首頁</n-button>
+          <n-button type="info">前往個人頁</n-button>
+          <n-button type="info">前往任務中心</n-button>
         </div>
       </div>
     </div>
