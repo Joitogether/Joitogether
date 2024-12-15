@@ -1,52 +1,37 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import {} from 'naive-ui'
-import { userPostAPI, getPostsAPI, getAllPostAPI } from '@/apis/userAPIs'
-const currentPage = ref(1)
-const nextPage = () => {
-  if (currentPage.value >= 5) {
-    return
-  }
-  currentPage.value++
-}
-const previousPage = () => {
-  if (currentPage.value <= 1) {
-    return
-  }
-  currentPage.value--
-}
-const posts = ref([]) // 用來抓貼文
+import { getAllPostsAPI } from '@/apis/postApi'
 const users = ref([]) // 用來抓使用者資料
 
+const posts = ref([]) // 用來抓貼文
 const fetchPosts = async () => {
-  try {
-    const response = await getAllPostAPI()
-    if (response && response.status === 200) {
-      posts.value = response.data
-      console.log('fetchPosts Success', response.data)
-    } else {
-      console.log('fetchPosts失敗')
-    }
-  } catch (err) {
-    console.error('fetchPosts沒有抓到資料', err)
+  const response = await getAllPostsAPI()
+  if (response) {
+    posts.value = response
+    console.log('貼文資料', posts.value)
+  } else {
+    console.log('貼文資料失敗')
   }
 }
+
 onMounted(() => {
   fetchPosts()
 })
 
-const formatDate = (isoString) => {
-  const date = new Date(isoString)
-  return date.toLocaleString('zh-TW', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-    hour12: false,
-  })
-}
+// const formatDate = (isoString) => {
+//   const date = new Date(isoString)
+//   return date.toLocaleString('zh-TW', {
+//     year: 'numeric',
+//     month: '2-digit',
+//     day: '2-digit',
+//     hour: '2-digit',
+//     minute: '2-digit',
+//     second: '2-digit',
+//     hour12: false,
+//   })
+// }
+
 // const posts = ref([
 //   {
 //     id: 1,
@@ -57,21 +42,6 @@ const formatDate = (isoString) => {
 //     likes: 20,
 //     comments: 5,
 //   },
-
-// 從 API 獲取資料
-
-const postsPerPage = 3
-const totalPages = computed(() => Math.ceil(posts.value.length / postsPerPage))
-// 當前頁的貼文
-const currentPosts = computed(() =>
-  posts.value.slice((currentPage.value - 1) * postsPerPage, currentPage.value * postsPerPage),
-)
-// 切換頁碼
-const changePage = (page) => {
-  if (page >= 1 && page <= totalPages.value) {
-    currentPage.value = page
-  }
-}
 </script>
 
 <template>

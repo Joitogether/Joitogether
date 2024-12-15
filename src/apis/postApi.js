@@ -12,24 +12,18 @@ import { apiAxios } from '@/utils/request'
 //   }
 // }
 
-export const HomePostGetPostAuthorAPI = async () => {
+export const getAllPostsAPI = async () => {
   try {
     const response = await apiAxios.get('/posts')
     if (response && response.status === 200) {
-      console.log('成功', response.data.data)
-      return response.data
-      // return response.data.map((item) => ({
-      //   post_id: item.post_id,
-      //   post_title: item.post_title,
-      //   post_content: item.post_content,
-      //   uid: item.uid,
-      //   created_at: item.created_at,
-      //   post_img: item.post_img,
-      // }))
+      console.log('API 請求成功:', response.data.data)
+      return response.data.data // 回傳資料
     } else {
-      return console.log('失敗')
+      console.log('API 返回非 200 狀態碼:', response.status)
+      return
     }
-  } catch (err) {
+  } catch (error) {
+    console.error('API 請求失敗:', error.message)
     return null
   }
 }
