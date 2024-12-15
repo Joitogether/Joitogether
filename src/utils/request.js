@@ -5,15 +5,22 @@ import { auth } from './firebaseConfig'
 const apiAxios = axios.create({
   baseURL: 'http://localhost:3030',
   timeout: 1000,
-  headers: { 'X-Custom-Header': 'foobar' },
 })
 
 apiAxios.interceptors.request.use(
   async function (config) {
-  const token = await getIdToken(auth.currentUser)
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`
-  }
+    if (auth.currentUser) {
+      try {
+        const token = await getIdToken(auth.currentUser)
+        if (token) {
+          config.headers.Authorization = `Bearer ${token}`
+        }
+      } catch (error) {
+        console.warn('無法獲取 Token，繼續發送請求', error)
+      }
+    } else {
+      console.log('用戶未登入，跳過 Authorization 設置')
+    }
     return config
   },
   function (error) {

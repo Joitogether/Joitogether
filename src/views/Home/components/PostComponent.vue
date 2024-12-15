@@ -81,7 +81,9 @@ onMounted(() => {
             class="post-bottom-top flex h-[180px] border-b-[1px] border-solid border-[rgba(61,57,44,0.1)]"
           >
             <div class="post-bottom-left w-52 leading-loose">
-              <p class="text-slate-300 text-sm h-8 mt-6">{{ formatDate(item.created_at) }}</p>
+              <!-- <p class="text-slate-300 text-sm h-8 mt-6">{{ formatDate(item.created_at) }}</p> -->
+              <p class="text-slate-300 text-sm h-8 mt-6">test</p>
+
               <h3 class="text-xl font-bold">{{ item.post_title }}</h3>
               <p class="post_content text-[16px]">
                 {{ item.post_content }}
