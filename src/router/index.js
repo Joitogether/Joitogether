@@ -117,7 +117,7 @@ const router = createRouter({
               component: ActivityReview,
             },
             {
-              path: 'rating',
+              path: 'rating/:activity_id',
               name: 'activityRating',
               component: ActivityRating,
             },

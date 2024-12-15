@@ -1,11 +1,14 @@
 <script setup>
-import { ref } from 'vue'
+import { onMounted, reactive, ref } from 'vue'
 import { useMessage, useDialog, NRate, NSpace, NInput } from 'naive-ui'
 import { CheckCircle, CheckCircleSolid, Heart, HeartSolid } from '@iconoir/vue'
+import { useRoute } from 'vue-router';
 
 const dialog = useDialog()
 const message = useMessage()
 const clickBtn = ref(false)
+const route = useRoute()
+
 
 const FollowSuccess = () => {
   clickBtn.value = true
@@ -29,6 +32,33 @@ const clickTheFollowBtn = () => {
 }
 
 const step = ref(0)
+
+const goStep1 = () => {
+  console.log('click');
+  console.log(ratingForm)
+  step.value = 1
+}
+
+const backStep0 = () => {
+  step.value = 0
+}
+
+const goStep2 = () => {
+  step.value =2
+}
+
+onMounted(() => {
+  const { activity_id } = route.params
+  console.log(activity_id)
+})
+
+const ratingForm = reactive({
+  comment: '',
+  overall: 0,
+  kindness: 0,
+  ability: 0,
+  credit: 0
+})
 </script>
 
 <template>
@@ -40,7 +70,7 @@ const step = ref(0)
       <div
         class="relative px-5 before:content-[''] before:absolute before:left-0 before:top-2 before:bottom-2 before:w-2 before: before:bg-blue-500"
       >
-        <div class="text-lg"><Search />活動評價</div>
+        <div class="text-lg">活動評價</div>
         <div class="text-gray-600 text-xl font-bold">本次活動評價</div>
       </div>
 
@@ -162,25 +192,25 @@ const step = ref(0)
         </div>
         <div class="flex mt-3 px-14">
           <div class="text-base w-full">您對於本次揪團的評價為</div>
-          <n-rate color="#B91C1C">
+          <n-rate  clearable v-model:value="ratingForm.overall" color="#B91C1C">
             <HeartSolid class="w-5 h-5" />
           </n-rate>
         </div>
         <div class="flex mt-3 px-14">
           <div class="text-base w-full">團主的親切度，您願意給到幾分呢？</div>
-          <n-rate color="#B91C1C">
+          <n-rate clearable v-model:value="ratingForm.kindness" color="#B91C1C">
             <HeartSolid class="w-5 h-5" />
           </n-rate>
         </div>
         <div class="flex mt-3 px-14">
           <div class="text-base w-full">團主的主辦能力，您願意給到幾分呢？</div>
-          <n-rate color="#B91C1C">
+          <n-rate clearable v-model:value="ratingForm.ability" color="#B91C1C">
             <HeartSolid class="w-5 h-5" />
           </n-rate>
         </div>
         <div class="flex mt-3 px-14">
           <div class="text-base w-full">團主的信用度，您願意給到幾分呢？</div>
-          <n-rate color="#B91C1C">
+          <n-rate clearable v-model:value="ratingForm.credit" color="#B91C1C">
             <HeartSolid class="w-5 h-5" />
           </n-rate>
         </div>
@@ -189,9 +219,10 @@ const step = ref(0)
           <p>留下您想對團主說的話：</p>
           <n-space vertical>
             <n-input 
+              :autosize="{ minRows: 3, maxRows: 5 }"
               placeholder="該選項為選填，如果沒有特別想留下的話~那就下一步吧"
               type="textarea"
-              v-model="ratingComment"
+              v-model:value="ratingForm.comment"
               maxlength="200"
               show-count
             />
@@ -205,20 +236,7 @@ const step = ref(0)
           ></textarea> -->
         </div>
         <div class="flex justify-end items-center mt-3">
-          <!-- /* 正常輸入會顯示的 */ -->
-          <div class="flex mx-3">
-            <div>159</div>
-            <div>/</div>
-            <div>200</div>
-          </div>
-          <!-- 超過字數上限顯示 -->
-          <div class="flex text-red-700 mx-3">
-            <div>200</div>
-            <div>/</div>
-            <div>200</div>
-            <div>話太多字數已達上線啦！</div>
-          </div>
-          <n-button type="info" class="px-5 tracking-widest">下一步</n-button>
+          <n-button type="info" @click="goStep1" class="px-5 tracking-widest">下一步</n-button>
         </div>
       </div>
       <!-- 追蹤團主介面 -->
@@ -254,8 +272,8 @@ const step = ref(0)
         </div>
 
         <div class="flex justify-end items-center mt-10">
-          <n-button type="info" class="px-5 mx-6 tracking-widest">上一步</n-button>
-          <n-button type="info" class="px-5 tracking-widest">下一步</n-button>
+          <n-button type="info" @click="backStep0" class="px-5 mx-6 tracking-widest">上一步</n-button>
+          <n-button type="info" @click="goStep2" class="px-5 tracking-widest">下一步</n-button>
         </div>
       </div>
       <!-- 完成的介面 -->
