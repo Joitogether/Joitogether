@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from 'vue'
-import { useMessage, useDialog, NRate } from 'naive-ui'
+import { useMessage, useDialog, NRate, NSpace, NInput } from 'naive-ui'
 import { CheckCircle, CheckCircleSolid, Heart, HeartSolid } from '@iconoir/vue'
 
 const dialog = useDialog()
@@ -11,6 +11,7 @@ const FollowSuccess = () => {
   clickBtn.value = true
   message.success('您已成功追蹤團主啦~')
 }
+
 
 const clickTheFollowBtn = () => {
   dialog.info({
@@ -26,6 +27,8 @@ const clickTheFollowBtn = () => {
     },
   })
 }
+
+const step = ref(0)
 </script>
 
 <template>
@@ -148,7 +151,7 @@ const clickTheFollowBtn = () => {
         </div>
       </div>
       <!-- 用戶在填寫團主評價的資訊 -->
-      <div class="mt-5">
+      <div v-if="step == 0" class="mt-5">
         <div>用戶：</div>
         <div class="flex items-center mt-2">
           <img
@@ -183,14 +186,23 @@ const clickTheFollowBtn = () => {
         </div>
 
         <div class="flex flex-col mt-5">
-          <label for="ThingsYouWantToSay">留下您想對團主說的話：</label>
-          <textarea
+          <p>留下您想對團主說的話：</p>
+          <n-space vertical>
+            <n-input 
+              placeholder="該選項為選填，如果沒有特別想留下的話~那就下一步吧"
+              type="textarea"
+              v-model="ratingComment"
+              maxlength="200"
+              show-count
+            />
+          </n-space>
+          <!-- <textarea
             class="h-28 border-2 border-gray-300 rounded-md resize-none p-2"
             name="ThingsYouWantToSay"
             id="ThingsYouWantToSay"
             maxlength="200"
             placeholder="該選項為選填，如果沒有特別想留下的話~那就下一步吧"
-          ></textarea>
+          ></textarea> -->
         </div>
         <div class="flex justify-end items-center mt-3">
           <!-- /* 正常輸入會顯示的 */ -->
@@ -210,7 +222,7 @@ const clickTheFollowBtn = () => {
         </div>
       </div>
       <!-- 追蹤團主介面 -->
-      <div class="mt-5">
+      <div v-else-if="step == 1" class="mt-5">
         <div>團主：</div>
         <div class="flex items-center mt-2">
           <img
@@ -247,7 +259,7 @@ const clickTheFollowBtn = () => {
         </div>
       </div>
       <!-- 完成的介面 -->
-      <div class="flex flex-col justify-center items-center">
+      <div v-else-if="step == 2" class="flex flex-col justify-center items-center">
         <div class="flex flex-col items-center">
           <div class="text-3xl text-gray-800 font-bold">感謝您本次的評價！</div>
           <div class="text-3xl text-gray-800 font-bold my-3">積分將匯入您的帳戶中！</div>
