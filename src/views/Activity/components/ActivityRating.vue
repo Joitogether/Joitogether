@@ -17,7 +17,7 @@ const router = useRouter()
 const activityDetail = ref({})
 const hostInfo = ref({})
 const hostRatingAverage = ref({})
-const latestHostRating = ref({})
+const latestHostRating = ref()
 const FollowSuccess = () => {
   clickBtn.value = true
   message.success('您已成功追蹤團主啦~')
@@ -204,7 +204,7 @@ const showSubmitModal = ref(false)
                 </div>
                 <div class="flex flex-col items-center">
                   <div class="flex items-center">
-                    <n-rate readonly :default-value="5" color="#B91C1C"
+                    <n-rate readonly v-model:value="latestHostRating.rating_heart" :default-value="5" color="#B91C1C"
                       ><HeartSolid class="w-2"
                     /></n-rate>
                   </div>
