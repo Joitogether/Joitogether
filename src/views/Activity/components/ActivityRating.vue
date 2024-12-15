@@ -1,15 +1,23 @@
 <script setup>
 import { onMounted, reactive, ref } from 'vue'
-import { useMessage, useDialog, NRate, NSpace, NInput } from 'naive-ui'
-import { CheckCircle, CheckCircleSolid, Heart, HeartSolid } from '@iconoir/vue'
-import { useRoute } from 'vue-router';
+import { useMessage, useDialog, NRate, NSpace, NInput, NModal } from 'naive-ui'
+import { CheckCircle, CheckCircleSolid, HeartSolid } from '@iconoir/vue'
+import { useRoute, useRouter } from 'vue-router';
+import { ratingGetDetailAPI, ratingSubmitAPI } from '@/apis/ratingApi';
+import dayjs from 'dayjs';
+import { useUserStore } from '@/stores/userStore';
 
+dayjs.locale('zh-tw')
+const userStore = useUserStore()
 const dialog = useDialog()
 const message = useMessage()
 const clickBtn = ref(false)
 const route = useRoute()
-
-
+const router = useRouter()
+const activityDetail = ref({})
+const hostInfo = ref({})
+const hostRatingAverage = ref({})
+const latestHostRating = ref({})
 const FollowSuccess = () => {
   clickBtn.value = true
   message.success('您已成功追蹤團主啦~')
@@ -34,7 +42,6 @@ const clickTheFollowBtn = () => {
 const step = ref(0)
 
 const goStep1 = () => {
-  console.log('click');
   console.log(ratingForm)
   step.value = 1
 }
@@ -43,13 +50,19 @@ const backStep0 = () => {
   step.value = 0
 }
 
-const goStep2 = () => {
-  step.value =2
+
+
+const getDetailForRating = async () => {
+  const { activity_id } = route.params
+  const res = await ratingGetDetailAPI(activity_id)
+  activityDetail.value = res.activity
+  hostInfo.value = res.activity.users
+  hostRatingAverage.value = res.hostRatingAverage['_avg']
+  latestHostRating.value = res.latestHostRating
 }
 
-onMounted(() => {
-  const { activity_id } = route.params
-  console.log(activity_id)
+onMounted(async () => {
+  await getDetailForRating()
 })
 
 const ratingForm = reactive({
@@ -59,6 +72,31 @@ const ratingForm = reactive({
   ability: 0,
   credit: 0
 })
+
+const submitRating = async() => {
+  const data = {
+    host_id: activityDetail.value.host_id,
+    user_id: userStore.user.uid,
+    user_comment: ratingForm.comment,
+    rating_heart: ratingForm.overall,
+    rating_kindness: ratingForm.kindness,
+    rating_credit: ratingForm.credit,
+    rating_ability: ratingForm.ability,
+    activity_id: parseInt(route.params.activity_id)
+  }
+  const res = await ratingSubmitAPI(data)
+  if(res.messsage == '資料唯一性衝突'){
+    message.error('你已評價過，無法重複評價')
+  }
+  if(res.status != 201){
+    showSubmitModal.value = false
+    return message.error('評價失敗')
+  }
+  showSubmitModal.value = false
+  message.success('評價成功！')
+  step.value = 2
+}
+const showSubmitModal = ref(false)
 </script>
 
 <template>
@@ -107,23 +145,23 @@ const ratingForm = reactive({
       <!-- 活動區域 -->
       <div class="flex w-full">
         <!-- 照片 -->
-        <div class="flex w-2/3">
-          <img src="https://fakeimg.pl/640x360/cccccc" class="w-full h-auto object-contain" />
+        <div class="flex w-2/3 aspect-video">
+          <img :src="activityDetail.img_url" class="w-full h-full object-cover" />
         </div>
         <!-- 活動資訊 -->
         <div class="w-1/3 ml-2">
           <div class="text-xs">
             <div class="">
               <div class="">活動名稱：</div>
-              <div class="">一起去旅遊</div>
+              <div class="">{{ activityDetail.name }}</div>
             </div>
             <div class="mt-2">
               <div class="">活動日期：</div>
-              <div class="">2024/12/12</div>
+              <div class="">{{ dayjs(activityDetail.event_time).format('YYYY-MM-DD ')}}</div>
             </div>
             <div class="mt-2">
               <div class="">團主：</div>
-              <div class="">阿里山獵犬</div>
+              <div class="">{{ hostInfo.display_name}}</div>
             </div>
           </div>
           <!-- 團主評價 -->
@@ -132,37 +170,37 @@ const ratingForm = reactive({
             <div class="flex justify-between bg-gray-200 px-3 py-1 my-2 rounded-full">
               <div class="flex items-center">親切度</div>
               <div class="flex items-center">
-                <n-rate readonly :default-value="5" color="#B91C1C"
+                <n-rate readonly :value="hostRatingAverage.rating_kindness" :default-value="5" color="#B91C1C"
                   ><HeartSolid class="w-4"
                 /></n-rate>
-                <div class="mx-2 text-xs">4.8 / 5.0</div>
+                <div class="mx-2 text-xs">{{  hostRatingAverage.rating_kindness?.toFixed(1) || '0.0' }} / 5.0</div>
               </div>
             </div>
             <div class="flex justify-between bg-gray-200 px-3 py-1 mb-2 rounded-full">
               <div class="flex items-center">主辦能力</div>
               <div class="flex items-center">
-                <n-rate readonly :default-value="5" color="#B91C1C"
+                <n-rate readonly :value="hostRatingAverage.rating_ability" :default-value="5" color="#B91C1C"
                   ><HeartSolid class="w-4"
                 /></n-rate>
-                <div class="mx-2 text-xs">4.8 / 5.0</div>
+                <div class="mx-2 text-xs">{{ hostRatingAverage.rating_ability?.toFixed(1) || '0.0'}} / 5.0</div>
               </div>
             </div>
             <div class="flex justify-between bg-gray-200 px-3 py-1 mb-2 rounded-full">
               <div class="flex items-center">信用度</div>
               <div class="flex items-center">
-                <n-rate readonly :default-value="5" color="#B91C1C"
+                <n-rate readonly :value="hostRatingAverage.rating_credit" :default-value="5" color="#B91C1C"
                   ><HeartSolid class="w-4"
                 /></n-rate>
-                <div class="mx-2 text-xs">4.8 / 5.0</div>
+                <div class="mx-2 text-xs">{{hostRatingAverage.rating_credit?.toFixed(1) || '0.0'}} / 5.0</div>
               </div>
             </div>
 
             <div class="mt-3 text-xs font-bold text-gray-600">其他用戶對團主評價</div>
-            <div class="mt-1 p-2 bg-gray-200 rounded-xl item">
-              <div class="flex items-center justify-between">
+            <div v-if="latestHostRating" class="mt-1 p-2 bg-gray-200 rounded-xl item">
+              <div  class="flex items-center justify-between">
                 <div class="flex items-center">
-                  <img src="https://fakeimg.pl/60x60/aaaaaa" class="w-6 rounded-full" />
-                  <div class="mx-2 text-xs">東方快遞</div>
+                  <img :src="latestHostRating.users_ratings_user_idTousers.photo_url" class="w-6 h-6 object-cover rounded-full" />
+                  <div class="mx-2 text-xs">{{  latestHostRating.users_ratings_user_idTousers.display_name }}</div>
                 </div>
                 <div class="flex flex-col items-center">
                   <div class="flex items-center">
@@ -177,6 +215,9 @@ const ratingForm = reactive({
                 團主真的超用心的，上次跟他去吃鷄肉飯還不用花錢，而且都介紹很强的小吃，真的很推啦!!
               </div>
             </div>
+            <p v-else class="mt-2" >
+              暫無用戶評價
+            </p>
           </div>
         </div>
       </div>
@@ -185,10 +226,10 @@ const ratingForm = reactive({
         <div>用戶：</div>
         <div class="flex items-center mt-2">
           <img
-            src="https://fakeimg.pl/60x60/aaaaaa"
-            class="w-10 rounded-full border-2 border-white"
+            :src="userStore.user.photo_url"
+            class="w-10 aspect-square object-cover rounded-full border-2 border-white"
           />
-          <div class="mx-2">南港燒臘王</div>
+          <div class="mx-2">{{ userStore.user.display_name }}</div>
         </div>
         <div class="flex mt-3 px-14">
           <div class="text-base w-full">您對於本次揪團的評價為</div>
@@ -244,18 +285,18 @@ const ratingForm = reactive({
         <div>團主：</div>
         <div class="flex items-center mt-2">
           <img
-            src="https://fakeimg.pl/60x60/aaaaaa"
-            class="w-10 rounded-full border-2 border-white"
+            :src="hostInfo.photo_url"
+            class="w-10 object-cover aspect-square rounded-full border-2 border-white"
           />
-          <div class="mx-2">寮國香草冰淇淋</div>
+          <div class="mx-2">{{ hostInfo.display_name }}</div>
         </div>
 
-        <div class="flex items-center mt-3">
+        <!-- <div class="flex items-center mt-3">
           <div class="text-base w-full">您對於本次揪團的評價為</div>
           <n-rate color="#B91C1C">
             <HeartSolid class="w-5 h-5" />
           </n-rate>
-        </div>
+        </div> -->
         <div class="flex items-center mt-3">
           <div class="text-base w-full">如果這次活動滿意，您想追蹤此團主嗎？</div>
           <!-- 還沒追蹤時的顯示 -->
@@ -273,8 +314,21 @@ const ratingForm = reactive({
 
         <div class="flex justify-end items-center mt-10">
           <n-button type="info" @click="backStep0" class="px-5 mx-6 tracking-widest">上一步</n-button>
-          <n-button type="info" @click="goStep2" class="px-5 tracking-widest">下一步</n-button>
+          <n-button type="info" @click="showSubmitModal = true" class="px-5 tracking-widest">送出評價</n-button>
         </div>
+        <n-modal
+          v-model:show="showSubmitModal"
+          preset="dialog"
+          title="你確認要送出評價嗎？"
+          positive-text="送出"
+          negative-text="再檢查一下"
+          @positive-click="submitRating"
+          @negative-click="showSubmitModal = false"
+        >
+          <p>
+            評價一但送出便無法再次編輯
+          </p>
+        </n-modal>
       </div>
       <!-- 完成的介面 -->
       <div v-else-if="step == 2" class="flex flex-col justify-center items-center">
@@ -288,8 +342,8 @@ const ratingForm = reactive({
           </n-result>
         </div>
         <div class="flex items-center w-2/3 h-20 justify-evenly">
-          <n-button type="info">返回首頁</n-button>
-          <n-button type="info">前往個人頁</n-button>
+          <n-button @click="router.push({ name: 'home'})" type="info">返回首頁</n-button>
+          <n-button @click="router.push({ name: 'profile'})" type="info">前往個人頁</n-button>
           <n-button type="info">前往任務中心</n-button>
         </div>
       </div>
