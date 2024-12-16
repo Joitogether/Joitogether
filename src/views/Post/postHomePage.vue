@@ -2,7 +2,7 @@
 import NewPostArea from './component/NewPostArea.vue'
 import { onMounted, reactive, ref } from 'vue'
 import { NSpace, NSelect } from 'naive-ui'
-import { getPostByIdAPI, getPostsByCategoryAPI } from '@/apis/postAPIs'
+import { getPostsByCategoryAPI } from '@/apis/postAPIs'
 import { useRouter } from 'vue-router'
 
 import dayjs from 'dayjs'
@@ -31,10 +31,9 @@ const options = [
   },
 ]
 
+// 文章排序
 const selectValue = ref('newest')
-
 const handleFilterSelect = (value) => {
-  // 這裡可以針對點擊事件做後續處理
   console.log(value)
   selectValue.value = value
 
@@ -66,33 +65,24 @@ const postList = reactive([])
 const fetchPostsByCategory = async () => {
   try {
     const res = await getPostsByCategoryAPI(selectedTag.value)
-    const posts = res.data
 
-    const formattedPosts = await Promise.all(
-      posts.map(async (post) => {
-        const postRes = await getPostByIdAPI(post.post_id)
-        const postData = postRes.data
+    const formattedPosts = res.data.map((post) => ({
+      id: post.post_id,
+      title: post.post_title,
+      content: post.post_content,
+      name: post.users.display_name,
+      avatar: post.users.photo_url,
+      time: post.updated_at,
+      img: post.post_img,
+      commentsCount: post.commentCount,
+      likesCount: post.likeCount,
+    }))
 
-        return {
-          id: post.post_id,
-          title: post.post_title,
-          content: post.post_content,
-          name: postData.users.display_name,
-          avatar: postData.users.photo_url,
-          time: post.updated_at,
-          img: post.post_img,
-          commentsCount: postData.post_comments.length,
-          likesCount: postData.post_likes.length,
-        }
-      }),
-    )
-
-    // 更新postList
+    // // 更新postList
     postList.splice(0, postList.length, ...formattedPosts)
 
     handleFilterSelect(selectValue.value)
-    // fetchCommentsCount()
-    // fetchPostLikes()
+
     console.log(`分類 ${selectedTag.value}文章已更新：`, postList)
   } catch (error) {
     console.error(`撈取分類 ${selectedTag.value} 文章失敗：`, error)
@@ -101,8 +91,6 @@ const fetchPostsByCategory = async () => {
 
 onMounted(async () => {
   await fetchPostsByCategory() // 確保先撈取分類文章
-  // await fetchCommentsCount() // 再撈取留言數
-  // await fetchPostLikes()
 })
 
 const router = useRouter()
@@ -117,10 +105,10 @@ const informPostUpdate = () => {
 </script>
 <template>
   <div class="w-full bg-gray-100">
-    <div class="postsArea w-full mx-auto px-4 bg-white md:w-3/4">
+    <div class="postsArea w-full mx-auto px-4 pt-1 bg-white md:w-3/4 lg:w-1/2">
       <NewPostArea @update="informPostUpdate" />
       <div class="w-full mb-4 md:mb-0 md:py-5">
-        <div class="flex w-full md:min-w-[550px]">
+        <div class="flex w-full md:w-full">
           <p
             @click="handleTagSelect('food')"
             :class="{ 'activated-tag': selectedTag === 'food' }"
@@ -177,7 +165,7 @@ const informPostUpdate = () => {
       <div class="post-posts-area">
         <div v-for="post in postList" :key="post.id" class="">
           <div
-            class="flex flex-col justify-between rounded-md md:flex-row p-4 cursor-pointer border-b border-gray-400 bg-gray-50 md:bg-white"
+            class="flex flex-col justify-between md:flex-row p-4 cursor-pointer border-b border-gray-200 bg-gray-50 md:bg-white"
             @click="handlePostClick(post.id)"
           >
             <!-- 左邊區塊 -->
@@ -226,6 +214,9 @@ const informPostUpdate = () => {
             </div>
           </div>
         </div>
+      </div>
+      <div class="flex justify-center items-center py-4 text-gray-500">
+        <p>你已經到底囉</p>
       </div>
     </div>
   </div>

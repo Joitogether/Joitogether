@@ -358,7 +358,6 @@ const loginGoogle = async () => {
       message.success(`🎉 歡迎，${userStore.user.display_name}！登入成功，太棒了！🎉`)
     }, 1000)
     // 更新 userStore 狀態
-
     router.push('/')
   } catch (error) {
     if (error.message.includes('display_name')) {
@@ -369,13 +368,14 @@ const loginGoogle = async () => {
     }
   }
 }
-
 const loginFacebook = async () => {
   try {
     const user = await loginWithFacebook()
     console.log('Facebook 登入成功！')
     setTimeout(() => {
-      message.success(`🎉 歡迎，${userStore.user.display_name || user.email}！Facebook 登入成功，太棒了！🎉`)
+      message.success(
+        `🎉 歡迎，${userStore.user.display_name || user.email}！Facebook 登入成功，太棒了！🎉`,
+      )
     }, 1000)
     // 更新 userStore 狀態
 

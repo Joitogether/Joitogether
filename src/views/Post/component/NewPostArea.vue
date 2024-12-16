@@ -230,16 +230,6 @@ watch(showModal, (newValue) => {
     </template>
     <template #header>
       <div class="flex flex-row items-center">
-        <div class="flex-shrink-0 hidden md:block md:mb-0 md:mr-8">
-          <n-avatar
-            round
-            :size="100"
-            :src="
-              userStore.user.photoURL ||
-              'https://i.pinimg.com/736x/20/3e/d7/203ed7d8550c2c1c145a2fb24b6fbca3.jpg'
-            "
-          />
-        </div>
         <div class="w-3/4">
           <n-h1 prefix="bar" align-text type="success">
             <n-text type="success">
@@ -250,9 +240,19 @@ watch(showModal, (newValue) => {
       </div>
     </template>
     <template #default>
-      <div class="flex flex-col md:flex-row">
-        <div class="flex flex-col space-y-4">
-          <n-h1 prefix="bar" align-text type="success">
+      <div class="flex flex-row w-full">
+        <div class="flex-shrink-0 hidden md:block md:mb-0 md:mr-8">
+          <n-avatar
+            round
+            :size="140"
+            :src="
+              userStore.user.photoURL ||
+              'https://i.pinimg.com/736x/20/3e/d7/203ed7d8550c2c1c145a2fb24b6fbca3.jpg'
+            "
+          />
+        </div>
+        <div class="flex flex-col justify-center gap-3">
+          <n-h1 prefix="bar" align-text type="success" class="flex justify-center">
             <n-input
               v-model:value="newPostTitle"
               size="large"
@@ -272,6 +272,7 @@ watch(showModal, (newValue) => {
           >
         </div>
       </div>
+
       <div class="p-4 bg-white border border-gray-300 rounded-lg mt-4 mb-4">
         <!-- 上傳圖片按鈕 -->
         <div class="flex justify-center">

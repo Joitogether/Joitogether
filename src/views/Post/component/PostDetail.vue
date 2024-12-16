@@ -352,7 +352,7 @@ onMounted(() => {
 
 <template>
   <div class="bg-gray-100 w-full p-4">
-    <div class="flex items-center relative w-full md:w-3/4 mx-auto">
+    <div class="flex items-center relative w-full md:w-3/4 lg:w-1/2 mx-auto">
       <NavArrowLeft
         stroke-width="2"
         class="w-6 h-6 cursor-pointer"
@@ -396,181 +396,181 @@ onMounted(() => {
       </transition>
     </div>
   </div>
-  <div class="p-6 md:w-3/4 md:mx-auto">
-    <div class="">
-      <p v-if="!isEditing" class="text-xl font-bold">{{ postDetails.title }}</p>
-      <textarea
-        v-else
-        v-model="editPostTitle"
-        class="border p-2 rounded w-full focus:outline-none focus:ring-2 focus:ring-yellow-400"
-        rows="1"
-        style="resize: none"
-        :placeholder="postDetails.title"
-      ></textarea>
-    </div>
-    <div class="">
-      <!-- 發文者的資訊區 -->
-      <div class="flex flex-row items-center mt-4 mb-4">
-        <div class="w-16 h-16 rounded-full overflow-hidden mr-4">
-          <img
-            class="w-full h-full object-cover"
-            alt=""
-            :src="
-              postDetails.avatar ||
-              'https://i.pinimg.com/736x/20/3e/d7/203ed7d8550c2c1c145a2fb24b6fbca3.jpg'
-            "
-          />
-        </div>
-
-        <div>
-          <div class="text-lg">{{ postDetails.name }}</div>
-          <div class="text-sm text-gray-400">
-            {{ dayjs(postDetails.time).format('YYYY-MM-DD HH:mm') }}
-          </div>
-        </div>
-      </div>
-      <!-- 文章資訊區 -->
-      <div class="items-center">
-        <div v-if="!isEditing" class="mb-6 text-base">{{ postDetails.content }}</div>
+  <div class="bg-gray-100">
+    <div class="p-6 md:mx-auto md:w-3/4 lg:w-1/2 bg-white">
+      <div class="">
+        <p v-if="!isEditing" class="text-xl font-bold">{{ postDetails.title }}</p>
         <textarea
           v-else
-          v-model="editPostContent"
+          v-model="editPostTitle"
           class="border p-2 rounded w-full focus:outline-none focus:ring-2 focus:ring-yellow-400"
-          rows="5"
+          rows="1"
           style="resize: none"
-          :placeholder="postDetails.content"
+          :placeholder="postDetails.title"
         ></textarea>
-
-        <div v-if="!isEditing && postDetails.img" class="w-full h-full rounded-lg overflow-hidden">
-          <img class="w-full h-full object-cover" :src="postDetails.img" alt="發文者圖片" />
-        </div>
-        <div v-if="isEditing" class="p-4 bg-white border border-gray-300 rounded-lg mt-4 mb-4">
-          <!-- 上傳圖片按鈕 -->
-          <div class="flex justify-center">
-            <button
-              class="mt-2 bg-green-500 text-white py-2 px-4 rounded-full hover:bg-green-600 focus:outline-none"
-              @click="triggerFileInput"
-            >
-              上傳圖片
-            </button>
-            <input
-              ref="fileInput"
-              type="file"
-              class="hidden"
-              multiple
-              accept="image/*"
-              @change="handleImageUpload"
+      </div>
+      <div class="">
+        <!-- 發文者的資訊區 -->
+        <div class="flex flex-row items-center mt-4 mb-4">
+          <div class="w-16 h-16 rounded-full overflow-hidden mr-4">
+            <img
+              class="w-full h-full object-cover"
+              alt=""
+              :src="
+                postDetails.avatar ||
+                'https://i.pinimg.com/736x/20/3e/d7/203ed7d8550c2c1c145a2fb24b6fbca3.jpg'
+              "
             />
           </div>
 
-          <!-- 圖片預覽 -->
-          <div v-if="imagePreview" class="mt-4 flex justify-center">
-            <div
-              class="relative bg-gray-100 border border-gray-300 rounded-lg overflow-hidden w-32 h-32"
-            >
-              <img :src="imagePreview" alt="圖片預覽" class="w-full h-full object-cover" />
-              <button
-                class="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm hover:bg-red-600 focus:outline-none"
-                @click="removeImage"
-              >
-                ✕
-              </button>
+          <div>
+            <div class="text-lg">{{ postDetails.name }}</div>
+            <div class="text-sm text-gray-400">
+              {{ dayjs(postDetails.time).format('YYYY-MM-DD HH:mm') }}
             </div>
           </div>
         </div>
-        <div class="flex justify-between my-6">
-          <div class="flex">
-            <div class="px-2 text-sm">👍🏻 {{ likesCount }} 讚</div>
-            <div class="px-2 text-sm">💬 {{ commentCount }} 留言</div>
+        <!-- 文章資訊區 -->
+        <div class="items-center">
+          <div v-if="!isEditing" class="mb-6 text-base">{{ postDetails.content }}</div>
+          <textarea
+            v-else
+            v-model="editPostContent"
+            class="border p-2 rounded w-full focus:outline-none focus:ring-2 focus:ring-yellow-400"
+            rows="5"
+            style="resize: none"
+            :placeholder="postDetails.content"
+          ></textarea>
+
+          <div
+            v-if="!isEditing && postDetails.img"
+            class="w-full h-full rounded-lg overflow-hidden"
+          >
+            <img class="w-full h-full object-cover" :src="postDetails.img" alt="發文者圖片" />
           </div>
-        </div>
-
-        <!-- 功能操作區 -->
-        <div class="gap-4 items-center h-12 mb-4">
-          <button
-            class="w-full h-full flex justify-center items-center text-white bg-green-500 rounded-full hover:bg-green-500"
-            @click="toggleLike"
-            :disabled="false"
-          >
-            {{ hasLiked ? '太廢了要收回按讚' : '這篇文章太讚了' }}
-          </button>
-          <!-- <button
-            class="w-1/2 h-full flex justify-center items-center bg-yellow-300 rounded-full hover:bg-yellow-400"
-          >
-            留言
-          </button> -->
-        </div>
-
-        <!-- 留言區 -->
-        <div class="p-3 bg-gray-100 rounded-md shadow-sm">
-          <!-- 新增留言 -->
-          <div class="flex justify-between space-x-3 border-b border-gray-200">
-            <div class="w-14 h-14 rounded-full overflow-hidden flex-shrink-0">
-              <img
-                alt="User Avatar"
-                :src="
-                  userStore.user.photoURL ||
-                  'https://i.pinimg.com/736x/20/3e/d7/203ed7d8550c2c1c145a2fb24b6fbca3.jpg'
-                "
-                class="w-full h-full bg-yellow-200 object-cover"
+          <div v-if="isEditing" class="p-4 bg-white border border-gray-300 rounded-lg mt-4 mb-4">
+            <!-- 上傳圖片按鈕 -->
+            <div class="flex justify-center">
+              <button
+                class="mt-2 bg-green-500 text-white py-2 px-4 rounded-full hover:bg-green-600 focus:outline-none"
+                @click="triggerFileInput"
+              >
+                上傳圖片
+              </button>
+              <input
+                ref="fileInput"
+                type="file"
+                class="hidden"
+                multiple
+                accept="image/*"
+                @change="handleImageUpload"
               />
             </div>
-            <div class="w-full">
-              <!-- <p>{{ userStore.user.displayName }}</p> -->
 
-              <textarea
-                rows="3"
-                v-model="newComment"
-                class="w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-400"
-                placeholder="原本想說點什麼 但想想還是算了"
-                style="resize: none"
-              ></textarea>
-              <div class="">
+            <!-- 圖片預覽 -->
+            <div v-if="imagePreview" class="mt-4 flex justify-center">
+              <div
+                class="relative bg-gray-100 border border-gray-300 rounded-lg overflow-hidden w-32 h-32"
+              >
+                <img :src="imagePreview" alt="圖片預覽" class="w-full h-full object-cover" />
                 <button
-                  @click="addComment"
-                  class="mt-2 px-6 py-2 bg-green-500 text-white rounded-full hover:bg-yellow-400 focus:outline-none mb-3"
+                  class="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm hover:bg-red-600 focus:outline-none"
+                  @click="removeImage"
                 >
-                  送出
+                  ✕
                 </button>
               </div>
             </div>
           </div>
+          <div class="flex justify-between my-6">
+            <div class="flex">
+              <div class="px-2 text-sm">👍🏻 {{ likesCount }} 讚</div>
+              <div class="px-2 text-sm">💬 {{ commentCount }} 留言</div>
+            </div>
+          </div>
 
-          <!-- 留言列表 -->
-          <div v-if="commentList.length" class="space-y-6">
-            <div
-              v-for="comment in commentList"
-              :key="comment.id"
-              class="flex items-start space-x-3 border-b pb-4 mt-6 relative"
+          <!-- 功能操作區 -->
+          <div class="gap-4 items-center h-12 mb-4">
+            <button
+              class="w-full h-full flex justify-center items-center text-white bg-green-500 rounded-full hover:bg-green-500"
+              @click="toggleLike"
+              :disabled="false"
             >
-              <div class="w-14 h-14 rounded-full overflow-hidden flex items-center justify-center">
+              {{ hasLiked ? '太廢了要收回按讚' : '這篇文章太讚了' }}
+            </button>
+          </div>
+
+          <!-- 留言區 -->
+          <div class="p-3 bg-gray-100 rounded-md shadow-sm">
+            <!-- 新增留言 -->
+            <div class="flex justify-between space-x-3 border-b border-gray-200">
+              <div class="w-14 h-14 rounded-full overflow-hidden flex-shrink-0">
                 <img
                   alt="User Avatar"
                   :src="
-                    comment.avatar ||
+                    userStore.user.photoURL ||
                     'https://i.pinimg.com/736x/20/3e/d7/203ed7d8550c2c1c145a2fb24b6fbca3.jpg'
                   "
                   class="w-full h-full bg-yellow-200 object-cover"
                 />
               </div>
-              <div>
-                <p class="font-semibold text-gray-800 text-sm">{{ comment.name }}</p>
-                <p class="text-gray-600 text-base">{{ comment.content }}</p>
-                <p class="text-gray-400 text-sm">{{ dayjs(comment.time).fromNow() }}</p>
+              <div class="w-full">
+                <textarea
+                  rows="3"
+                  v-model="newComment"
+                  class="w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                  placeholder="原本想說點什麼 但想想還是算了"
+                  style="resize: none"
+                ></textarea>
+                <div class="">
+                  <button
+                    @click="addComment"
+                    class="mt-2 px-6 py-2 bg-green-500 text-white rounded-full hover:bg-green-600 focus:outline-none mb-3"
+                  >
+                    送出
+                  </button>
+                </div>
               </div>
-              <n-button
-                v-if="comment.isCommentAuthor"
-                size="tiny"
-                secondary
-                strong
-                class="absolute top-0 right-0"
-                @click="deleteComment(comment.id, comment.uid)"
-              >
-                刪除
-              </n-button>
             </div>
+
+            <!-- 留言列表 -->
+            <div v-if="commentList.length" class="space-y-6">
+              <div
+                v-for="comment in commentList"
+                :key="comment.id"
+                class="flex items-start space-x-3 border-b pb-4 mt-6 relative"
+              >
+                <div
+                  class="w-14 h-14 rounded-full overflow-hidden flex items-center justify-center"
+                >
+                  <img
+                    alt="User Avatar"
+                    :src="
+                      comment.avatar ||
+                      'https://i.pinimg.com/736x/20/3e/d7/203ed7d8550c2c1c145a2fb24b6fbca3.jpg'
+                    "
+                    class="w-full h-full bg-yellow-200 object-cover"
+                  />
+                </div>
+                <div>
+                  <p class="font-semibold text-gray-800 text-sm">{{ comment.name }}</p>
+                  <p class="text-gray-600 text-base">{{ comment.content }}</p>
+                  <p class="text-gray-400 text-sm">{{ dayjs(comment.time).fromNow() }}</p>
+                </div>
+                <n-button
+                  v-if="comment.isCommentAuthor"
+                  size="tiny"
+                  secondary
+                  strong
+                  class="absolute top-0 right-0"
+                  @click="deleteComment(comment.id, comment.uid)"
+                >
+                  刪除
+                </n-button>
+              </div>
+            </div>
+            <p v-else class="text-gray-500 mt-2">目前沒有留言，快來留下第一則吧！</p>
           </div>
-          <p v-else class="text-gray-500 mt-2">目前沒有留言，快來留下第一則吧！</p>
         </div>
       </div>
     </div>
