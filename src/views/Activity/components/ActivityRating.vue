@@ -82,9 +82,11 @@ const submitRating = async () => {
     activity_id: parseInt(route.params.activity_id),
   }
   const res = await ratingSubmitAPI(data)
-  if (res.messsage == '資料唯一性衝突') {
-    message.error('你已評價過，無法重複評價')
+
+  if (res.message === '資料唯一性衝突') {
+    return message.error('你已評價過，無法重複評價')
   }
+
   if (res.status != 201) {
     showSubmitModal.value = false
     return message.error('評價失敗')
@@ -127,14 +129,16 @@ const showSubmitModal = ref(false)
       >
         <div>
           <!-- 團主評價到此頁面的進度顯示-->
-          <div class="flex justify-center items-center text-blue-600 font-bold tracking-widest">
-            <CheckCircleSolid class="mr-1" />團主評價
+          <div :class="{ 'text-blue-600': step == 0, 'text-gray-300': step != 0 }" class="flex justify-center items-center  font-bold tracking-widest">
+            <CheckCircleSolid v-if="step == 0" class="mr-1" />團主評價
+            <CheckCircle v-if="step != 0" class="mr-1" />
           </div>
         </div>
         <div>
           <!-- 還沒到追蹤評價頁面的進度顯示-->
-          <div class="flex justify-center items-center text-gray-300 font-bold tracking-widest">
-            <CheckCircle class="mr-1" />追蹤活動
+          <div :class="{ 'text-blue-600' : step == 1, 'text-gray-300' : step != 1}" class="flex justify-center items-center  font-bold tracking-widest">
+            <CheckCircleSolid v-if="step == 1" class="mr-1" />
+            <CheckCircle v-if="step != 1"  class="mr-1" />追蹤活動
           </div>
           <!-- 到追蹤評價頁面的進度顯示-->
 
@@ -145,7 +149,8 @@ const showSubmitModal = ref(false)
         <div>
           <!-- 還沒到最後完成頁面的進度顯示 -->
           <div class="flex justify-center items-center text-gray-300 font-bold tracking-widest">
-            <CheckCircle class="mr-1" />完成
+            <CheckCircleSolid v-if="step == 2" class="mr-1" />
+            <CheckCircle v-if="step != 2" class="mr-1" />完成
           </div>
           <!-- 到完成介面的進度顯示 -->
           <!-- <div class="flex justify-center items-center text-blue-600 font-bold tracking-widest"><CheckCircleSolid class="mr-1" />完成</div> -->
@@ -257,7 +262,7 @@ const showSubmitModal = ref(false)
                 </div>
               </div>
               <div class="text-xs tracking-wider truncate mt-2 xl:text-base xl:p-1">
-                團主真的超用心的，上次跟他去吃鷄肉飯還不用花錢，而且都介紹很强的小吃，真的很推啦!!
+                {{ latestHostRating.user_comment }}
               </div>
             </div>
             <p v-else class="mt-2 xl:text-base xl:p-1">暫無用戶評價</p>
