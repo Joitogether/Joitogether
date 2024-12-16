@@ -5,12 +5,13 @@ import Home from '@/views/Home/index.vue'
 import PersonInfo from '@/views/MyProfile/component/PersonInfo.vue'
 import PersonActivity from '@/views/MyProfile/component/PersonActivity.vue'
 import PersonPost from '@/views/MyProfile/component/PersonPost.vue'
-import Post from '../views/Post/index.vue'
+import PostHomePage from '../views/Post/postHomePage.vue'
+import PostDetail from '@/views/Post/component/PostDetail.vue'
 import PersonRate from '@/views/MyProfile/component/PersonRate.vue'
 import PersonFollow from '@/views/MyProfile/component/PersonFollow.vue'
 import Activity from '@/views/Activity/index.vue'
 import ActivityDetail from '@/views/Activity/components/ActivityDetail.vue'
-import ActivityCreate from '@/views/Activity/components/ACtivityCreate.vue'
+import ActivityCreate from '@/views/Activity/components/ActivityCreate.vue'
 import ActivityReview from '@/views/Activity/components/ActivityReview.vue'
 import SignupSuccess from '@/views/Login/SignupSuccess.vue'
 import ResetPassword from '@/views/Login/ResetPassword.vue'
@@ -50,7 +51,7 @@ const router = createRouter({
       path: '/',
       name: 'layout',
       component: Layout,
-      redirect: { name: 'home'},
+      redirect: { name: 'home' },
       children: [
         {
           path: '/home',
@@ -93,7 +94,12 @@ const router = createRouter({
         {
           path: '/post',
           name: 'post',
-          component: Post,
+          component: PostHomePage,
+        },
+        {
+          path: '/post/:post_id',
+          name: 'PostDetail',
+          component: PostDetail,
         },
         {
           path: '/activity',
@@ -110,7 +116,7 @@ const router = createRouter({
               name: 'activityCreate',
               component: ActivityCreate,
             },
-    
+
             {
               path: 'review/:activity_id',
               name: 'activityReview',
@@ -118,9 +124,8 @@ const router = createRouter({
             },
           ],
         },
-      ]
+      ],
     },
-
   ],
 })
 
@@ -129,7 +134,5 @@ router.beforeEach(async (to, from, next) => {
   console.log('router觸發了')
   next()
 })
-
-
 
 export default router

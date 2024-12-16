@@ -5,15 +5,20 @@ import { auth } from './firebaseConfig'
 const apiAxios = axios.create({
   baseURL: 'http://localhost:3030',
   timeout: 1000,
-  headers: { 'X-Custom-Header': 'foobar' },
 })
+
+// const apiAxios = axios.create({
+//   baseURL: 'https://main-vervet-sincerely.ngrok-free.app',
+//   timeout: 1000,
+//   headers: { 'ngrok-skip-browser-warning': '69420' },
+// })
 
 apiAxios.interceptors.request.use(
   async function (config) {
-  const token = await getIdToken(auth.currentUser)
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`
-  }
+    const token = await getIdToken(auth.currentUser)
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`
+    }
     return config
   },
   function (error) {

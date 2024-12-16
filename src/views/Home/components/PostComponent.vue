@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import {} from 'naive-ui'
-import { HomePostGetPostAuthorAPI } from '@/apis/postApi.js'
+import { getPostsAPI } from '@/apis/postAPIs'
 const currentPage = ref(1)
 const nextPage = () => {
   if (currentPage.value >= 5) {
@@ -41,7 +41,7 @@ const formatDate = (isoString) => {
 
 // 從 API 獲取資料
 const fetchPosts = async () => {
-  const apiResponse = await HomePostGetPostAuthorAPI()
+  const apiResponse = await getPostsAPI()
   if (apiResponse) {
     posts.value = apiResponse.data.slice(0, 3) // 假設回傳的資料是 { data: [...] }
   } else {

@@ -15,5 +15,4 @@ app.use(pinia)
 app.use(router)
 app.use(Naive)
 
-
 app.mount('#app')
