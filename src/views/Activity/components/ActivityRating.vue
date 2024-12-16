@@ -2,10 +2,10 @@
 import { onMounted, reactive, ref } from 'vue'
 import { useMessage, useDialog, NRate, NSpace, NInput, NModal } from 'naive-ui'
 import { CheckCircle, CheckCircleSolid, HeartSolid } from '@iconoir/vue'
-import { useRoute, useRouter } from 'vue-router';
-import { ratingGetDetailAPI, ratingSubmitAPI } from '@/apis/ratingApi';
-import dayjs from 'dayjs';
-import { useUserStore } from '@/stores/userStore';
+import { useRoute, useRouter } from 'vue-router'
+import { ratingGetDetailAPI, ratingSubmitAPI } from '@/apis/ratingApi'
+import dayjs from 'dayjs'
+import { useUserStore } from '@/stores/userStore'
 
 dayjs.locale('zh-tw')
 const userStore = useUserStore()
@@ -22,7 +22,6 @@ const FollowSuccess = () => {
   clickBtn.value = true
   message.success('您已成功追蹤團主啦~')
 }
-
 
 const clickTheFollowBtn = () => {
   dialog.info({
@@ -50,8 +49,6 @@ const backStep0 = () => {
   step.value = 0
 }
 
-
-
 const getDetailForRating = async () => {
   const { activity_id } = route.params
   const res = await ratingGetDetailAPI(activity_id)
@@ -70,10 +67,10 @@ const ratingForm = reactive({
   overall: 0,
   kindness: 0,
   ability: 0,
-  credit: 0
+  credit: 0,
 })
 
-const submitRating = async() => {
+const submitRating = async () => {
   const data = {
     host_id: activityDetail.value.host_id,
     user_id: userStore.user.uid,
@@ -82,13 +79,13 @@ const submitRating = async() => {
     rating_kindness: ratingForm.kindness,
     rating_credit: ratingForm.credit,
     rating_ability: ratingForm.ability,
-    activity_id: parseInt(route.params.activity_id)
+    activity_id: parseInt(route.params.activity_id),
   }
   const res = await ratingSubmitAPI(data)
-  if(res.messsage == '資料唯一性衝突'){
+  if (res.messsage == '資料唯一性衝突') {
     message.error('你已評價過，無法重複評價')
   }
-  if(res.status != 201){
+  if (res.status != 201) {
     showSubmitModal.value = false
     return message.error('評價失敗')
   }
@@ -100,21 +97,33 @@ const showSubmitModal = ref(false)
 </script>
 
 <template>
-  <body class="bg-gray-50 p-10">
+  <body class="bg-gray-50 p-10 min-w-[400px] ">
     <!-- 活動評價 -->
     <div
-      class="flex flex-col w-[1024px] m-auto p-5 bg-gray-100 rounded-2xl border-2 border-gray-200"
+      class="flex flex-col w-full min-w-[650px] max-w-[1440px] m-auto p-5 bg-gray-100 rounded-2xl border-2 border-gray-200"
     >
-      <div
+      <div v-if="step == 0"
         class="relative px-5 before:content-[''] before:absolute before:left-0 before:top-2 before:bottom-2 before:w-2 before: before:bg-blue-500"
       >
-        <div class="text-lg">活動評價</div>
-        <div class="text-gray-600 text-xl font-bold">本次活動評價</div>
+        <div class="text-sm xl:text-2xl md:text-xl">活動評價</div>
+        <div class="text-gray-600 text-sm font-bold xl:text-3xl md:text-xl">團主評價</div>
+      </div>
+      <div v-else-if="step == 1"  
+        class="relative px-5 before:content-[''] before:absolute before:left-0 before:top-2 before:bottom-2 before:w-2 before: before:bg-blue-500"
+      >
+        <div class="text-sm xl:text-2xl md:text-xl">活動評價</div>
+        <div class="text-gray-600 text-sm font-bold xl:text-3xl md:text-xl">追蹤活動</div>
+      </div>
+      <div v-else-if="step == 2"
+        class="relative px-5 before:content-[''] before:absolute before:left-0 before:top-2 before:bottom-2 before:w-2 before: before:bg-blue-500"
+      >
+        <div class="text-sm xl:text-2xl md:text-xl">活動評價</div>
+        <div class="text-gray-600 text-sm font-bold xl:text-3xl md:text-xl">完成評價</div>
       </div>
 
       <!-- 評分進度 -->
       <div
-        class="flex flex-row w-[400px] justify-around m-auto bg-white border-2 p-1 my-3 rounded-full"
+        class="flex flex-row w-full max-w-[400px] justify-around m-auto bg-white border-2 p-1 my-3 rounded-full xl:text-base xl:py-1 md:text-md sm:text-sm"
       >
         <div>
           <!-- 團主評價到此頁面的進度顯示-->
@@ -143,87 +152,121 @@ const showSubmitModal = ref(false)
         </div>
       </div>
       <!-- 活動區域 -->
-      <div class="flex w-full">
+      <div class="flex w-full min-w-[600px]">
         <!-- 照片 -->
-        <div class="flex w-2/3 aspect-video">
-          <img :src="activityDetail.img_url" class="w-full h-full object-cover" />
+        <div class="flex w-full aspect-video xs:hidden sm:w-full md:w-full lg:flex">
+          <img
+            :src="activityDetail.img_url"
+            class="w-full h-full xs:w-full sm:w-full md:w-full object-cover"
+          />
         </div>
         <!-- 活動資訊 -->
-        <div class="w-1/3 ml-2">
+        <div
+          class="hidden max-w-[500px] ml-2 flex-col xs:hidden sm:hidden md:hidden lg:flex lg:w-1/2"
+        >
           <div class="text-xs">
-            <div class="">
+            <div class="xl:text-base xl:p-1">
               <div class="">活動名稱：</div>
               <div class="">{{ activityDetail.name }}</div>
             </div>
-            <div class="mt-2">
+            <div class="mt-2 xl:text-base xl:p-1">
               <div class="">活動日期：</div>
-              <div class="">{{ dayjs(activityDetail.event_time).format('YYYY-MM-DD ')}}</div>
+              <div class="">{{ dayjs(activityDetail.event_time).format('YYYY-MM-DD ') }}</div>
             </div>
-            <div class="mt-2">
+            <div class="mt-2 xl:text-base xl:p-1">
               <div class="">團主：</div>
-              <div class="">{{ hostInfo.display_name}}</div>
+              <div class="">{{ hostInfo.display_name }}</div>
             </div>
           </div>
           <!-- 團主評價 -->
-          <div class="mt-2 p-3 text-xs bg-white rounded-xl border-2 border-gray-200">
-            <div class="">團主評價</div>
+          <div
+            class="w-full min-w-[270px] mt-2 p-3 text-xs bg-white rounded-xl border-2 border-gray-200"
+          >
+            <div>團主評價</div>
             <div class="flex justify-between bg-gray-200 px-3 py-1 my-2 rounded-full">
-              <div class="flex items-center">親切度</div>
+              <div class="min-w-[60px] flex items-center xl:text-base xl:p-1">親切度</div>
               <div class="flex items-center">
-                <n-rate readonly :value="hostRatingAverage.rating_kindness" :default-value="5" color="#B91C1C"
+                <n-rate
+                  readonly
+                  :value="hostRatingAverage.rating_kindness"
+                  :default-value="5"
+                  color="#B91C1C"
                   ><HeartSolid class="w-4"
                 /></n-rate>
-                <div class="mx-2 text-xs">{{  hostRatingAverage.rating_kindness?.toFixed(1) || '0.0' }} / 5.0</div>
+                <div class="mx-2 text-xs xl:text-base xl:p-1">
+                  {{ hostRatingAverage.rating_kindness?.toFixed(1) || '0.0' }} / 5.0
+                </div>
               </div>
             </div>
             <div class="flex justify-between bg-gray-200 px-3 py-1 mb-2 rounded-full">
-              <div class="flex items-center">主辦能力</div>
+              <div class="min-w-[60px] flex items-center xl:text-base xl:p-1">主辦能力</div>
               <div class="flex items-center">
-                <n-rate readonly :value="hostRatingAverage.rating_ability" :default-value="5" color="#B91C1C"
+                <n-rate
+                  readonly
+                  :value="hostRatingAverage.rating_ability"
+                  :default-value="5"
+                  color="#B91C1C"
                   ><HeartSolid class="w-4"
                 /></n-rate>
-                <div class="mx-2 text-xs">{{ hostRatingAverage.rating_ability?.toFixed(1) || '0.0'}} / 5.0</div>
+                <div class="min-w-[45px] mx-2 text-xs xl:text-base xl:p-1">
+                  {{ hostRatingAverage.rating_ability?.toFixed(1) || '0.0' }} / 5.0
+                </div>
               </div>
             </div>
             <div class="flex justify-between bg-gray-200 px-3 py-1 mb-2 rounded-full">
-              <div class="flex items-center">信用度</div>
+              <div class="min-w-[60px] flex items-center xl:text-base xl:p-1">信用度</div>
               <div class="flex items-center">
-                <n-rate readonly :value="hostRatingAverage.rating_credit" :default-value="5" color="#B91C1C"
+                <n-rate
+                  readonly
+                  :value="hostRatingAverage.rating_credit"
+                  :default-value="5"
+                  color="#B91C1C"
                   ><HeartSolid class="w-4"
                 /></n-rate>
-                <div class="mx-2 text-xs">{{hostRatingAverage.rating_credit?.toFixed(1) || '0.0'}} / 5.0</div>
+                <div class="mx-2 text-xs xl:text-base xl:p-1">
+                  {{ hostRatingAverage.rating_credit?.toFixed(1) || '0.0' }} / 5.0
+                </div>
               </div>
             </div>
 
-            <div class="mt-3 text-xs font-bold text-gray-600">其他用戶對團主評價</div>
+            <div class="mt-3 text-xs font-bold text-gray-600 xl:text-base xl:p-1">
+              其他用戶對團主評價
+            </div>
             <div v-if="latestHostRating" class="mt-1 p-2 bg-gray-200 rounded-xl item">
-              <div  class="flex items-center justify-between">
+              <div class="flex items-center justify-between">
                 <div class="flex items-center">
-                  <img :src="latestHostRating.users_ratings_user_idTousers.photo_url" class="w-6 h-6 object-cover rounded-full" />
-                  <div class="mx-2 text-xs">{{  latestHostRating.users_ratings_user_idTousers.display_name }}</div>
+                  <img
+                    :src="latestHostRating.users_ratings_user_idTousers.photo_url"
+                    class="w-6 h-6 object-cover rounded-full"
+                  />
+                  <div class="mx-2 text-xs">
+                    {{ latestHostRating.users_ratings_user_idTousers.display_name }}
+                  </div>
                 </div>
                 <div class="flex flex-col items-center">
                   <div class="flex items-center">
-                    <n-rate readonly v-model:value="latestHostRating.rating_heart" :default-value="5" color="#B91C1C"
+                    <n-rate
+                      readonly
+                      v-model:value="latestHostRating.rating_heart"
+                      :default-value="5"
+                      color="#B91C1C"
                       ><HeartSolid class="w-2"
                     /></n-rate>
                   </div>
                   <div class="mx-1 text-[10px]">2024/12/14</div>
                 </div>
               </div>
-              <div class="text-xs tracking-wider truncate mt-2">
+              <div class="text-xs tracking-wider truncate mt-2 xl:text-base xl:p-1">
                 團主真的超用心的，上次跟他去吃鷄肉飯還不用花錢，而且都介紹很强的小吃，真的很推啦!!
               </div>
             </div>
-            <p v-else class="mt-2" >
-              暫無用戶評價
-            </p>
+            <p v-else class="mt-2 xl:text-base xl:p-1">暫無用戶評價</p>
           </div>
         </div>
       </div>
       <!-- 用戶在填寫團主評價的資訊 -->
       <div v-if="step == 0" class="mt-5">
-        <div>用戶：</div>
+        <div class="xl:text-base xl:p-1">用戶：</div>
         <div class="flex items-center mt-2">
           <img
             :src="userStore.user.photo_url"
@@ -233,7 +276,7 @@ const showSubmitModal = ref(false)
         </div>
         <div class="flex mt-3 px-14">
           <div class="text-base w-full">您對於本次揪團的評價為</div>
-          <n-rate  clearable v-model:value="ratingForm.overall" color="#B91C1C">
+          <n-rate clearable v-model:value="ratingForm.overall" color="#B91C1C">
             <HeartSolid class="w-5 h-5" />
           </n-rate>
         </div>
@@ -256,10 +299,10 @@ const showSubmitModal = ref(false)
           </n-rate>
         </div>
 
-        <div class="flex flex-col mt-5">
+        <div class="flex flex-col mt-5 xl:text-base">
           <p>留下您想對團主說的話：</p>
           <n-space vertical>
-            <n-input 
+            <n-input
               :autosize="{ minRows: 3, maxRows: 5 }"
               placeholder="該選項為選填，如果沒有特別想留下的話~那就下一步吧"
               type="textarea"
@@ -282,7 +325,8 @@ const showSubmitModal = ref(false)
       </div>
       <!-- 追蹤團主介面 -->
       <div v-else-if="step == 1" class="mt-5">
-        <div>團主：</div>
+        
+        <div class="xl:text-base xl:p-1">團主：</div>
         <div class="flex items-center mt-2">
           <img
             :src="hostInfo.photo_url"
@@ -307,14 +351,18 @@ const showSubmitModal = ref(false)
         <div class="flex items-center mt-3">
           <div class="text-base w-full">您想要追蹤類似的活動嗎？</div>
           <!-- 還沒追蹤時的顯示 -->
-          <n-button strong secondary type="tertiary">追蹤</n-button>
+          <n-button @click="clickTheFollowBtn" strong secondary type="tertiary">追蹤</n-button>
           <!-- 已經追蹤的顯示 -->
           <n-button type="info">已追蹤</n-button>
         </div>
 
         <div class="flex justify-end items-center mt-10">
-          <n-button type="info" @click="backStep0" class="px-5 mx-6 tracking-widest">上一步</n-button>
-          <n-button type="info" @click="showSubmitModal = true" class="px-5 tracking-widest">送出評價</n-button>
+          <n-button type="info" @click="backStep0" class="px-5 mx-6 tracking-widest"
+            >上一步</n-button
+          >
+          <n-button type="info" @click="showSubmitModal = true" class="px-5 tracking-widest"
+            >送出評價</n-button
+          >
         </div>
         <n-modal
           v-model:show="showSubmitModal"
@@ -325,9 +373,7 @@ const showSubmitModal = ref(false)
           @positive-click="submitRating"
           @negative-click="showSubmitModal = false"
         >
-          <p>
-            評價一但送出便無法再次編輯
-          </p>
+          <p>評價一但送出便無法再次編輯</p>
         </n-modal>
       </div>
       <!-- 完成的介面 -->
@@ -342,8 +388,8 @@ const showSubmitModal = ref(false)
           </n-result>
         </div>
         <div class="flex items-center w-2/3 h-20 justify-evenly">
-          <n-button @click="router.push({ name: 'home'})" type="info">返回首頁</n-button>
-          <n-button @click="router.push({ name: 'profile'})" type="info">前往個人頁</n-button>
+          <n-button @click="router.push({ name: 'home' })" type="info">返回首頁</n-button>
+          <n-button @click="router.push({ name: 'profile' })" type="info">前往個人頁</n-button>
           <n-button type="info">前往任務中心</n-button>
         </div>
       </div>
