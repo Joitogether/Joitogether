@@ -68,26 +68,23 @@ onMounted(() => {
 </script>
 
 <template>
-  <div v-if="loading">
-    <n-spin size="medium" />
-    資料正在跑來的路上...
-  </div>
-  <div v-else-if="errorMessage">{{ errorMessage }}</div>
+  <div v-if="errorMessage">{{ errorMessage }}</div>
   <div v-else class="mx-6 py-6">
     <n-tabs type="segment" animated>
       <n-tab-pane name="chap1" tab="關注中">
-        <div v-for="(following, index) in followingList" :key="index" class="followingArea my-5 flex">
-            <div class="me-5 max-w-[44px] max-h-[44px]">
-              <img :src="following.photo_url" class="rounded-full self-center" />
-            </div>
-            <div>
-              <div>{{ following.display_name }}</div>
-              <div>{{ following.favorite_sentence }}</div>
-            </div>
+        <div v-if="following" v-for="(following, index) in followingList" :key="index" class="followingArea my-5 flex">
+          <div class="me-5 max-w-[44px] max-h-[44px]">
+            <img :src="following.photo_url" class="rounded-full self-center" />
+          </div>
+          <div>
+            <div>{{ following.display_name }}</div>
+            <div>{{ following.favorite_sentence }}</div>
+          </div>
         </div>
+        <div v-else>還沒有關注中的人喔！</div>
       </n-tab-pane>
       <n-tab-pane name="chap2" tab="粉絲">
-        <div v-for="follower in followerList" :key="follower.follower_id" class="followerArea my-5 flex">
+        <div v-if="follower" v-for="follower in followerList" :key="follower.follower_id" class="followerArea my-5 flex">
           <div class="me-5 max-w-[44px] max-h-[44px]">
             <img :src="follower.photo_url" class="rounded-full" />
           </div>
@@ -96,6 +93,7 @@ onMounted(() => {
             <div>{{ follower.favorite_sentence }}</div>
           </div>
         </div>
+        <div v-else>還沒有粉絲喔😢</div>
       </n-tab-pane>
     </n-tabs>
   </div>
