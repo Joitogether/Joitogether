@@ -1,50 +1,77 @@
 <script setup>
+  import NavbarComponent from '../Home/components/NavbarComponent.vue';
+  import { UserGetApi } from '@/apis/userAPIs';
+  import { ref } from 'vue'
+  import { useUserStore } from '@/stores/userStore'
 
+
+  const user = ref(null)
+  const userStore = useUserStore()
+  const Amount = ref(0)
+
+  if (userStore.user.isLogin) {
+  const fetchUserData = async () => {
+    try {
+      const result = await UserGetApi(userStore.user.uid)
+
+      if (result) {
+        user.value = result
+        loading.value = false
+        return user.value
+      }
+    } catch (err) {
+      errorMessage.value = err.message || '資料加載錯誤'
+      loading.value = false
+    }
+  }
+  fetchUserData()
+}
 </script>
 <template>
-  <div class="w-[375px] bg-white rounded-lg shadow-md p-4">
-    <header class="flex justify-center items-center mb-6">
-      <h1 class="font-title text-lg text-neutral-950">儲值設定</h1>
-    </header>
-    <section class="mb-6">
-      <div class="flex justify-between items-center">
-        <span class="text-neutral-950 font-medium">開啟自動儲值功能</span>
-        <label class="relative inline-block w-[42px] h-[26px]">
-          <input type="checkbox" class="sr-only peer"/>
-          <span class="absolute inset-0 bg-neutral-300 rounded-full transition peer-checked:bg-primary-500"></span>
-          <span class="absolute top-1 left-1 w-[22px] h-[22px] bg-white rounded-full transition peer-checked:translate-x-full"></span>
-        </label>
+  <header>
+    <NavbarComponent/>
+  </header>
+  <body>
+    <div class=" bg-white shadow">
+      <div class="text-center mb-6">
+        <div class="border-2  rounded-md mt-4 py-4 font-title text-2xl"> 儲值中心 </div>
       </div>
-      <p class="text-neutral-500 text-sm mt-2"> 開啟功能後，當您的全支付帳戶付帳或轉帳餘額不足時，將先計算差額並自動透過您指定的銀行帳戶儲值以順利完成交易。更貼心的是，您可隨時取消此服務。 </p>
-    </section>
-    <section class="mb-6">
-      <span class="text-neutral-950 font-medium">扣款銀行帳戶</span>
-      <div class="border border-neutral-300 rounded-md p-4 flex justify-between items-center mt-2">
-        <span class="text-neutral-950">玉山銀行帳戶</span>
-        <div class="flex items-center">
-          <span class="text-neutral-500 text-sm mr-2">*12345</span>
-          <i class="material-symbols-outlined text-neutral-500">expand_more</i>
+      <div class="flex justify-end items-center mb-6">
+        <button class="border-2  rounded-md px-4 py-2 flex justify-center items-center w-[100px]"> 儲值記錄 </button>
+      </div>
+      <div class="first-area-title flex items-center mb-4">
+        <div class="flex items-center justify-center border-2  rounded-full w-[40px] h-[40px] text-lg"> 1 </div>
+        <span class="ml-4 text-lg">餘額</span>
+      </div>
+      <div class="first-area-bottom grid grid-cols-12 mb-6">
+        <div class="img-container overflow-hidden col-start-2 rounded-full grid- w-16 h-16 aspect-square">
+          <img class="card-img w-full relative" :src="user.photo_url" alt="personImg" />
         </div>
+        <div class="block col-span-2">
+          <div class= "text-lg mb-1">{{ user.display_name }}</div>
+          <div class= "text-lg mb-1">{{ user.email }}</div>
+        </div>
+        <div class="py-2 col-span-2">目前富有程度：💰999</div>
       </div>
-    </section>
-    <section class="mb-6">
-      <div class="flex flex-col space-y-6">
-          <span class="text-neutral-950 font-medium">單筆儲值上限金額</span>
-          <div class="flex items-center border-b border-neutral-300 mt-2">
-            <span class="text-neutral-950 text-xl font-medium">NT$</span>
-            <input type="number" class="ml-2 flex-1 outline-none text-neutral-950 text-xl placeholder-neutral-500" placeholder="0"/>
-          </div>
-          <div>
-            <span class="text-neutral-950 font-medium">每日累積儲值上限金額</span>
-            <div class="flex items-center border-b border-neutral-300 mt-2">
-                <span class="text-neutral-950 text-xl font-medium">NT$</span>
-                <input type="number" class="ml-2 flex-1 outline-none text-neutral-950 text-xl placeholder-neutral-500" placeholder="0"/>
-            </div>
-          </div>
+      <div class="second-area-title flex items-center mb-4">
+        <div class="flex items-center justify-center border-2  rounded-full w-[40px] h-[40px] text-lg"> 2 </div>
+        <span class="ml-4 text-lg">本次儲值金額</span>
       </div>
-    </section>
-      <button class="w-full h-[48px] mt-2 bg-neutral-300 text-neutral-500 rounded-md"> 確認 </button>
-  </div>
+      <div class="second-area-bottom grid grid-cols-4 gap-4 mb-6">
+          <button class="border-2 rounded-md px-6 py-2 text-lg" @click="Amount=100"> 💰100 </button>
+          <button class="border-2 rounded-md px-6 py-2 text-lg" @click="Amount=200"> 💰200 </button>
+          <button class="border-2 rounded-md px-6 py-2 text-lg" @click="Amount=300"> 💰300 </button>
+          <button class="border-2 rounded-md px-6 py-2 text-lg" @click="Amount=500"> 💰500 </button>
+      </div>
+      <div class="flex border-2 rounded-md px-4 py-2 mr-5 mb-10">
+        <p>金額：</p><input type="text" :value="Amount"/>
+      </div>
+      <button class="text-center border-2 rounded-md py-2 px-10 text-lg" @click="createOrder"> 立即儲值 </button>
+    </div>
+  </body>
+
 </template>
 
+<style scoped>
 
+</style>
