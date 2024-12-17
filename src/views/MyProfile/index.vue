@@ -13,9 +13,7 @@ const errorMessage = ref(null)
 
 const fetchUserData = async () => {
   try {
-    const result = await userGetAPI(userUid)
-    console.log('API回傳資料:', result)
-
+    const result = await userGetAPI(userStore.user.uid)
     if (result) {
       user.value = result
       loading.value = false
@@ -27,6 +25,11 @@ const fetchUserData = async () => {
   }
 }
 
+const handleSave = async() => {
+  await fetchUserData()
+  console.log(user.value);
+
+}
 onMounted(() => {
   fetchUserData()
 })
@@ -34,7 +37,6 @@ onMounted(() => {
 const isEditModalOpen = ref(false)
 // 開啟編輯視窗
 const openEditModal = (param) => {
-  console.log(param) // 查看傳遞的參數
   isEditModalOpen.value = true // 顯示編輯視窗
 }
 
@@ -51,8 +53,8 @@ const closeEditModal = () => {
     <NavbarComponent/>
   </header>
   <div class="container mx-auto">
-    <CardList type="users" @edit="openEditModal" @close="closeEditModal" />
-    <EditModal v-if="isEditModalOpen" @close="closeEditModal" @edit="openEditModal" />
+    <CardList type="users" @edit="openEditModal" />
+    <EditModal v-if="isEditModalOpen" @close="closeEditModal" @save="handleSave" />
 
     <div>
       <ul class="flex justify-between px-10 py-5">

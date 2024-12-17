@@ -1,34 +1,27 @@
 <script setup>
 import { NButton, NSpin } from 'naive-ui'
 import { userGetAPI } from '../../../apis/userAPIs'
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useUserStore } from '@/stores/userStore'
 
-defineProps({
+const props = defineProps({
   items: {
-    type: Object,
+    type: Array,
     required: true,
-    default: () => ({
-      display_name: '名字加載中',
-      city: '城市加載中',
-      age: '年齡加載中',
-      career: '職業加載中',
-      favorite_sentence: '喜愛的句子加載中',
-      tag: '標籤加載中',
-    }),
+    default: () => [],
   },
   type: {
     type: String,
     required: true,
-  },
+  }
 })
+
 const user = ref(null)
 const loading = ref(true)
 const errorMessage = ref(null)
 const userStore = useUserStore()
 const showModal = ref(false) // 控制 modal 顯示
 
-if (userStore.user.isLogin) {
   const fetchUserData = async () => {
     try {
       const result = await userGetAPI(userStore.user.uid)
@@ -43,8 +36,10 @@ if (userStore.user.isLogin) {
       loading.value = false
     }
   }
+onMounted(() => {
   fetchUserData()
-}
+
+})
 // 控制 modal 開啟
 const openModal = () => {
   showModal.value = true

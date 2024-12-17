@@ -11,10 +11,12 @@ import {
   NInputNumber,
   NDynamicTags,
   NSelect,
+  useDialog,
+  useMessage
 } from 'naive-ui'
 import { ArrowLeft, ArrowRight } from '@iconoir/vue'
 import { ref, watch, onMounted } from 'vue'
-import { UserPutApi, UserGetApi } from '../../../apis/userAPIs'
+import { userPutAPI, userGetAPI } from '@/apis/userAPIs'
 import { useUserStore } from '@/stores/userStore'
 import { storage } from '@/utils/firebaseConfig'
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage'
@@ -27,6 +29,10 @@ const loading = ref(true)
 const tagsArray = ref([])
 const fileListSec = ref([])
 const fileListAva = ref([])
+const currentRef = ref(1)
+const currentStatus = ref('process')
+const message = useMessage();
+const dialog = useDialog();
 
 const cityOptions = [
   { label: '基隆市', value: '基隆市' },
@@ -70,7 +76,7 @@ const zodiacOptions = [
 
 const fetchUserData = async () => {
   try {
-    const result = await UserGetApi(userStore.user.uid)
+    const result = await userGetAPI(userStore.user.uid)
     if (result) {
       user.value = result
       if (user.value.tags) {
@@ -88,29 +94,20 @@ const fetchUserData = async () => {
     loading.value = false
   }
 }
-//標籤部分阻止按Enter就送出
-const handleEnter = (event) => {
-  const inputValue = event.target.value.trim()
-  if (inputValue && !tagsArray.value.includes(inputValue)) {
-    tagsArray.value.push(inputValue)
-    event.target.value = ''
-  }
-}
 
 //處理大頭照
 const handleAvatarChange = async (fileListAva) => {
   console.log('大頭照檔案變更:', fileListAva)
 
   if (fileListAva.length === 0) {
-    console.log('沒有大頭照檔案被選中')
+    message.error('沒有大頭照檔案被選中')
     return
   }
 
   const avatarFile = fileListAva[0]?.file
-  console.log('選中的大頭照檔案:', avatarFile)
 
   if (!avatarFile) {
-    console.log('大頭照檔案對象不存在')
+    message.error('大頭照檔案對象不存在')
     return
   }
 
@@ -130,42 +127,30 @@ const handleAvatarChange = async (fileListAva) => {
     const filePath = `avatars/${Date.now()}_${avatarFile.name}`
     const fileRef = storageRef(storage, filePath)
 
-    console.log('大頭照開始上傳檔案...', avatarFile.name)
-
     const snapshot = await uploadBytes(fileRef, avatarFile)
     const downloadURL = await getDownloadURL(snapshot.ref)
 
-    console.log('大頭照下載 URL:', downloadURL)
-
     // 更新 user 中的圖片 URL
     user.value.photo_url = downloadURL
-    console.log('更新後的 user:', user.value)
-    // message.success('🎉 圖片上傳成功！');
+    message.success('🎉 圖片上傳成功！');
   } catch (error) {
-    console.error('大頭照上傳失敗:', error.message)
-    // message.error('😭 上傳圖片失敗，請稍後再試。');
+    message.error('大頭照上傳失敗:', error.message)
   }
 }
 
 //處理第一張照片
 const handleFileChange1 = async (fileList) => {
-  console.log('檔案變更:', fileList) // 輸出 fileList 的內容
-
   if (fileList.length === 0) {
-    console.log('沒有檔案被選中')
+    message.error('沒有檔案被選中')
     return
   }
 
   const file = fileList[0]?.file
-  console.log('選中的檔案:', file)
-
   if (!file) {
-    console.log('檔案對象不存在')
+    message.error('檔案對象不存在')
     return
   }
-
   if (file.size > 2 * 1024 * 1024) {
-    // 檢查檔案大小
     message.error('上傳失敗！圖片大小不能超過 2MB 😭')
     return
   }
@@ -181,44 +166,35 @@ const handleFileChange1 = async (fileList) => {
     const filePath = `lifephoto/${Date.now()}_${file.name}`
     const fileRef = storageRef(storage, filePath)
 
-    console.log('開始上傳檔案...', file.name)
-
     const snapshot = await uploadBytes(fileRef, file)
     const downloadURL = await getDownloadURL(snapshot.ref)
 
-    console.log('圖片下載 URL:', downloadURL)
-
     // 更新 user 中的圖片 URL
     user.value.life_photo_1 = downloadURL
-    console.log('更新後的 user:', user.value)
   } catch (error) {
-    console.error('圖片上傳失敗:', error.message)
+    message.error('圖片上傳失敗:', error.message)
   }
 }
 
 // 處理第二張照片
 const handleFileChange2 = async (fileListSec) => {
-  console.log('檔案變更:', fileListSec) // 輸出 fileList 的內容
-
   if (fileListSec.length === 0) {
-    console.log('沒有檔案被選中')
+    message.error('沒有檔案被選中')
     return
   }
 
   // 確保能從 fileList 中正確取得檔案
   const file2 = fileListSec[0]?.file
-  console.log('第二張選中的檔案:', file2)
-
+  message.error('第二張選中的檔案:', file2)
   if (!file2) {
-    console.log('第二張檔案對象不存在')
+    message.error('第二張檔案對象不存在')
     return
   }
-
   if (file2.size > 2 * 1024 * 1024) {
-    // 檢查檔案大小
     message.error('第二張上傳失敗！圖片大小不能超過 2MB 😭')
     return
   }
+
   // 預覽圖片
   const reader = new FileReader()
   reader.onload = (event) => {
@@ -231,21 +207,23 @@ const handleFileChange2 = async (fileListSec) => {
     const filePath = `lifephoto/${Date.now()}_${file2.name}`
     const fileRef = storageRef(storage, filePath)
 
-    console.log('第二張圖片開始上傳檔案...', file2.name)
-
     const snapshot = await uploadBytes(fileRef, file2)
     const downloadURL = await getDownloadURL(snapshot.ref)
 
-    console.log('第二張圖片下載 URL:', downloadURL)
-
     // 更新 user 中的圖片 URL
     user.value.life_photo_2 = downloadURL
-    console.log('第二張上傳後更新後的 user:', user.value)
   } catch (error) {
-    console.error('第二張圖片上傳失敗:', error.message)
+    message.error('第二張圖片上傳失敗:', error.message)
   }
 }
-
+//標籤部分阻止按Enter就送出
+const handleEnter = (event) => {
+  const inputValue = event.target.value.trim()
+  if (inputValue && !tagsArray.value.includes(inputValue)) {
+    tagsArray.value.push(inputValue)
+    event.target.value = ''
+  }
+}
 // 監聽 tagsArray，當 tagsArray 變動時更新 user.tags
 watch(tagsArray, (newTags) => {
   user.value.tags = newTags.join(',')
@@ -257,8 +235,6 @@ onMounted(() => {
   }
 })
 
-const currentRef = ref(1)
-const currentStatus = ref('process')
 // `next` 方法
 const next = () => {
   if (currentRef.value === 1) {
@@ -277,32 +253,35 @@ const prev = () => {
   }
 }
 
-// 控制 modal 開啟
-const openModal = () => {
-  showModal.value = true
-  emit('edit', user.value)
-}
-
 const handleSave = () => {
   user.value.tags = tagsArray.value.join(',')
-  UserPutApi(userStore.user.uid, user.value)
+  userPutAPI(userStore.user.uid, user.value)
     .then((response) => {
-      console.log('res的資料:', response)
       emit('save')
-      window.location.reload()
+      // window.location.reload()
       showModal.value = false
     })
     .catch((error) => {
-      console.error('資料保存錯誤:', error)
+      message.error('資料保存錯誤:', error)
     })
 }
-const warning = () => {
-  alert('警告: 是否確認改天再填?')
+const handleConfirm = () => {
+  dialog.warning({
+    title: "確定下次再填嗎？",
+    content: "本次修改資料將不被保存喔！",
+    positiveText: "确定肯定一定",
+    negativeText: "好啦繼續填",
+    onPositiveClick: () => {
+      emit('close')
+      message.info("等你下次回來");
+      showModal.value = false
+    },
+    onNegativeClick: () => {
+      message.success("請繼續～～～");
+      showModal.value = true
+    }
+  });
 
-  console.log('警告提示已顯示')
-}
-const close = () => {
-  emit('close')
 }
 
 // 用來關閉視窗的函數
@@ -462,7 +441,7 @@ const emit = defineEmits(['close', 'save'])
             </div>
           </div>
           <div class="save flex gap-3 justify-end">
-            <n-button tertiary @click="warning() ; close()">改天再填</n-button>
+            <n-button tertiary @click="handleConfirm()">改天再填</n-button>
             <n-button strong secondary type="primary" @click="handleSave">填好啦！</n-button>
           </div>
         </div>

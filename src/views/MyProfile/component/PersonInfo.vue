@@ -4,47 +4,38 @@ import { ref, onMounted } from 'vue'
 import { NSpin } from 'naive-ui'
 import { useUserStore } from '@/stores/userStore'
 
-defineProps({
+const props = defineProps({
   items: {
-    type: Object,
+    type: Array,
     required: true,
-    default: () => ({
-      life_photo_1: '圖片加載中',
-      life_photo_2: '圖片加載中',
-      self_introduction: '自我介紹加載中',
-      zodiac: '星座加載中',
-      hobby: '興趣加載中',
-      expertise: '專長加載中',
-      interested_in: '興趣活動加載中',
-    }),
+    default: () => [],
   },
   type: {
     type: String,
     required: true,
-  },
+  }
 })
+
 const user = ref(null)
 const loading = ref(true)
 const errorMessage = ref(null)
 const userStore = useUserStore()
-if (userStore.user.isLogin) {
-  const fetchUserData = async () => {
-    try {
-      const result = await userGetAPI(userStore.user.uid)
-      console.log('API回傳資料:', result)
-
-      if (result) {
-        user.value = result
-        loading.value = false
-        return user.value
-      }
-    } catch (err) {
-      errorMessage.value = err.message || '資料加載錯誤'
+const fetchUserData = async () => {
+  try {
+    const result = await userGetAPI(userStore.user.uid)
+    if (result) {
+      user.value = result
       loading.value = false
+      return user.value
     }
+  } catch (err) {
+    errorMessage.value = err.message || '資料加載錯誤'
+    loading.value = false
   }
-  fetchUserData()
 }
+onMounted(() => {
+  fetchUserData()
+})
 </script>
 <template>
   <div v-if="loading">
