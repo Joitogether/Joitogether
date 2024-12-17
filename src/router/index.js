@@ -15,6 +15,7 @@ import ActivityReview from '@/views/Activity/components/ActivityReview.vue'
 import SignupSuccess from '@/views/Login/SignupSuccess.vue'
 import ResetPassword from '@/views/Login/ResetPassword.vue'
 import forgotPassword from '@/views/Login/ForgotPassword.vue'
+import ShoppingCart from '@/views/CashFlow/components/ShoppingCart.vue'
 import { onAuthStateChanged } from 'firebase/auth'
 import { auth } from '@/utils/firebaseConfig.js'
 import { useUserStore } from '@/stores/userStore'
@@ -46,6 +47,11 @@ const router = createRouter({
       path: '/reset-password',
       name: 'resetPassword',
       component: ResetPassword,
+    },
+    {
+      path: '/shoppingcart',
+      name: 'shpopingcart',
+      component: ShoppingCart,
     },
     {
       path: '/profile',
