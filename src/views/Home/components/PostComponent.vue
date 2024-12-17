@@ -3,16 +3,29 @@ import { ref, onMounted } from 'vue'
 import {} from 'naive-ui'
 import { getLatestPostsAPI, getPopularPostsAPI } from '@/apis/postApi'
 import defaultAvatar from '@/assets/avatar.png'
+import { useRoute, useRouter } from 'vue-router'
 
-const postsPerPage = 3 // 每頁顯示 15 個貼文
+const router = useRouter()
 const currentPage = ref(1) // 當前頁碼
 const totalPosts = ref([]) // 全部貼文資料
+const postsPerPage = 3 // 每頁顯示 15 個貼文
 
 const posts = ref([]) // 用來抓貼文
 const latestPosts = ref([]) // 最新貼文
 const popularPosts = ref([]) // 熱門貼文
+const activieTab = ref('latest') //切換
+const goToPostsPage = () => {
+  router.push('/post') // 導航到 /posts 路由
+}
 
-const activieTab = ref('latest')
+const postImgUrl =
+  'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTloBdf4Wa_JxRmW-03mPB_wfP-lBvTGh8-CQ&s'
+const onPostImageError = (event) => {
+  event.target.src = postImgUrl
+}
+const onAvatarImageError = (event) => {
+  event.target.src = defaultAvatar
+}
 
 // 根據當前頁碼更新貼文顯示
 const updatePosts = () => {
@@ -45,7 +58,7 @@ const fetchLatestPostsData = async () => {
     if (response) {
       console.log('fetchLatestPostsData成功', response.data)
       latestPosts.value = response.data
-      totalPosts.value = latestPosts.value // 預設顯示最新貼文
+      totalPosts.value = latestPosts.value
       return updatePosts()
     }
   } catch (error) {
@@ -57,11 +70,16 @@ const fetchPopularPostsData = async () => {
     const response = await getPopularPostsAPI()
     if (response) {
       console.log('fetchPopularPostsData成功', response.data)
+      popularPosts.value = response.data.sort((a, b) => {
+        return b._count.post_likes - a._count.post_likes
+      })
+
+      console.log('排序後的熱門貼文:', popularPosts.value)
       popularPosts.value = response.data
-      totalPosts.value = popularPosts.value // 預設顯示最新貼文
+      totalPosts.value = popularPosts.value
 
       if (activieTab.value === 'popular') {
-        totalPosts.value = popularPosts.value // 如果當前頁籤是熱門貼文，則更新顯示
+        totalPosts.value = popularPosts.value
         updatePosts()
       }
     } else {
@@ -76,14 +94,6 @@ onMounted(() => {
   fetchPopularPostsData()
 })
 
-const postImgUrl =
-  'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTloBdf4Wa_JxRmW-03mPB_wfP-lBvTGh8-CQ&s'
-const onPostImageError = (event) => {
-  event.target.src = postImgUrl
-}
-const onAvatarImageError = (event) => {
-  event.target.src = defaultAvatar
-}
 const formatDate = (isoString) => {
   const date = new Date(isoString)
   return date.toLocaleString('zh-TW', {
@@ -109,22 +119,20 @@ const formatDate = (isoString) => {
         circle
         type="warning"
         @click="switchTab('latest')"
-        :class="activeTab === 'latest' ? 'bg-yellow-500' : 'bg-yellow-400'"
-        class="w-16 text-gray-800 hover:font-bold hover:scale-110 transition-all duration-300"
+        class="w-16 text-gray-700 hover:font-bold hover:scale-110 transition-all duration-300"
         >最新</n-button
       >
       <n-button
         circle
         type="warning"
         @click="switchTab('popular')"
-        :class="activeTab === 'popular' ? 'bg-yellow-500' : 'bg-yellow-400'"
-        class="w-16 text-gray-800 hover:font-bold hover:scale-110 transition-all duration-300 mx-3"
+        class="w-16 text-gray-700 hover:font-bold hover:scale-110 transition-all duration-300 mx-3"
         >熱門</n-button
       >
     </div>
 
     <div class="post-posts-area grid grid-cols-1 gap-4">
-      <div v-for="item in posts" :key="item.id" class="post-onepost">
+      <div @click="goToPostsPage" v-for="item in posts" :key="item.id" class="post-onepost">
         <div class="post-onepost-top flex pt-5 pl-10 items-center cursor-pointer">
           <div class="one-post-img w-10 h-10 rounded-full overflow-hidden">
             <img
@@ -167,6 +175,15 @@ const formatDate = (isoString) => {
       :page-count="Math.min(Math.ceil(totalPosts.length / postsPerPage), 5)"
       @update:page="handlePageChange"
     />
+  </div>
+  <div class="flex justify-center">
+    <n-button
+      circle
+      type="warning"
+      @click="goToPostsPage"
+      class="mt-5 p-2 w-40 text-gray-700 hover:font-bold hover:scale-110 transition-all duration-300"
+      >顯示更多貼文</n-button
+    >
   </div>
 </template>
 <style scoped>
