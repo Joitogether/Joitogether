@@ -2,7 +2,7 @@
 import { ref, watch, defineEmits, onMounted, onBeforeUnmount } from 'vue'
 import { useUserStore } from '@/stores/userStore.js'
 import { createPostAPI } from '@/apis/postAPIs'
-import { useMessage, NButton, NModal, NAvatar } from 'naive-ui'
+import { useMessage, NButton, NModal } from 'naive-ui'
 import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage'
 
 // 版面欄位
@@ -196,14 +196,16 @@ watch(showModal, (newValue) => {
 <template>
   <div class="flex justify-between items-center p-4 border border-gray-300 rounded-md mt-3">
     <div class="w-1/3 flex justify-center">
-      <n-avatar
-        round
-        :size="100"
-        :src="
-          userStore.user.photoURL ||
-          'https://i.pinimg.com/736x/20/3e/d7/203ed7d8550c2c1c145a2fb24b6fbca3.jpg'
-        "
-      />
+      <div class="w-36 h-36 rounded-full object-cover">
+        <img
+          class="w-full h-full object-cover rounded-full"
+          :src="
+            userStore.user.photo_url ||
+            'https://i.pinimg.com/736x/20/3e/d7/203ed7d8550c2c1c145a2fb24b6fbca3.jpg'
+          "
+          alt=""
+        />
+      </div>
     </div>
 
     <div class="w-2/3 flex flex-col justify-center pl-4 mt-4">
@@ -242,14 +244,9 @@ watch(showModal, (newValue) => {
     <template #default>
       <div class="flex flex-row w-full">
         <div class="flex-shrink-0 hidden md:block md:mb-0 md:mr-8">
-          <n-avatar
-            round
-            :size="140"
-            :src="
-              userStore.user.photoURL ||
-              'https://i.pinimg.com/736x/20/3e/d7/203ed7d8550c2c1c145a2fb24b6fbca3.jpg'
-            "
-          />
+          <div class="w-36 h-36 rounded-full overflow-hidden">
+            <img class="w-full h-full object-cover" :src="userStore.user.photo_url" alt="" />
+          </div>
         </div>
         <div class="flex flex-col justify-center gap-3">
           <n-h1 prefix="bar" align-text type="success" class="flex justify-center">

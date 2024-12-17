@@ -34,6 +34,8 @@ const editPostImg = ref('')
 const newComment = ref('')
 const message = useMessage()
 
+console.log('來這裡看看:', userStore)
+
 const likesCount = computed(() => {
   return likesList.value.length || 0
 })
@@ -195,7 +197,7 @@ const fetchPostLikes = async () => {
     console.log(likesList.value)
     console.log(`取得文章 ${postId} 的按讚數成功`, likesList.value)
   } catch (error) {
-    console.error(`${postId}沒有任何按讚紀錄`)
+    console.error(`${postId}沒有任何按讚紀錄`, error)
   }
 }
 
@@ -508,7 +510,7 @@ onMounted(() => {
                 <img
                   alt="User Avatar"
                   :src="
-                    userStore.user.photoURL ||
+                    userStore.user.photo_url ||
                     'https://i.pinimg.com/736x/20/3e/d7/203ed7d8550c2c1c145a2fb24b6fbca3.jpg'
                   "
                   class="w-full h-full bg-yellow-200 object-cover"
