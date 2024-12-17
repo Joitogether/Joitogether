@@ -5,12 +5,13 @@ import Home from '@/views/Home/index.vue'
 import PersonInfo from '@/views/MyProfile/component/PersonInfo.vue'
 import PersonActivity from '@/views/MyProfile/component/PersonActivity.vue'
 import PersonPost from '@/views/MyProfile/component/PersonPost.vue'
-import Post from '../views/Post/index.vue'
+import PostHomePage from '../views/Post/postHomePage.vue'
+import PostDetail from '@/views/Post/component/PostDetail.vue'
 import PersonRate from '@/views/MyProfile/component/PersonRate.vue'
 import PersonFollow from '@/views/MyProfile/component/PersonFollow.vue'
 import Activity from '@/views/Activity/index.vue'
 import ActivityDetail from '@/views/Activity/components/ActivityDetail.vue'
-import ActivityCreate from '@/views/Activity/components/ACtivityCreate.vue'
+import ActivityCreate from '@/views/Activity/components/ActivityCreate.vue'
 import ActivityReview from '@/views/Activity/components/ActivityReview.vue'
 import ActivityRating from '@/views/Activity/components/ActivityRating.vue'
 import SignupSuccess from '@/views/Login/SignupSuccess.vue'
@@ -94,7 +95,12 @@ const router = createRouter({
         {
           path: '/post',
           name: 'post',
-          component: Post,
+          component: PostHomePage,
+        },
+        {
+          path: '/post/:post_id',
+          name: 'PostDetail',
+          component: PostDetail,
         },
         {
           path: '/activity',

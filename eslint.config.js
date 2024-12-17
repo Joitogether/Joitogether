@@ -14,8 +14,8 @@ export default [
   {
     // 新增這個配置區塊
     rules: {
-      "vue/multi-word-component-names": "off"
-    }
+      'vue/multi-word-component-names': 'off',
+    },
   },
   js.configs.recommended,
   ...pluginVue.configs['flat/essential'],
