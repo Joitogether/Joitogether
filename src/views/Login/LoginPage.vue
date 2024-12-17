@@ -627,7 +627,7 @@ const startCooldown = () => {
   }, 1000)
 }
 
-const resendVerificationEmail = async (user) => {
+const resendVerificationEmail = async () => {
   try {
     const auth = getAuth() // 獲取認證實例
     const user = auth.currentUser
