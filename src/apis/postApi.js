@@ -12,7 +12,6 @@ export const getLatestPostsAPI = async () => {
       return
     }
   } catch (error) {
-    // console.error('getLatestPostsAPI 請求失敗:', error)
     return 
   }
 }
@@ -22,14 +21,12 @@ export const getPopularPostsAPI = async () => {
   try {
     const response = await apiAxios.get('/posts/popular')
     if (response && response.status === 200) {
-      console.log('getPopularPostsAPI 請求成功:', response.data.data)
       return response.data.data
     } else {
       console.log('getPopularPostsAPI 返回非 200 狀態碼:', response.status)
       return
     }
   } catch (error) {
-    // console.error('getPopularPostsAPI 請求失敗:', error.message)
     return null
   }
 }

@@ -3,7 +3,7 @@ import { ref, onMounted } from 'vue'
 import {} from 'naive-ui'
 import { getLatestPostsAPI, getPopularPostsAPI } from '@/apis/postApi'
 import defaultAvatar from '@/assets/avatar.png'
-import { useRoute, useRouter } from 'vue-router'
+import { useRouter } from 'vue-router'
 
 const router = useRouter()
 const currentPage = ref(1) // 當前頁碼
@@ -15,8 +15,9 @@ const latestPosts = ref([]) // 最新貼文
 const popularPosts = ref([]) // 熱門貼文
 const activieTab = ref('latest') //切換
 const goToPostsPage = () => {
-  router.push('/post') // 導航到 /posts 路由
+  router.push('/post') //
 }
+
 
 const postImgUrl =
   'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTloBdf4Wa_JxRmW-03mPB_wfP-lBvTGh8-CQ&s'
@@ -89,6 +90,7 @@ const fetchPopularPostsData = async () => {
     console.error('fetchPopularPostsData未抓到', error)
   }
 }
+
 onMounted(() => {
   fetchLatestPostsData()
   fetchPopularPostsData()
@@ -131,9 +133,9 @@ const formatDate = (isoString) => {
       >
     </div>
 
-    <div class="post-posts-area grid grid-cols-1 gap-4">
-      <div @click="goToPostsPage" v-for="item in posts" :key="item.id" class="post-onepost">
-        <div class="post-onepost-top flex pt-5 pl-10 items-center cursor-pointer">
+    <div  class="post-posts-area grid grid-cols-1 gap-4">
+      <div @click="router.push(`/post/${item.post_id}`)" v-for="item in posts" :key="item.id" class="post-onepost">
+        <div  class="post-onepost-top flex pt-5 pl-10 items-center cursor-pointer">
           <div class="one-post-img w-10 h-10 rounded-full overflow-hidden">
             <img
               :src="item.user_photo || defaultAvatar"
