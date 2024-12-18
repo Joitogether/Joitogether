@@ -18,7 +18,6 @@ const goToPostsPage = () => {
   router.push('/post') //
 }
 
-
 const postImgUrl =
   'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTloBdf4Wa_JxRmW-03mPB_wfP-lBvTGh8-CQ&s'
 const onPostImageError = (event) => {
@@ -45,49 +44,34 @@ const switchTab = (tab) => {
   currentPage.value = 1
   if (tab === 'latest') {
     totalPosts.value = latestPosts.value
-    console.log('切換最新', totalPosts.value)
   } else {
     totalPosts.value = popularPosts.value
-    console.log('切換熱門', totalPosts.value)
   }
   updatePosts()
 }
 
 const fetchLatestPostsData = async () => {
-  try {
-    const response = await getLatestPostsAPI()
-    if (response) {
-      console.log('fetchLatestPostsData成功', response.data)
-      latestPosts.value = response.data
-      totalPosts.value = latestPosts.value
-      return updatePosts()
-    }
-  } catch (error) {
-    console.error('fetchLatestPostsData未抓到', error)
+  const response = await getLatestPostsAPI()
+  if (response) {
+    latestPosts.value = response.data
+    totalPosts.value = latestPosts.value
+    return updatePosts()
   }
 }
+
 const fetchPopularPostsData = async () => {
-  try {
-    const response = await getPopularPostsAPI()
-    if (response) {
-      console.log('fetchPopularPostsData成功', response.data)
-      popularPosts.value = response.data.sort((a, b) => {
-        return b._count.post_likes - a._count.post_likes
-      })
-
-      console.log('排序後的熱門貼文:', popularPosts.value)
-      popularPosts.value = response.data
+  const response = await getPopularPostsAPI()
+  if (response) {
+    popularPosts.value = response.data.sort((a, b) => {
+      return b._count.post_likes - a._count.post_likes
+    })
+    totalPosts.value = popularPosts.value
+    if (activieTab.value === 'popular') {
       totalPosts.value = popularPosts.value
-
-      if (activieTab.value === 'popular') {
-        totalPosts.value = popularPosts.value
-        updatePosts()
-      }
-    } else {
-      console.log('fetchPopularPostsData失敗')
+      updatePosts()
     }
-  } catch (error) {
-    console.error('fetchPopularPostsData未抓到', error)
+  } else {
+    console.log('fetchPopularPostsData失敗')
   }
 }
 
@@ -133,9 +117,14 @@ const formatDate = (isoString) => {
       >
     </div>
 
-    <div  class="post-posts-area grid grid-cols-1 gap-4">
-      <div @click="router.push(`/post/${item.post_id}`)" v-for="item in posts" :key="item.id" class="post-onepost">
-        <div  class="post-onepost-top flex pt-5 pl-10 items-center cursor-pointer">
+    <div class="post-posts-area grid grid-cols-1 gap-4">
+      <div
+        @click="router.push(`/post/${item.post_id}`)"
+        v-for="item in posts"
+        :key="item.id"
+        class="post-onepost"
+      >
+        <div class="post-onepost-top flex pt-5 pl-10 items-center cursor-pointer">
           <div class="one-post-img w-10 h-10 rounded-full overflow-hidden">
             <img
               :src="item.user_photo || defaultAvatar"
