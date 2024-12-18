@@ -10,7 +10,7 @@ import ActivityCard from '@/views/components/ActivityCard.vue';
 import router from '@/router';
 import { useRoute } from 'vue-router';
 import { useUserStore } from '@/stores/userStore';
-import { activityCancelRegisterAPI, activityGetDetailAPI, activityRegisterAPI, activityCancelAPI, activityNewCommentAPI, activityDeleteCommentAPI } from '@/apis/activityApi';
+import { activityCancelRegisterAPI, activityGetDetailAPI, activityRegisterAPI, activityCancelAPI, activityNewCommentAPI, activityDeleteCommentAPI } from '@/apis/activityApi.js';
 import { useSocketStore } from '@/stores/socketStore';
 
 dayjs.locale('zh-tw')
@@ -67,12 +67,12 @@ const payment = computed(() => {
 const registerCount = computed(() => {
   // 不用審核的用，報名人數就是validated的人數，
   if(!activity.value.require_approval){
-    return activity.value.participants.reduce((count, application) => {
+    return activity.value.applications.reduce((count, application) => {
       return count + application.register_validated
     }, 0)
   }
   // 要審核的話，報名人數就是在表單裡有出現且為Registered的
-  return activity.value.particiapnts.reduce((count, application) => {
+  return activity.value.applications.reduce((count, application) => {
     if(application.status === 'registered'){
       return count++
     }
@@ -285,7 +285,7 @@ const handleDropSelect = async (key, comment_id) => {
           </div>
           <span class="text-sm text-red-500">{{ `最後審核時間 ${dayjs(activity.approval_deadline).format('YYYY年MM月DD日dddd HH:mm')}` }}</span>
           <p v-if="activity.status === 'registrationOpen'" class="font-bold text-lg text-end">{{ `${registerCount}人報名` }}</p>
-          <div v-if="activity.status === 'registrationOpen'">
+          <div v-if="activity.status === 'registrationOpen' ">
             <div v-if="isHost">
               <NButton v-if="activity.require_approval" class="w-full mt-3 font-bold text-lg py-5" round type="primary" @click="toggleReviewModal">審核報名</NButton>
               <NButton v-else class="w-full mt-3 font-bold text-lg py-5" round type="primary" @click="toggleReviewModal">瀏覽報名</NButton>
