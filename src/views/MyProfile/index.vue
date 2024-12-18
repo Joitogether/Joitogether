@@ -1,13 +1,19 @@
 <script async setup>
 import { ref, onMounted } from 'vue'
 import { ProfileCircle, BrightStar, Heart, Post, Group } from '@iconoir/vue'
-import { RouterLink, RouterView } from 'vue-router'
 import CardList from './component/CardList.vue'
 import EditModal from './component/EditModal.vue'
+import PersonInfo from './component/PersonInfo.vue'
+import PersonRate from './component/PersonRate.vue'
+import PersonFollow from './component/PersonFollow.vue'
+import PersonPost from './component/PersonPost.vue'
+import PersonActivity from './component/PersonActivity.vue'
 import NavbarComponent from '../Home/components/NavbarComponent.vue'
 import { userGetAPI } from '@/apis/userAPIs'
+import { useUserStore } from '@/stores/userStore'
 
-const user = ref(null)
+const userStore = useUserStore()
+const user = ref({})
 const loading = ref(true)
 const errorMessage = ref(null)
 
@@ -16,6 +22,7 @@ const fetchUserData = async () => {
     const result = await userGetAPI(userStore.user.uid)
     if (result) {
       user.value = result
+
       loading.value = false
       return user.value
     }
@@ -27,12 +34,12 @@ const fetchUserData = async () => {
 
 const handleSave = async() => {
   await fetchUserData()
-  console.log(user.value);
+  isEditModalOpen.value = false
 
 }
-onMounted(() => {
-  fetchUserData()
-})
+onMounted(async () => {
+  await fetchUserData();
+});
 
 const isEditModalOpen = ref(false)
 // 開啟編輯視窗
@@ -44,6 +51,7 @@ const openEditModal = (param) => {
 const closeEditModal = () => {
   isEditModalOpen.value = false
 }
+const currentPage = ref('PersonInfo');
 
 
 </script>
@@ -53,64 +61,53 @@ const closeEditModal = () => {
     <NavbarComponent/>
   </header>
   <div class="container mx-auto">
-    <CardList type="users" @edit="openEditModal" />
+    <CardList
+    :display_name="user.display_name"
+    :age="user.age"
+    :career="user.career"
+    :city="user.city"
+    :favorite_sentence="user.favorite_sentence"
+    :tags="user.tags"
+    :photo_url="user.photo_url"
+    @edit="openEditModal" />
     <EditModal v-if="isEditModalOpen" @close="closeEditModal" @save="handleSave" />
-
-    <div>
-      <ul class="flex justify-between px-10 py-5">
-        <li
-          class="hover:cursor-pointer w-24"
-          :class="{
-            'border-b-4 border-solid border-green-600': $route.path === '/profile/personInfo',
-          }"
-        >
-          <RouterLink to="/profile/personInfo"
-            ><ProfileCircle class="justify-self-center"
-          /></RouterLink>
-        </li>
-        <li
-          class="hover:cursor-pointer w-24"
-          :class="{
-            'border-b-4 border-solid border-green-600': $route.path === '/profile/personalrate',
-          }"
-        >
-          <RouterLink to="/profile/personalrate"
-            ><BrightStar class="justify-self-center"
-          /></RouterLink>
-        </li>
-        <li
-          class="hover:cursor-pointer w-24"
-          :class="{
-            'border-b-4 border-solid border-green-600': $route.path === '/profile/personfollow',
-          }"
-        >
-          <RouterLink to="/profile/personfollow">
-            <Heart class="justify-self-center" />
-          </RouterLink>
-        </li>
-        <li
-          class="hover:cursor-pointer w-24"
-          :class="{
-            'border-b-4 border-solid border-green-600': $route.path === '/profile/personpost',
-          }"
-        >
-          <RouterLink to="/profile/personpost"><Post class="justify-self-center" /></RouterLink>
-        </li>
-        <li
-          class="hover:cursor-pointer w-24"
-          :class="{
-            'border-b-4 border-solid border-green-600': $route.path === '/profile/personActivity',
-          }"
-        >
-          <RouterLink to="/profile/personActivity"
-            ><Group class="justify-self-center"
-          /></RouterLink>
-        </li>
-      </ul>
+    <div class="flex justify-between px-10 py-5">
+      <button
+      @click="currentPage = 'PersonInfo'"
+      :class="{'text-green-600': currentPage === 'PersonInfo'}">
+        <ProfileCircle class="justify-self-center"/>
+      </button >
+      <button @click="currentPage = 'PersonRate'"
+      :class="{'text-green-600': currentPage === 'PersonRate'}">
+        <BrightStar class="justify-self-center"/>
+      </button >
+      <button @click="currentPage = 'PersonFollow'"
+      :class="{'text-green-600': currentPage === 'PersonFollow'}">
+        <Heart class="justify-self-center"/>
+      </button >
+      <button @click="currentPage = 'PersonPost'"
+      :class="{'text-green-600': currentPage === 'PersonPost'}">
+        <Post class="justify-self-center"/>
+      </button >
+      <button @click="currentPage = 'PersonActivity'"
+      :class="{'text-green-600': currentPage === 'PersonActivity'}">
+        <Group class="justify-self-center"/>
+      </button >
     </div>
-    <div class="border">
-      <router-view></router-view>
-    </div>
+    <PersonInfo
+    v-if="currentPage === 'PersonInfo'"
+    :life_photo_1="user.life_photo_1"
+    :life_photo_2="user.life_photo_2"
+    :self_introduction="user.self_introduction"
+    :zodiac="user.zodiac"
+    :hobby="user.hobby"
+    :expertise="user.expertise"
+    :interested_in="user.interested_in"
+    />
+    <PersonRate v-if="currentPage === 'PersonRate'"/>
+    <PersonFollow v-if="currentPage === 'PersonFollow'"/>
+    <PersonPost v-if="currentPage === 'PersonPost'"/>
+    <PersonActivity v-if="currentPage === 'PersonActivity'"/>
   </div>
 </template>
 

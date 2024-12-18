@@ -257,9 +257,8 @@ const handleSave = () => {
   user.value.tags = tagsArray.value.join(',')
   userPutAPI(userStore.user.uid, user.value)
     .then((response) => {
-      emit('save')
-      // window.location.reload()
       showModal.value = false
+      emit('save')
     })
     .catch((error) => {
       message.error('資料保存錯誤:', error)
@@ -281,7 +280,6 @@ const handleConfirm = () => {
       showModal.value = true
     }
   });
-
 }
 
 // 用來關閉視窗的函數
