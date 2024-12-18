@@ -25,7 +25,7 @@ export const activityGetDetailAPI = async (activityId) => {
     if (response && response.status === 200) {
       return response.data.data
     }
-  } catch (err) {
+  } catch{
     //沒抓到
     return null
   }
@@ -45,7 +45,7 @@ export const activityGetAPI = async () => {
     if (response && response.status === 200) {
       return response.data.data
     }
-  } catch (err) {
+  } catch {
     //沒抓到
     return null
   }
