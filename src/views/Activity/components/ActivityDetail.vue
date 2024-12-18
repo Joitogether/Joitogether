@@ -287,7 +287,8 @@ const handleDropSelect = async (key, comment_id) => {
           <p v-if="activity.status === 'registrationOpen'" class="font-bold text-lg text-end">{{ `${registerCount}人報名` }}</p>
           <div v-if="activity.status === 'registrationOpen'">
             <div v-if="isHost">
-              <NButton  class="w-full mt-3 font-bold text-lg py-5" round type="primary" @click="toggleReviewModal">審核</NButton>
+              <NButton v-if="activity.require_approval" class="w-full mt-3 font-bold text-lg py-5" round type="primary" @click="toggleReviewModal">審核報名</NButton>
+              <NButton v-else class="w-full mt-3 font-bold text-lg py-5" round type="primary" @click="toggleReviewModal">瀏覽報名</NButton>
               <NButton  class="w-full mt-3 font-bold text-lg py-5" round type="warning" @click="toggleCancelModal">取消活動</NButton>
             </div>
             <div v-else>
