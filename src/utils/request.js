@@ -15,6 +15,9 @@ const apiAxios = axios.create({
 
 apiAxios.interceptors.request.use(
   async function (config) {
+    if(!auth.currentUser){
+      return config
+    }
     const token = await getIdToken(auth.currentUser)
     if (token) {
       config.headers.Authorization = `Bearer ${token}`

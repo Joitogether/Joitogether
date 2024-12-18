@@ -19,6 +19,7 @@ const route = useRoute()
 const userComment = ref('')
 const registerComment = ref('')
 const activityId = route.params.id
+const recentActivities = ref([])
 async function getActivityDetail(){
   const activityDetail = await activityGetDetailAPI(activityId)
 
@@ -32,6 +33,7 @@ async function getActivityDetail(){
   activity.value = activityDetail
   host.value = activityDetail.host_info
   comments.value = activityDetail.comments
+  recentActivities.value = activityDetail.recent_activities
 }
 
 
@@ -45,36 +47,9 @@ const { previewMap } = useGoogleMaps(apiKey);
 const searchQuery= ref("");
 
 
-const activity = ref({
-  id: 'unique-activity-id',
-  name: '一起去玩水', // 活動名稱
-  img_url: 'https://www.welcometw.com/wp-content/uploads/2022/06/%E7%B6%B2%E7%BE%8E%E8%80%81%E6%9C%A8@sshihhan-850x638.jpg', // 活動照片網址
-  location: '261宜蘭縣頭城鎮濱海路二段6號',
-  host_id: 'uid', // 團主 ID
-  description: "一場帶你品嘗台北美味夜市小吃的活動。",
-  max_participants: 5, // 最大人數
-  min_participants: 2, // 最小人數
-  category: 'travel',
-  status: 'ongoing', // 活動狀態    registrationOpen|onGoing|completed|cancelled
-  price: 100, // 活動費用，0 表示免費
-  pay_type: 'free', // 付款方式 free|AA|host
-  require_approval: true, // 是否需要審核
-  approval_deadline: "2024-12-08T23:59:59.000Z", // 最後審核日期
-  event_time: "2024-12-08T23:59:59.000Z",
-  participants: [],
-})
+const activity = ref({})
 
 const host = ref({})
-
-const user = ref({
-  uid: 'zm5skjX4z7WTal4x6m7f6Ae0zzE2',
-  email: 'mbg@dghuifr.voh',
-  email_verified: false,
-  full_name: '張曉明',
-  display_name: '小明123',
-  phone_number: 1232312312,
-  photo_url: 'https://via.placeholder.com/150',
-})
 
 const payment = computed(() => {
   switch (activity.value.pay_type) {
@@ -90,24 +65,26 @@ const payment = computed(() => {
 })
 
 const registerCount = computed(() => {
-  return activity.value.participants.reduce((count ,application) => {
-    if(application.status == 'registered' || application.status == 'approved'){
-      count++
+  // 不用審核的用，報名人數就是validated的人數，
+  if(!activity.value.require_approval){
+    return activity.value.participants.reduce((count, application) => {
+      return count + application.register_validated
+    }, 0)
+  }
+  // 要審核的話，報名人數就是在表單裡有出現且為Registered的
+  return activity.value.particiapnts.reduce((count, application) => {
+    if(application.status === 'registered'){
+      return count++
     }
     return count
-  } ,0)
+  }, 0)
 })
 
 const clearComment = () => {
   userComment.value = ''
 }
 
-const comments = ref({
-  uid: 'zm5skjX4z7WTal4x6m7f6Ae0zzE2',
-  user_comment: '一起去吧!',
-  photo_url: 'https://via.placeholder.com/150',
-  display_name: '小明123',
-})
+const comments = ref()
 
 const showRegisterModal = ref(false)
 const toggleRegisterModal = () => {
@@ -117,7 +94,8 @@ const toggleRegisterModal = () => {
 const registerActivity = async () => {
   const data = {
     participant_id: userStore.user.uid, //這裡記得改成pinia定義的user
-    comment: registerComment.value
+    comment: registerComment.value,
+    register_validated: !activity.value.require_approval && !activity.value.require_payment ? 1 : 0
   }
   // 等登入那部份處理好
   // if(!userStore.user.isLogin){
@@ -127,7 +105,11 @@ const registerActivity = async () => {
 
   const res = await activityRegisterAPI(activityId, data)
   if(res.status !== 201){
-    message.error('報名失敗')
+    if(res.message === '報名上限已達'){
+      message.error('報名已達上限')
+    }else{
+      message.error('報名失敗')
+    }
     toggleRegisterModal()
     return
   }
@@ -150,7 +132,7 @@ const registerActivity = async () => {
 }
 // 根據活動判斷當前使用者是否為主辦者
 const isHost = computed(() => {
-  return activity.value.host_id === user.value.uid
+  return activity.value.host_id === userStore.user.uid
 })
 
 
@@ -158,7 +140,6 @@ onMounted(async() => {
   await getActivityDetail()
   searchQuery.value = activity.value.location;
   await previewMap(searchQuery.value);
-  user.value = userStore.user
 })
 // 根據抓取回來的資料判斷使用者是否已註冊該活動
 const isRegistered = computed(() => {
@@ -244,6 +225,15 @@ const submitComment = async () => {
   clearComment()
 }
 
+const addToCart = () => {
+  const data = {
+    activity_id: activity.value.id,
+    uid: userStore.user.uid
+  }
+  console.log('加到購物車', data)
+  toggleRegisterModal()
+}
+
 const options = [
   {
     label: '刪除',
@@ -268,7 +258,7 @@ const handleDropSelect = async (key, comment_id) => {
 
 </script>
 <template>
-  <div class="bg-[#E5E7EB]">
+  <div v-if="activity.id" class="bg-[#E5E7EB]">
     <div class="container" >
       <div class="detail-container">
         <div class="flex items-center mb-4 w-full">
@@ -279,7 +269,7 @@ const handleDropSelect = async (key, comment_id) => {
             <img class="w-14 aspect-square rounded-full" :src="host.photo_url" alt="">
             <div class="ml-3 relative w-full h-14">
               <p class="font-bold text-lg absolute top-0">{{ host.display_name }}</p>
-              <p class="absolute bottom-0">新北市 • 45 • 員工</p>
+              <p class="absolute bottom-0">{{`${userStore.user.city} • ${userStore.user.age} • ${userStore.user.career}`}}</p>
             </div>
           </div>
 
@@ -338,6 +328,43 @@ const handleDropSelect = async (key, comment_id) => {
             @positive-click="onCancelPositiveClick"
             @negative-click="onCancelNegativeClick"
           />
+          <n-modal
+            class="rounded-lg"
+            v-model:show="showRegisterModal"
+            :auto-focus="false"
+          >
+            <n-card
+              v-if="!activity.require_payment"
+              style="width: 500px"
+              title="報名活動"
+              :bordered="false"
+              size="huge"
+              role="dialog"
+              aria-modal="true"
+              >
+
+              <NInput :autosize="{ minRows: 3, maxRows: 5 }" :show-count="true" v-model:value="registerComment" :maxlength="50" :clearable="true" type="textarea" placeholder="告訴團主你為什麼想參加吧！"></NInput>
+              <template #footer>
+                <NButton @click="registerActivity" type="primary" round class="font-bold w-full">報名</NButton>
+                <NButton type="secondary" round class="font-bold mt-2 w-full" @click="toggleRegisterModal">取消</NButton>
+              </template>
+            </n-card>
+            <n-card 
+              v-else
+              style="width: 500px; "
+              title="報名活動"
+              :bordered="false"
+              size="huge"
+              role="dialog"
+              aria-modal="true"              
+              >  
+              該活動需要先付費完成才視同報名成功，是否將活動加入購物車？
+              <template #footer>
+                <NButton  type="primary" round class="font-bold w-full" @click="addToCart">加到購物車</NButton>
+                <NButton type="secondary" round class="font-bold mt-2 w-full" @click="toggleRegisterModal">取消</NButton>
+              </template>
+            </n-card>
+          </n-modal>
           <p class="py-8 leading-6">{{ activity.description }}</p>
           <ul class="flex justify-around text-md border border-gray-200/100 rounded-lg p-2">
             <li class="flex flex-col items-center">
@@ -395,42 +422,20 @@ const handleDropSelect = async (key, comment_id) => {
       <div class="cards-container  px-[2%] ">
         <h2 class="text-2xl font-bold mb-10">近期活動</h2>
         <ActivityCard
-          v-for="(items, index) in 5"
-          :key="index"
-
+          v-for="item in recentActivities"
+          :key="item.img_url"
           horizontal="true"
-          :title="activity.name"
-          :actImgUrl="activity.img_url"
-          :location="activity.location"
-          :dateTime="dayjs(activity.event_time).format('YYYY年MM月DD日')"
+          :title="item.name"
+          :actImgUrl="item.photo_url"
+          :location="item.location"
+          :dateTime="dayjs(item.event_time).format('YYYY年MM月DD日')"
           :participants="registerCount"
-          :host="activity.host_id"
+          :host="item.users.display_name"
           :imageHeight="'100%'"
+          :hostImgUrl="item.users.photo_url"
           class="mb-[3%] h-36"
         ></ActivityCard>
       </div>
-      <NModal
-        class="rounded-lg"
-        v-model:show="showRegisterModal"
-        :auto-focus="false"
-      >
-        <n-card
-          style="width: 500px"
-          title="報名活動"
-          :bordered="false"
-          size="huge"
-          role="dialog"
-          aria-modal="true"
-        >
-
-          <NInput :autosize="{ minRows: 3, maxRows: 5 }" :show-count="true" v-model:value="registerComment" :maxlength="50" :clearable="true" type="textarea" placeholder="告訴團主你為什麼想參加吧！"></NInput>
-          <template #footer>
-            <NButton @click="registerActivity" type="primary" round class="font-bold w-full">報名</NButton>
-            <NButton type="secondary" round class="font-bold mt-2 w-full" @click="toggleRegisterModal">取消</NButton>
-          </template>
-        </n-card>
-      </NModal>
-
     </div>
   </div>
 
