@@ -95,17 +95,13 @@ const fetchUserData = async () => {
   }
 }
 
-//處理大頭照
 const handleAvatarChange = async (fileListAva) => {
-  console.log('大頭照檔案變更:', fileListAva)
-
   if (fileListAva.length === 0) {
     message.error('沒有大頭照檔案被選中')
     return
   }
 
   const avatarFile = fileListAva[0]?.file
-
   if (!avatarFile) {
     message.error('大頭照檔案對象不存在')
     return
@@ -115,7 +111,7 @@ const handleAvatarChange = async (fileListAva) => {
     message.error('上傳失敗！圖片大小不能超過 2MB 😭')
     return
   }
-  // 預覽圖片
+
   const reader = new FileReader()
   reader.onload = (event) => {
     user.value.photo_url = event.target.result
@@ -123,14 +119,12 @@ const handleAvatarChange = async (fileListAva) => {
   reader.readAsDataURL(avatarFile)
 
   try {
-    // 設定圖片文件的存儲路徑
     const filePath = `avatars/${Date.now()}_${avatarFile.name}`
     const fileRef = storageRef(storage, filePath)
 
     const snapshot = await uploadBytes(fileRef, avatarFile)
     const downloadURL = await getDownloadURL(snapshot.ref)
 
-    // 更新 user 中的圖片 URL
     user.value.photo_url = downloadURL
     message.success('🎉 圖片上傳成功！');
   } catch (error) {
@@ -138,7 +132,6 @@ const handleAvatarChange = async (fileListAva) => {
   }
 }
 
-//處理第一張照片
 const handleFileChange1 = async (fileList) => {
   if (fileList.length === 0) {
     message.error('沒有檔案被選中')
@@ -154,7 +147,7 @@ const handleFileChange1 = async (fileList) => {
     message.error('上傳失敗！圖片大小不能超過 2MB 😭')
     return
   }
-  // 預覽圖片
+
   const reader = new FileReader()
   reader.onload = (event) => {
     user.value.life_photo_1 = event.target.result
@@ -162,28 +155,24 @@ const handleFileChange1 = async (fileList) => {
   reader.readAsDataURL(file)
 
   try {
-    // 設定圖片文件的存儲路徑
     const filePath = `lifephoto/${Date.now()}_${file.name}`
     const fileRef = storageRef(storage, filePath)
 
     const snapshot = await uploadBytes(fileRef, file)
     const downloadURL = await getDownloadURL(snapshot.ref)
 
-    // 更新 user 中的圖片 URL
     user.value.life_photo_1 = downloadURL
   } catch (error) {
     message.error('圖片上傳失敗:', error.message)
   }
 }
 
-// 處理第二張照片
 const handleFileChange2 = async (fileListSec) => {
   if (fileListSec.length === 0) {
     message.error('沒有檔案被選中')
     return
   }
 
-  // 確保能從 fileList 中正確取得檔案
   const file2 = fileListSec[0]?.file
   message.error('第二張選中的檔案:', file2)
   if (!file2) {
@@ -195,7 +184,6 @@ const handleFileChange2 = async (fileListSec) => {
     return
   }
 
-  // 預覽圖片
   const reader = new FileReader()
   reader.onload = (event) => {
     user.value.life_photo_2 = event.target.result
@@ -203,20 +191,18 @@ const handleFileChange2 = async (fileListSec) => {
   reader.readAsDataURL(file2)
 
   try {
-    // 設定圖片文件的存儲路徑
     const filePath = `lifephoto/${Date.now()}_${file2.name}`
     const fileRef = storageRef(storage, filePath)
 
     const snapshot = await uploadBytes(fileRef, file2)
     const downloadURL = await getDownloadURL(snapshot.ref)
 
-    // 更新 user 中的圖片 URL
     user.value.life_photo_2 = downloadURL
   } catch (error) {
     message.error('第二張圖片上傳失敗:', error.message)
   }
 }
-//標籤部分阻止按Enter就送出
+
 const handleEnter = (event) => {
   const inputValue = event.target.value.trim()
   if (inputValue && !tagsArray.value.includes(inputValue)) {
@@ -224,7 +210,7 @@ const handleEnter = (event) => {
     event.target.value = ''
   }
 }
-// 監聽 tagsArray，當 tagsArray 變動時更新 user.tags
+
 watch(tagsArray, (newTags) => {
   user.value.tags = newTags.join(',')
 })
@@ -235,7 +221,6 @@ onMounted(() => {
   }
 })
 
-// `next` 方法
 const next = () => {
   if (currentRef.value === 1) {
     currentRef.value = 2
@@ -244,7 +229,6 @@ const next = () => {
   }
 }
 
-// `prev` 方法
 const prev = () => {
   if (currentRef.value === 1) {
     currentRef.value = 2
@@ -282,10 +266,9 @@ const handleConfirm = () => {
   });
 }
 
-// 用來關閉視窗的函數
 const closeModal = () => {
   showModal.value = false
-  emit('close') // 向父組件發送事件，通知關閉
+  emit('close')
 }
 const emit = defineEmits(['close', 'save'])
 </script>

@@ -1,8 +1,4 @@
 <script setup>
-import { ref, watch } from 'vue'
-import { NSpin } from 'naive-ui'
-import { useUserStore } from '@/stores/userStore'
-
 const props = defineProps({
   life_photo_1: {
     type: String,
@@ -26,15 +22,6 @@ const props = defineProps({
     type: String,
   }
 })
-// watch(() => props.expertise, (newVal) => {
-//  console.log('使用者專長', newVal);
-// });
-
-const user = ref(null)
-const loading = ref(true)
-const errorMessage = ref(null)
-const userStore = useUserStore()
-
 </script>
 <template>
   <div v-if="props" class="personInfo mx-8 my-5">
