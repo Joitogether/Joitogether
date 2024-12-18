@@ -21,7 +21,7 @@ const { map, previewMap } = useGoogleMaps(apiKey);
 const { isPreviewMode, enterPreviewMode, exitPreviewMode } = usePreviewMode(previewMap, map);
 const { minTime, maxTime } = taiwanTime();
 const selectedFile  = ref(null);
-const isSubmitting = ref(false); // 控制按鈕狀態
+const isSubmitting = ref(false);
 const router = useRouter();
 const userStore = useUserStore();
 const user =ref(null)
@@ -41,25 +41,24 @@ if (userStore.user.isLogin) {
   }
   fetchUserData()
 }
-  
+
 
 const markdownPreview = computed(() => convertMarkdown(inputValues.value.describe))
 
 const message = useMessage()
 dayjs.locale('zh-tw')
 
-//  資料推送
 const ActivityDataPush = async () => {
   if (isSubmitting.value) return
   isSubmitting.value = true
 
   const hostId = userStore.user.uid;
-  // 組合資料
+
   const activityData  ={
     name: inputValues.value.name,
     description: inputValues.value.describe,
-    event_time: isoEventTime.value, // **
-    approval_deadline: isoDeadLine.value || null, // **
+    event_time: isoEventTime.value,
+    approval_deadline: isoDeadLine.value || null,
     max_participants: participants.value,
     min_participants: 1 ,
     pay_type: paymentMethod.value,
@@ -67,8 +66,9 @@ const ActivityDataPush = async () => {
     location: searchQuery.value ||null,
     category: inputValues.value.category ||null,
     require_approval: inputValues.value.requireApproval ? 1:0,
-    host_id:hostId,   //useUid
+    host_id:hostId,
     status:'registrationOpen',
+    require_payment: inputValues.value.require_payment ? 1:0,
   }
 
   if (!previewActivity()) {
@@ -78,9 +78,7 @@ const ActivityDataPush = async () => {
   }
 
   try {
-    const result = await activityUserCreateAPI(selectedFile.value || null, activityData);
-    console.log('成功回應:', result);
-     // 成功後導向首頁
+    await activityUserCreateAPI(selectedFile.value || null, activityData);
      router.replace('/');
   } catch (err) {
     console.error('錯誤回應:', err)
@@ -90,11 +88,9 @@ const ActivityDataPush = async () => {
 }
 
 const handlePreviewClick = () => {
-  // 檢查資料是否完整
   const isValid = previewActivity()
   if (isValid) {
     enterPreviewMode(searchQuery.value)
-    // previewMap(searchQuery.value)
   } else {
     message.error('資料未完成或有誤，請檢查填寫項目！')
   }
@@ -108,6 +104,7 @@ const inputValues = ref({
   deadline: '',
   category: '',
   requireApproval: false,
+  require_payment: false,
 })
 
 const userNotEnter = ref({
@@ -117,6 +114,7 @@ const userNotEnter = ref({
   eventTime: false,
   deadline: false,
   requireApproval: false,
+  require_payment: false,
   category: false,
 })
 
@@ -133,6 +131,8 @@ const payment = computed(() => {
       return '各付各的'
     case 'host':
       return '團主請客'
+    case 'paymentRequired':
+      return '需要付款'
     default:
       return 'null'
   }
@@ -225,14 +225,14 @@ const checkTimeInput = (field) => {
 }
 
 const paymentMethod = ref('free')
-const showEventCost = computed(() => paymentMethod.value === 'AA')
+const showEventCost = computed(() => paymentMethod.value === 'AA' || paymentMethod.value === 'paymentRequired' )
 
 const validateCost = () => {
   userNotEnter.value.price = eventCost.value < 0 || eventCost.value > 99999
 }
 
 const checkPaymentMethod = () => {
-  if (paymentMethod.value !== 'AA') {
+  if (paymentMethod.value !== 'AA' || paymentMethod.value !== 'paymentRequired') {
     eventCost.value = 0
     userNotEnter.value.price = false
   }
@@ -240,6 +240,13 @@ const checkPaymentMethod = () => {
   if (paymentMethod.value === 'AA') {
     validateCost()
   }
+
+  if (paymentMethod.value === 'paymentRequired') {
+  inputValues.value.require_payment = true;
+  validateCost()
+} else {
+  inputValues.value.require_payment = false;
+}
 }
 
 const uploadedImage = ref(null)
@@ -609,9 +616,10 @@ const previewActivity = () => {
           v-model="paymentMethod"
           @change="checkPaymentMethod"
           >
-              <option value="free">免費</option>
-              <option value="AA">各付各的</option>
-              <option value="host">團主請客</option>
+            <option value="free">免費</option>
+            <option value="AA">各付各的</option>
+            <option value="host">團主請客</option>
+            <option value="paymentRequired">需要付款</option>
           </select>
           </div>
             <div class="mb-6 grid grid-cols-2 "
