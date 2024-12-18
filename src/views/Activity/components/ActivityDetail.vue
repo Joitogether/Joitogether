@@ -74,7 +74,7 @@ const registerCount = computed(() => {
   // 要審核的話，報名人數就是在表單裡有出現且為Registered的
   return activity.value.applications.reduce((count, application) => {
     if(application.status === 'registered'){
-      return count++
+      return ++count
     }
     return count
   }, 0)
@@ -91,17 +91,14 @@ const toggleRegisterModal = () => {
   showRegisterModal.value = !showRegisterModal.value
 }
 
+// 只有不用付款的報名會跑到這個function
 const registerActivity = async () => {
   const data = {
-    participant_id: userStore.user.uid, //這裡記得改成pinia定義的user
+    participant_id: userStore.user.uid, 
     comment: registerComment.value,
-    register_validated: !activity.value.require_approval && !activity.value.require_payment ? 1 : 0
+    // 不需要審核的話，報名即視為認證報名
+    register_validated: !activity.value.require_approval  ? 1 : 0
   }
-  // 等登入那部份處理好
-  // if(!userStore.user.isLogin){
-  //   alert('請先登入')
-  //   return
-  // }
 
   const res = await activityRegisterAPI(activityId, data)
   if(res.status !== 201){
