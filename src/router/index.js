@@ -13,6 +13,7 @@ import Activity from '@/views/Activity/index.vue'
 import ActivityDetail from '@/views/Activity/components/ActivityDetail.vue'
 import ActivityCreate from '@/views/Activity/components/ActivityCreate.vue'
 import ActivityReview from '@/views/Activity/components/ActivityReview.vue'
+import ActivityRating from '@/views/Activity/components/ActivityRating.vue'
 import SignupSuccess from '@/views/Login/SignupSuccess.vue'
 import ResetPassword from '@/views/Login/ResetPassword.vue'
 import forgotPassword from '@/views/Login/ForgotPassword.vue'
@@ -116,11 +117,15 @@ const router = createRouter({
               name: 'activityCreate',
               component: ActivityCreate,
             },
-
             {
               path: 'review/:activity_id',
               name: 'activityReview',
               component: ActivityReview,
+            },
+            {
+              path: 'rating/:activity_id',
+              name: 'activityRating',
+              component: ActivityRating,
             },
           ],
         },
