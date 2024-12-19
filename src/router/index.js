@@ -16,6 +16,7 @@ import SignupSuccess from '@/views/Login/SignupSuccess.vue'
 import ResetPassword from '@/views/Login/ResetPassword.vue'
 import forgotPassword from '@/views/Login/ForgotPassword.vue'
 import TopUp from '@/views/TopUp/index.vue'
+import TopupFinish from '@/views/TopUp/component/TopupFinish.vue'
 import { onAuthStateChanged } from 'firebase/auth'
 import { auth } from '@/utils/firebaseConfig.js'
 import { useUserStore } from '@/stores/userStore'
@@ -112,8 +113,13 @@ const router = createRouter({
     {
       path:'/topup',
       name: 'topup',
-      component: TopUp
+      component: TopUp,
     },
+    {
+      path: '/topupFinish',
+      name: 'topupFinish',
+      component: TopupFinish
+    }
   ],
 })
 
