@@ -12,7 +12,6 @@ const fetchCartItems = async () => {
   try {
     isLoading.value = true
     const data = await getUserCartDetailsAPI(userStore.user.uid)
-    console.log('data資料', data) // 呼叫 API
 
     cartItems.value = data.map((item) => ({
       cartActivityId: item.activityId,
@@ -29,42 +28,6 @@ const fetchCartItems = async () => {
     isLoading.value = false
   }
 }
-
-// const deleteCartActivity = async (activityId) => {
-//   try {
-//     const confirmDelete = window.confirm('確定要刪除此活動嗎？')
-//     if (confirmDelete) {
-//       await deleteUserCartDetailsAPI(activityId)
-//       message.success('留言刪除成功')
-//       // 將刪除的最後一則留言從留言列表中移除
-//       commentList.value = commentList.value.filter((comment) => comment.id !== commentId)
-//       // 留言數歸零
-//       if (commentList.value.length === 0) {
-//         commentCount.value = 0
-//       }
-//     }
-//   } catch (error) {
-//     console.log(error)
-//   }
-// }
-
-// const deleteCartActivity = async () => {
-//   try {
-//     await deleteUserCartDetailsAPI(cartActivityId)
-//     // message.success('活動刪除成功')
-//     console.log(cartActivityId)
-//     setTimeout(() => {
-//       router.push('/carts')
-//     }, 1000)
-//   } catch (error) {
-//     console.log(error)
-//     if (error.message) {
-//       console.error(error.message)
-//     } else {
-//       console.error('刪除失敗，請稍後再試！😞')
-//     }
-//   }
-// }
 
 onMounted(() => {
   fetchCartItems()
@@ -95,15 +58,13 @@ const removeSelected = async () => {
     const selectedIds = selectedItems.map((item) => item.cartActivityId)
 
     // 3. 打印所有的 cartActivityId（用於確認）
-    console.log('Selected cartActivityIds:', selectedIds)
+    // console.log('Selected cartActivityIds:', selectedIds)
 
     // 4. 使用 Promise.all 並行執行刪除請求
     await Promise.all(selectedIds.map((id) => deleteUserCartDetailsAPI(userStore.user.uid, id)))
 
     // 5. 更新本地 cartItems 列表，移除已刪除的項目
     cartItems.value = cartItems.value.filter((item) => !item.Selected)
-
-    console.log('Updated cartItems:', cartItems.value) // 查看刪除後的狀態
   } catch (error) {
     console.error('刪除失敗:', error)
   }
