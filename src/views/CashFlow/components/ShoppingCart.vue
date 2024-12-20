@@ -23,7 +23,7 @@ const fetchCartItems = async () => {
       // selected: false, // 初始未選中
     }))
   } catch (error) {
-    console.error('獲取購物車失敗:', error)
+    return false
   } finally {
     isLoading.value = false
   }
@@ -66,7 +66,7 @@ const removeSelected = async () => {
     // 5. 更新本地 cartItems 列表，移除已刪除的項目
     cartItems.value = cartItems.value.filter((item) => !item.Selected)
   } catch (error) {
-    console.error('刪除失敗:', error)
+    return false
   }
 }
 // 模擬結帳動作
