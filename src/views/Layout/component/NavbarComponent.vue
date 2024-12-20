@@ -1,26 +1,36 @@
 <script setup>
-import { Search, User, Menu, Sweep3d, Activity } from '@iconoir/vue'
-import { NButton, NDivider, useMessage } from 'naive-ui'
+import { Search, User, Menu, Sweep3d, BellNotificationSolid } from '@iconoir/vue'
+import { NButton, NDivider, NBadge, NPopover, NScrollbar, NSpin } from 'naive-ui'
+import { useMessage } from 'naive-ui'
 import { useUserStore } from '/src/stores/userStore.js'
 import { auth } from '@/utils/firebaseConfig.js'
 import { useRouter, RouterLink } from 'vue-router'
-import { UserGetApi } from '@/apis/userAPIs'
+import 'dayjs/locale/zh-tw.js'
+import relativeTime from 'dayjs/plugin/relativeTime'
+import dayjs from 'dayjs'
+import { useNotificationStore } from '@/stores/notificationStore'
+import { storeToRefs } from 'pinia'
+import { userGetAPI } from '@/apis/userAPIs'
 import { ref, onMounted } from 'vue'
-import { getPostsApi } from '@/apis/userAPIs'
-import { UserGetFollowerApi } from '@/apis/userAPIs'
-import { UserGetActivityApi } from '@/apis/userAPIs';
+import { getPostsAPI } from '@/apis/userAPIs'
+import { userGetFollowerAPI } from '@/apis/userAPIs'
+import { userGetActivityAPI } from '@/apis/userAPIs';
 
 
 const message = useMessage()
 const userStore = useUserStore()
 const router = useRouter()
+const notificationStore = useNotificationStore()
+const { notifications, unreadCount, unreadList } = storeToRefs(notificationStore)
+const {  updateNotifications } = notificationStore
+dayjs.locale('zh-tw')
+dayjs.extend(relativeTime)
 const user = ref(null);  // 儲存使用者資料
 const loading = ref(true);
-const errorMessage = ref(null);
-const isMenuOpen = ref(false); // 用來控制選單顯示狀態
 const postNumber = ref(null)
 const followerNumber = ref(null)
 const activityNumber = ref(null)
+const userLogin = ref(false); //檢查登入
 
 defineProps({
   items: {
@@ -42,19 +52,21 @@ defineProps({
 // 檢查用戶登入狀態並獲取用戶資料
 const fetchUserData = async () => {
   try {
-    const result = await UserGetApi(userStore.user.uid);
+    const result = await userGetAPI(userStore.user.uid);
     if (result) {
       user.value = result;
       loading.value = false;
+      userLogin.value = true;
     }
   } catch (err) {
     message.error('載入用戶資料錯誤');
     loading.value = false;
+    userLogin.value = false
   }
 };
 const getPostCount = async() => {
       try {
-        const result = await getPostsApi(userStore.user.uid).catch(() => ({ data: []}))
+        const result = await getPostsAPI(userStore.user.uid).catch(() => ({ data: []}))
         postNumber.value = result.data.length
       } catch(err) {
         console.log('抓取文章數量發生錯誤',err)
@@ -64,7 +76,7 @@ const getPostCount = async() => {
     }
 const getFollowerCount = async() => {
   try {
-    const result = await UserGetFollowerApi(userStore.user.uid).catch(() => ({ data: []}))
+    const result = await userGetFollowerAPI(userStore.user.uid).catch(() => ({ data: []}))
     followerNumber.value = result.data.length
   } catch(err) {
     console.log('抓取粉絲數量發生錯誤',err)
@@ -74,7 +86,7 @@ const getFollowerCount = async() => {
 }
 const getActivityCount = async() => {
   try{
-    const result = await UserGetActivityApi(userStore.user.uid);
+    const result = await userGetActivityAPI(userStore.user.uid);
     console.log('活動資料：', result);
     console.log(result.length);
 
@@ -97,9 +109,7 @@ onMounted(() => {
 });
 
 // 切換選單顯示
-const toggleMenu = () => {
-  isMenuOpen.value = !isMenuOpen.value;
-};
+
 
 // 註冊/登入按鈕跳轉
 const navigateToLogin = () => {
@@ -129,6 +139,30 @@ const handleLogout = async () => {
     console.error('登出錯誤：', error)
   }
 }
+
+const showPopover = ref(false)
+
+
+const handleNotificationRead = async (value) => {
+  // 掌握開關
+  showPopover.value = value
+  // 關起來的話做檢查
+  if(!value){
+    if(unreadList.value.length > 0) {
+      // 調用 API 更新未讀的通知狀態
+      await updateNotifications(userStore.user.uid, unreadList.value)
+    }
+}
+}
+
+
+
+const handleLoadClick = async () => {
+  showLoading.value = true
+  await notificationStore.getMoreNotifications(userStore.user.uid)
+  showLoading.value = false
+}
+const showLoading = ref(false)
 </script>
 
 <template>
@@ -217,9 +251,51 @@ const handleLogout = async () => {
       </ul>
     </div>
     <!-- 登入/註冊 -->
-    <div class="flex">
+    <div class="flex items-center">
+      <n-popover  :on-update:show="handleNotificationRead" placement="bottom-end" :on-clickoutside="() => showPopover = false" class="w-[400px]" style="padding: 10px"  trigger="click" :show="showPopover">
+        <template #trigger>
+          <n-badge :max="15"  :value="unreadCount" class="mr-3 cursor-pointer">
+            <BellNotificationSolid></BellNotificationSolid>
+          </n-badge>
+        </template>
+        <n-scrollbar  style="max-height: 500px">
+          <div class="flex  flex-col ">
+            <p class="pl-2 text-xl font-bold">通知</p>
+            <div v-if="notifications.length > 0 && userStore.user.uid">
+              <div  v-for="notification in notifications" :key="notification.id" >
+                <router-link :to="notification.link">
+                  <div :class="{ 'bg-yellow-100' : !notification.is_read}" class="hover:bg-yellow-100 pl-2 overflow-hidden hover:transition-colors post-onepost-top flex py-2  rounded-md items-center	cursor-pointer ">
+                    <img class=" w-14 aspect-square rounded-full" :src="notification.users_notifications_actor_idTousers.photo_url" alt="">
+                    <div class="ml-3 relative w-full h-14 ">
+                      <p class="font-bold text-lg absolute top-0"> {{notification.users_notifications_actor_idTousers.display_name }}<span class="pl-1 font-normal">{{ notification.message}}</span> </p>
+                      <p class="absolute bottom-0 w-full text-md truncate">{{dayjs(notification.created_at).fromNow()}}
+                        <span v-if="notification.target_type === 'activity'"  class="pl-1 font-normal text-lg ">{{ notification.target_detail.name }}</span>
+                        <span v-else-if="notification.target_type === 'post'"  class="pl-1 font-normal text-lg ">{{ notification.target_detail.post_title }}</span>
+                        <span v-else-if="notification.target_type === 'rating'"  class="pl-1 font-normal text-lg ">{{ notification.target_detail.user_comment }}</span>
+                      </p>
+                    </div>
+                  </div>
+                </router-link>
+              </div>
+            </div>
+            <div v-else-if="userStore.user.uid && notifications.length === 0">
+              暫無通知
+            </div>
+            <div v-else>
+              登入以查看通知
+            </div>
+            <n-spin v-if="!notificationStore.hideLoadBtn" :show="showLoading">
+              <n-button @click="handleLoadClick" class="w-full h-12 mt-2 text-lg font-bold">加載更多</n-button>
+            </n-spin>
+            <div v-else class="text-center font-bold text-lg border-[1px] cursor-not-allowed rounded-md py-2 mt-1 ">
+              已經到底囉～
+            </div>
+          </div>
+        </n-scrollbar>
+
+      </n-popover>
       <div class="hidden md:flex min-w-20 items-center">登入/註冊</div>
-      <div class="hidden md:flex min-w-20 items-center" v-if="isUserLoggedIn">
+      <div class="hidden md:flex min-w-20 items-center" v-if="userLogin">
         <router-link :to="{ name: 'activityCreate' }">
           <button>活動創建</button>
         </router-link>

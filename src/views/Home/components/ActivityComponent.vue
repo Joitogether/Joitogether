@@ -1,7 +1,7 @@
 <script setup>
 import ActivityCard from '@/views/components/ActivityCard.vue';
-import { ActivityComponentApi, ActivityUseApi } from '@/apis/useActivityComponentApi';
-import {ref, onMounted, computed } from 'vue'
+import { activityGetAllAPI, activityGetUsersAPI } from '@/apis/activityAPi.js';
+import {ref, onMounted, computed,onUnmounted,nextTick } from 'vue'
 import { formatToISOWithTimezone } from '@/stores/useDateTime'
 
 
@@ -54,35 +54,73 @@ const filteredItems = computed(() => {
 });
 
 
+const currentPage = ref(1); // 當前頁碼
+const isLoading = ref(false); // 正在加載中
+const hasMore = ref(true); // 是否還有更多資料
+const observer = ref(null); // IntersectionObserver 實例
+
+
+
 
 const fetchActivitiesAndUsers = async () => {
+  if (isLoading.value || !hasMore.value) return;
+
+  isLoading.value = true;
   try {
-    const [activities,users] =await Promise.all([
-      ActivityComponentApi(),
-      ActivityUseApi()
-    ]) ;
+    const [activities, users] = await Promise.all([
+      activityGetAllAPI({ page: currentPage.value, limit: 10 }), // 分頁參數
+      activityGetUsersAPI()
+    ]);
 
-    console.log("API 返回的活動資料:", activities);
-    console.log("API 返回使用者資訊:", users);
-
-    if(users.status === 200 && Array.isArray(users.data)){
-      userMap.value =Object.fromEntries(
+    // 處理使用者資料
+    if (users.status === 200 && Array.isArray(users.data)) {
+      userMap.value = Object.fromEntries(
         users.data.map((user) => [user.uid, user.display_name])
-      )
+      );
     }
 
+    // 處理活動資料
     if (activities.status === 200 && Array.isArray(activities.data)) {
-      allActivities.value = activities.data;
-    } else {
-      console.error("活動資料格式錯誤:", activities,users);
+  activities.data.forEach((activity) => {
+    const exists = allActivities.value.some((item) => item.id === activity.id);
+    if (!exists) {
+      allActivities.value.push(activity);
     }
+  });
+
+  if (activities.data.length < 10) hasMore.value = false; // 最後一頁
+  currentPage.value++; // 下一頁
+} else {
+  hasMore.value = false;
+}
   } catch (err) {
     console.error("取得活動資料失敗:", err);
+  } finally {
+    isLoading.value = false;
   }
 };
 
-onMounted(() => {
-  fetchActivitiesAndUsers();
+onMounted(async() => {
+  await fetchActivitiesAndUsers();
+
+  nextTick(() => {
+    const loadMoreTrigger = document.querySelector('#load-more');
+    if (loadMoreTrigger) {
+      observer.value = new IntersectionObserver((entries) => {
+  if (entries[0].isIntersecting && !isLoading.value && hasMore.value) {
+    setTimeout(() => {
+      fetchActivitiesAndUsers();
+    }, 300); // 加入 300ms 延遲，避免過於頻繁觸發
+  }
+});
+      observer.value.observe(loadMoreTrigger);
+    }
+  });
+});
+
+
+onUnmounted(() => {
+  if (observer.value) observer.value.disconnect();
 });
 
 
@@ -176,8 +214,13 @@ onMounted(() => {
                     :date-time="item.dateTime"
                     :participants="item.participants"
                     :host="item.user"
+                    :id="item.id"
                 ></ActivityCard>
             </div>
+
+            <div v-if="isLoading" class="text-center my-5">加載中...</div>
+            <div id="load-more" style="height: 20px;"></div>  <!-- 底部觸發點 -->
+            <div v-if="!hasMore" class="text-center my-5 text-gray-500"></div>
         </div>
     </main>
 

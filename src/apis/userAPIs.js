@@ -58,7 +58,7 @@ export const userAuthLoginAPI = async (data) => {
   }
 }
 
-export const UserGetApi = async (uid) => {
+export const userGetAPI = async (uid) => {
   try {
     const response = await apiAxios.get(`/users/${uid}`)
 
@@ -70,23 +70,9 @@ export const UserGetApi = async (uid) => {
   }
 }
 
-export const UserGetFollowerApi = async (uid) => {
+export const userGetFollowerAPI = async (uid) => {
   try {
-    const response = await apiAxios.get(`/users/userFollowers/${uid}`);
-
-    if (response && response.status === 200) {
-      return response.data
-    }
-  } catch (err) {
-
-    return err.response.message
-
-  }
-};
-
-export const UserGetFollowingApi = async (uid) => {
-  try {
-    const response = await apiAxios.get(`/users/following/${uid}`);
+    const response = await apiAxios.get(`/users/userFollowers/${uid}`)
 
     if (response && response.status === 200) {
       return response.data
@@ -94,11 +80,23 @@ export const UserGetFollowingApi = async (uid) => {
   } catch (err) {
     return err.response.message
   }
-};
+}
 
-export const UserGetActivityApi = async (uid) => {
+export const userGetFollowingAPI = async (uid) => {
   try {
-    const response = await apiAxios.get(`/users/applications/${uid}`);
+    const response = await apiAxios.get(`/users/following/${uid}`)
+
+    if (response && response.status === 200) {
+      return response.data
+    }
+  } catch (err) {
+    return err.response.message
+  }
+}
+
+export const userGetActivityAPI = async (uid) => {
+  try {
+    const response = await apiAxios.get(`/users/applications/${uid}`)
 
     if (response && response.status === 200) {
       return response.data.data
@@ -106,10 +104,9 @@ export const UserGetActivityApi = async (uid) => {
   } catch (err) {
     return err.response.message
   }
-};
+}
 
-
-export const UserPutApi = async(uid, data) => {
+export const userPutAPI = async (uid, data) => {
   try {
     const response = await apiAxios.put(`/users/update/${uid}`, data)
     return response
@@ -118,7 +115,7 @@ export const UserPutApi = async(uid, data) => {
   }
 }
 
-export const UserPostApi = async (uid, data) => {
+export const userPostAPI = async (uid, data) => {
   try {
     return await apiAxios.post(`/users/register/${uid}`, data)
   } catch (err) {
@@ -126,7 +123,7 @@ export const UserPostApi = async (uid, data) => {
   }
 }
 
-export const getPostsApi = async (uid) => {
+export const getPostsAPI = async (uid) => {
   try {
     const response = await apiAxios.get(`/users/posts/${uid}`)
     return response.data
@@ -136,7 +133,7 @@ export const getPostsApi = async (uid) => {
   }
 }
 
-export const getPostsCommentApi = async (post_id) => {
+export const getPostsCommentAPI = async (post_id) => {
   try {
     const response = await apiAxios.get(`/posts/comments/${post_id}`)
     return response.data
@@ -146,7 +143,7 @@ export const getPostsCommentApi = async (post_id) => {
   }
 }
 
-export const getPostsLikeApi = async (post_id) => {
+export const getPostsLikeAPI = async (post_id) => {
   try {
     const response = await apiAxios.get(`/posts/likes/${post_id}`)
     return response.data
@@ -155,13 +152,43 @@ export const getPostsLikeApi = async (post_id) => {
     throw error
   }
 }
-
-export const getRatingsApi = async (user_id) => {
+export const getAllPostAPI = async () => {
+  try {
+    const response = await apiAxios.get('/posts')
+    return response.data
+  } catch (error) {
+    console.error('沒有任何貼文', error)
+  }
+}
+export const getRatingsAPI = async (user_id) => {
   try {
     const response = await apiAxios.get(`/ratings/userDetails/${user_id}`)
     return response.data
   } catch (error) {
     console.error('找不到留言者', error)
     throw error
+  }
+}
+export const userGetNotificationAPI = async (uid, page, pageSize, additionalSkip) => {
+  try {
+    const { data } = await apiAxios.get(`/users/notifications/${uid}`, {
+      params: { page, pageSize, additionalSkip },
+    })
+    return data
+  } catch (error) {
+    if (error) {
+      return null
+    }
+  }
+}
+
+export const userUpdateNotificationAPI = async (uid, unreadList) => {
+  try {
+    const response = await apiAxios.put(`/users/notifications/${uid}`, { unreadList })
+    return response
+  } catch (error) {
+    if (error) {
+      return null
+    }
   }
 }

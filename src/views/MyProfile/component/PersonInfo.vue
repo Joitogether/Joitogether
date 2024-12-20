@@ -1,5 +1,5 @@
 <script setup>
-import { UserGetApi } from '../../../apis/userAPIs'
+import { userGetAPI } from '../../../apis/userAPIs'
 import { ref, onMounted } from 'vue'
 import { NSpin } from 'naive-ui'
 import { useUserStore } from '@/stores/userStore'
@@ -30,7 +30,7 @@ const userStore = useUserStore()
 if (userStore.user.isLogin) {
   const fetchUserData = async () => {
     try {
-      const result = await UserGetApi(userStore.user.uid)
+      const result = await userGetAPI(userStore.user.uid)
       console.log('API回傳資料:', result)
 
       if (result) {

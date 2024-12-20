@@ -1,7 +1,7 @@
 <script setup>
 import { onMounted, ref } from 'vue';
 import { NEllipsis } from 'naive-ui';
-import { UserGetActivityApi } from '@/apis/userAPIs';
+import { userGetActivityAPI } from '@/apis/userAPIs';
 import { useUserStore } from '@/stores/userStore';
 import dayjs from 'dayjs';
 
@@ -18,7 +18,7 @@ const formatDate = (dateString) => {
 
 const fetchActivityData = async () => {
   try {
-    const result = await UserGetActivityApi(userStore.user.uid);
+    const result = await userGetActivityAPI(userStore.user.uid);
     console.log('活動資料：', result);
 
     if (result) {

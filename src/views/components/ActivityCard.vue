@@ -1,5 +1,4 @@
 <script setup>
-import defaultImage from '@/assets/UserUpdata1.jpg';
 
 
 const props = defineProps({
@@ -20,6 +19,9 @@ const props = defineProps({
   imageHeight: {
     type: String,
     default: '200px' // 預設高度
+  },
+  id: {
+    type: Number
   }
 })
 </script>
@@ -28,8 +30,8 @@ const props = defineProps({
     <router-link :to="{
       name: 'activityDetail',
       params: {
-        id: '123'
-    }}" :class="{ ['flex' ] : props.horizontal }">
+        id: props.id
+    }}" :class="{ ['flex' ] : props.horizontal }" class="w-full h-full ">
       <div :class="{'flex-1' : props.horizontal}" class="w-full h-28 md:h-72 overflow-hidden relative" :style="{ height: imageHeight }">
           <img :class="{ 'horizontal-layout-img' : true}" class="w-full h-full absolute top-0 left-0 object-cover" :src="props.actImgUrl" alt="死圖">
       </div>
@@ -37,7 +39,7 @@ const props = defineProps({
           <div class=" text-lg font-semibold mb-2 truncate 	">活動名稱:{{ props.title }}</div>
           <div class="text-sm  mb-2 truncate">地點:{{ props.location }}</div>
           <div class="text-sm text-gray-500 mb-2 truncate">時間:{{ props.dateTime }}</div>
-          <div class="flex items-center justify-between text-sm " :class="{ 'mt-auto' : props.horizontal}">
+          <div class="flex items-center justify-between text-sm mt-auto" >
               <div class="flex items-center">
                   <img class="w-6 h-6 rounded-full mr-2" :src="props.hostImgUrl" alt="團主頭像">
                   <span>{{ props.host }}</span>
