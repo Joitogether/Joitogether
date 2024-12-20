@@ -1,21 +1,84 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import {} from 'naive-ui'
-import { getPostsAPI } from '@/apis/postAPIs'
-const currentPage = ref(1)
-const nextPage = () => {
-  if (currentPage.value >= 5) {
-    return
-  }
-  currentPage.value++
+import { getLatestPostsAPI, getPopularPostsAPI } from '@/apis/postApi'
+import defaultAvatar from '@/assets/avatar.png'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
+const currentPage = ref(1) // 當前頁碼
+const totalPosts = ref([]) // 全部貼文資料
+const postsPerPage = 3 // 每頁顯示 15 個貼文
+
+const posts = ref([]) // 用來抓貼文
+const latestPosts = ref([]) // 最新貼文
+const popularPosts = ref([]) // 熱門貼文
+const activieTab = ref('latest') //切換
+const goToPostsPage = () => {
+  router.push('/post') //
 }
-const previousPage = () => {
-  if (currentPage.value <= 1) {
-    return
-  }
-  currentPage.value--
+
+const postImgUrl =
+  'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTloBdf4Wa_JxRmW-03mPB_wfP-lBvTGh8-CQ&s'
+const onPostImageError = (event) => {
+  event.target.src = postImgUrl
 }
-const posts = ref([])
+const onAvatarImageError = (event) => {
+  event.target.src = defaultAvatar
+}
+
+// 根據當前頁碼更新貼文顯示
+const updatePosts = () => {
+  const start = (currentPage.value - 1) * postsPerPage
+  const end = start + postsPerPage
+  posts.value = totalPosts.value.slice(start, end)
+}
+// 當頁碼變動時更新貼文
+const handlePageChange = (page) => {
+  currentPage.value = page
+  updatePosts()
+}
+
+const switchTab = (tab) => {
+  activieTab.value = tab
+  currentPage.value = 1
+  if (tab === 'latest') {
+    totalPosts.value = latestPosts.value
+  } else {
+    totalPosts.value = popularPosts.value
+  }
+  updatePosts()
+}
+
+const fetchLatestPostsData = async () => {
+  const response = await getLatestPostsAPI()
+  if (response) {
+    latestPosts.value = response.data
+    totalPosts.value = latestPosts.value
+    return updatePosts()
+  }
+}
+
+const fetchPopularPostsData = async () => {
+  const response = await getPopularPostsAPI()
+  if (response) {
+    popularPosts.value = response.data.sort((a, b) => {
+      return b._count.post_likes - a._count.post_likes
+    })
+    totalPosts.value = popularPosts.value
+    if (activieTab.value === 'popular') {
+      totalPosts.value = popularPosts.value
+      updatePosts()
+    }
+  } else {
+    console.log('fetchPopularPostsData失敗')
+  }
+}
+
+onMounted(() => {
+  fetchLatestPostsData()
+  fetchPopularPostsData()
+})
+
 const formatDate = (isoString) => {
   const date = new Date(isoString)
   return date.toLocaleString('zh-TW', {
@@ -28,20 +91,10 @@ const formatDate = (isoString) => {
     hour12: false,
   })
 }
-// const posts = ref([
-//   {
-//     id: 1,
-//     title: '文章標題 1',
-//     content: '內文內容 1',
-//     author: '發文者 1',
-//     date: '2024-11-16',
-//     likes: 20,
-//     comments: 5,
-//   },
 
 // 從 API 獲取資料
 const fetchPosts = async () => {
-  const apiResponse = await getPostsAPI()
+  const apiResponse = await HomePostGetPostAuthorAPI()
   if (apiResponse) {
     posts.value = apiResponse.data.slice(0, 3) // 假設回傳的資料是 { data: [...] }
   } else {
@@ -53,18 +106,11 @@ const fetchPosts = async () => {
 onMounted(() => {
   fetchPosts()
 })
-const postsPerPage = 3
 const totalPages = computed(() => Math.ceil(posts.value.length / postsPerPage))
 // 當前頁的貼文
 const currentPosts = computed(() =>
   posts.value.slice((currentPage.value - 1) * postsPerPage, currentPage.value * postsPerPage),
 )
-// 切換頁碼
-const changePage = (page) => {
-  if (page >= 1 && page <= totalPages.value) {
-    currentPage.value = page
-  }
-}
 </script>
 
 <template>
@@ -72,32 +118,42 @@ const changePage = (page) => {
     <div>
       <h2 class="text-3xl">最新貼文</h2>
     </div>
+
     <div class="post-label-area flex py-7 border-b-[1px] border-solid border-[rgba(61,57,44,0.1)]">
       <n-button
         circle
         type="warning"
-        class="w-16 bg-yellow-400 text-gray-800 hover:font-bold hover:scale-110 transition-all duration-300"
+        @click="switchTab('latest')"
+        class="w-16 text-gray-700 hover:font-bold hover:scale-110 transition-all duration-300"
         >最新</n-button
       >
       <n-button
         circle
         type="warning"
-        class="w-16 bg-yellow-400 text-gray-800 hover:font-bold hover:scale-110 transition-all duration-300 mx-3"
+        @click="switchTab('popular')"
+        class="w-16 text-gray-700 hover:font-bold hover:scale-110 transition-all duration-300 mx-3"
         >熱門</n-button
       >
     </div>
+
     <div class="post-posts-area grid grid-cols-1 gap-4">
-      <div v-for="(item, index) in posts" :key="item.id" class="post-onepost">
+      <div
+        @click="router.push(`/post/${item.post_id}`)"
+        v-for="item in posts"
+        :key="item.id"
+        class="post-onepost"
+      >
         <div class="post-onepost-top flex pt-5 pl-10 items-center cursor-pointer">
           <div class="one-post-img w-10 h-10 rounded-full overflow-hidden">
             <img
-              src="https://image1.gamme.com.tw/news2/2017/49/24/q6CVnZ2YlKOesA.jpg"
+              :src="item.user_photo || defaultAvatar"
               alt="發文者大頭照"
               class="object-cover w-full h-full"
+              @error="onAvatarImageError"
             />
           </div>
 
-          <p class="ml-5 text-sm">{{ item.uid }}</p>
+          <p class="ml-5 text-sm">{{ item.users.display_name }}</p>
         </div>
         <div class="one-post-bottom mt-2.5 px-6 bg-white rounded-2xl pb-4 cursor-pointer">
           <div
@@ -105,54 +161,39 @@ const changePage = (page) => {
           >
             <div class="post-bottom-left w-52 leading-loose">
               <p class="text-slate-300 text-sm h-8 mt-6">{{ formatDate(item.created_at) }}</p>
+
               <h3 class="text-xl font-bold">{{ item.post_title }}</h3>
               <p class="post_content text-[16px]">
                 {{ item.post_content }}
               </p>
             </div>
             <div class="post-bottom-right h-24 w-24 rounded-3xl overflow-hidden ml-2.5 mt-4">
-              <img
-                src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTloBdf4Wa_JxRmW-03mPB_wfP-lBvTGh8-CQ&s"
-                alt="文章照片"
-              />
+              <img :src="item.post_img" alt="文章照片" @error="onPostImageError" />
             </div>
           </div>
           <div class="post-bottom-bottom flex leading-loose mt-6 mx-6">
-            <div class="mr-8">👍🏻 {{}}讚</div>
-            <div>💬 {{}} 留言</div>
+            <div class="mr-8">👍🏻 {{ item._count.post_likes }}讚</div>
+            <div>💬 {{ item._count.post_comments }} 留言</div>
           </div>
         </div>
       </div>
     </div>
-
-    <div class="po-bottom mt-5 grid grid-cols-3">
-      <div class="more-post-btn flex justify-center text-sm col-start-2">
-        <n-button
-          circle
-          type="warning"
-          class="w-40 bg-yellow-400 text-gray-800 hover:font-bold hover:scale-110 transition-all duration-300 mx-3"
-          >更多熱門貼文</n-button
-        >
-      </div>
-      <n-pagination v-model:previousPage="nextPage" :page-count="5" />
-
-      <!-- 原本的分頁按鈕 -->
-      <div class="change-post-btn flex justify-end text-zinc-600 leading-loose">
-        <p class="page-number content-center hidden">{{ currentPage }} / 5</p>
-        <button
-          @click="previousPage"
-          class="switch-btn-left hidden ml-5 text-base rounded-full bg-gray-300 w-10 h-10 text-center justify-center items-center"
-        >
-          <p class="font-black">＜</p>
-        </button>
-        <button
-          @click="nextPage"
-          class="switch-btn-right hidden ml-5 text-base rounded-full bg-gray-300 w-10 h-10 text-cente justify-center items-center"
-        >
-          <label class="font-black" type="number">＞</label>
-        </button>
-      </div>
-    </div>
+  </div>
+  <div class="pagination-container mt-5 flex justify-center">
+    <n-pagination
+      v-model:page="currentPage"
+      :page-count="Math.min(Math.ceil(totalPosts.length / postsPerPage), 5)"
+      @update:page="handlePageChange"
+    />
+  </div>
+  <div class="flex justify-center">
+    <n-button
+      circle
+      type="warning"
+      @click="goToPostsPage"
+      class="mt-5 p-2 w-40 text-gray-700 hover:font-bold hover:scale-110 transition-all duration-300"
+      >顯示更多貼文</n-button
+    >
   </div>
 </template>
 <style scoped>
