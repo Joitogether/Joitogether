@@ -3,13 +3,8 @@ import { getIdToken } from 'firebase/auth'
 import { auth } from './firebaseConfig'
 
 const apiAxios = axios.create({
-<<<<<<< HEAD
   baseURL: 'https://joitogetherbackend-production-5e45.up.railway.app/',
   timeout: 5000,
-=======
-  baseURL: 'http://localhost:3030',
-  timeout: 1000,
->>>>>>> HomeLatestPosts
 })
 //
 // const apiAxios = axios.create({
@@ -20,14 +15,6 @@ const apiAxios = axios.create({
 
 apiAxios.interceptors.request.use(
   async function (config) {
-<<<<<<< HEAD
-    if(!auth.currentUser){
-      return config
-    }
-    const token = await getIdToken(auth.currentUser)
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`
-=======
     if (auth.currentUser) {
       try {
         const token = await getIdToken(auth.currentUser)
@@ -39,7 +26,6 @@ apiAxios.interceptors.request.use(
       }
     } else {
       console.log('用戶未登入，跳過 Authorization 設置')
->>>>>>> HomeLatestPosts
     }
     return config
   },
