@@ -8,7 +8,7 @@ import PersonRate from './component/PersonRate.vue'
 import PersonFollow from './component/PersonFollow.vue'
 import PersonPost from './component/PersonPost.vue'
 import PersonActivity from './component/PersonActivity.vue'
-import NavbarComponent from '../Home/components/NavbarComponent.vue'
+
 import { userGetAPI } from '@/apis/userAPIs'
 import { useUserStore } from '@/stores/userStore'
 
@@ -57,9 +57,6 @@ const currentPage = ref('PersonInfo');
 </script>
 
 <template>
-  <header>
-    <NavbarComponent/>
-  </header>
   <div class="container mx-auto">
     <CardList
     :display_name="user.display_name"
