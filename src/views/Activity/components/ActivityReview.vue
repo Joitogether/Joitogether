@@ -16,7 +16,7 @@ import {
   ActivityGetApplicationsAPI,
   ActivityReviewApplicationsAPI,
   ActivityGetActivitiesAPI,
-} from '@/apis/activityApi'
+} from '@/apis/activityAPI'
 import { useRoute } from 'vue-router'
 import { useUserStore } from '@/stores/userStore'
 
