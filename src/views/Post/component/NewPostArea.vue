@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch, defineEmits, onMounted, onBeforeUnmount } from 'vue'
+import { ref, watch, onMounted, onBeforeUnmount } from 'vue'
 import { useUserStore } from '@/stores/userStore.js'
 import { createPostAPI } from '@/apis/postAPIs'
 import { useMessage, NButton, NModal } from 'naive-ui'
