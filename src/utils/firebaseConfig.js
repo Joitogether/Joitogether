@@ -40,6 +40,5 @@ const getCurrentUser = () => {
       resolve(user)
     })
   })
-
 }
 export { auth, storage, getCurrentUser }

@@ -1,7 +1,7 @@
-import { marked } from "marked";
+import { marked } from 'marked'
 
 marked.setOptions({
-  breaks:true, //啟用單換行解析
+  breaks: true, //啟用單換行解析
 })
 
 /**
@@ -10,7 +10,6 @@ marked.setOptions({
  * @returns {string} - 轉換後的 HTML 字符串
  */
 
-export function convertMarkdown(markdownText)
-{
-  return marked(markdownText||"");
+export function convertMarkdown(markdownText) {
+  return marked(markdownText || '')
 }

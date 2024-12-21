@@ -23,9 +23,8 @@ const props = defineProps({
   },
   tags: {
     type: Array,
-  }
-});
-
+  },
+})
 
 const user = ref(null)
 const showModal = ref(false) // 控制 modal 顯示
@@ -75,8 +74,6 @@ const emit = defineEmits(['edit', 'close'])
         round
         >編輯檔案
       </n-button>
-
-
     </div>
   </div>
 </template>
@@ -114,8 +111,7 @@ const emit = defineEmits(['edit', 'close'])
   }
 
   .user-name,
-  .user-detail
-  {
+  .user-detail {
     text-align: start;
   }
 

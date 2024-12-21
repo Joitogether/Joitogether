@@ -99,24 +99,27 @@ const showSubmitModal = ref(false)
 </script>
 
 <template>
-  <body class="bg-gray-50 p-10 min-w-[400px] ">
+  <body class="bg-gray-50 p-10 min-w-[400px]">
     <!-- 活動評價 -->
     <div
       class="flex flex-col w-full min-w-[650px] max-w-[1440px] m-auto p-5 bg-gray-100 rounded-2xl border-2 border-gray-200"
     >
-      <div v-if="step == 0"
+      <div
+        v-if="step == 0"
         class="relative px-5 before:content-[''] before:absolute before:left-0 before:top-2 before:bottom-2 before:w-2 before: before:bg-blue-500"
       >
         <div class="text-sm xl:text-2xl md:text-xl">活動評價</div>
         <div class="text-gray-600 text-sm font-bold xl:text-3xl md:text-xl">團主評價</div>
       </div>
-      <div v-else-if="step == 1"  
+      <div
+        v-else-if="step == 1"
         class="relative px-5 before:content-[''] before:absolute before:left-0 before:top-2 before:bottom-2 before:w-2 before: before:bg-blue-500"
       >
         <div class="text-sm xl:text-2xl md:text-xl">活動評價</div>
         <div class="text-gray-600 text-sm font-bold xl:text-3xl md:text-xl">追蹤活動</div>
       </div>
-      <div v-else-if="step == 2"
+      <div
+        v-else-if="step == 2"
         class="relative px-5 before:content-[''] before:absolute before:left-0 before:top-2 before:bottom-2 before:w-2 before: before:bg-blue-500"
       >
         <div class="text-sm xl:text-2xl md:text-xl">活動評價</div>
@@ -129,16 +132,22 @@ const showSubmitModal = ref(false)
       >
         <div>
           <!-- 團主評價到此頁面的進度顯示-->
-          <div :class="{ 'text-blue-600': step == 0, 'text-gray-300': step != 0 }" class="flex justify-center items-center  font-bold tracking-widest">
+          <div
+            :class="{ 'text-blue-600': step == 0, 'text-gray-300': step != 0 }"
+            class="flex justify-center items-center font-bold tracking-widest"
+          >
             <CheckCircleSolid v-if="step == 0" class="mr-1" />團主評價
             <CheckCircle v-if="step != 0" class="mr-1" />
           </div>
         </div>
         <div>
           <!-- 還沒到追蹤評價頁面的進度顯示-->
-          <div :class="{ 'text-blue-600' : step == 1, 'text-gray-300' : step != 1}" class="flex justify-center items-center  font-bold tracking-widest">
+          <div
+            :class="{ 'text-blue-600': step == 1, 'text-gray-300': step != 1 }"
+            class="flex justify-center items-center font-bold tracking-widest"
+          >
             <CheckCircleSolid v-if="step == 1" class="mr-1" />
-            <CheckCircle v-if="step != 1"  class="mr-1" />追蹤活動
+            <CheckCircle v-if="step != 1" class="mr-1" />追蹤活動
           </div>
           <!-- 到追蹤評價頁面的進度顯示-->
 
@@ -330,7 +339,6 @@ const showSubmitModal = ref(false)
       </div>
       <!-- 追蹤團主介面 -->
       <div v-else-if="step == 1" class="mt-5">
-        
         <div class="xl:text-base xl:p-1">團主：</div>
         <div class="flex items-center mt-2">
           <img

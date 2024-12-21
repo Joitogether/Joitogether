@@ -14,23 +14,22 @@ import { userGetAPI } from '@/apis/userAPIs'
 import { ref, onMounted } from 'vue'
 import { getPostsAPI } from '@/apis/userAPIs'
 import { userGetFollowerAPI } from '@/apis/userAPIs'
-import { userGetActivityAPI } from '@/apis/userAPIs';
-
+import { userGetActivityAPI } from '@/apis/userAPIs'
 
 const message = useMessage()
 const userStore = useUserStore()
 const router = useRouter()
 const notificationStore = useNotificationStore()
 const { notifications, unreadCount, unreadList } = storeToRefs(notificationStore)
-const {  updateNotifications } = notificationStore
+const { updateNotifications } = notificationStore
 dayjs.locale('zh-tw')
 dayjs.extend(relativeTime)
-const user = ref(null);  // 儲存使用者資料
-const loading = ref(true);
+const user = ref(null) // 儲存使用者資料
+const loading = ref(true)
 const postNumber = ref(null)
 const followerNumber = ref(null)
 const activityNumber = ref(null)
-const userLogin = ref(false); //檢查登入
+const userLogin = ref(false) //檢查登入
 
 defineProps({
   items: {
@@ -42,74 +41,71 @@ defineProps({
       city: '城市加載中',
       age: '年齡加載中',
       career: '職業加載中',
-    })
+    }),
   },
   type: {
     type: String,
     required: true,
-  }
+  },
 })
 // 檢查用戶登入狀態並獲取用戶資料
 const fetchUserData = async () => {
   try {
-    const result = await userGetAPI(userStore.user.uid);
+    const result = await userGetAPI(userStore.user.uid)
     if (result) {
-      user.value = result;
-      loading.value = false;
-      userLogin.value = true;
+      user.value = result
+      loading.value = false
+      userLogin.value = true
     }
   } catch (err) {
-    message.error('載入用戶資料錯誤');
-    loading.value = false;
+    message.error('載入用戶資料錯誤')
+    loading.value = false
     userLogin.value = false
   }
-};
-const getPostCount = async() => {
-      try {
-        const result = await getPostsAPI(userStore.user.uid).catch(() => ({ data: []}))
-        postNumber.value = result.data.length
-      } catch(err) {
-        console.log('抓取文章數量發生錯誤',err)
-          postNumber.value = 0
-
-      }
-    }
-const getFollowerCount = async() => {
+}
+const getPostCount = async () => {
   try {
-    const result = await userGetFollowerAPI(userStore.user.uid).catch(() => ({ data: []}))
-    followerNumber.value = result.data.length
-  } catch(err) {
-    console.log('抓取粉絲數量發生錯誤',err)
-      followerNumber.value = 0
-
+    const result = await getPostsAPI(userStore.user.uid).catch(() => ({ data: [] }))
+    postNumber.value = result.data.length
+  } catch (err) {
+    console.log('抓取文章數量發生錯誤', err)
+    postNumber.value = 0
   }
 }
-const getActivityCount = async() => {
-  try{
-    const result = await userGetActivityAPI(userStore.user.uid);
-    console.log('活動資料：', result);
-    console.log(result.length);
+const getFollowerCount = async () => {
+  try {
+    const result = await userGetFollowerAPI(userStore.user.uid).catch(() => ({ data: [] }))
+    followerNumber.value = result.data.length
+  } catch (err) {
+    console.log('抓取粉絲數量發生錯誤', err)
+    followerNumber.value = 0
+  }
+}
+const getActivityCount = async () => {
+  try {
+    const result = await userGetActivityAPI(userStore.user.uid)
+    console.log('活動資料：', result)
+    console.log(result.length)
 
     activityNumber.value = result.length
   } catch (err) {
-    console.log('抓取活動數量發生錯誤', err);
+    console.log('抓取活動數量發生錯誤', err)
     activityNumber.value = 0
   }
 }
 // 註冊登入邏輯
 onMounted(() => {
   if (userStore.user.isLogin) {
-    fetchUserData();
-    getPostCount();
-    getFollowerCount();
+    fetchUserData()
+    getPostCount()
+    getFollowerCount()
     getActivityCount()
   } else {
-    loading.value = false;
+    loading.value = false
   }
-});
+})
 
 // 切換選單顯示
-
 
 // 註冊/登入按鈕跳轉
 const navigateToLogin = () => {
@@ -142,20 +138,17 @@ const handleLogout = async () => {
 
 const showPopover = ref(false)
 
-
 const handleNotificationRead = async (value) => {
   // 掌握開關
   showPopover.value = value
   // 關起來的話做檢查
-  if(!value){
-    if(unreadList.value.length > 0) {
+  if (!value) {
+    if (unreadList.value.length > 0) {
       // 調用 API 更新未讀的通知狀態
       await updateNotifications(userStore.user.uid, unreadList.value)
     }
+  }
 }
-}
-
-
 
 const handleLoadClick = async () => {
   showLoading.value = true
@@ -191,7 +184,8 @@ const showLoading = ref(false)
       <!--選單內容-->
       <div
         id="menu"
-        class="hidden md:hidden bg-gray-200 text-white p-6 space-y-4 absolute top-10 inset-x-0">
+        class="hidden md:hidden bg-gray-200 text-white p-6 space-y-4 absolute top-10 inset-x-0"
+      >
         <ul>
           <li class="flex">
             <Search />
@@ -200,24 +194,31 @@ const showLoading = ref(false)
           <li>
             <a
               href="#"
-              class="block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-black dark:hover:text-white">
-              加入聚會</a>
+              class="block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-black dark:hover:text-white"
+            >
+              加入聚會</a
+            >
           </li>
           <li
-            class="block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-black dark:hover:text-white">
+            class="block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-black dark:hover:text-white"
+          >
             <RouterLink to="/post">社群</RouterLink>
           </li>
           <li>
             <a
               href="#"
-              class="block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-black dark:hover:text-white">
-              活動中心</a>
+              class="block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-black dark:hover:text-white"
+            >
+              活動中心</a
+            >
           </li>
           <li>
             <a
               href="#"
-              class="block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-black dark:hover:text-white">
-              儲值中心</a>
+              class="block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-black dark:hover:text-white"
+            >
+              儲值中心</a
+            >
           </li>
         </ul>
       </div>
@@ -228,23 +229,29 @@ const showLoading = ref(false)
         <li>
           <a
             href="#"
-            class="block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-black dark:hover:text-white">
-            加入聚會</a>
+            class="block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-black dark:hover:text-white"
+          >
+            加入聚會</a
+          >
         </li>
         <li
-          class="block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-black dark:hover:text-white">
+          class="block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-black dark:hover:text-white"
+        >
           <RouterLink to="/post">社群</RouterLink>
         </li>
         <li>
           <a
             href="#"
-            class="block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-black dark:hover:text-white">
-            活動中心</a>
+            class="block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-black dark:hover:text-white"
+          >
+            活動中心</a
+          >
         </li>
         <li>
           <a
             href="#"
-            class="block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-black dark:hover:text-white">
+            class="block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-black dark:hover:text-white"
+          >
             儲值中心</a
           >
         </li>
@@ -252,47 +259,78 @@ const showLoading = ref(false)
     </div>
     <!-- 登入/註冊 -->
     <div class="flex items-center">
-      <n-popover  :on-update:show="handleNotificationRead" placement="bottom-end" :on-clickoutside="() => showPopover = false" class="w-[400px]" style="padding: 10px"  trigger="click" :show="showPopover">
+      <n-popover
+        :on-update:show="handleNotificationRead"
+        placement="bottom-end"
+        :on-clickoutside="() => (showPopover = false)"
+        class="w-[400px]"
+        style="padding: 10px"
+        trigger="click"
+        :show="showPopover"
+      >
         <template #trigger>
-          <n-badge :max="15"  :value="unreadCount" class="mr-3 cursor-pointer">
+          <n-badge :max="15" :value="unreadCount" class="mr-3 cursor-pointer">
             <BellNotificationSolid></BellNotificationSolid>
           </n-badge>
         </template>
-        <n-scrollbar  style="max-height: 500px">
-          <div class="flex  flex-col ">
+        <n-scrollbar style="max-height: 500px">
+          <div class="flex flex-col">
             <p class="pl-2 text-xl font-bold">通知</p>
             <div v-if="notifications.length > 0 && userStore.user.uid">
-              <div  v-for="notification in notifications" :key="notification.id" >
+              <div v-for="notification in notifications" :key="notification.id">
                 <router-link :to="notification.link">
-                  <div :class="{ 'bg-yellow-100' : !notification.is_read}" class="hover:bg-yellow-100 pl-2 overflow-hidden hover:transition-colors post-onepost-top flex py-2  rounded-md items-center	cursor-pointer ">
-                    <img class=" w-14 aspect-square rounded-full" :src="notification.users_notifications_actor_idTousers.photo_url" alt="">
-                    <div class="ml-3 relative w-full h-14 ">
-                      <p class="font-bold text-lg absolute top-0"> {{notification.users_notifications_actor_idTousers.display_name }}<span class="pl-1 font-normal">{{ notification.message}}</span> </p>
-                      <p class="absolute bottom-0 w-full text-md truncate">{{dayjs(notification.created_at).fromNow()}}
-                        <span v-if="notification.target_type === 'activity'"  class="pl-1 font-normal text-lg ">{{ notification.target_detail.name }}</span>
-                        <span v-else-if="notification.target_type === 'post'"  class="pl-1 font-normal text-lg ">{{ notification.target_detail.post_title }}</span>
-                        <span v-else-if="notification.target_type === 'rating'"  class="pl-1 font-normal text-lg ">{{ notification.target_detail.user_comment }}</span>
+                  <div
+                    :class="{ 'bg-yellow-100': !notification.is_read }"
+                    class="hover:bg-yellow-100 pl-2 overflow-hidden hover:transition-colors post-onepost-top flex py-2 rounded-md items-center cursor-pointer"
+                  >
+                    <img
+                      class="w-14 aspect-square rounded-full"
+                      :src="notification.users_notifications_actor_idTousers.photo_url"
+                      alt=""
+                    />
+                    <div class="ml-3 relative w-full h-14">
+                      <p class="font-bold text-lg absolute top-0">
+                        {{ notification.users_notifications_actor_idTousers.display_name
+                        }}<span class="pl-1 font-normal">{{ notification.message }}</span>
+                      </p>
+                      <p class="absolute bottom-0 w-full text-md truncate">
+                        {{ dayjs(notification.created_at).fromNow() }}
+                        <span
+                          v-if="notification.target_type === 'activity'"
+                          class="pl-1 font-normal text-lg"
+                          >{{ notification.target_detail.name }}</span
+                        >
+                        <span
+                          v-else-if="notification.target_type === 'post'"
+                          class="pl-1 font-normal text-lg"
+                          >{{ notification.target_detail.post_title }}</span
+                        >
+                        <span
+                          v-else-if="notification.target_type === 'rating'"
+                          class="pl-1 font-normal text-lg"
+                          >{{ notification.target_detail.user_comment }}</span
+                        >
                       </p>
                     </div>
                   </div>
                 </router-link>
               </div>
             </div>
-            <div v-else-if="userStore.user.uid && notifications.length === 0">
-              暫無通知
-            </div>
-            <div v-else>
-              登入以查看通知
-            </div>
+            <div v-else-if="userStore.user.uid && notifications.length === 0">暫無通知</div>
+            <div v-else>登入以查看通知</div>
             <n-spin v-if="!notificationStore.hideLoadBtn" :show="showLoading">
-              <n-button @click="handleLoadClick" class="w-full h-12 mt-2 text-lg font-bold">加載更多</n-button>
+              <n-button @click="handleLoadClick" class="w-full h-12 mt-2 text-lg font-bold"
+                >加載更多</n-button
+              >
             </n-spin>
-            <div v-else class="text-center font-bold text-lg border-[1px] cursor-not-allowed rounded-md py-2 mt-1 ">
+            <div
+              v-else
+              class="text-center font-bold text-lg border-[1px] cursor-not-allowed rounded-md py-2 mt-1"
+            >
               已經到底囉～
             </div>
           </div>
         </n-scrollbar>
-
       </n-popover>
       <div class="hidden md:flex min-w-20 items-center">登入/註冊</div>
       <div class="hidden md:flex min-w-20 items-center" v-if="userLogin">
@@ -307,19 +345,25 @@ const showLoading = ref(false)
       >
         <User />
       </label>
-      <div v-if="loading"> 加载中... </div>
+      <div v-if="loading">加载中...</div>
 
       <div
         v-else
         id="login-menu"
-        class="hidden w-1/4 bg-gray-50 text-black p-6 space-y-4 absolute top-10 right-0">
-        <div v-if="userStore.user.isLogin" class="user-photo rounded-full w-1/2 h-1/2 aspect-square overflow-hidden flex justify-self-center">
-          <img :src="user.photo_url || 'default_image_path.jpg'" alt="userPhoto" class="w-full"/>
+        class="hidden w-1/4 bg-gray-50 text-black p-6 space-y-4 absolute top-10 right-0"
+      >
+        <div
+          v-if="userStore.user.isLogin"
+          class="user-photo rounded-full w-1/2 h-1/2 aspect-square overflow-hidden flex justify-self-center"
+        >
+          <img :src="user.photo_url || 'default_image_path.jpg'" alt="userPhoto" class="w-full" />
         </div>
-        <div v-if="userStore.user.isLogin" class="user-name text-center font-bold text-xl">{{ user.display_name || '暱稱'}}</div>
+        <div v-if="userStore.user.isLogin" class="user-name text-center font-bold text-xl">
+          {{ user.display_name || '暱稱' }}
+        </div>
         <div v-if="userStore.user.isLogin" class="user-info text-md font-bold text-center">
-          <span>{{ user.city  || '所在地'}}</span>
-          <span> • {{ user.age || '年齡'}}</span>
+          <span>{{ user.city || '所在地' }}</span>
+          <span> • {{ user.age || '年齡' }}</span>
           <span> • {{ user.career || '職業' }}</span>
         </div>
         <div v-if="userStore.user.isLogin" class="flex justify-center">
@@ -350,7 +394,8 @@ const showLoading = ref(false)
             strong
             secondary
             type="tertiary"
-            @click="userStore.user.isLogin ? handleLogout() : navigateToLogin()">
+            @click="userStore.user.isLogin ? handleLogout() : navigateToLogin()"
+          >
             {{ userStore.user.isLogin ? '登出' : '登入' }}
           </n-button>
         </div>
@@ -364,25 +409,25 @@ const showLoading = ref(false)
   .user-photo,
   .user-name,
   .user-info,
-  .user-more-info{
-    display: none
+  .user-more-info {
+    display: none;
   }
   .goinfo-mob {
     display: contents;
     writing-mode: vertical-lr; /* 使文字垂直顯示，從右到左 */
-    transform: rotate(360deg);  /* 旋轉180度，讓文字從上到下排列 */
-    white-space: nowrap;        /* 防止文字換行 */
-    text-align: center;         /* 讓文字在按鈕內部居中 */
+    transform: rotate(360deg); /* 旋轉180度，讓文字從上到下排列 */
+    white-space: nowrap; /* 防止文字換行 */
+    text-align: center; /* 讓文字在按鈕內部居中 */
   }
-  .goinfo-pc{
-    display: none
+  .goinfo-pc {
+    display: none;
   }
 }
-.user-name{
-  text-align: center
+.user-name {
+  text-align: center;
 }
-.user-photo{
-  justify-content: center
+.user-photo {
+  justify-content: center;
 }
 
 /* 當checkbox被選中時顯示選單 */

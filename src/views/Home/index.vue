@@ -19,13 +19,12 @@ const hasInitialized = ref(false)
 const skipNextWatch = ref(false)
 
 onMounted(() => {
-    if (userStore.user.isLogin) {
-      message.success(`歡迎回來 ${userStore.user.display_name}，很高興見到您！🎉`)
-    } else {
-      message.warning('😵 您尚未登入，部分功能可能無法使用喔！💔')
-    }
+  if (userStore.user.isLogin) {
+    message.success(`歡迎回來 ${userStore.user.display_name}，很高興見到您！🎉`)
+  } else {
+    message.warning('😵 您尚未登入，部分功能可能無法使用喔！💔')
   }
-)
+})
 
 // 監聽登入狀態的變化（避免在初始化時重複執行）
 watch(
@@ -42,7 +41,7 @@ watch(
         // 登入提示
         // message.success('🎉 歡迎回來～開心見到您！✨')
         message.success(`歡迎回來 ${userStore.user.display_name} 🎉`)
-          // 活動創建顯示
+        // 活動創建顯示
       } else {
         // 未登入提示
         message.warning('😵 您尚未登入，部分功能可能無法使用喔！💔')

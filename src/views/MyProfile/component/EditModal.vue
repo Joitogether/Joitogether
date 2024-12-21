@@ -12,7 +12,7 @@ import {
   NDynamicTags,
   NSelect,
   useDialog,
-  useMessage
+  useMessage,
 } from 'naive-ui'
 import { ArrowLeft, ArrowRight } from '@iconoir/vue'
 import { ref, watch, onMounted } from 'vue'
@@ -31,8 +31,8 @@ const fileListSec = ref([])
 const fileListAva = ref([])
 const currentRef = ref(1)
 const currentStatus = ref('process')
-const message = useMessage();
-const dialog = useDialog();
+const message = useMessage()
+const dialog = useDialog()
 
 const cityOptions = [
   { label: '基隆市', value: '基隆市' },
@@ -126,7 +126,7 @@ const handleAvatarChange = async (fileListAva) => {
     const downloadURL = await getDownloadURL(snapshot.ref)
 
     user.value.photo_url = downloadURL
-    message.success('🎉 圖片上傳成功！');
+    message.success('🎉 圖片上傳成功！')
   } catch (error) {
     message.error('大頭照上傳失敗:', error.message)
   }
@@ -250,20 +250,20 @@ const handleSave = () => {
 }
 const handleConfirm = () => {
   dialog.warning({
-    title: "確定下次再填嗎？",
-    content: "本次修改資料將不被保存喔！",
-    positiveText: "确定肯定一定",
-    negativeText: "好啦繼續填",
+    title: '確定下次再填嗎？',
+    content: '本次修改資料將不被保存喔！',
+    positiveText: '确定肯定一定',
+    negativeText: '好啦繼續填',
     onPositiveClick: () => {
       emit('close')
-      message.info("等你下次回來");
+      message.info('等你下次回來')
       showModal.value = false
     },
     onNegativeClick: () => {
-      message.success("請繼續～～～");
+      message.success('請繼續～～～')
       showModal.value = true
-    }
-  });
+    },
+  })
 }
 
 const closeModal = () => {

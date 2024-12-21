@@ -32,14 +32,13 @@ const fetchUserData = async () => {
   }
 }
 
-const handleSave = async() => {
+const handleSave = async () => {
   await fetchUserData()
   isEditModalOpen.value = false
-
 }
 onMounted(async () => {
-  await fetchUserData();
-});
+  await fetchUserData()
+})
 
 const isEditModalOpen = ref(false)
 // 開啟編輯視窗
@@ -51,60 +50,68 @@ const openEditModal = (param) => {
 const closeEditModal = () => {
   isEditModalOpen.value = false
 }
-const currentPage = ref('PersonInfo');
-
-
+const currentPage = ref('PersonInfo')
 </script>
 
 <template>
   <div class="container mx-auto">
     <CardList
-    :display_name="user.display_name"
-    :age="user.age"
-    :career="user.career"
-    :city="user.city"
-    :favorite_sentence="user.favorite_sentence"
-    :tags="user.tags"
-    :photo_url="user.photo_url"
-    @edit="openEditModal" />
+      :display_name="user.display_name"
+      :age="user.age"
+      :career="user.career"
+      :city="user.city"
+      :favorite_sentence="user.favorite_sentence"
+      :tags="user.tags"
+      :photo_url="user.photo_url"
+      @edit="openEditModal"
+    />
     <EditModal v-if="isEditModalOpen" @close="closeEditModal" @save="handleSave" />
     <div class="flex justify-between px-10 py-5">
       <button
-      @click="currentPage = 'PersonInfo'"
-      :class="{'text-green-600': currentPage === 'PersonInfo'}">
-        <ProfileCircle class="justify-self-center"/>
-      </button >
-      <button @click="currentPage = 'PersonRate'"
-      :class="{'text-green-600': currentPage === 'PersonRate'}">
-        <BrightStar class="justify-self-center"/>
-      </button >
-      <button @click="currentPage = 'PersonFollow'"
-      :class="{'text-green-600': currentPage === 'PersonFollow'}">
-        <Heart class="justify-self-center"/>
-      </button >
-      <button @click="currentPage = 'PersonPost'"
-      :class="{'text-green-600': currentPage === 'PersonPost'}">
-        <Post class="justify-self-center"/>
-      </button >
-      <button @click="currentPage = 'PersonActivity'"
-      :class="{'text-green-600': currentPage === 'PersonActivity'}">
-        <Group class="justify-self-center"/>
-      </button >
+        @click="currentPage = 'PersonInfo'"
+        :class="{ 'text-green-600': currentPage === 'PersonInfo' }"
+      >
+        <ProfileCircle class="justify-self-center" />
+      </button>
+      <button
+        @click="currentPage = 'PersonRate'"
+        :class="{ 'text-green-600': currentPage === 'PersonRate' }"
+      >
+        <BrightStar class="justify-self-center" />
+      </button>
+      <button
+        @click="currentPage = 'PersonFollow'"
+        :class="{ 'text-green-600': currentPage === 'PersonFollow' }"
+      >
+        <Heart class="justify-self-center" />
+      </button>
+      <button
+        @click="currentPage = 'PersonPost'"
+        :class="{ 'text-green-600': currentPage === 'PersonPost' }"
+      >
+        <Post class="justify-self-center" />
+      </button>
+      <button
+        @click="currentPage = 'PersonActivity'"
+        :class="{ 'text-green-600': currentPage === 'PersonActivity' }"
+      >
+        <Group class="justify-self-center" />
+      </button>
     </div>
     <PersonInfo
-    v-if="currentPage === 'PersonInfo'"
-    :life_photo_1="user.life_photo_1"
-    :life_photo_2="user.life_photo_2"
-    :self_introduction="user.self_introduction"
-    :zodiac="user.zodiac"
-    :hobby="user.hobby"
-    :expertise="user.expertise"
-    :interested_in="user.interested_in"
+      v-if="currentPage === 'PersonInfo'"
+      :life_photo_1="user.life_photo_1"
+      :life_photo_2="user.life_photo_2"
+      :self_introduction="user.self_introduction"
+      :zodiac="user.zodiac"
+      :hobby="user.hobby"
+      :expertise="user.expertise"
+      :interested_in="user.interested_in"
     />
-    <PersonRate v-if="currentPage === 'PersonRate'"/>
-    <PersonFollow v-if="currentPage === 'PersonFollow'"/>
-    <PersonPost v-if="currentPage === 'PersonPost'"/>
-    <PersonActivity v-if="currentPage === 'PersonActivity'"/>
+    <PersonRate v-if="currentPage === 'PersonRate'" />
+    <PersonFollow v-if="currentPage === 'PersonFollow'" />
+    <PersonPost v-if="currentPage === 'PersonPost'" />
+    <PersonActivity v-if="currentPage === 'PersonActivity'" />
   </div>
 </template>
 
@@ -117,7 +124,7 @@ const currentPage = ref('PersonInfo');
 }
 
 @media screen and (width >= 768px) {
-  header{
+  header {
     margin-bottom: 2%;
   }
   .container {

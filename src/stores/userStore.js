@@ -10,8 +10,8 @@ export const useUserStore = defineStore('user', {
     },
   }),
   actions: {
-    async getUser(uid){
-      const user =  await userGetAPI(uid)
+    async getUser(uid) {
+      const user = await userGetAPI(uid)
       this.setUser(user)
     },
     // 設定用戶資料
