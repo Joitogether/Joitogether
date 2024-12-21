@@ -1,6 +1,6 @@
 <script setup>
 import ActivityCard from '@/views/components/ActivityCard.vue'
-import { activityGetAllAPI, activityGetUsersAPI } from '@/apis/activityAPi.js'
+import { activityGetAllAPI, activityGetUsersAPI } from '@/apis/activityAPI.js'
 import { ref, onMounted, computed, onUnmounted, nextTick } from 'vue'
 import { formatToISOWithTimezone } from '@/stores/useDateTime'
 

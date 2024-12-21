@@ -2,28 +2,43 @@
 import { Search, XmarkCircle, Clock, CreditCard, MoneySquare, Group, MapPin } from '@iconoir/vue'
 import { computed, ref, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import { useGoogleMaps } from '@/stores/useGoogleMaps'
-import { useAutocomplete } from '@/stores/useAutocomplete'
-import { usePreviewMode } from '@/stores/usePreviewMode'
 import { useMessage } from 'naive-ui'
 import dayjs from 'dayjs'
 import { taiwanTime, formatToISOWithTimezone } from '@/stores/useDateTime'
 import { useUserStore } from '@/stores/userStore'
 import { convertMarkdown } from '@/stores/useMarkdown'
 import { userGetAPI } from '@/apis/userAPIs'
-import { activityUserCreateAPI } from '@/apis/activityApi.js'
+import { activityUserCreateAPI } from '@/apis/activityAPI.js'
+import { useAutocomplete } from '@/stores/useAutocomplete';
+import { useGoogleMaps } from '@/stores/useGoogleMaps';
+import { usePreviewMode } from '@/stores/usePreviewMode'
 
-const apiKey = import.meta.env.VITE_GOOGLE_KEY
+
+const { previewMap } = useGoogleMaps();
+const { isPreviewMode, enterPreviewMode, exitPreviewMode } = usePreviewMode(previewMap);
+
+const message = useMessage();
 const {
   searchQuery,
   suggestions,
-  initializeAutocomplete,
   triggerInputChange,
-  isLoading: loadingState,
-  isLoadOK: loadStateOK,
-} = useAutocomplete(apiKey)
-const { map, previewMap } = useGoogleMaps(apiKey)
-const { isPreviewMode, enterPreviewMode, exitPreviewMode } = usePreviewMode(previewMap, map)
+  isLoading,
+  isLoadOK,
+} = useAutocomplete();
+
+
+const clearSearch = () => {
+  searchQuery.value = '';
+  suggestions.value = [];
+  isLoadOK.value = false;
+};
+
+const selectSuggestion = (suggestion) => {
+  searchQuery.value = suggestion.description;
+  suggestions.value = [];
+  previewMap(suggestion.description);
+};
+
 const { minTime, maxTime } = taiwanTime()
 const selectedFile = ref(null)
 const isSubmitting = ref(false)
@@ -34,20 +49,20 @@ const user = ref(null)
 if (userStore.user.isLogin) {
   const fetchUserData = async () => {
     try {
-      const result = await userGetAPI(userStore.user.uid)
-
+      const result = await userGetAPI(userStore.user.uid);
       if (result) {
-        user.value = result
-        return user.value
+        user.value = result;
       }
-    } catch (err) {}
-  }
-  fetchUserData()
+      return result;
+    } catch {
+      return
+    }
+  };
+  fetchUserData();
 }
 
 const markdownPreview = computed(() => convertMarkdown(inputValues.value.describe))
 
-const message = useMessage()
 dayjs.locale('zh-tw')
 
 const ActivityDataPush = async () => {
@@ -282,19 +297,8 @@ const removeImage = () => {
   uploadedImage.value = null
 }
 
-// 選擇建議
-const selectSuggestion = (suggestion) => {
-  searchQuery.value = suggestion.description
-  suggestions.value = []
-}
 
-// 清除輸入框
-const clearSearch = () => {
-  searchQuery.value = ''
-  suggestions.value = []
-  loadStateOK.value = false
-  loadingState.value = false
-}
+
 
 // 聚焦輸入框
 const inputElement = ref(null)
@@ -482,7 +486,7 @@ const previewActivity = () => {
                       @input="triggerInputChange"
                       @focus="initializeAutocomplete"
                     />
-                    <button v-if="loadStateOK" class="p-3" @click="clearSearch">
+                    <button v-if="isLoadOK" class="p-3" @click="clearSearch">
                       <XmarkCircle />
                     </button>
                     <button class="p-3 border-l-2" @click="focusInput">
@@ -491,10 +495,10 @@ const previewActivity = () => {
                   </div>
                   <div>
                     <ul
-                      v-if="loadingState || suggestions.length"
+                      v-if="isLoading || suggestions.length"
                       class="border rounded-md mt-2 bg-white"
                     >
-                      <li v-if="loadingState" class="p-2 text-gray-500 text-sm">搜尋中...</li>
+                      <li v-if="isLoading" class="p-2 text-gray-500 text-sm">搜尋中...</li>
                       <li
                         v-else
                         v-for="(suggestion, index) in suggestions"

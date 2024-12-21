@@ -17,7 +17,7 @@ import {
   activityCancelAPI,
   activityNewCommentAPI,
   activityDeleteCommentAPI,
-} from '@/apis/activityApi.js'
+} from '@/apis/activityAPI.js'
 import { useSocketStore } from '@/stores/socketStore'
 
 dayjs.locale('zh-tw')
