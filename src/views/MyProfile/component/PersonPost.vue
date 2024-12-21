@@ -76,9 +76,9 @@ onMounted(() => {
 <template>
   <div v-if="userPostList.length > 0">
     <div
-    v-for="post in userPostList"
-    :key="post.post_id"
-    class="one-post-bottom px-6 bg-white pb-4 cursor-pointer border-b-4 border-solid border-[rgba(61,57,44,0.1)]"
+      v-for="post in userPostList"
+      :key="post.post_id"
+      class="one-post-bottom px-6 bg-white pb-4 cursor-pointer border-b-4 border-solid border-[rgba(61,57,44,0.1)]"
     >
       <div class="post-bottom-top grid grid-cols-6 my-6">
         <div

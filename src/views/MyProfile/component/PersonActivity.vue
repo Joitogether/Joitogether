@@ -67,9 +67,9 @@ onMounted(() => {
     <div class="h-20 content-center text-center bg-slate-100 text-lg">即將參加</div>
     <div v-if="afterToday.length > 0">
       <div
-      v-for="(future_activity, id) in afterToday"
-      :key="id"
-      class="future-party grid grid-cols-3 gap-10 mt-10 sm:px-14 px-9"
+        v-for="(future_activity, id) in afterToday"
+        :key="id"
+        class="future-party grid grid-cols-3 gap-10 mt-10 sm:px-14 px-9"
       >
         <div class="future-party-photo overflow-hidden flex max-h-40">
           <img :src="future_activity.img_url" alt="future-party-photo" class="object-contain" />
@@ -87,16 +87,16 @@ onMounted(() => {
             <div class="text-xl">{{ formatDate(future_activity.event_time) }}</div>
           </n-ellipsis>
         </div>
-      </div>      
+      </div>
     </div>
     <div v-else>用戶沒有即將參加的活動</div>
 
     <div class="h-20 content-center text-center bg-slate-100 text-lg mt-10">聚會紀錄</div>
     <div v-if="beforeToday.length > 0">
       <div
-      v-for="(pre_activity, id) in beforeToday"
-      :key="id"
-      class="past-party grid grid-cols-3 gap-10 mt-10 sm:px-14 px-9 overflow-hidden"
+        v-for="(pre_activity, id) in beforeToday"
+        :key="id"
+        class="past-party grid grid-cols-3 gap-10 mt-10 sm:px-14 px-9 overflow-hidden"
       >
         <div class="past-party-photo overflow-hidden flex max-h-40">
           <img :src="pre_activity.img_url" alt="past-party-photo" class="object-contain" />
@@ -115,7 +115,6 @@ onMounted(() => {
           </n-ellipsis>
         </div>
       </div>
-
     </div>
     <div v-else>用戶沒有過去的活動</div>
   </div>

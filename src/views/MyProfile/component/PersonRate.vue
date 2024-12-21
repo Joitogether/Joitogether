@@ -1,6 +1,6 @@
 <script setup>
-import {  ref, onMounted } from 'vue'
-import {  Heart, Search, HeartSolid } from '@iconoir/vue'
+import { ref, onMounted } from 'vue'
+import { Heart, Search, HeartSolid } from '@iconoir/vue'
 import { NProgress, NDropdown, NButton, NRate } from 'naive-ui'
 import { useUserStore } from '@/stores/userStore'
 import { getRatingsAPI } from '@/apis/userAPIs'

@@ -234,7 +234,6 @@ const handleCancelClick = async (id) => {
 
 // 切換審核狀態
 
-
 const approvedCount = computed(() => {
   return attendee.value.filter((item) => item.approved).length
 })
@@ -386,7 +385,7 @@ const sendReplies = async () => {
 
         <!-- 未審核通過時畫面 -->
         <div
-          v-for="(item) in filteredAttendees"
+          v-for="item in filteredAttendees"
           :key="item.id"
           class="flex flex-col text-gray-500 bg-gray-100 border-[1px] border-gray-200 rounded-xl p-2 my-2 w-full"
         >

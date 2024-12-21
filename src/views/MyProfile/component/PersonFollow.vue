@@ -67,10 +67,10 @@ onMounted(() => {
     <n-tabs type="segment" animated>
       <n-tab-pane name="chap1" tab="關注中">
         <div v-if="following">
-          <div         
-          v-for="(following, index) in followingList"
-          :key="index"
-          class="followingArea my-5 flex"
+          <div
+            v-for="(following, index) in followingList"
+            :key="index"
+            class="followingArea my-5 flex"
           >
             <div class="me-5 max-w-[44px] max-h-[44px]">
               <img :src="following.photo_url" class="rounded-full self-center" />
@@ -86,9 +86,9 @@ onMounted(() => {
       <n-tab-pane name="chap2" tab="粉絲">
         <div v-if="follower">
           <div
-          v-for="follower in followerList"
-          :key="follower.follower_id"
-          class="followerArea my-5 flex"
+            v-for="follower in followerList"
+            :key="follower.follower_id"
+            class="followerArea my-5 flex"
           >
             <div class="me-5 max-w-[44px] max-h-[44px]">
               <img :src="follower.photo_url" class="rounded-full" />

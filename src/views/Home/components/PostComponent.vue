@@ -91,7 +91,6 @@ const formatDate = (isoString) => {
     hour12: false,
   })
 }
-
 </script>
 
 <template>
