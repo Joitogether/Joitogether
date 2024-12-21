@@ -6,9 +6,6 @@ export default [
   {
     name: 'app/files-to-lint',
     files: ['**/*.{js,mjs,jsx,vue}'],
-    rules: {
-      'vue/multi-word-component-names': 'off',
-    },
   },
   {
     name: 'app/files-to-ignore',
@@ -17,4 +14,9 @@ export default [
   js.configs.recommended,
   ...pluginVue.configs['flat/essential'],
   skipFormatting,
+  {
+    rules: {
+      'vue/multi-word-component-names': 0,
+    },
+  }
 ]
