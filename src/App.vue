@@ -1,6 +1,5 @@
 <script setup>
 import { NConfigProvider, NDialogProvider, NMessageProvider } from 'naive-ui'
-import { useUserStore } from './stores/userStore'
 import { getCurrentUser } from './utils/firebaseConfig'
 import { onMounted } from 'vue'
 

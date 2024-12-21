@@ -17,12 +17,9 @@ import ActivityRating from '@/views/Activity/components/ActivityRating.vue'
 import SignupSuccess from '@/views/Login/SignupSuccess.vue'
 import ResetPassword from '@/views/Login/ResetPassword.vue'
 import forgotPassword from '@/views/Login/ForgotPassword.vue'
-import ShoppingCart from '@/views/CashFlow/components/ShoppingCart.vue'
-import { onAuthStateChanged } from 'firebase/auth'
-import { auth } from '@/utils/firebaseConfig.js'
-import { useUserStore } from '@/stores/userStore'
-import { getCurrentUser } from '@/utils/firebaseConfig'
+import ShoppingCart from '@/views/CashFlow/index.vue'
 import Layout from '@/views/Layout/index.vue'
+import { getCurrentUser } from '@/utils/firebaseConfig'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -58,10 +55,6 @@ const router = createRouter({
       component: ShoppingCart,
     },
     {
-      path: '/profile',
-      name: 'profile',
-      component: Profile,
-      redirect: { name: 'personInfo' },
       path: '/',
       name: 'layout',
       component: Layout,

@@ -1,6 +1,6 @@
 <script setup>
 import { onMounted, ref } from 'vue'
-import { NTabs, NTabPane, NSpin } from 'naive-ui'
+import { NTabs, NTabPane } from 'naive-ui'
 import { userGetFollowerAPI, userGetFollowingAPI } from '../../../apis/userAPIs'
 import { useUserStore } from '@/stores/userStore'
 
@@ -66,35 +66,37 @@ onMounted(() => {
   <div v-else class="mx-6 py-6">
     <n-tabs type="segment" animated>
       <n-tab-pane name="chap1" tab="關注中">
-        <div
-          v-if="following"
+        <div v-if="following">
+          <div         
           v-for="(following, index) in followingList"
           :key="index"
           class="followingArea my-5 flex"
-        >
-          <div class="me-5 max-w-[44px] max-h-[44px]">
-            <img :src="following.photo_url" class="rounded-full self-center" />
-          </div>
-          <div>
-            <div>{{ following.display_name }}</div>
-            <div>{{ following.favorite_sentence }}</div>
+          >
+            <div class="me-5 max-w-[44px] max-h-[44px]">
+              <img :src="following.photo_url" class="rounded-full self-center" />
+            </div>
+            <div>
+              <div>{{ following.display_name }}</div>
+              <div>{{ following.favorite_sentence }}</div>
+            </div>
           </div>
         </div>
         <div v-else>還沒有關注中的人喔！</div>
       </n-tab-pane>
       <n-tab-pane name="chap2" tab="粉絲">
-        <div
-          v-if="follower"
+        <div v-if="follower">
+          <div
           v-for="follower in followerList"
           :key="follower.follower_id"
           class="followerArea my-5 flex"
-        >
-          <div class="me-5 max-w-[44px] max-h-[44px]">
-            <img :src="follower.photo_url" class="rounded-full" />
-          </div>
-          <div>
-            <div>{{ follower.display_name }}</div>
-            <div>{{ follower.favorite_sentence }}</div>
+          >
+            <div class="me-5 max-w-[44px] max-h-[44px]">
+              <img :src="follower.photo_url" class="rounded-full" />
+            </div>
+            <div>
+              <div>{{ follower.display_name }}</div>
+              <div>{{ follower.favorite_sentence }}</div>
+            </div>
           </div>
         </div>
         <div v-else>還沒有粉絲喔😢</div>

@@ -74,36 +74,38 @@ onMounted(() => {
 </script>
 
 <template>
-  <div
-    v-if="userPostList.length > 0"
+  <div v-if="userPostList.length > 0">
+    <div
     v-for="post in userPostList"
     :key="post.post_id"
     class="one-post-bottom px-6 bg-white pb-4 cursor-pointer border-b-4 border-solid border-[rgba(61,57,44,0.1)]"
-  >
-    <div class="post-bottom-top grid grid-cols-6 my-6">
-      <div
-        class="post-bottom-left leading-normal lg:col-span-5 sm:col-span-4 col-span-3 overflow-hidden mb-5"
-      >
-        <p class="text-slate-300 text-sm h-8 mt-6">{{ formatDate(post.created_at) }}</p>
-        <n-ellipsis class="blockArea" expand-trigger="click" line-clamp="1" :tooltip="false">
-          <h3 class="text-xl font-bold leading-loose">{{ post.post_title }}</h3>
-        </n-ellipsis>
-        <n-ellipsis class="blockArea" expand-trigger="click" line-clamp="2" :tooltip="false">
-          <p class="post-content text-[16px] text-slate-600">{{ post.post_content }}</p>
-        </n-ellipsis>
+    >
+      <div class="post-bottom-top grid grid-cols-6 my-6">
+        <div
+          class="post-bottom-left leading-normal lg:col-span-5 sm:col-span-4 col-span-3 overflow-hidden mb-5"
+        >
+          <p class="text-slate-300 text-sm h-8 mt-6">{{ formatDate(post.created_at) }}</p>
+          <n-ellipsis class="blockArea" expand-trigger="click" line-clamp="1" :tooltip="false">
+            <h3 class="text-xl font-bold leading-loose">{{ post.post_title }}</h3>
+          </n-ellipsis>
+          <n-ellipsis class="blockArea" expand-trigger="click" line-clamp="2" :tooltip="false">
+            <p class="post-content text-[16px] text-slate-600">{{ post.post_content }}</p>
+          </n-ellipsis>
+        </div>
+        <div
+          class="post-bottom-right rounded-3xl overflow-hidden ml-2.5 my-5 lg:col-span-1 sm:col-span-2 col-span-3"
+        >
+          <img :src="post.post_img" alt="Post Image" class="object-cover w-full h-full" />
+        </div>
       </div>
-      <div
-        class="post-bottom-right rounded-3xl overflow-hidden ml-2.5 my-5 lg:col-span-1 sm:col-span-2 col-span-3"
-      >
-        <img :src="post.post_img" alt="Post Image" class="object-cover w-full h-full" />
+      <NDivider />
+      <div class="post-bottom-bottom flex leading-loose mt-6 mx-6">
+        <div class="mr-8">👍🏻 {{ post.likeCount || 0 }} 讚</div>
+        <div>💬 {{ post.commentCount || 0 }} 留言</div>
       </div>
-    </div>
-    <NDivider />
-    <div class="post-bottom-bottom flex leading-loose mt-6 mx-6">
-      <div class="mr-8">👍🏻 {{ post.likeCount || 0 }} 讚</div>
-      <div>💬 {{ post.commentCount || 0 }} 留言</div>
     </div>
   </div>
+
   <div v-else>用戶還沒有任何貼文</div>
 </template>
 <style scoped>

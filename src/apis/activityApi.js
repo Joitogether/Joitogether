@@ -74,7 +74,7 @@ export const ActivityGetApplicationsAPI = async (activity_id, defaultAvatar) => 
         id: item.application_id,
         name: item.participant_info.full_name,
         avatar: item.participant_info.photo_url || defaultAvatar,
-        number: `@${item.participant_id}` || '未提供 ID',
+        number: `@${item.participant_id}`,
         message: item.comment || '這位參加者尚無留言',
         date: new Date().toLocaleDateString(),
         approved: item.status === 'approved',

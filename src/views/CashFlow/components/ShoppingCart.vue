@@ -6,7 +6,6 @@ import { useUserStore } from '@/stores/userStore'
 const cartItems = ref([]) // 存放購物車資料
 const isLoading = ref(true) // 載入狀態
 const userStore = useUserStore()
-const cartActivityId = ref([])
 // 取得購物車資料並轉換格式
 const fetchCartItems = async () => {
   try {
@@ -22,7 +21,7 @@ const fetchCartItems = async () => {
       image: item.image || 'https://via.placeholder.com/200', // 預設圖片
       // selected: false, // 初始未選中
     }))
-  } catch (error) {
+  } catch {
     return false
   } finally {
     isLoading.value = false
@@ -65,7 +64,7 @@ const removeSelected = async () => {
 
     // 5. 更新本地 cartItems 列表，移除已刪除的項目
     cartItems.value = cartItems.value.filter((item) => !item.Selected)
-  } catch (error) {
+  } catch {
     return false
   }
 }

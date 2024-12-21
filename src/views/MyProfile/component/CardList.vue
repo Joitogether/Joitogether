@@ -1,5 +1,5 @@
 <script setup>
-import { NButton, NSpin } from 'naive-ui'
+import { NButton } from 'naive-ui'
 import { ref } from 'vue'
 
 const props = defineProps({

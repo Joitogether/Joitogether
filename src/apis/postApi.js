@@ -9,7 +9,7 @@ export const getLatestPostsAPI = async () => {
     } else {
       return
     }
-  } catch (error) {
+  } catch {
     return
   }
 }
@@ -23,7 +23,7 @@ export const getPopularPostsAPI = async () => {
     } else {
       return
     }
-  } catch (error) {
+  } catch {
     return null
   }
 }

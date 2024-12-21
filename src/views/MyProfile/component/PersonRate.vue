@@ -1,7 +1,6 @@
 <script setup>
-import { userGetAPI } from '@/apis/userAPIs'
-import { reactive, ref, onMounted } from 'vue'
-import { ArrowLeft, Heart, Search, HeartSolid } from '@iconoir/vue'
+import {  ref, onMounted } from 'vue'
+import {  Heart, Search, HeartSolid } from '@iconoir/vue'
 import { NProgress, NDropdown, NButton, NRate } from 'naive-ui'
 import { useUserStore } from '@/stores/userStore'
 import { getRatingsAPI } from '@/apis/userAPIs'
@@ -52,7 +51,7 @@ const abilityAverageRating = computed(() => {
     const total = userRatings.value.reduce((sum, rating) => sum + rating.rating_ability, 0)
     return parseFloat(total / userRatings.value.length).toFixed(1)
   } else {
-    abilityAverageRating.value = 0
+    return 0
   }
 })
 const creditAverageRating = computed(() => {
@@ -60,7 +59,7 @@ const creditAverageRating = computed(() => {
     const total = userRatings.value.reduce((sum, rating) => sum + rating.rating_credit, 0)
     return parseFloat(total / userRatings.value.length).toFixed(1)
   } else {
-    creditAverageRating.value = 0
+    return 0
   }
 })
 

@@ -57,7 +57,7 @@ const fetchUserData = async () => {
       loading.value = false
       userLogin.value = true
     }
-  } catch (err) {
+  } catch {
     message.error('載入用戶資料錯誤')
     loading.value = false
     userLogin.value = false

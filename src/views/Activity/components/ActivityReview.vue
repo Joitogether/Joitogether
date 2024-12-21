@@ -3,18 +3,15 @@ import { ref, computed, onMounted } from 'vue'
 import {
   NavArrowLeft,
   ThumbsUp,
-  CheckCircle,
   CheckCircleSolid,
   FireFlame,
   Leaf,
   ArrowUpLeftSquareSolid,
-  Search,
   XmarkCircle,
 } from '@iconoir/vue'
 import defaultAvatar from '@/assets/avatar.png'
 
 import { useDialog, useMessage } from 'naive-ui'
-import { apiAxios } from '@/utils/request'
 import {
   ActivityGetApplicationsAPI,
   ActivityReviewApplicationsAPI,
@@ -28,7 +25,6 @@ const activity_id = route.params.activity_id
 
 const userStore = useUserStore()
 const activity = ref([null]) // 活動詳細資料
-const attendees = ref([]) // 參加者資料
 
 onMounted(async () => {
   try {
@@ -56,18 +52,6 @@ const attendee = ref([])
 
 //切換報名,截止報名功能
 const registrationStatus = ref('open')
-const toggleRegistration = async (status) => {
-  if (status === 'closed') {
-    const checkClose = confirm('您是否確認截止報名？')
-    if (!checkClose) return
-    registrationStatus.value = 'closed'
-  } else if (status === 'open') {
-    const checkOpen = confirm('您是否確認開放報名？')
-    if (!checkOpen) return
-    registrationStatus.value = 'open'
-  }
-  await refreshAttendees()
-}
 
 // 切換開放、截止報名的UI
 const openRegistration = () => {
@@ -109,21 +93,6 @@ const filteredAttendees = computed(() => {
   )
 })
 
-const handleAttendeeClick = (callback, id) => {
-  const approvalAttendee = attendee.value.find((item) => item.id === id)
-
-  if (registrationStatus.value === 'closed') {
-    message.warning('目前報名已截止，無法操作。請返回開放報名繼續操作。')
-    return
-  }
-
-  if (approvalAttendee && approvalAttendee.rejected) {
-    message.warning(`${approvalAttendee.name} 已經被拒絕參加，無法進行操作！`)
-    return
-  }
-
-  callback()
-}
 const handleApproveClick = async (id) => {
   const attendeeToUpdate = attendee.value.find((item) => item.id === id)
   if (!attendeeToUpdate) {
@@ -264,36 +233,7 @@ const handleCancelClick = async (id) => {
 }
 
 // 切換審核狀態
-const toggleApproval = (id) => {
-  const approvalAttendee = attendee.value.find((item) => item.id === id)
-  if (!approvalAttendee) {
-    message.error('找不到該參加者！')
-    return
-  }
 
-  dialog.warning({
-    title: '確認操作',
-    content: approvalAttendee.approved
-      ? `您確定要取消 ${approvalAttendee.name} 的參加資格嗎？`
-      : `您確定要允許 ${approvalAttendee.name} 參加嗎？`,
-    positiveText: '確認',
-    negativeText: '取消',
-    onPositiveClick: () => {
-      if (approvalAttendee.approved) {
-        approvalAttendee.rejected = true
-        approvalAttendee.approved = false
-        message.success(`已解除 ${approvalAttendee.name} 的參加資格！`)
-      } else {
-        approvalAttendee.approved = true
-        approvalAttendee.rejected = false
-        message.success(`已允許 ${approvalAttendee.name} 參加！`)
-      }
-    },
-    onNegativeClick: () => {
-      message.info('您已取消操作！')
-    },
-  })
-}
 
 const approvedCount = computed(() => {
   return attendee.value.filter((item) => item.approved).length
@@ -305,7 +245,6 @@ const rejectCount = computed(() => {
 
 const quickReplyVisible = ref(false)
 const selectedReplies = ref([])
-const sentReplies = ref([])
 
 const currentAttendeeId = ref(null)
 
@@ -447,7 +386,7 @@ const sendReplies = async () => {
 
         <!-- 未審核通過時畫面 -->
         <div
-          v-for="(item, index) in filteredAttendees"
+          v-for="(item) in filteredAttendees"
           :key="item.id"
           class="flex flex-col text-gray-500 bg-gray-100 border-[1px] border-gray-200 rounded-xl p-2 my-2 w-full"
         >

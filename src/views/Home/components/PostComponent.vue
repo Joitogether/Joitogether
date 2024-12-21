@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import { getLatestPostsAPI, getPopularPostsAPI } from '@/apis/postApi'
 import defaultAvatar from '@/assets/avatar.png'
 import { useRouter } from 'vue-router'
@@ -92,25 +92,6 @@ const formatDate = (isoString) => {
   })
 }
 
-// 從 API 獲取資料
-const fetchPosts = async () => {
-  const apiResponse = await HomePostGetPostAuthorAPI()
-  if (apiResponse) {
-    posts.value = apiResponse.data.slice(0, 3) // 假設回傳的資料是 { data: [...] }
-  } else {
-    console.error('無法獲取貼文資料')
-  }
-}
-
-// 在組件加載時調用 fetchPosts
-onMounted(() => {
-  fetchPosts()
-})
-const totalPages = computed(() => Math.ceil(posts.value.length / postsPerPage))
-// 當前頁的貼文
-const currentPosts = computed(() =>
-  posts.value.slice((currentPage.value - 1) * postsPerPage, currentPage.value * postsPerPage),
-)
 </script>
 
 <template>

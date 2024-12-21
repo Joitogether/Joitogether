@@ -21,7 +21,7 @@ const auth = getAuth(app)
 const storage = getStorage(app)
 
 const getCurrentUser = () => {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     onAuthStateChanged(auth, async (user) => {
       const userStore = useUserStore()
       const socketStore = useSocketStore()

@@ -56,7 +56,6 @@ import { useRouter } from 'vue-router'
 import { userUpdateEmailVerifiedAPI } from '@/apis/userAPIs'
 import { useUserStore } from '@/stores/userStore'
 
-const user = ref(null)
 const router = useRouter()
 const countdown = ref(10)
 

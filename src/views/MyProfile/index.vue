@@ -42,7 +42,7 @@ onMounted(async () => {
 
 const isEditModalOpen = ref(false)
 // 開啟編輯視窗
-const openEditModal = (param) => {
+const openEditModal = () => {
   isEditModalOpen.value = true // 顯示編輯視窗
 }
 

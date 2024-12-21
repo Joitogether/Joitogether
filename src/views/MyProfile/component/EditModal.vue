@@ -240,7 +240,7 @@ const prev = () => {
 const handleSave = () => {
   user.value.tags = tagsArray.value.join(',')
   userPutAPI(userStore.user.uid, user.value)
-    .then((response) => {
+    .then(() => {
       showModal.value = false
       emit('save')
     })

@@ -16,7 +16,7 @@ export function useAutocomplete(apiKey) {
     try {
       isLoading.value = true
       isLoadSearch.value = true
-    } catch (error) {
+    } catch {
       isLoading.value = false // 如果失敗，設置為 false
     }
 
