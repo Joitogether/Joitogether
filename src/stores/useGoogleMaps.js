@@ -13,7 +13,7 @@ export function useGoogleMaps() {
 
     try {
       const response = await activityGeocodeAPI(searchQuery);
-      const location = response.data.location;
+      const location = response.data.data;
 
       await loadGoogleMapsAPI(apiKey)
 
