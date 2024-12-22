@@ -43,7 +43,6 @@ const fetchWalletBalance = async () => {
   try {
     const response = await CheckoutAPIs.getWalletBalanceAPI(userStore.user.uid)
     balance.value = response.data.balance
-    // console.log('餘額獲取成功', response.data)
     return balance.value
   } catch (error) {
     message.error('餘額獲取失敗')
@@ -63,16 +62,17 @@ const currentOrderId = ref(null)
 // 檢查未完成訂單
 const checkoutPendingOrder = async () => {
   const response = await CheckoutAPIs.checkPendingOrderAPI(userStore.user.uid)
-  if (response.data) {
-    currentOrderId.value = response.data.id
+  if (response.data && Object.keys(response.data).length > 0) {
+    currentOrderId.value = response.data.order_id
     return true
   }
+
   return false
 }
 
 // 處理結帳
 const handleCheckout = async () => {
-  const hasPendingOrder = await checkoutPendingOrder()
+  const hasPendingOrder = await checkoutPendingOrder(userStore.user.uid)
   if (hasPendingOrder) {
     showModal.value = true
   } else {
@@ -82,7 +82,7 @@ const handleCheckout = async () => {
 
 const createOrder = async () => {
   try {
-    await CheckoutAPIs.createOrderAPI({
+    const response = await CheckoutAPIs.createOrderAPI({
       uid: userStore.user.uid,
       total_amount: total.value,
       order_status: 'pending',
@@ -93,8 +93,8 @@ const createOrder = async () => {
         subtotal: item.price,
       })),
     })
+    currentOrderId.value = response.data.order_id
     showModal.value = true
-    // console.log('訂單創建成功', response.data)
   } catch (error) {
     message.error('訂單創建失敗')
     console.error('訂單創建失敗:', error)
@@ -105,12 +105,9 @@ const createOrder = async () => {
 const spendBalance = async () => {
   try {
     await CheckoutAPIs.spendWalletBalanceAPI(userStore.user.uid, total.value)
-    // console.log('餘額扣除成功', paymentResponse.data)
-
     await CheckoutAPIs.clearCartAPI(userStore.user.uid)
-    console.log('購物車清空成功')
 
-    router.push({ name: 'checkoutSuccess' })
+    router.push({ name: 'checkoutSuccess', params: { order_id: currentOrderId.value } })
   } catch (error) {
     message.error('餘額扣除或清空購物車失敗')
     console.error('餘額扣除或清空購物車失敗:', error)
@@ -128,7 +125,7 @@ const goTopUp = () => {
 
 onMounted(async () => {
   try {
-    await Promise.all(fetchCartItems(), fetchWalletBalance())
+    await Promise.all([fetchCartItems(), fetchWalletBalance()])
   } catch (error) {
     console.error('資料加載失敗:', error)
   }

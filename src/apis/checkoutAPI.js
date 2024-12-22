@@ -2,7 +2,6 @@ import { apiAxios } from '@/utils/request.js'
 
 export const getCartItemsAPI = async (uid) => {
   const response = await apiAxios.get(`/carts/${uid}`)
-  // console.log('購物車資料獲取成功', response.data)
   return response.data
 }
 
@@ -23,7 +22,6 @@ export const spendWalletBalanceAPI = async (uid, amount) => {
 
 export const createOrderAPI = async (orderData) => {
   const response = await apiAxios.post('/orders', orderData)
-  // console.log('訂單資料傳送成功', response.data)
   return response
 }
 
@@ -35,4 +33,14 @@ export const checkPendingOrderAPI = async (uid) => {
 export const getOrderAPI = async (order_id) => {
   const response = await apiAxios.get(`/orders/${order_id}`)
   return response.data
+}
+
+export const updateOrderCompleteAPI = async (order_id) => {
+  const response = await apiAxios.put(`/orders/${order_id}/complete`, { order_status: 'completed' })
+  return response
+}
+
+export const registerApplicationAPI = async (activity_id) => {
+  const response = await apiAxios.post(`/applications/register/${activity_id}`)
+  return response
 }

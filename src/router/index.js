@@ -20,7 +20,7 @@ import forgotPassword from '@/views/Login/ForgotPassword.vue'
 import ShoppingCart from '@/views/CashFlow/index.vue'
 import Layout from '@/views/Layout/index.vue'
 import CheckoutPage from '@/views/Payment/CheckoutPage.vue'
-import CheckoutSuccess from '@/views/Payment/CheckoutSuccess.vue'
+// import CheckoutSuccess from '@/views/Payment/CheckoutSuccess.vue'
 import { getCurrentUser } from '@/utils/firebaseConfig'
 
 const router = createRouter({
@@ -145,9 +145,9 @@ const router = createRouter({
       component: CheckoutPage,
     },
     {
-      path: '/checkout-success',
+      path: '/checkout-success/:order_id',
       name: 'checkoutSuccess',
-      component: CheckoutSuccess,
+      component: () => import('../views/Payment/CheckoutSuccess.vue'),
     },
   ],
 })
