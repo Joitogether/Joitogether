@@ -1,12 +1,13 @@
 <script setup>
 import ActivityCard from '@/views/components/ActivityCard.vue'
-import { activityGetAllAPI, activityGetUsersAPI } from '@/apis/activityAPi.js'
-import { ref, onMounted, computed, onUnmounted, nextTick } from 'vue'
+import { activityGetAllAPI, activityGetUsersAPI, activitySearchAPI } from '@/apis/activityAPi.js'
+import { ref, onMounted, computed, onUnmounted, nextTick, watch } from 'vue'
 import { formatToISOWithTimezone } from '@/stores/useDateTime'
+import { useRoute } from 'vue-router'
 
 const allActivities = ref([]) // 存放所有活動資料（未篩選）
 const userMap = ref({})
-
+const route = useRoute()
 // 計算今天日期的字串
 const today = new Date()
 const yyyy = today.getFullYear()
@@ -94,6 +95,9 @@ const fetchActivitiesAndUsers = async () => {
 }
 
 onMounted(async () => {
+  if (route.query.q) {
+    return
+  }
   await fetchActivitiesAndUsers()
 
   nextTick(() => {
@@ -114,6 +118,19 @@ onMounted(async () => {
 onUnmounted(() => {
   if (observer.value) observer.value.disconnect()
 })
+
+watch(
+  () => route.query.q,
+  async (keyword) => {
+    isLoading.value = true
+    const acitvities = await activitySearchAPI(keyword)
+    allActivities.value = acitvities
+    isLoading.value = false
+  },
+  {
+    immediate: true,
+  },
+)
 </script>
 
 <template>
@@ -216,7 +233,7 @@ onUnmounted(() => {
           :id="item.id"
         ></ActivityCard>
       </div>
-
+      <div v-if="allActivities.length === 0" class="text-center text-xl">查無活動</div>
       <div v-if="isLoading" class="text-center my-5">加載中...</div>
       <div id="load-more" style="height: 20px"></div>
       <!-- 底部觸發點 -->

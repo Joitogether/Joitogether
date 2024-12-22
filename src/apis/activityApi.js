@@ -170,3 +170,14 @@ export const activityUserCreateAPI = async (file, otherData) => {
     throw error // 重新拋出錯誤以便處理
   }
 }
+
+export const activitySearchAPI = async (keyword) => {
+  try {
+    const res = await apiAxios.post('/activities/search', {
+      keyword,
+    })
+    return res.data.data
+  } catch (error) {
+    return error.response.data.data
+  }
+}
