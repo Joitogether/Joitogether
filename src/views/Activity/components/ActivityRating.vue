@@ -3,7 +3,7 @@ import { onMounted, reactive, ref } from 'vue'
 import { useMessage, useDialog, NRate, NSpace, NInput, NModal } from 'naive-ui'
 import { CheckCircle, CheckCircleSolid, HeartSolid } from '@iconoir/vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ratingGetDetailAPI, ratingSubmitAPI } from '@/apis/ratingApi'
+import { ratingGetDetailAPI, ratingSubmitAPI } from '@/apis/ratingAPIs'
 import dayjs from 'dayjs'
 import { useUserStore } from '@/stores/userStore'
 

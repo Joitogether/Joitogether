@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted } from 'vue'
-import { getLatestPostsAPI, getPopularPostsAPI } from '@/apis/postApi'
+import { getLatestPostsAPI, getPopularPostsAPI } from '@/apis/postAPIs.js'
 import defaultAvatar from '@/assets/avatar.png'
 import { useRouter } from 'vue-router'
 
