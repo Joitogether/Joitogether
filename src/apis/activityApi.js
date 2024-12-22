@@ -170,3 +170,11 @@ export const activityUserCreateAPI = async (file, otherData) => {
     throw error // 重新拋出錯誤以便處理
   }
 }
+
+export const activityAutocompleteAPI = async (query) => {
+  return await apiAxios.post('/activities/autocomplete', { query });
+};
+
+export const activityGeocodeAPI = async (address) => {
+  return await apiAxios.post('/activities/geocode', { address });
+};
