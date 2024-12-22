@@ -3,7 +3,7 @@ import { getIdToken } from 'firebase/auth'
 import { auth } from './firebaseConfig'
 
 const apiAxios = axios.create({
-  baseURL: 'http://localhost:3030/',
+  baseURL: 'https://joitogetherbackend-production-5e45.up.railway.app/',
   timeout: 5000,
 })
 //
