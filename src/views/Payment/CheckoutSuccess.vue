@@ -1,5 +1,8 @@
 <script setup>
 import { ref, computed } from 'vue'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
 
 const orderDetails = ref([
   { name: '一起去玩水', quantity: 1, price: 100 },
@@ -13,6 +16,10 @@ const totalPrice = computed(() => {
     return total + item.price * item.quantity
   }, 0)
 })
+
+const goHome = () => {
+  router.push('/')
+}
 </script>
 
 <template>
@@ -75,7 +82,11 @@ const totalPrice = computed(() => {
       </div>
 
       <div class="flex justify-center mt-8">
-        <n-button class="font-bold text-lg py-5 px-12 rounded-full shadow-lg" round type="primary"
+        <n-button
+          @click="goHome"
+          class="font-bold text-lg py-5 px-12 rounded-full shadow-lg"
+          round
+          type="primary"
           >回到首頁</n-button
         >
       </div>
