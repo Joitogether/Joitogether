@@ -16,3 +16,8 @@
     @apply transition-colors duration-200 ease-in-out;
   }
 }
+@layer utilities {
+  a:not(.no-hover-style):hover {
+    @apply text-green-600;
+  }
+}

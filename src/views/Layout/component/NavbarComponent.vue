@@ -199,31 +199,37 @@ const showLoading = ref(false)
               <input
                 type="text"
                 placeholder="運動、美食、唱歌..."
-                class="w-full h-10 mb-2 rounded-full border border-gray-400 p-2"
+                class="w-full h-10 mb-2 rounded-full border border-gray-400 p-2 focus:outline-green-600"
               />
-              <Search class="text-gray-500" :style="{ width: '35px', height: '35px' }" />
+              <div
+                class="w-10 h-10 aspect-square rounded-full bg-green-600 flex items-center justify-center cursor-pointer hover:bg-green-700"
+              >
+                <Search class="text-white" :style="{ width: '20px', height: '20px' }" />
+              </div>
             </li>
             <li>
               <a
                 href="#"
-                class="font-bold py-3 block text-base text-gray-500 border-b border-gray-300"
+                class="font-bold py-3 block text-base text-gray-500 hover:text-green-600 border-b border-gray-300"
               >
                 •&nbsp;&nbsp;加入聚會
               </a>
             </li>
-            <li class="font-bold py-3 block text-base text-gray-500 border-b border-gray-300">
+            <li
+              class="font-bold py-3 block text-base text-gray-500 hover:text-green-600 border-b border-gray-300"
+            >
               <RouterLink to="/post">•&nbsp;&nbsp;社群</RouterLink>
             </li>
             <li>
               <a
                 href="#"
-                class="font-bold py-3 block text-base text-gray-500 border-b border-gray-300"
+                class="font-bold py-3 block text-base text-gray-500 hover:text-green-600 border-b border-gray-300"
               >
                 •&nbsp;&nbsp;活動中心
               </a>
             </li>
             <li>
-              <a href="#" class="font-bold pt-3 block text-base text-gray-500">
+              <a href="#" class="font-bold pt-3 block text-base text-gray-500 hover:text-green-600">
                 •&nbsp;&nbsp;儲值中心
               </a>
             </li>

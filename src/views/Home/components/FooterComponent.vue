@@ -1,79 +1,103 @@
 <script setup>
 // import HelloWorld from './components/HelloWorld.vue'
-import { Instagram, Facebook, Play, AppleShortcuts, AppleMac } from '@iconoir/vue'
+import { Facebook, Instagram } from '@iconoir/vue'
 </script>
 
 <template>
   <footer>
-    <div class="bg-[#afac99] w-screen h-72 py-10 px-32 overflow-x-scroll scrollbar-hidden">
-      <div class="flex">
-        <div class="leading-8 w-3/12 min-w-72">
-          <div class="text-xl font-semibold">更多</div>
-          <div class=""><a href="#" class="">註冊會員</a></div>
-          <div class=""><a href="#" class="">升級會員</a></div>
-          <div class=""><a href="#" class="">PRO認證會員</a></div>
-          <div class=""><a href="#" class="">交友小技巧</a></div>
-          <div class=""><a href="#" class="">聚會主題推薦</a></div>
+    <div class="bg-gray-300 w-full h-auto p-8 flex justify-center">
+      <div
+        class="flex flex-col md:flex md:flex-row md:px-4 md:gap-10 md:justify-between lg:w-3/4 lg:gap-20"
+      >
+        <div class="w-14 mb-2 md:w-1/6 md:flex md:items-center lg:w-28">
+          <img src="../../../assets/Joi.png" alt="" />
         </div>
-        <div class="leading-8 w-3/12 min-w-72">
-          <div class="text-xl font-semibold">幫助</div>
-          <div class=""><a href="#" class="">社群守則</a></div>
-          <div class=""><a href="#" class="">使用者指南 </a></div>
-          <div class=""><a href="#" class="">常見問題 </a></div>
+        <div class="leading-8 mt-3 md:mt-0 md:w-1/2 lg:w-1/3">
+          <div
+            class="py-1 text-xl font-semibold border-b border-gray-400 text-gray-600 md:border-none lg:text-2xl lg:tracking-wider lg:mb-2"
+          >
+            Joitogether
+          </div>
+          <div class="md:flex md:flex-row md:gap-6 lg:text-base lg:tracking-wider">
+            <div class="md:flex md:flex-col lg:gap-2">
+              <div class="text-gray-600">
+                <RouterLink to="/login" class="">註冊會員</RouterLink>
+              </div>
+              <div class="text-gray-600">
+                <a href="#" class="">創建活動</a>
+              </div>
+            </div>
+            <div class="md:flex md:flex-col lg:gap-2">
+              <div class="text-gray-600">
+                <a href="#" class="">加入聚會</a>
+              </div>
+              <div class="text-gray-600">
+                <RouterLink to="/post" class="">加入討論</RouterLink>
+              </div>
+            </div>
+            <div class="md:flex md:flex-col lg:gap-2">
+              <div class="text-gray-600">
+                <a href="#" class="">儲值手續</a>
+              </div>
+              <div class="text-gray-600">
+                <a href="#" class="">購物車</a>
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="leading-8 w-3/12 min-w-72">
-          <div class="text-xl font-semibold">關於我們</div>
-          <div class=""><a href="#" class="">加入我們</a></div>
+
+        <div class="leading-8 mt-3 md:mt-0 md:w-1/5">
+          <div
+            class="py-1 text-xl font-semibold border-b border-gray-400 text-gray-600 md:border-none lg:text-2xl lg:tracking-wider lg:mb-2"
+          >
+            關於我們
+          </div>
+          <div class="text-gray-600 flex flex-col lg:text-base lg:tracking-wider lg:gap-2">
+            <RouterLink to="/" class="">了解我們</RouterLink>
+            <RouterLink to="/" class="">加入我們</RouterLink>
+          </div>
         </div>
-        <div class="leading-8 w-3/12 min-w-72">
-          <div class="text-xl font-semibold">聯繫我們</div>
-          <div class="">
-            <a href="https://eatgether.com/zh-tw/service@eatgether.com" class="font-thin"
-              >service@eatgether.com
+        <div
+          class="leading-8 mt-3 md:mt-0 md:flex md:flex-col md:justify-between md:w-1/4 lg:w-1/3"
+        >
+          <div>
+            <div
+              class="py-1 text-xl font-semibold border-b border-gray-400 text-gray-600 md:border-none lg:text-2xl lg:tracking-wider"
+            >
+              聯繫我們
+            </div>
+            <a
+              href="mailto:joitogether123@gmail.com"
+              class="font-thin lg:font-normal lg:tracking-wider lg:text-base"
+              >joitogether123@gmail.com
             </a>
           </div>
-          <div class="flex gap-3">
-            <div class="bg-[#3d392c] flex p-1.5 rounded-full text-white">
-              <a href="https://www.instagram.com/eatgether_official/"><Instagram /></a>
+          <div class="flex gap-3 mt-2">
+            <div class="bg-gray-700 text-white flex p-1.5 rounded-full hover:bg-green-600">
+              <a href="https://www.facebook.com/joitogether" class="no-hover-style"><Facebook /></a>
             </div>
-            <div class="bg-[#3d392c] flex p-1.5 rounded-full text-white">
-              <a href="https://www.facebook.com/eatgether"><Facebook /></a>
-            </div>
-            <div class="bg-[#3d392c] flex p-1.5 rounded-full text-white">
-              <a href="https://www.youtube.com/channel/UCcZ7tJEscY294rxTEohxQhw"><Play /></a>
-            </div>
-            <div class="bg-[#3d392c] flex p-1.5 rounded-full text-white">
-              <a href="https://play.google.com/store/apps/details?id=com.eatme.eatgether&hl=zh-TW"
-                ><AppleShortcuts
+            <div class="bg-gray-700 flex p-1.5 rounded-full text-white hover:bg-green-600">
+              <a href="https://www.instagram.com/joitogether" class="no-hover-style">
+                <Instagram
               /></a>
-            </div>
-            <div class="bg-[#3d392c] flex p-1.5 rounded-full text-white">
-              <a href="https://apps.apple.com/tw/app/id1121788143"><AppleMac /></a>
             </div>
           </div>
         </div>
       </div>
     </div>
-    <div
-      class="lg:flex lg:flex-row lg:justify-between items-center flex flex-col bg-[#3d392c] w-screen h-24 px-6 py-4"
-    >
-      <div class="text-white text-base font-semibold">
-        Eatgether樂宇宙科技股份有限公司 © 2022 Funiverse Co., LTD. All rights reserved. 統一編號
-        24545707
-      </div>
-      <div class="text-white text-base font-semibold">
-        ｜<a href="https://eatgether.com/zh-tw/privacy" class="text-white">隱私權政策</a>｜<a
-          href="https://eatgether.com/zh-tw/terms"
-          class="text-white"
-          >使用者條款</a
-        >｜
+    <div class="flex justify-center bg-gray-700 w-full h-auto p-3">
+      <div class="text-gray-300 font-semibold text-center md:flex flex-row gap-5">
+        <p class="text-base font-medium md:border-r border-gray-300 md:pr-5">
+          Joitogether 揪團股份有限公司 © 2024
+        </p>
+        <p class="text-sm font-light">Joitogether Co., LTD. All rights reserved.</p>
       </div>
     </div>
   </footer>
 </template>
 
 <style scoped>
-.scrollbar-hidden::-webkit-scrollbar {
-  display: none; /* Chrome, Safari 和 Opera 隱藏滾動條 */
-}
+/* .scrollbar-hidden::-webkit-scrollbar {
+  display: none;
+} */
 </style>
