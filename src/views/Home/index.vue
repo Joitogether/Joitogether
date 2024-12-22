@@ -5,7 +5,13 @@ import PostComponent from './components/PostComponent.vue'
 import ActivityComponent from './components/ActivityComponent.vue'
 import { useUserStore } from '/src/stores/userStore.js'
 import { useMessage } from 'naive-ui'
-import { watch, ref, onMounted } from 'vue'
+import { watch, ref, onMounted, provide } from 'vue'
+
+// 創建地區共享的響應式變數
+const selectedRegions = ref([])
+
+// 使用 provide 提供給子組件
+provide('selectedRegion', selectedRegions)
 
 // 初始化區域
 const userStore = useUserStore()

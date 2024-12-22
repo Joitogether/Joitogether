@@ -1,8 +1,36 @@
 <script setup>
 import ActivityCard from '@/views/components/ActivityCard.vue'
 import { activityGetAllAPI, activityGetUsersAPI } from '@/apis/activityAPi.js'
-import { ref, onMounted, computed, onUnmounted, nextTick } from 'vue'
+import { ref, onMounted, computed, onUnmounted, nextTick, inject } from 'vue'
 import { formatToISOWithTimezone } from '@/stores/useDateTime'
+import { NSelect } from 'naive-ui'
+
+// 注入來自 BannerComponent 的 selectedRegion
+const selectedRegions = inject('selectedRegion')
+
+// 地區選項
+const regionOptions = ref([
+  { label: '台北', value: '台北市' },
+  { label: '新北', value: '新北市' },
+  { label: '基隆', value: '基隆市' },
+  { label: '新竹', value: '新竹市' },
+  { label: '桃園', value: '桃園市' },
+  { label: '新竹', value: '新竹縣' },
+  { label: '宜蘭', value: '宜蘭縣' },
+  { label: '臺中', value: '臺中市' },
+  { label: '苗栗', value: '苗栗縣' },
+  { label: '彰化', value: '彰化縣' },
+  { label: '南投', value: '南投縣' },
+  { label: '雲林', value: '雲林縣' },
+  { label: '高雄', value: '高雄市' },
+  { label: '臺南', value: '臺南市' },
+  { label: '嘉義', value: '嘉義市' },
+  { label: '嘉義', value: '嘉義縣' },
+  { label: '屏東', value: '屏東縣' },
+  { label: '澎湖', value: '澎湖縣' },
+  { label: '花蓮', value: '花蓮縣' },
+  { label: '臺東', value: '臺東縣' },
+])
 
 const allActivities = ref([]) // 存放所有活動資料（未篩選）
 const userMap = ref({})
@@ -34,9 +62,17 @@ const filteredItems = computed(() => {
 
   return allActivities.value
     .filter((activity) => {
+      const location = activity.location ||''
       const eventDate = new Date(activity.event_time)
       if (eventDate < today) return false
       if (eventDate < startFilterDate) return false
+       // 多地區篩選邏輯
+      if (selectedRegions.value.length > 0) {
+      const matchRegion = selectedRegions.value.some((region) =>
+        location.includes(region.toLowerCase())
+      )
+      if (!matchRegion) return false
+      }
       if (selectedCategory.value && activity.category !== selectedCategory.value) return false
       return true
     })
@@ -191,7 +227,14 @@ onUnmounted(() => {
     <!-- 篩選器 -->
     <div class="mt-7 flex justify-between items-center">
       <div class="text-xl flex items-center">
-        <span class="ml-1"></span>
+        <n-select
+      v-model:value="selectedRegions"
+      :options="regionOptions"
+      multiple
+      clearable
+      placeholder="選擇地區"
+      style="width: 200px; margin-right: 16px;"
+    />
       </div>
       <div class="text-xl flex items-center">
         篩選日期

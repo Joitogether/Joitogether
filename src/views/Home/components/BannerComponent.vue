@@ -14,10 +14,11 @@
           <h1>熱門聚會地點</h1>
           <div class="flex items-center w-full justify-evenly">
             <div v-for="aria in ariaData" :key="aria.title">
-              <a href="#">
+              <button
+              @click="setRegion(aria.keyword)">
                 <img :src="aria.src" alt="" />
                 <p class="text-center">{{ aria.title }}</p>
-              </a>
+              </button>
             </div>
           </div>
         </div>
@@ -28,6 +29,15 @@
 
 <script setup>
 import { NCarousel } from 'naive-ui'
+import { inject } from 'vue';
+
+const selectedRegions = inject('selectedRegion')
+
+const setRegion = (region) => {
+  if (!selectedRegions.value.includes(region)) {
+    selectedRegions.value.push(region)
+  }
+}
 
 const carouselData = [
   {
@@ -44,26 +54,32 @@ const carouselData = [
 const ariaData = [
   {
     title: '大台北',
+    keyword: '台北',
     src: 'https://www.eatgether.com/static/media/TPE.91790170.png',
   },
   {
     title: '桃園市',
+    keyword: '桃園',
     src: 'https://www.eatgether.com/static/media/TAO.68ddb6e3.png',
   },
   {
     title: '新竹市',
+    keyword: '新竹',
     src: 'https://www.eatgether.com/static/media/HSZ.417cf6b8.png',
   },
   {
     title: '臺中市',
+    keyword: '臺中',
     src: 'https://www.eatgether.com/static/media/TXG.c136bf99.png',
   },
   {
     title: '臺南市',
+    keyword: '臺南',
     src: 'https://www.eatgether.com/static/media/TNN.1ab27f99.png',
   },
   {
     title: '高雄市',
+    keyword: '高雄',
     src: 'https://www.eatgether.com/static/media/KHH.da56765a.png',
   },
 ]
@@ -75,13 +91,13 @@ const ariaData = [
   height: 450px;
   object-fit: cover;
 }
-a img {
+button img {
   border-radius: 50%;
   max-width: 100px;
   height: auto;
   margin: 0 auto;
 }
-a img:hover {
+button img:hover {
   transform: scale(1.05);
   transition: transform 0.3s ease-in-out;
 }
