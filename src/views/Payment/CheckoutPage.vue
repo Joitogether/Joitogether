@@ -1,9 +1,13 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
+import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/userStore.js'
+import { useMessage } from 'naive-ui'
 import * as CheckoutAPIs from '../../apis/checkoutAPI.js'
 
+const router = useRouter()
 const userStore = useUserStore()
+const message = useMessage()
 
 // 抓取購物車明細
 const cartItems = ref([])
@@ -23,22 +27,26 @@ const fetchCartItems = async () => {
 
     subtotal.value = cartItems.value.reduce((total, item) => total + item.price, 0)
   } catch (error) {
+    message.error('購物車資料獲取失敗')
     console.error('購物車資料獲取失敗:', error)
   }
 }
+
 // 計算總金額
 const total = computed(() => {
   return subtotal.value
 })
+
 // 抓取餘額
 const balance = ref(0)
 const fetchWalletBalance = async () => {
   try {
     const response = await CheckoutAPIs.getWalletBalanceAPI(userStore.user.uid)
     balance.value = response.data.balance
-    console.log('餘額獲取成功', response.data)
+    // console.log('餘額獲取成功', response.data)
     return balance.value
   } catch (error) {
+    message.error('餘額獲取失敗')
     console.error('餘額獲取失敗:', error)
   }
 }
@@ -48,10 +56,33 @@ const isBalanceEnough = computed(() => {
   return balance.value >= total.value
 })
 
-// 創建訂單
+// 結帳流程
+const showModal = ref(false)
+const currentOrderId = ref(null)
+
+// 檢查未完成訂單
+const checkoutPendingOrder = async () => {
+  const response = await CheckoutAPIs.checkPendingOrderAPI(userStore.user.uid)
+  if (response.data) {
+    currentOrderId.value = response.data.id
+    return true
+  }
+  return false
+}
+
+// 處理結帳
+const handleCheckout = async () => {
+  const hasPendingOrder = await checkoutPendingOrder()
+  if (hasPendingOrder) {
+    showModal.value = true
+  } else {
+    await createOrder()
+  }
+}
+
 const createOrder = async () => {
   try {
-    const response = await CheckoutAPIs.createOrderAPI({
+    await CheckoutAPIs.createOrderAPI({
       uid: userStore.user.uid,
       total_amount: total.value,
       order_status: 'pending',
@@ -62,14 +93,45 @@ const createOrder = async () => {
         subtotal: item.price,
       })),
     })
-    console.log('訂單創建成功', response.data)
+    showModal.value = true
+    // console.log('訂單創建成功', response.data)
   } catch (error) {
+    message.error('訂單創建失敗')
     console.error('訂單創建失敗:', error)
   }
 }
 
-onMounted(() => {
-  fetchCartItems(), fetchWalletBalance()
+// 確認付款扣除餘額並跳轉
+const spendBalance = async () => {
+  try {
+    await CheckoutAPIs.spendWalletBalanceAPI(userStore.user.uid, total.value)
+    // console.log('餘額扣除成功', paymentResponse.data)
+
+    await CheckoutAPIs.clearCartAPI(userStore.user.uid)
+    console.log('購物車清空成功')
+
+    router.push({ name: 'checkoutSuccess' })
+  } catch (error) {
+    message.error('餘額扣除或清空購物車失敗')
+    console.error('餘額扣除或清空購物車失敗:', error)
+  }
+}
+
+// 頁面跳轉
+const goShoppingCart = () => {
+  router.push('/shoppingcart')
+}
+
+const goTopUp = () => {
+  router.push('/topup')
+}
+
+onMounted(async () => {
+  try {
+    await Promise.all(fetchCartItems(), fetchWalletBalance())
+  } catch (error) {
+    console.error('資料加載失敗:', error)
+  }
 })
 </script>
 
@@ -114,7 +176,7 @@ onMounted(() => {
           <div>
             <div class="flex justify-between text-sm py-1">
               <span>小計</span>
-              <span>${{ subtotal }}</span>
+              <span>$ {{ subtotal }}</span>
             </div>
 
             <!-- <div class="flex justify-between text-sm py-1">
@@ -122,15 +184,15 @@ onMounted(() => {
             </div> -->
 
             <div class="flex justify-between text-sm font-semibold py-1">
-              <span>總計</span> <span>${{ total }}</span>
+              <span>總計</span> <span>$ {{ total }}</span>
             </div>
           </div>
           <div>
             <div class="flex justify-between text-sm py-1">
-              <span>儲值金餘額</span> <span>${{ balance }}</span>
+              <span>儲值金餘額</span> <span>$ {{ balance }}</span>
             </div>
             <div v-if="!isBalanceEnough" class="flex justify-between text-sm font-semibold py-1">
-              <span>餘額不足</span> <span>${{ total - balance }}</span>
+              <span>餘額不足</span> <span>$ - {{ total - balance }}</span>
             </div>
             <div v-if="isBalanceEnough" class="flex justify-between text-sm font-semibold py-1">
               <span>扣除後剩餘儲值金</span> <span>${{ balance - total }}</span>
@@ -146,16 +208,36 @@ onMounted(() => {
         餘額不足請前往儲值!
       </div>
       <div class="flex justify-between items-center gap-4">
-        <button class="flex-1 text-sm text-white bg-gray-500 rounded-md py-2">上一步</button>
         <button
+          @click="goShoppingCart"
+          class="flex-1 text-sm text-white bg-gray-500 rounded-md py-2"
+        >
+          上一步
+        </button>
+        <button
+          @click="goTopUp"
           v-if="!isBalanceEnough"
           class="flex-1 text-sm text-white bg-red-500 rounded-md py-2"
         >
           前往儲值頁
         </button>
-        <button @click="createOrder" class="flex-1 text-sm text-white bg-gray-500 rounded-md py-2">
+        <button
+          @click="handleCheckout"
+          class="flex-1 text-sm text-white bg-gray-500 rounded-md py-2"
+        >
           結帳
         </button>
+        <n-modal
+          v-model:show="showModal"
+          :mask-closable="false"
+          preset="dialog"
+          title="確認付款"
+          content="最後機會了！即將扣除餘額 💰"
+          positive-text="買了 💸"
+          negative-text="再想想"
+          @positive-click="spendBalance"
+          @negative-click="showModal = false"
+        />
       </div>
     </div>
   </div>

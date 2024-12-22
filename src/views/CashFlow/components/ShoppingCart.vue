@@ -1,7 +1,9 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { deleteUserCartDetailsAPI, getUserCartDetailsAPI } from '@/apis/userShoppingCartApi'
 import { useUserStore } from '@/stores/userStore'
+import { useMessage } from 'naive-ui'
 
 const cartItems = ref([]) // 存放購物車資料
 const isLoading = ref(true) // 載入狀態
@@ -69,8 +71,20 @@ const removeSelected = async () => {
   }
 }
 // 模擬結帳動作
-const checkout = () => {
-  alert(`總金額 NT$${totalPrice.value}，前往結帳！`)
+// const checkout = () => {
+//   alert(`總金額 NT$${totalPrice.value}，前往結帳！`)
+// }
+
+// 跳轉結帳頁面
+const router = useRouter()
+const message = useMessage()
+const goToCheckout = () => {
+  const selectedItems = cartItems.value.filter((item) => item.Selected)
+  if (selectedItems.length === 0) {
+    message.error('請選擇要結帳的項目')
+    return
+  }
+  router.push('/checkout')
 }
 </script>
 
@@ -122,7 +136,7 @@ const checkout = () => {
           <div class="text-lg font-bold">NT$ {{ totalPrice }}</div>
         </div>
         <div>
-          <button class="w-full bg-sky-500 text-white rounded-md py-3" @click="checkout">
+          <button @click="goToCheckout" class="w-full bg-sky-500 text-white rounded-md py-3">
             前往結帳
           </button>
         </div>
