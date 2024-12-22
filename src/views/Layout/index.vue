@@ -1,15 +1,10 @@
 <script setup>
-import { computed } from 'vue'
 import NavbarComponent from './component/NavbarComponent.vue'
-import { useUserStore } from '@/stores/userStore'
-
-const userStore = useUserStore()
-const activityCreate = computed(() => {
-  return userStore.user.isLogin
-})
+import FooterComponent from './component/FooterComponent.vue'
 </script>
 
 <template>
-  <NavbarComponent :isUserLoggedIn="activityCreate" />
+  <NavbarComponent isUserLoggedIn="activityCreate" />
   <router-view></router-view>
+  <FooterComponent></FooterComponent>
 </template>
