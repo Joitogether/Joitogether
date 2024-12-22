@@ -178,3 +178,14 @@ export const activityAutocompleteAPI = async (query) => {
 export const activityGeocodeAPI = async (address) => {
   return await apiAxios.post('/activities/geocode', { address });
 };
+
+export const activitySearchAPI = async (keyword) => {
+  try {
+    const res = await apiAxios.post('/activities/search', {
+      keyword,
+    })
+    return res.data.data
+  } catch (error) {
+    return error.response.data.data
+  }
+}

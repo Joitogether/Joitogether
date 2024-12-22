@@ -1,11 +1,11 @@
 <script setup>
 import BannerComponent from './components/BannerComponent.vue'
-import FooterComponent from './components/FooterComponent.vue'
 import PostComponent from './components/PostComponent.vue'
 import ActivityComponent from './components/ActivityComponent.vue'
 import { useUserStore } from '/src/stores/userStore.js'
 import { useMessage } from 'naive-ui'
 import { watch, ref, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
 
 // 初始化區域
 const userStore = useUserStore()
@@ -50,11 +50,30 @@ watch(
     }
   },
 )
+const route = useRoute()
+const isSearch = ref(false)
+
+watch(
+  () => {
+    return route.query.q
+  },
+  (value) => {
+    if (value) {
+      isSearch.value = true
+    } else {
+      isSearch.value = false
+    }
+  },
+  {
+    immediate: true,
+  },
+)
 </script>
 <template>
-  <BannerComponent></BannerComponent>
-  <PostComponent />
+  <div v-if="!isSearch">
+    <BannerComponent></BannerComponent>
+    <PostComponent />
+  </div>
   <ActivityComponent />
-  <FooterComponent></FooterComponent>
 </template>
 <style scoped></style>

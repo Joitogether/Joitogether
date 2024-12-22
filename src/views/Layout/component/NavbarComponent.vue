@@ -156,6 +156,17 @@ const handleLoadClick = async () => {
   showLoading.value = false
 }
 const showLoading = ref(false)
+const searchKeyword = ref('')
+const handleSearchClick = (e) => {
+  if (e.isComposing) return
+  if (searchKeyword.value === '') return
+  router.push({
+    name: 'home',
+    query: {
+      q: searchKeyword.value,
+    },
+  })
+}
 </script>
 
 <template>
@@ -166,10 +177,15 @@ const showLoading = ref(false)
     <div class="flex items-center space-x-6">
       <div class="hidden md:flex min-w-12">找聚會</div>
       <div class="hidden md:flex">
-        <input type="text" placeholder="運動、美食、唱歌..." />
+        <input
+          @keydown.enter="handleSearchClick"
+          v-model.trim="searchKeyword"
+          type="text"
+          placeholder="運動、美食、唱歌..."
+        />
       </div>
       <div>
-        <a href="#"><Search /></a>
+        <div @click="handleSearchClick" class="cursor-pointer"><Search /></div>
       </div>
     </div>
 
