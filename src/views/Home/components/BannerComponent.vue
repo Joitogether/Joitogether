@@ -15,7 +15,7 @@
           <div class="flex items-center w-full justify-evenly">
             <div v-for="area in areaData" :key="area.title">
               <a href="#" @click.prevent="scrollToCategory(area.targetId)">
-                <img :src="area.src" alt=""/>
+                <img :src="area.src" alt="" class="" />
                 <p class="text-center">{{ area.title }}</p>
               </a>
             </div>
@@ -42,12 +42,36 @@ const carouselData = [
 ]
 
 const areaData = [
-  { title: '美食', src: 'https://i.pinimg.com/736x/54/63/f8/5463f879dafecd317b771aaee0d4a0aa.jpg', targetId: 'food-category' },
-  { title: '購物', src: 'https://i.pinimg.com/736x/80/c4/f7/80c4f7e387cc05ce50f2906a59f621d5.jpg', targetId: 'shopping-category' },
-  { title: '旅遊', src: 'https://i.pinimg.com/736x/15/f0/e0/15f0e0372d1e04df5f325d00e5899069.jpg', targetId: 'travel-category' },
-  { title: '運動', src: 'https://i.pinimg.com/736x/b6/74/ca/b674ca0f776433f737615236d466a02d.jpg', targetId: 'sports-category' },
-  { title: '教育', src: 'https://i.pinimg.com/736x/ec/80/62/ec80622845d58a8cf0dcea9681ea353a.jpg', targetId: 'education-category' },
-  { title: '其他', src: 'https://i.pinimg.com/736x/55/7c/64/557c64034ecc52a10522dd77a80c8700.jpg', targetId: 'others-category' },
+  {
+    title: '美食',
+    src: 'https://i.pinimg.com/736x/54/63/f8/5463f879dafecd317b771aaee0d4a0aa.jpg',
+    targetId: 'food-category',
+  },
+  {
+    title: '購物',
+    src: 'https://i.pinimg.com/736x/80/c4/f7/80c4f7e387cc05ce50f2906a59f621d5.jpg',
+    targetId: 'shopping-category',
+  },
+  {
+    title: '旅遊',
+    src: 'https://i.pinimg.com/736x/15/f0/e0/15f0e0372d1e04df5f325d00e5899069.jpg',
+    targetId: 'travel-category',
+  },
+  {
+    title: '運動',
+    src: 'https://i.pinimg.com/736x/b6/74/ca/b674ca0f776433f737615236d466a02d.jpg',
+    targetId: 'sports-category',
+  },
+  {
+    title: '教育',
+    src: 'https://i.pinimg.com/736x/ec/80/62/ec80622845d58a8cf0dcea9681ea353a.jpg',
+    targetId: 'education-category',
+  },
+  {
+    title: '其他',
+    src: 'https://i.pinimg.com/736x/55/7c/64/557c64034ecc52a10522dd77a80c8700.jpg',
+    targetId: 'others-category',
+  },
 ]
 const scrollToCategory = (id) => {
   const targetElement = document.getElementById(id)
@@ -67,8 +91,10 @@ const scrollToCategory = (id) => {
 }
 a img {
   border-radius: 50%;
-  max-width: 100px;
-  height: auto;
+  max-width: 150px;
+  max-height: 150px;
+  width: 100px;
+  height: 100px;
   margin: 0 auto;
 }
 a img:hover {
@@ -102,6 +128,14 @@ p {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 60px;
+  }
+  a img {
+    border-radius: 50%;
+    max-width: 150px;
+    max-height: 150px;
+    width: 100px;
+    height: 100px;
+    margin: 0 auto;
   }
 }
 </style>
