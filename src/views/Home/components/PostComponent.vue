@@ -94,7 +94,7 @@ const formatDate = (isoString) => {
 </script>
 
 <template>
-  <div class="home-posts-area bg-gray-100 px-28 py-10">
+  <div class="home-posts-area bg-gray-100 px-28 py-10 w-full">
     <div>
       <h2 class="text-3xl">最新貼文</h2>
     </div>
@@ -133,13 +133,14 @@ const formatDate = (isoString) => {
             />
           </div>
 
-          <p class="ml-5 text-sm">{{ item.users.display_name }}</p>
+          <p class="ml-5 text-sm lg:text-lg">{{ item.users.display_name }}</p>
         </div>
         <div class="one-post-bottom mt-2.5 px-6 bg-white rounded-2xl pb-4 cursor-pointer">
           <div
-            class="post-bottom-top flex h-[180px] border-b-[1px] border-solid border-[rgba(61,57,44,0.1)]"
+            class=" post-bottom-top flex w-full h-[180px] border-b-[1px] border-solid border-[rgba(61,57,44,0.1)]"
           >
-            <div class="post-bottom-left w-52 leading-loose">
+          
+            <div class="post-bottom-left w-52 min-w-[120px] leading-loose lg:w-full">
               <p class="text-slate-300 text-sm h-8 mt-6">{{ formatDate(item.created_at) }}</p>
 
               <h3 class="text-xl font-bold">{{ item.post_title }}</h3>
@@ -147,11 +148,12 @@ const formatDate = (isoString) => {
                 {{ item.post_content }}
               </p>
             </div>
-            <div class="post-bottom-right h-24 w-24 rounded-3xl overflow-hidden ml-2.5 mt-4">
-              <img :src="item.post_img" alt="文章照片" @error="onPostImageError" />
+            <div class="post-bottom-right h-24 w-24 rounded-xl overflow-hidden mt-2.5 ml-2.5 mr-2.5 lg:w-full lg:h-full lg:min-w-[120px] lg:min-h-[100px] lg:max-w-[160px] lg:max-h-[160px]  ">
+              <img :src="item.post_img" alt="文章照片" @error="onPostImageError" class="w-full h-full object-cover aspect-auto"/>
             </div>
-          </div>
-          <div class="post-bottom-bottom flex leading-loose mt-6 mx-6">
+          
+        </div>
+          <div class="post-bottom-bottom flex items-center justify-center leading-loose mt-2 lg:text-lg">
             <div class="mr-8">👍🏻 {{ item._count.post_likes }}讚</div>
             <div>💬 {{ item._count.post_comments }} 留言</div>
           </div>
