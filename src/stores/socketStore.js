@@ -15,7 +15,7 @@ export const useSocketStore = defineStore('socket', () => {
       socket.value.disconnect()
     }
     // 建立連線
-    socket.value = io('http://localhost:3030', {
+    socket.value = io(import.meta.env.VITE_API_BASE_URL, {
       withCredentials: true,
       query: {
         userId: userId,

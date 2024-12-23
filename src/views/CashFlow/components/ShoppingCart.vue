@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { deleteUserCartDetailsAPI, getUserCartDetailsAPI } from '@/apis/userShoppingCartApi'
+import { deleteUserCartDetailsAPI, getUserCartDetailsAPI } from '@/apis/userShoppingCartAPIs'
 import { useUserStore } from '@/stores/userStore'
 
 const cartItems = ref([]) // 存放購物車資料

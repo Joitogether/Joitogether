@@ -8,7 +8,7 @@ import { taiwanTime, formatToISOWithTimezone } from '@/stores/useDateTime'
 import { useUserStore } from '@/stores/userStore'
 import { convertMarkdown } from '@/stores/useMarkdown'
 import { userGetAPI } from '@/apis/userAPIs'
-import { activityUserCreateAPI } from '@/apis/activityAPI.js'
+import { activityUserCreateAPI } from '@/apis/activityAPIs.js'
 import { useAutocomplete } from '@/stores/useAutocomplete';
 import { useGoogleMaps } from '@/stores/useGoogleMaps';
 import { usePreviewMode } from '@/stores/usePreviewMode'
