@@ -195,10 +195,10 @@ watch(showModal, (newValue) => {
 
 <template>
   <div class="flex justify-between items-center p-4 border border-gray-300 rounded-md mt-3">
-    <div class="w-1/3 flex justify-center">
-      <div class="w-36 h-36 rounded-full object-cover">
+    <div class="flex justify-center">
+      <div class="w-28 h-28 aspect-square rounded-full overflow-hidden md:w-36 md:h-36">
         <img
-          class="w-full h-full object-cover rounded-full"
+          class="w-full h-full object-cover"
           :src="
             userStore.user.photo_url ||
             'https://i.pinimg.com/736x/20/3e/d7/203ed7d8550c2c1c145a2fb24b6fbca3.jpg'
@@ -208,7 +208,7 @@ watch(showModal, (newValue) => {
       </div>
     </div>
 
-    <div class="w-2/3 flex flex-col justify-center pl-4 mt-4">
+    <div class="w-3/4 flex flex-col justify-center mt-4 md:ml-3">
       <div class="mb-0 text-lg font-xl ml-5">
         (｡•̀ᴗ-)✧ {{ userStore.user.display_name || '訪客' }}
       </div>

@@ -104,8 +104,8 @@ const informPostUpdate = () => {
 }
 </script>
 <template>
-  <div class="w-full bg-gray-100">
-    <div class="postsArea w-full mx-auto px-4 pt-1 bg-white md:w-3/4 lg:w-1/2">
+  <div class="w-full h-auto bg-gray-100">
+    <div class="postsArea w-full min-h-screen mx-auto px-4 pt-1 bg-white md:w-3/4 lg:w-1/2">
       <NewPostArea @update="informPostUpdate" />
       <div class="w-full mb-4 md:mb-0 md:py-5">
         <div class="flex w-full md:w-full">
@@ -121,7 +121,7 @@ const informPostUpdate = () => {
             :class="{ 'activated-tag': selectedTag === 'shopping' }"
             class="text-black border-transparent text-center pb-1 md:pb-0 border-b-[2px] md:text-white md:rounded-full flex-1 cursor-pointer md:leading-0 leading-9 md:bg-green-500 md:hover:bg-green-600 text-base py-1 md:py-0 md:px-4 md:mr-3"
           >
-            逛街
+            購物
           </p>
           <p
             @click="handleTagSelect('travel')"
@@ -152,7 +152,7 @@ const informPostUpdate = () => {
             其他
           </p>
         </div>
-        <n-space class="w-[40%] border-none text-center ml-auto md:mt-5" vertical>
+        <n-space class="w-[40%] border-none text-center ml-auto mt-1 md:mt-5" vertical>
           <n-select
             @update:value="handleFilterSelect"
             placeholder="排序"

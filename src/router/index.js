@@ -25,11 +25,6 @@ const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
-      path: '/',
-      name: 'home',
-      component: Home,
-    },
-    {
       path: '/login',
       name: 'login',
       component: Login,
@@ -61,12 +56,12 @@ const router = createRouter({
       redirect: { name: 'home' },
       children: [
         {
-          path: '/home',
+          path: 'home',
           name: 'home',
           component: Home,
         },
         {
-          path: '/profile',
+          path: 'profile',
           name: 'profile',
           component: Profile,
           redirect: { name: 'personInfo' },
@@ -99,17 +94,17 @@ const router = createRouter({
           ],
         },
         {
-          path: '/post',
+          path: 'post',
           name: 'post',
           component: PostHomePage,
         },
         {
-          path: '/post/:post_id',
+          path: 'post/:post_id',
           name: 'PostDetail',
           component: PostDetail,
         },
         {
-          path: '/activity',
+          path: 'activity',
           name: 'activity',
           component: Activity,
           redirect: { name: 'home' },
