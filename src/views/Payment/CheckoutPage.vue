@@ -57,60 +57,43 @@ const isBalanceEnough = computed(() => {
 
 // 結帳流程
 const showModal = ref(false)
-const currentOrderId = ref(null)
-
-// 檢查未完成訂單
-const checkoutPendingOrder = async () => {
-  const response = await CheckoutAPIs.checkPendingOrderAPI(userStore.user.uid)
-  if (response.data && Object.keys(response.data).length > 0) {
-    currentOrderId.value = response.data.order_id
-    return true
-  }
-
-  return false
-}
-
-// 處理結帳
 const handleCheckout = async () => {
-  const hasPendingOrder = await checkoutPendingOrder(userStore.user.uid)
-  if (hasPendingOrder) {
-    showModal.value = true
-  } else {
-    await createOrder()
-  }
-}
-
-const createOrder = async () => {
   try {
-    const response = await CheckoutAPIs.createOrderAPI({
+    // 檢查餘額
+    if (!isBalanceEnough.value) {
+      message.error('餘額不足，請先充值')
+      return
+    }
+
+    // 整理訂單資料
+    const orderData = {
       uid: userStore.user.uid,
       total_amount: total.value,
-      order_status: 'pending',
-      order_item: cartItems.value.map((item) => ({
+      order_items: cartItems.value.map((item) => ({
         activity_id: item.id,
         quantity: 1,
         price: item.price,
         subtotal: item.price,
       })),
-    })
-    currentOrderId.value = response.data.order_id
-    showModal.value = true
-  } catch (error) {
-    message.error('訂單創建失敗')
-    console.error('訂單創建失敗:', error)
-  }
-}
+      activity_id: cartItems.value[0]?.id,
+      comment: '已付款，自動報名',
+      register_validated: 0,
+    }
 
-// 確認付款扣除餘額並跳轉
-const spendBalance = async () => {
-  try {
-    await CheckoutAPIs.spendWalletBalanceAPI(userStore.user.uid, total.value)
-    await CheckoutAPIs.clearCartAPI(userStore.user.uid)
-
-    router.push({ name: 'checkoutSuccess', params: { order_id: currentOrderId.value } })
+    const response = await CheckoutAPIs.processOrder(orderData)
+    if (response.success) {
+      message.success('訂單與報名成功完成')
+      goCheckoutSuccess(response.data.order.order_id)
+    }
   } catch (error) {
-    message.error('餘額扣除或清空購物車失敗')
-    console.error('餘額扣除或清空購物車失敗:', error)
+    if (error.message === 409) {
+      message.error('已有待處理的訂單，請先完成或取消該訂單')
+    } else if (error.message === 402) {
+      message.error('餘額不足，請先充值')
+    } else {
+      message.error('結帳失敗，請稍後再試')
+    }
+    console.error('結帳失敗:', error)
   }
 }
 
@@ -121,6 +104,10 @@ const goShoppingCart = () => {
 
 const goTopUp = () => {
   router.push('/topup')
+}
+
+const goCheckoutSuccess = (orderId) => {
+  router.push({ name: 'checkoutSuccess', params: { order_id: orderId } })
 }
 
 onMounted(async () => {
@@ -219,7 +206,7 @@ onMounted(async () => {
           前往儲值頁
         </button>
         <button
-          @click="handleCheckout"
+          @click="showModal = true"
           class="flex-1 text-sm text-white bg-gray-500 rounded-md py-2"
         >
           結帳
@@ -232,7 +219,7 @@ onMounted(async () => {
           content="最後機會了！即將扣除餘額 💰"
           positive-text="買了 💸"
           negative-text="再想想"
-          @positive-click="spendBalance"
+          @positive-click="handleCheckout"
           @negative-click="showModal = false"
         />
       </div>

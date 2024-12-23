@@ -11,20 +11,21 @@ const userStore = useUserStore()
 
 // 獲取訂單資料
 const orderDetails = ref([])
-const orderId = ref(route.params.order_id)
+const orderId = route.params.order_id
 const fetchOrderDetails = async () => {
   try {
+    // 確認 order_id 是否存在
     if (!orderId.value) {
-      throw new Error('無法獲取訂單 ID')
+      throw new Error('無法獲取 order_id')
     }
 
     const response = await CheckoutAPIs.getOrderAPI(orderId.value)
-
-    if (response.data) {
-      orderDetails.value = response.data.order_items.map((item) => ({
-        name: item.activities.name || '未知活動名稱',
+    if (response) {
+      orderDetails.value = response.order_items.map((item) => ({
+        name: item.activities.name || '活動名稱',
         price: item.price || 0,
         quantity: item.quantity || 0,
+        activity_id: item.activity_id,
       }))
     } else {
       console.error('無法獲取訂單資料')
@@ -53,34 +54,13 @@ const fetchWalletBalance = async () => {
   }
 }
 
-// 更改訂單狀態為已完成
-const completeOrder = async (order_id) => {
-  try {
-    await CheckoutAPIs.updateOrderCompleteAPI(order_id)
-  } catch (error) {
-    console.error('訂單狀態更新失敗', error)
-  }
-}
-
-// 報名活動
-// const applyActivity = async () => {
-//   try {
-//     for (const item of orderDetails.value) {
-//       const response = await CheckoutAPIs.registerApplicationAPI(item.activity_id)
-//       console.log('報名成功', response.data)
-//     }
-//   } catch (error) {
-//     console.error('報名失敗', error)
-//   }
-// }
-
 const goHome = () => {
   router.push('/')
 }
 
 onMounted(async () => {
   try {
-    await Promise.all([fetchOrderDetails(), fetchWalletBalance(), completeOrder(orderId.value)])
+    await Promise.all([fetchOrderDetails(), fetchWalletBalance()])
   } catch (error) {
     console.error('資料加載失敗:', error)
   }
