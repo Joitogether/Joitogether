@@ -1,6 +1,6 @@
 <script setup>
 import ActivityCard from '@/views/components/ActivityCard.vue'
-import { activityGetAllAPI, activityGetUsersAPI, activitySearchAPI } from '@/apis/activityApIs.js'
+import { activityGetAllAPI, activityGetUsersAPI, activitySearchAPI } from '@/apis/activityAPIs.js'
 import { ref, onMounted, computed, onUnmounted, nextTick, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { formatDate } from '@/stores/useDateTime'

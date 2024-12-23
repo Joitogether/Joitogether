@@ -1,7 +1,7 @@
 import { ref } from 'vue';
 import debounce from 'lodash/debounce';
 import { useMessage } from 'naive-ui';
-import { activityAutocompleteAPI } from '@/apis/activityAPI';
+import { activityAutocompleteAPI } from '@/apis/activityAPIs';
 
 export function useAutocomplete() {
   const searchQuery = ref('');

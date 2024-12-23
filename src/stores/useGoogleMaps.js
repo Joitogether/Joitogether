@@ -1,5 +1,5 @@
 import { ref, nextTick } from 'vue';
-import { activityGeocodeAPI } from '@/apis/activityAPI';
+import { activityGeocodeAPI } from '@/apis/activityAPIs';
 import { loadGoogleMapsAPI } from '@/utils/googleMapsLoader';
 
 /* global google */
