@@ -5,7 +5,6 @@ import { ref, onMounted, computed, onUnmounted, nextTick, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { formatDate } from '@/stores/useDateTime'
 
-
 const allActivities = ref([]) // 存放所有活動資料（未篩選）
 const userMap = ref({})
 const route = useRoute()

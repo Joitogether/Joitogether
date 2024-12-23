@@ -172,12 +172,12 @@ export const activityUserCreateAPI = async (file, otherData) => {
 }
 
 export const activityAutocompleteAPI = async (query) => {
-  return await apiAxios.post('/activities/autocomplete', { query });
-};
+  return await apiAxios.post('/activities/autocomplete', { query })
+}
 
 export const activityGeocodeAPI = async (address) => {
-  return await apiAxios.post('/activities/geocode', { address });
-};
+  return await apiAxios.post('/activities/geocode', { address })
+}
 
 export const activitySearchAPI = async (keyword) => {
   try {

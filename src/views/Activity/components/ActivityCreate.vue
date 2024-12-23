@@ -9,35 +9,27 @@ import { useUserStore } from '@/stores/userStore'
 import { convertMarkdown } from '@/stores/useMarkdown'
 import { userGetAPI } from '@/apis/userAPIs'
 import { activityUserCreateAPI } from '@/apis/activityAPIs.js'
-import { useAutocomplete } from '@/stores/useAutocomplete';
-import { useGoogleMaps } from '@/stores/useGoogleMaps';
+import { useAutocomplete } from '@/stores/useAutocomplete'
+import { useGoogleMaps } from '@/stores/useGoogleMaps'
 import { usePreviewMode } from '@/stores/usePreviewMode'
 
+const { previewMap } = useGoogleMaps()
+const { isPreviewMode, enterPreviewMode, exitPreviewMode } = usePreviewMode(previewMap)
 
-const { previewMap } = useGoogleMaps();
-const { isPreviewMode, enterPreviewMode, exitPreviewMode } = usePreviewMode(previewMap);
-
-const message = useMessage();
-const {
-  searchQuery,
-  suggestions,
-  triggerInputChange,
-  isLoading,
-  isLoadOK,
-} = useAutocomplete();
-
+const message = useMessage()
+const { searchQuery, suggestions, triggerInputChange, isLoading, isLoadOK } = useAutocomplete()
 
 const clearSearch = () => {
-  searchQuery.value = '';
-  suggestions.value = [];
-  isLoadOK.value = false;
-};
+  searchQuery.value = ''
+  suggestions.value = []
+  isLoadOK.value = false
+}
 
 const selectSuggestion = (suggestion) => {
-  searchQuery.value = suggestion.description;
-  suggestions.value = [];
-  previewMap(suggestion.description);
-};
+  searchQuery.value = suggestion.description
+  suggestions.value = []
+  previewMap(suggestion.description)
+}
 
 const { minTime, maxTime } = taiwanTime()
 const selectedFile = ref(null)
@@ -49,16 +41,16 @@ const user = ref(null)
 if (userStore.user.isLogin) {
   const fetchUserData = async () => {
     try {
-      const result = await userGetAPI(userStore.user.uid);
+      const result = await userGetAPI(userStore.user.uid)
       if (result) {
-        user.value = result;
+        user.value = result
       }
-      return result;
+      return result
     } catch {
       return
     }
-  };
-  fetchUserData();
+  }
+  fetchUserData()
 }
 
 const markdownPreview = computed(() => convertMarkdown(inputValues.value.describe))
@@ -296,9 +288,6 @@ const handleFileUpload = (event) => {
 const removeImage = () => {
   uploadedImage.value = null
 }
-
-
-
 
 // 聚焦輸入框
 const inputElement = ref(null)

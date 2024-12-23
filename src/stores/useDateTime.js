@@ -30,8 +30,7 @@ export function formatToISOWithTimezone(dateString) {
   return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
 }
 
-
-export function formatDate(dateString){
+export function formatDate(dateString) {
   const date = new Date(dateString)
   const formattedDate = date.toLocaleString('zh-TW', {
     year: 'numeric',
