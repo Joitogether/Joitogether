@@ -3,7 +3,7 @@ import ActivityCard from '@/views/components/ActivityCard.vue'
 import { activityGetAllAPI, activityGetUsersAPI, activitySearchAPI } from '@/apis/activityAPIs.js'
 import { ref, onMounted, computed, onUnmounted, nextTick, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import { formatDate } from '@/stores/useDateTime'
+import { formatDate } from '@/utils/useDateTime'
 
 const allActivities = ref([]) // 存放所有活動資料（未篩選）
 const userMap = ref({})

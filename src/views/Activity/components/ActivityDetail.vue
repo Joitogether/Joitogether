@@ -47,7 +47,7 @@ const userStore = useUserStore()
 const message = useMessage()
 const socketStore = useSocketStore()
 
-import { useGoogleMaps } from '@/stores/useGoogleMaps'
+import { useGoogleMaps } from '@/utils/useGoogleMaps'
 const apiKey = import.meta.env.VITE_GOOGLE_KEY
 const { previewMap } = useGoogleMaps(apiKey)
 const searchQuery = ref('')
