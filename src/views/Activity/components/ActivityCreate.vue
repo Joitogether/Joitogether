@@ -322,7 +322,6 @@ const formattedDeadLine = computed(() =>
 onMounted(() => {
   timeRange.value.minTime = minTime
   timeRange.value.maxTime = maxTime
-
 })
 
 watch(
@@ -693,7 +692,7 @@ const previewActivity = () => {
                 </ul>
                 <div class="flex items-center my-5">
                   <MapPin height="32" width="32"></MapPin>
-                  <span class="text-lg ml-5">{{ inputElement.value }}</span>
+                  <span class="text-lg ml-5">{{ searchQuery }}</span>
                 </div>
                 <div
                   id="map"
