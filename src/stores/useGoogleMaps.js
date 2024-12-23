@@ -1,49 +1,48 @@
-import { ref, nextTick } from 'vue'
-import { loadGoogleMapsAPI } from '@/utils/googleMapsLoader'
+import { ref, nextTick } from 'vue';
+import { activityGeocodeAPI } from '@/apis/activityAPI';
+import { loadGoogleMapsAPI } from '@/utils/googleMapsLoader';
 
-export function useGoogleMaps(apiKey) {
-  const map = ref(null)
-  const geocoder = ref(null)
+/* global google */
+
+export function useGoogleMaps() {
+  const map = ref(null);
+  const apiKey = import.meta.env.VITE_GOOGLE_KEY
 
   const previewMap = async (searchQuery) => {
-    if (!searchQuery) return // 若搜尋查詢為空則返回
+    if (!searchQuery) return;
 
-    const googleMaps = await loadGoogleMapsAPI(apiKey)
-    if (!geocoder.value) {
-      geocoder.value = new googleMaps.Geocoder() // 初始化地理編碼器
-    }
+    try {
+      const response = await activityGeocodeAPI(searchQuery);
+      const location = response.data.data;
 
-    geocoder.value.geocode({ address: searchQuery }, (results, status) => {
-      if (status === 'OK' && results[0]) {
-        const location = results[0].geometry.location
+      await loadGoogleMapsAPI(apiKey)
 
         nextTick(() => {
-          const mapElement = document.getElementById('map')
-          if (!mapElement) {
-            console.error('地圖容器元素未找到')
-            return
-          }
+        const mapElement = document.getElementById('map');
+        if (!mapElement) {
+          return;
+        }
 
-          map.value = new googleMaps.Map(mapElement, {
-            center: location,
-            zoom: 14,
-          })
-          new googleMaps.Marker({
-            map: map.value,
-            position: location,
-          })
-        })
-      } else {
-        console.error('地址無法解析為地圖位置', status)
-      }
-    })
-  }
+      // 初始化Google Maps
+        map.value = new google.maps.Map(mapElement, {
+          center: location,
+          zoom: 14,
+        });
+        new google.maps.Marker({
+          map: map.value,
+          position: location,
+        });
+      });
+    } catch{
+      return
+    }
+  };
 
   const clearMap = () => {
     if (map.value) {
-      map.value = null
+      map.value = null;
     }
-  }
+  };
 
-  return { map, geocoder, previewMap, clearMap }
+  return { map, previewMap, clearMap };
 }

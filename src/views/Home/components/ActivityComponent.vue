@@ -1,9 +1,12 @@
 <script setup>
 import ActivityCard from '@/views/components/ActivityCard.vue'
-import { activityGetAllAPI, activityGetUsersAPI, activitySearchAPI } from '@/apis/activityAPi.js'
+import { activityGetAllAPI, activityGetUsersAPI, activitySearchAPI } from '@/apis/activityApi.js'
 import { ref, onMounted, computed, onUnmounted, nextTick, watch } from 'vue'
 import { formatToISOWithTimezone } from '@/stores/useDateTime'
 import { useRoute } from 'vue-router'
+import { formatDate } from '@/stores/useDateTime'
+
+
 
 const allActivities = ref([]) // 存放所有活動資料（未篩選）
 const userMap = ref({})
@@ -47,7 +50,7 @@ const filteredItems = computed(() => {
       name: activity.name,
       img_url: activity.img_url || '/src/assets/UserUpdata1.jpg',
       location: activity.location || '未知地點',
-      dateTime: formatToISOWithTimezone(activity.event_time),
+      dateTime: formatDate(activity.event_time),
       user: userMap.value[activity.host_id] || '未知用戶',
       participants: activity.max_participants || 0,
     }))

@@ -181,3 +181,11 @@ export const activitySearchAPI = async (keyword) => {
     return error.response.data.data
   }
 }
+
+export const activityAutocompleteAPI = async (query) => {
+  return await apiAxios.post('/activities/autocomplete', { query });
+};
+
+export const activityGeocodeAPI = async (address) => {
+  return await apiAxios.post('/activities/geocode', { address });
+};
