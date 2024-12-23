@@ -14,7 +14,7 @@
           <h1>熱門聚會地點</h1>
           <div class="flex items-center w-full justify-evenly">
             <div v-for="aria in ariaData" :key="aria.title">
-              <a href="#">
+              <a href="#" @click.prevent="scrollToCategory(aria.targetId)">
                 <img :src="aria.src" alt="" />
                 <p class="text-center">{{ aria.title }}</p>
               </a>
@@ -42,31 +42,19 @@ const carouselData = [
 ]
 
 const ariaData = [
-  {
-    title: '大台北',
-    src: 'https://www.eatgether.com/static/media/TPE.91790170.png',
-  },
-  {
-    title: '桃園市',
-    src: 'https://www.eatgether.com/static/media/TAO.68ddb6e3.png',
-  },
-  {
-    title: '新竹市',
-    src: 'https://www.eatgether.com/static/media/HSZ.417cf6b8.png',
-  },
-  {
-    title: '臺中市',
-    src: 'https://www.eatgether.com/static/media/TXG.c136bf99.png',
-  },
-  {
-    title: '臺南市',
-    src: 'https://www.eatgether.com/static/media/TNN.1ab27f99.png',
-  },
-  {
-    title: '高雄市',
-    src: 'https://www.eatgether.com/static/media/KHH.da56765a.png',
-  },
+  { title: '美食', src: 'https://www.eatgether.com/static/media/TPE.91790170.png', targetId: 'food-category' },
+  { title: '購物', src: 'https://www.eatgether.com/static/media/TAO.68ddb6e3.png', targetId: 'shopping-category' },
+  { title: '旅遊', src: 'https://www.eatgether.com/static/media/HSZ.417cf6b8.png', targetId: 'travel-category' },
+  { title: '運動', src: 'https://www.eatgether.com/static/media/TXG.c136bf99.png', targetId: 'sports-category' },
+  { title: '教育', src: 'https://www.eatgether.com/static/media/TNN.1ab27f99.png', targetId: 'education-category' },
+  { title: '其他', src: 'https://www.eatgether.com/static/media/KHH.da56765a.png', targetId: 'others-category' },
 ]
+const scrollToCategory = (id) => {
+  const targetElement = document.getElementById(id)
+  if (targetElement) {
+    targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+}
 </script>
 
 <style scoped>
