@@ -184,10 +184,12 @@ const handleSearchClick = (e) => {
         <label for="search" class="cursor-pointer hover:text-green-600">找聚會</label>
         <div class="flex items-center gap-2">
           <input
+            v-model="searchKeyword"
             type="text"
             id="search"
             class="h-8 bg-gray-100 rounded-full p-3 focus:outline-green-600"
             placeholder="運動、美食、唱歌..."
+            @keydown.enter="handleSearchClick"
           />
           <div
             class="w-7 h-7 rounded-full bg-green-600 flex items-center justify-center cursor-pointer hover:bg-green-700"
@@ -207,10 +209,12 @@ const handleSearchClick = (e) => {
           <Menu class="hover:text-green-600 w-8 h-8" />
         </label>
         <!--選單內容-->
-        <div id="menu" class="w-full bg-gray-50 text-white p-6 space-y-4 rounded-md">
+        <div id="menu" class="w-full bg-gray-50 text-black p-6 space-y-4 rounded-md">
           <ul>
             <li class="flex gap-3">
               <input
+                @keydown.enter="handleSearchClick"
+                v-model="searchKeyword"
                 type="text"
                 placeholder="運動、美食、唱歌..."
                 class="w-full h-10 mb-2 rounded-full border border-gray-400 p-2 focus:outline-green-600"
@@ -218,7 +222,11 @@ const handleSearchClick = (e) => {
               <div
                 class="w-10 h-10 aspect-square rounded-full bg-green-600 flex items-center justify-center cursor-pointer hover:bg-green-700"
               >
-                <Search class="text-white" :style="{ width: '20px', height: '20px' }" />
+                <Search
+                  @click="handleSearchClick"
+                  class="text-white"
+                  :style="{ width: '20px', height: '20px' }"
+                />
               </div>
             </li>
             <li>
