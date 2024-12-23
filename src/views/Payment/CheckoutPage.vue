@@ -23,8 +23,6 @@ const fetchCartItems = async () => {
       price: Number(item.activities.price),
     }))
 
-    console.log(cartItems.value)
-
     subtotal.value = cartItems.value.reduce((total, item) => total + item.price, 0)
   } catch (error) {
     message.error('購物車資料獲取失敗')

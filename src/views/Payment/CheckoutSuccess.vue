@@ -11,7 +11,7 @@ const userStore = useUserStore()
 
 // 獲取訂單資料
 const orderDetails = ref([])
-const orderId = route.params.order_id
+const orderId = ref(route.params.order_id)
 const fetchOrderDetails = async () => {
   try {
     // 確認 order_id 是否存在
