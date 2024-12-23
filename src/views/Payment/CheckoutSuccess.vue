@@ -3,7 +3,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useRoute } from 'vue-router'
 import { useUserStore } from '@/stores/userStore'
-import * as CheckoutAPIs from '../../apis/checkoutAPI.js'
+import * as PaymentAPIs from '../../apis/paymentAPIs.js'
 
 const router = useRouter()
 const route = useRoute()
@@ -19,7 +19,7 @@ const fetchOrderDetails = async () => {
       throw new Error('無法獲取 order_id')
     }
 
-    const response = await CheckoutAPIs.getOrderAPI(orderId.value)
+    const response = await PaymentAPIs.getOrderAPI(orderId.value)
     if (response) {
       orderDetails.value = response.order_items.map((item) => ({
         name: item.activities.name || '活動名稱',
@@ -46,7 +46,7 @@ const totalPrice = computed(() => {
 const balance = ref(0)
 const fetchWalletBalance = async () => {
   try {
-    const response = await CheckoutAPIs.getWalletBalanceAPI(userStore.user.uid)
+    const response = await PaymentAPIs.getWalletBalanceAPI(userStore.user.uid)
     balance.value = response.data.balance
     return balance.value
   } catch (error) {

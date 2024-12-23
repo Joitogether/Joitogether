@@ -1,40 +1,41 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { deleteUserCartDetailsAPI, getUserCartDetailsAPI } from '@/apis/userShoppingCartApi'
+import * as PaymentAPIs from '../../../apis/paymentAPIs.js'
 import { useUserStore } from '@/stores/userStore'
 import { useMessage } from 'naive-ui'
 
 const cartItems = ref([]) // 存放購物車資料
 const isLoading = ref(true) // 載入狀態
 const userStore = useUserStore()
+
 // 取得購物車資料並轉換格式
 const fetchCartItems = async () => {
+  isLoading.value = true
   try {
-    isLoading.value = true
-    const data = await getUserCartDetailsAPI(userStore.user.uid)
+    const response = await PaymentAPIs.getUserCartDetailsAPI(userStore.user.uid)
 
-    cartItems.value = data.map((item) => ({
-      cartActivityId: item.activityId,
-      name: item.activityName,
-      location: item.location,
-      time: new Date(item.eventTime).toLocaleString(), // 格式化時間
-      price: Number(item.price),
-      image: item.image || 'https://via.placeholder.com/200', // 預設圖片
-      // selected: false, // 初始未選中
+    const cartItemsData = response.data.cartItems
+    cartItems.value = cartItemsData.map((item) => ({
+      cartItemsId: item.id,
+      cartActivityId: item.activity_id,
+      name: item.activities.name,
+      location: item.activities.location,
+      time: new Date(item.activities.event_time).toLocaleString(),
+      price: Number(item.activities.price),
+      image: item.activities.img_url || 'https://via.placeholder.com/200',
+      selected: item.is_selected,
     }))
-  } catch {
-    return false
+  } catch (error) {
+    console.error('購物車資料獲取失敗:', error.message)
+    message.error('購物車資料獲取失敗，請稍後再試！')
   } finally {
     isLoading.value = false
   }
 }
 
-onMounted(() => {
-  fetchCartItems()
-})
-
-const selectAll = ref(false) // 全選控制
+// 全選控制
+const selectAll = ref(false)
 
 // 計算總金額
 const totalPrice = computed(() => {
@@ -52,40 +53,46 @@ const toggleSelectAll = () => {
 // 刪除所選項目
 const removeSelected = async () => {
   try {
-    // 1. 篩選出被選中的項目
     const selectedItems = cartItems.value.filter((item) => item.Selected)
-
-    // 2. 提取選中項目的 cartActivityId
     const selectedIds = selectedItems.map((item) => item.cartActivityId)
 
-    // 3. 打印所有的 cartActivityId（用於確認）
-    // console.log('Selected cartActivityIds:', selectedIds)
-
-    // 4. 使用 Promise.all 並行執行刪除請求
-    await Promise.all(selectedIds.map((id) => deleteUserCartDetailsAPI(userStore.user.uid, id)))
-
-    // 5. 更新本地 cartItems 列表，移除已刪除的項目
+    await Promise.all(
+      selectedIds.map((id) => PaymentAPIs.deleteUserCartDetailsAPI(userStore.user.uid, id)),
+    )
     cartItems.value = cartItems.value.filter((item) => !item.Selected)
-  } catch {
-    return false
+  } catch (error) {
+    console.error('刪除所選商品失敗:', error)
   }
 }
-// 模擬結帳動作
-// const checkout = () => {
-//   alert(`總金額 NT$${totalPrice.value}，前往結帳！`)
-// }
 
-// 跳轉結帳頁面
+// 將選中商品送往結帳頁面
 const router = useRouter()
 const message = useMessage()
-const goToCheckout = () => {
+const goToCheckout = async () => {
   const selectedItems = cartItems.value.filter((item) => item.Selected)
   if (selectedItems.length === 0) {
     message.error('請選擇要結帳的項目')
     return
   }
+  try {
+    await Promise.all(
+      selectedItems.map((item) => PaymentAPIs.updateCartSelectionAPI(item.cartItemsId, true)),
+    )
+    goCheckoutPage()
+  } catch (error) {
+    console.error('同步選中狀態失敗:', error)
+    message.error('無法選中商品，請稍後再試！')
+  }
+}
+
+// 頁面跳轉
+const goCheckoutPage = () => {
   router.push('/checkout')
 }
+
+onMounted(() => {
+  fetchCartItems()
+})
 </script>
 
 <template>

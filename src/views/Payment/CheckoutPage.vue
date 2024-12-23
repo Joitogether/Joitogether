@@ -3,7 +3,7 @@ import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/userStore.js'
 import { useMessage } from 'naive-ui'
-import * as CheckoutAPIs from '../../apis/checkoutAPI.js'
+import * as PaymentAPIs from '../../apis/paymentAPIs.js'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -14,16 +14,19 @@ const cartItems = ref([])
 const subtotal = ref(0)
 const fetchCartItems = async () => {
   try {
-    const response = await CheckoutAPIs.getCartItemsAPI(userStore.user.uid)
+    const response = await PaymentAPIs.getCheckoutItemsAPI(userStore.user.uid)
 
     cartItems.value = response.data.cartItems.map((item) => ({
-      id: item.activity_id,
+      id: item.id,
+      activity_id: item.activity_id,
       title: item.activities.name,
       photo: item.activities.img_url,
       price: Number(item.activities.price),
     }))
 
     subtotal.value = cartItems.value.reduce((total, item) => total + item.price, 0)
+
+    console.log('購物車明細:', cartItems.value)
   } catch (error) {
     message.error('購物車資料獲取失敗')
     console.error('購物車資料獲取失敗:', error)
@@ -39,7 +42,7 @@ const total = computed(() => {
 const balance = ref(0)
 const fetchWalletBalance = async () => {
   try {
-    const response = await CheckoutAPIs.getWalletBalanceAPI(userStore.user.uid)
+    const response = await PaymentAPIs.getWalletBalanceAPI(userStore.user.uid)
     balance.value = response.data.balance
     return balance.value
   } catch (error) {
@@ -68,7 +71,7 @@ const handleCheckout = async () => {
       uid: userStore.user.uid,
       total_amount: total.value,
       order_items: cartItems.value.map((item) => ({
-        activity_id: item.id,
+        activity_id: item.activity_id,
         quantity: 1,
         price: item.price,
         subtotal: item.price,
@@ -78,7 +81,7 @@ const handleCheckout = async () => {
       register_validated: 0,
     }
 
-    const response = await CheckoutAPIs.processOrder(orderData)
+    const response = await PaymentAPIs.processOrder(orderData)
     if (response.success) {
       message.success('訂單與報名成功完成')
       goCheckoutSuccess(response.data.order.order_id)
@@ -92,6 +95,17 @@ const handleCheckout = async () => {
       message.error('結帳失敗，請稍後再試')
     }
     console.error('結帳失敗:', error)
+  }
+}
+
+// 回到購物車頁面時將購物車明細清空
+const backToCart = async () => {
+  try {
+    const selectedIds = cartItems.value.map((item) => item.id)
+    await Promise.all(selectedIds.map((id) => PaymentAPIs.updateCartSelectionAPI(id, false)))
+    goShoppingCart()
+  } catch (error) {
+    console.error('清空購物車失敗:', error)
   }
 }
 
@@ -190,10 +204,7 @@ onMounted(async () => {
         餘額不足請前往儲值!
       </div>
       <div class="flex justify-between items-center gap-4">
-        <button
-          @click="goShoppingCart"
-          class="flex-1 text-sm text-white bg-gray-500 rounded-md py-2"
-        >
+        <button @click="backToCart" class="flex-1 text-sm text-white bg-gray-500 rounded-md py-2">
           上一步
         </button>
         <button
