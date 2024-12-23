@@ -159,7 +159,10 @@ const showLoading = ref(false)
 </script>
 
 <template>
-  <div id="navbar" class="h-12 py-1 px-4 flex items-center justify-between relative shadow">
+  <div
+    id="navbar"
+    class="fixed z-50 top-0 left-0 w-full h-16 bg-white py-1 px-4 flex items-center justify-between shadow"
+  >
     <div class="flex items-center">
       <div class="hidden md:block w-16 md:h-9 md:overflow-hidden">
         <RouterLink to="/">
@@ -187,13 +190,10 @@ const showLoading = ref(false)
       <div class="md:hidden">
         <input type="checkbox" id="menu-toggle" class="hidden" />
         <label for="menu-toggle" class="text-gray-500 cursor-pointer">
-          <Menu class="hover:text-green-600" />
+          <Menu class="hover:text-green-600 w-8 h-8" />
         </label>
         <!--選單內容-->
-        <div
-          id="menu"
-          class="w-full absolute top-12 left-0 bg-gray-50 text-white p-6 space-y-4 shadow-md"
-        >
+        <div id="menu" class="w-full bg-gray-50 text-white p-6 space-y-4 rounded-md">
           <ul>
             <li class="flex gap-3">
               <input
@@ -276,14 +276,14 @@ const showLoading = ref(false)
         :on-update:show="handleNotificationRead"
         placement="bottom-end"
         :on-clickoutside="() => (showPopover = false)"
-        class="w-[377px] bellNotice"
-        :style="{
-          '--v-offset-left': '50px',
-          transform: 'translateX(429px) translateX(-100%)',
-          '--n-color': '#f9fafb',
-        }"
+        class="w-[300px] bellNotice"
         trigger="click"
         :show="showPopover"
+        :style="{
+          '--n-arrow-offset': '30px',
+          transform: ' translateY(10%) translateX(8%)',
+          '--n-color': '#f9fafb',
+        }"
       >
         <template #trigger>
           <n-badge :max="15" :value="unreadCount" class="cursor-pointer">
@@ -363,7 +363,7 @@ const showLoading = ref(false)
       <div
         v-else
         id="login-menu"
-        class="w-full bg-gray-50 text-black p-6 space-y-4 absolute top-12 right-0 shadow-md md:w-1/3 lg:w-1/4"
+        class="w-full rounded-md bg-gray-50 text-black px-6 py-10 space-y-4 shadow-md md:w-1/3 md:right-2 lg:w-1/4"
       >
         <div
           v-if="userStore.user.isLogin"
@@ -432,11 +432,6 @@ const showLoading = ref(false)
   justify-content: center;
 }
 
-#navbar {
-  position: relative;
-  z-index: 999;
-}
-
 #login-toggle {
   display: none;
 }
@@ -444,27 +439,67 @@ const showLoading = ref(false)
 #login-menu {
   z-index: 1;
   position: absolute;
+  top: 65px;
+  right: 0px;
   pointer-events: none;
   opacity: 0;
   transition: all 0.1s ease-in-out;
+  box-shadow:
+    0 -3px 6px -4px rgba(0, 0, 0, 0.12),
+    0 3px 6px -4px rgba(0, 0, 0, 0.12),
+    0 6px 16px 0 rgba(0, 0, 0, 0.08),
+    0 9px 28px 8px rgba(0, 0, 0, 0.05); /* 套用指定的陰影 */
 }
+#login-menu::after {
+  content: '';
+  position: absolute;
+  top: -7px;
+  right: 20px;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 0 8px 10px 8px;
+  border-color: transparent transparent #fff transparent;
+}
+
 #login-toggle:checked ~ #login-menu {
   pointer-events: auto;
   opacity: 1;
 }
 
 #menu {
+  position: absolute;
+  top: 65px;
+  right: 0px;
   opacity: 0;
   pointer-events: none;
   transition: all 0.1s ease-in-out;
+  box-shadow:
+    0 -3px 6px -4px rgba(0, 0, 0, 0.12),
+    0 3px 6px -4px rgba(0, 0, 0, 0.12),
+    0 6px 16px 0 rgba(0, 0, 0, 0.08),
+    0 9px 28px 8px rgba(0, 0, 0, 0.05); /* 套用指定的陰影 */
 }
+#menu::after {
+  content: '';
+  position: absolute;
+  top: -7px;
+  left: 25px;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 0 8px 10px 8px;
+  border-color: transparent transparent #fff transparent;
+}
+
 #menu-toggle:checked ~ #menu {
   pointer-events: auto;
   opacity: 1;
 }
-/* 預設情況下隱藏選單 */
-/* #menu,
-#login-menu {
-  display: none;
-} */
+
+@media screen and (width >= 768px) {
+  #login-menu {
+    right: 3px;
+  }
+}
 </style>
