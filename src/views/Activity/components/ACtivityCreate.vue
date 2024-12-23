@@ -333,6 +333,7 @@ const formattedDeadLine = computed(() =>
 onMounted(() => {
   timeRange.value.minTime = minTime
   timeRange.value.maxTime = maxTime
+
 })
 
 watch(
