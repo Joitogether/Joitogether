@@ -353,7 +353,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="bg-gray-200 w-full p-4">
+  <div class="bg-gray-100 w-full p-4">
     <div class="flex items-center relative w-full md:w-3/4 lg:w-1/2 mx-auto">
       <NavArrowLeft
         stroke-width="2"
