@@ -112,6 +112,7 @@ const router = createRouter({
           path: '/activity',
           name: 'activity',
           component: Activity,
+          redirect: { name: 'home' },
           children: [
             {
               path: 'detail/:id',

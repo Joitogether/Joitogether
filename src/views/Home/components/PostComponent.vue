@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted } from 'vue'
-import { getLatestPostsAPI, getPopularPostsAPI } from '@/apis/postApi'
+import { getLatestPostsAPI, getPopularPostsAPI } from '@/apis/postAPIs.js'
 import defaultAvatar from '@/assets/avatar.png'
 import { useRouter } from 'vue-router'
 
@@ -81,7 +81,7 @@ onMounted(() => {
 
 const formatDate = (isoString) => {
   const date = new Date(isoString)
-  return date.toLocaleString('zh-TW', {
+  const formattedDate = date.toLocaleString('zh-TW', {
     year: 'numeric',
     month: '2-digit',
     day: '2-digit',
@@ -90,6 +90,7 @@ const formatDate = (isoString) => {
     second: '2-digit',
     hour12: false,
   })
+  return formattedDate.replace(/\//g, '-').replace(/:\d{2}$/, '')
 }
 </script>
 

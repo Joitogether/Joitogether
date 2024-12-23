@@ -1,7 +1,13 @@
 <template>
   <div class="login-wrapper">
     <div class="block shadow-md">
-      <div class="event-image bg-green-100"></div>
+      <div class="event-image bg-green-100">
+        <img
+          class="w-full h-full object-cover hidden md:block"
+          src="https://i.pinimg.com/736x/84/a3/ed/84a3edac31b96b7d73af3172a3b1991d.jpg"
+          alt=""
+        />
+      </div>
       <div v-if="login" class="login-box">
         <h2 class="font-black text-6xl" style="color: #18a058">登入</h2>
         <n-form ref="loginFormRef" :label-width="80" :model="loginForm" :rules="loginRules">

@@ -28,18 +28,22 @@
 
 <script setup>
 import { NCarousel } from 'naive-ui'
+import { ref, onMounted, onUnmounted, watch } from 'vue'
+import joixmas from '@/assets/JoiXmas.jpg'
+import joixmasmobile from '@/assets/JoiXmasMobile.jpg'
+import joigif from '@/assets/joitogether.gif'
 
-const carouselData = [
+const carouselData = ref([
   {
-    src: 'https://cdn.eatgether.com/images/website/banner/01.jpeg',
+    src: joigif,
   },
+  // {
+  //   src: 'https://i.pinimg.com/originals/aa/06/9f/aa069f2356b0397342892fd712f604c2.gif',
+  // },
   {
-    src: 'https://cdn.eatgether.com/images/website/banner/02.jpeg',
+    src: joixmas,
   },
-  {
-    src: 'https://cdn.eatgether.com/images/website/banner/03.jpeg',
-  },
-]
+])
 
 const ariaData = [
   {
@@ -67,12 +71,34 @@ const ariaData = [
     src: 'https://www.eatgether.com/static/media/KHH.da56765a.png',
   },
 ]
+const isMobile = ref(false)
+
+const updateScreenSize = () => {
+  isMobile.value = window.innerWidth < 768
+}
+
+onMounted(() => {
+  updateScreenSize()
+  window.addEventListener('resize', updateScreenSize)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', updateScreenSize)
+})
+
+watch(isMobile, (newVal) => {
+  if (newVal) {
+    carouselData.value[1].src = joixmasmobile // 替換成手機版圖片
+  } else {
+    carouselData.value[1].src = joixmas // 替換回桌面版圖片
+  }
+})
 </script>
 
 <style scoped>
 .carousel-img {
   width: 100%;
-  height: 450px;
+  height: 480px;
   object-fit: cover;
 }
 a img {

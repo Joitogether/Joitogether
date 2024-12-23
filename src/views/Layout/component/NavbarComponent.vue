@@ -1,5 +1,5 @@
 <script setup>
-import { Search, User, Menu, Sweep3d, BellNotificationSolid } from '@iconoir/vue'
+import { Search, User, Menu, BellNotification } from '@iconoir/vue'
 import { NButton, NDivider, NBadge, NPopover, NScrollbar, NSpin } from 'naive-ui'
 import { useMessage } from 'naive-ui'
 import { useUserStore } from '/src/stores/userStore.js'
@@ -156,121 +156,160 @@ const handleLoadClick = async () => {
   showLoading.value = false
 }
 const showLoading = ref(false)
+const searchKeyword = ref('')
+const handleSearchClick = (e) => {
+  if (e.isComposing) return
+  if (searchKeyword.value === '') return
+  router.push({
+    name: 'home',
+    query: {
+      q: searchKeyword.value,
+    },
+  })
+}
 </script>
 
 <template>
-  <div id="navbar" class="flex items-center space-x-2 justify-evenly">
-    <div>
-      <a href="/"><Sweep3d /></a>
-    </div>
-    <div class="flex items-center space-x-6">
-      <div class="hidden md:flex min-w-12">找聚會</div>
-      <div class="hidden md:flex">
-        <input type="text" placeholder="運動、美食、唱歌..." />
+  <div
+    id="navbar"
+    class="fixed z-50 top-0 left-0 w-full h-16 bg-white py-1 px-4 flex items-center justify-between shadow"
+  >
+    <div class="flex items-center">
+      <div class="hidden md:block w-16 md:h-9 md:overflow-hidden">
+        <RouterLink to="/">
+          <img src="../../../assets/Joi.png" alt="logo" class="w-full h-full object-contain" />
+        </RouterLink>
       </div>
-      <div>
-        <a href="#"><Search /></a>
-      </div>
-    </div>
-
-    <div class="md:hidden flex">
-      <input type="checkbox" id="menu-toggle" class="hidden" />
-      <label
-        for="menu-toggle"
-        class="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-500 rounded-lg cursor-pointer hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-black"
-      >
-        <Menu />
-      </label>
-      <!--選單內容-->
-      <div
-        id="menu"
-        class="hidden md:hidden bg-gray-200 text-white p-6 space-y-4 absolute top-10 inset-x-0"
-      >
-        <ul>
-          <li class="flex">
-            <Search />
-            <input type="text" placeholder="運動、美食、唱歌..." />
-          </li>
-          <li>
-            <a
-              href="#"
-              class="block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-black dark:hover:text-white"
-            >
-              加入聚會</a
-            >
-          </li>
-          <li
-            class="block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-black dark:hover:text-white"
+      <div class="hidden lg:flex flex-row items-center gap-2 mx-3">
+        <label for="search" class="cursor-pointer hover:text-green-600">找聚會</label>
+        <div class="flex items-center gap-2">
+          <input
+            v-model="searchKeyword"
+            type="text"
+            id="search"
+            class="h-8 bg-gray-100 rounded-full p-3 focus:outline-green-600"
+            placeholder="運動、美食、唱歌..."
+            @keydown.enter="handleSearchClick"
+          />
+          <div
+            class="w-7 h-7 rounded-full bg-green-600 flex items-center justify-center cursor-pointer hover:bg-green-700"
           >
-            <RouterLink to="/post">社群</RouterLink>
+            <Search
+              @click="handleSearchClick"
+              class="text-white"
+              :style="{ width: '20px', height: '20px' }"
+            />
+          </div>
+        </div>
+      </div>
+
+      <div class="md:hidden">
+        <input type="checkbox" id="menu-toggle" class="hidden" />
+        <label for="menu-toggle" class="text-gray-500 cursor-pointer">
+          <Menu class="hover:text-green-600 w-8 h-8" />
+        </label>
+        <!--選單內容-->
+        <div id="menu" class="w-full bg-gray-50 text-black p-6 space-y-4 rounded-md">
+          <ul>
+            <li class="flex gap-3">
+              <input
+                @keydown.enter="handleSearchClick"
+                v-model="searchKeyword"
+                type="text"
+                placeholder="運動、美食、唱歌..."
+                class="w-full h-10 mb-2 rounded-full border border-gray-400 p-2 focus:outline-green-600"
+              />
+              <div
+                class="w-10 h-10 aspect-square rounded-full bg-green-600 flex items-center justify-center cursor-pointer hover:bg-green-700"
+              >
+                <Search
+                  @click="handleSearchClick"
+                  class="text-white"
+                  :style="{ width: '20px', height: '20px' }"
+                />
+              </div>
+            </li>
+            <li>
+              <a
+                href="#"
+                class="font-bold py-3 block text-base text-gray-500 hover:text-green-600 border-b border-gray-300"
+              >
+                •&nbsp;&nbsp;加入聚會
+              </a>
+            </li>
+            <li
+              class="font-bold py-3 block text-base text-gray-500 hover:text-green-600 border-b border-gray-300"
+            >
+              <RouterLink to="/post">•&nbsp;&nbsp;社群</RouterLink>
+            </li>
+            <li>
+              <a
+                href="#"
+                class="font-bold py-3 block text-base text-gray-500 hover:text-green-600 border-b border-gray-300"
+              >
+                •&nbsp;&nbsp;活動中心
+              </a>
+            </li>
+            <li>
+              <a href="#" class="font-bold pt-3 block text-base text-gray-500 hover:text-green-600">
+                •&nbsp;&nbsp;儲值中心
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="md:hidden w-16 h-9 overflow-hidden absolute left-1/2 transform -translate-x-1/2">
+        <RouterLink to="/">
+          <img src="../../../assets/Joi.png" alt="logo" class="w-full h-full object-contain" />
+        </RouterLink>
+      </div>
+
+      <div class="hidden md:block">
+        <ul class="md:flex flex-wrap items-center">
+          <li class="lg:hidden py-1">
+            <a href="#" class="mx-3 tracking-wide hover:text-green-600"> 加入聚會</a>
           </li>
-          <li>
-            <a
-              href="#"
-              class="block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-black dark:hover:text-white"
-            >
-              活動中心</a
-            >
+          <li class="py-1">
+            <RouterLink to="/post" class="mx-3 tracking-wide hover:text-green-600">社群</RouterLink>
           </li>
-          <li>
-            <a
-              href="#"
-              class="block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-black dark:hover:text-white"
-            >
-              儲值中心</a
-            >
+          <li class="py-1">
+            <a href="#" class="mx-3 tracking-wide hover:text-green-600"> 購物車</a>
+          </li>
+          <li class="py-1">
+            <a href="#" class="mx-3 tracking-wide hover:text-green-600"> 儲值中心</a>
           </li>
         </ul>
       </div>
     </div>
 
-    <div class="hidden md:flex min-w-96">
-      <ul class="hidden md:flex flex-wrap items-center gap-2">
-        <li>
-          <a
-            href="#"
-            class="block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-black dark:hover:text-white"
-          >
-            加入聚會</a
-          >
-        </li>
-        <li
-          class="block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-black dark:hover:text-white"
-        >
-          <RouterLink to="/post">社群</RouterLink>
-        </li>
-        <li>
-          <a
-            href="#"
-            class="block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-black dark:hover:text-white"
-          >
-            活動中心</a
-          >
-        </li>
-        <li>
-          <a
-            href="#"
-            class="block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-black dark:hover:text-white"
-          >
-            儲值中心</a
-          >
-        </li>
-      </ul>
-    </div>
     <!-- 登入/註冊 -->
-    <div class="flex items-center">
+    <div class="flex items-center gap-4">
+      <div class="hidden md:flex items-center" v-if="userLogin">
+        <router-link :to="{ name: 'activityCreate' }">
+          <button
+            class="border border-gray-600 text-gray-600 rounded-full px-3 py-1 hover:border-green-600 hover:text-green-600"
+          >
+            活動創建
+          </button>
+        </router-link>
+      </div>
       <n-popover
         :on-update:show="handleNotificationRead"
         placement="bottom-end"
         :on-clickoutside="() => (showPopover = false)"
-        class="w-[400px]"
-        style="padding: 10px"
+        class="w-[300px] bellNotice"
         trigger="click"
         :show="showPopover"
+        :style="{
+          '--n-arrow-offset': '30px',
+          transform: ' translateY(10%) translateX(8%)',
+          '--n-color': '#f9fafb',
+        }"
       >
         <template #trigger>
-          <n-badge :max="15" :value="unreadCount" class="mr-3 cursor-pointer">
-            <BellNotificationSolid></BellNotificationSolid>
+          <n-badge :max="15" :value="unreadCount" class="cursor-pointer">
+            <BellNotification class="hover:text-green-600"></BellNotification>
           </n-badge>
         </template>
         <n-scrollbar style="max-height: 500px">
@@ -332,31 +371,31 @@ const showLoading = ref(false)
           </div>
         </n-scrollbar>
       </n-popover>
-      <div class="hidden md:flex min-w-20 items-center">登入/註冊</div>
-      <div class="hidden md:flex min-w-20 items-center" v-if="userLogin">
-        <router-link :to="{ name: 'activityCreate' }">
-          <button>活動創建</button>
-        </router-link>
-      </div>
-      <input type="checkbox" id="login-toggle" class="hidden" />
+      <!-- <div class="hidden md:flex min-w-20 items-center">登入/註冊</div> -->
+
+      <input type="checkbox" id="login-toggle" />
       <label
         for="login-toggle"
-        class="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-500 rounded-lg cursor-pointer hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-black"
+        class="inline-flex items-center justify-center text-sm text-gray-500 cursor-pointer"
       >
-        <User />
+        <User class="w-7 h-7 hover:text-green-600" />
       </label>
-      <div v-if="loading">加载中...</div>
+      <div v-if="loading"></div>
 
       <div
         v-else
         id="login-menu"
-        class="hidden w-1/4 bg-gray-50 text-black p-6 space-y-4 absolute top-10 right-0"
+        class="w-full rounded-md bg-gray-50 text-black px-6 py-10 space-y-4 shadow-md md:w-1/3 md:right-2 lg:w-1/4"
       >
         <div
           v-if="userStore.user.isLogin"
-          class="user-photo rounded-full w-1/2 h-1/2 aspect-square overflow-hidden flex justify-self-center"
+          class="user-photo rounded-full w-40 h-40 aspect-square overflow-hidden flex justify-self-center md:w-24 md:h-24"
         >
-          <img :src="user.photo_url || 'default_image_path.jpg'" alt="userPhoto" class="w-full" />
+          <img
+            :src="user.photo_url || 'default_image_path.jpg'"
+            alt="userPhoto"
+            class="w-full h-full object-cover"
+          />
         </div>
         <div v-if="userStore.user.isLogin" class="user-name text-center font-bold text-xl">
           {{ user.display_name || '暱稱' }}
@@ -368,8 +407,11 @@ const showLoading = ref(false)
         </div>
         <div v-if="userStore.user.isLogin" class="flex justify-center">
           <RouterLink to="/profile">
-            <n-button type="primary" ghost round class="goinfo-pc"> 查看個人頁面 </n-button>
-            <n-button type="primary" ghost class="hidden goinfo-mob"> 查看個人頁面 </n-button>
+            <button
+              class="border border-gray-600 text-gray-600 py-2 px-4 rounded-full hover:border-green-600 hover:text-green-600"
+            >
+              查看個人頁面
+            </button>
           </RouterLink>
         </div>
 
@@ -405,24 +447,6 @@ const showLoading = ref(false)
 </template>
 
 <style scoped>
-@media screen and (width < 768px) {
-  .user-photo,
-  .user-name,
-  .user-info,
-  .user-more-info {
-    display: none;
-  }
-  .goinfo-mob {
-    display: contents;
-    writing-mode: vertical-lr; /* 使文字垂直顯示，從右到左 */
-    transform: rotate(360deg); /* 旋轉180度，讓文字從上到下排列 */
-    white-space: nowrap; /* 防止文字換行 */
-    text-align: center; /* 讓文字在按鈕內部居中 */
-  }
-  .goinfo-pc {
-    display: none;
-  }
-}
 .user-name {
   text-align: center;
 }
@@ -430,24 +454,74 @@ const showLoading = ref(false)
   justify-content: center;
 }
 
-/* 當checkbox被選中時顯示選單 */
-#menu-toggle:checked + label + #menu {
-  display: block;
-}
-
-/* 當checkbox被選中時顯示登入註冊選單 */
-#login-toggle:checked ~ label + #login-menu {
-  display: block;
-}
-
-/* 預設情況下隱藏選單 */
-#menu,
-#login-menu {
+#login-toggle {
   display: none;
 }
 
-#navbar {
-  position: relative;
-  z-index: 999;
+#login-menu {
+  z-index: 1;
+  position: absolute;
+  top: 65px;
+  right: 0px;
+  pointer-events: none;
+  opacity: 0;
+  transition: all 0.1s ease-in-out;
+  box-shadow:
+    0 -3px 6px -4px rgba(0, 0, 0, 0.12),
+    0 3px 6px -4px rgba(0, 0, 0, 0.12),
+    0 6px 16px 0 rgba(0, 0, 0, 0.08),
+    0 9px 28px 8px rgba(0, 0, 0, 0.05); /* 套用指定的陰影 */
+}
+#login-menu::after {
+  content: '';
+  position: absolute;
+  top: -7px;
+  right: 20px;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 0 8px 10px 8px;
+  border-color: transparent transparent #fff transparent;
+}
+
+#login-toggle:checked ~ #login-menu {
+  pointer-events: auto;
+  opacity: 1;
+}
+
+#menu {
+  position: absolute;
+  top: 65px;
+  right: 0px;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.1s ease-in-out;
+  box-shadow:
+    0 -3px 6px -4px rgba(0, 0, 0, 0.12),
+    0 3px 6px -4px rgba(0, 0, 0, 0.12),
+    0 6px 16px 0 rgba(0, 0, 0, 0.08),
+    0 9px 28px 8px rgba(0, 0, 0, 0.05); /* 套用指定的陰影 */
+}
+#menu::after {
+  content: '';
+  position: absolute;
+  top: -7px;
+  left: 25px;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 0 8px 10px 8px;
+  border-color: transparent transparent #fff transparent;
+}
+
+#menu-toggle:checked ~ #menu {
+  pointer-events: auto;
+  opacity: 1;
+}
+
+@media screen and (width >= 768px) {
+  #login-menu {
+    right: 3px;
+  }
 }
 </style>

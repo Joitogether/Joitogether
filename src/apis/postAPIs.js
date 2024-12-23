@@ -65,3 +65,31 @@ export const deletePostAPI = async (postId) => {
     return null
   }
 }
+
+// 抓 15 筆最新貼文
+export const getLatestPostsAPI = async () => {
+  try {
+    const response = await apiAxios.get('/posts/latest')
+    if (response && response.status === 200) {
+      return response.data.data
+    } else {
+      return
+    }
+  } catch {
+    return
+  }
+}
+
+// 抓 15 天區間熱門貼文
+export const getPopularPostsAPI = async () => {
+  try {
+    const response = await apiAxios.get('/posts/popular')
+    if (response && response.status === 200) {
+      return response.data.data
+    } else {
+      return
+    }
+  } catch {
+    return null
+  }
+}
