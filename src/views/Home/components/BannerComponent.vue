@@ -10,7 +10,7 @@
         />
       </n-carousel>
       <div class="container mx-auto area">
-        <div class="flex flex-col items-center mt-10">
+        <div class="flex flex-col items-center mt-10 mb-10">
           <h1>熱門揪團類型</h1>
           <div class="flex items-center w-full justify-evenly">
             <div v-for="area in areaData" :key="area.title">
