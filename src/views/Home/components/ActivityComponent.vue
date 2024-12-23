@@ -94,7 +94,17 @@ const fetchActivitiesAndUsers = async () => {
   }
 }
 
+// 監聽 BannerComponent 的訊息
+const handleMessage = (event) => {
+  if (event.data?.action === 'selectCategory' && event.data.category) {
+    selectCategory(event.data.category)
+  }
+}
+
+
 onMounted(async () => {
+  window.addEventListener('message', handleMessage)
+
   if (route.query.q) {
     return
   }
@@ -116,6 +126,7 @@ onMounted(async () => {
 })
 
 onUnmounted(() => {
+  window.removeEventListener('message', handleMessage)
   if (observer.value) observer.value.disconnect()
 })
 
