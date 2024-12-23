@@ -117,7 +117,7 @@ const formatDate = (isoString) => {
       >
     </div>
 
-    <div class="post-posts-area grid grid-cols-1 gap-4">
+    <!-- <div class="post-posts-area grid grid-cols-1 gap-4">
       <div
         @click="router.push(`/post/${item.post_id}`)"
         v-for="item in posts"
@@ -158,7 +158,7 @@ const formatDate = (isoString) => {
           </div>
         </div>
       </div>
-    </div>
+    </div> -->
   </div>
   <div class="pagination-container mt-5 flex justify-center">
     <n-pagination
