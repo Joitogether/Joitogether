@@ -25,8 +25,6 @@ const fetchCartItems = async () => {
     }))
 
     subtotal.value = cartItems.value.reduce((total, item) => total + item.price, 0)
-
-    console.log('購物車明細:', cartItems.value)
   } catch (error) {
     message.error('購物車資料獲取失敗')
     console.error('購物車資料獲取失敗:', error)
