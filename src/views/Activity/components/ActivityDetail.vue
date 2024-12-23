@@ -511,7 +511,7 @@ const handleDropSelect = async (key, comment_id) => {
           :key="item.img_url"
           horizontal="true"
           :title="item.name"
-          :actImgUrl="item.photo_url"
+          :actImgUrl="item.img_url"
           :location="item.location"
           :dateTime="dayjs(item.event_time).format('YYYY年MM月DD日')"
           :participants="registerCount"
