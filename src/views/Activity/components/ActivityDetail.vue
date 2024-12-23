@@ -144,7 +144,7 @@ onMounted(async () => {
 })
 // 根據抓取回來的資料判斷使用者是否已註冊該活動
 const isRegistered = computed(() => {
-  return activity.value.participants?.some(
+  return activity.value.applications?.some(
     (participant) =>
       participant.participant_id === userStore.user.uid && participant.status === 'registered',
   )
