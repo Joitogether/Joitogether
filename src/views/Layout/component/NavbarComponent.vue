@@ -358,8 +358,10 @@ const showLoading = ref(false)
       >
         <User class="w-7 h-7 hover:text-green-600" />
       </label>
+      <div v-if="loading"></div>
 
       <div
+        v-else
         id="login-menu"
         class="w-full rounded-md bg-gray-50 text-black px-6 py-10 space-y-4 shadow-md md:w-1/3 md:right-2 lg:w-1/4"
       >
