@@ -95,6 +95,50 @@ const formatDate = (isoString) => {
 </script>
 
 <template>
+  <div class="flex flex-col justify-center items-center bg-gray-100 w-full p-4">
+    <div v-for="item in posts" :key="item.id" class="m-6 mb-0 w-full h-full max-w-[600px] relative">
+      <!-- 頭貼區 -->
+      <div class="flex items-center pl-10">
+        <div class="w-[40px] h-[40px]">
+          <img
+            :src="item.user_photo || defaultAvatar"
+            alt=""
+            class="bg-slate-700 w-full h-full rounded-full"
+            @error="onAvatarImageError"
+          />
+        </div>
+        <div class="mx-2">{{ item.users.display_name }}</div>
+      </div>
+      <div
+        class="absolute top-[44px] left-5 border-l-[20px] border-l-transparent border-b-[20px] border-b-red-700"
+      ></div>
+      <!-- 內文 -->
+      <div class="flex flex-col bg-white w-full my-4 p-4 rounded-xl">
+        <div class="flex">
+          <div class="mx-4 w-full min-w-[180px] max-w-[200px]">
+            <div class="">{{ formatDate(item.created_at) }}</div>
+            <div class="my-2">{{ item.post_title }}</div>
+            <div class="line-clamp-2 w-full">
+              {{ item.post_content }}
+            </div>
+          </div>
+          <div class="">
+            <img
+              :src="item.post_img"
+              alt="文章照片"
+              class="object-cover aspect-square rounded-xl max-w-[100px] max-h-[100px]"
+              @error="onPostImageError"
+            />
+          </div>
+        </div>
+        <div class="flex border-t-2 mt-4 pt-4">
+          <div class="">👍🏻{{ item._count.post_likes }}讚</div>
+          <div class="">💬{{ item._count.post_comments }}留言</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="home-posts-area bg-gray-100 px-28 py-10">
     <div>
       <h2 class="text-3xl">最新貼文</h2>
@@ -138,9 +182,9 @@ const formatDate = (isoString) => {
         </div>
         <div class="one-post-bottom mt-2.5 px-6 bg-white rounded-2xl pb-4 cursor-pointer">
           <div
-            class="post-bottom-top flex h-[180px] border-b-[1px] border-solid border-[rgba(61,57,44,0.1)]"
+            class="post-bottom-top flex flex-row items-start w-full h-full border-b-[1px] border-solid border-[rgba(61,57,44,0.1)]"
           >
-            <div class="post-bottom-left w-52 leading-loose">
+            <div class="post-bottom-left w-full h-full lg:max-w-[300px] leading-loose">
               <p class="text-slate-300 text-sm h-8 mt-6">{{ formatDate(item.created_at) }}</p>
 
               <h3 class="text-xl font-bold">{{ item.post_title }}</h3>
@@ -148,8 +192,15 @@ const formatDate = (isoString) => {
                 {{ item.post_content }}
               </p>
             </div>
-            <div class="post-bottom-right h-24 w-24 rounded-3xl overflow-hidden ml-2.5 mt-4">
-              <img :src="item.post_img" alt="文章照片" @error="onPostImageError" />
+            <div
+              class="post-bottom-right max-h-[180px] max-w-[180px] rounded-3xl overflow-hidden ml-2.5 mt-4"
+            >
+              <img
+                :src="item.post_img"
+                alt="文章照片"
+                @error="onPostImageError"
+                class="w-full h-full max-h-[180px] max-w-[180px] object-cover aspect-square"
+              />
             </div>
           </div>
           <div class="post-bottom-bottom flex leading-loose mt-6 mx-6">
