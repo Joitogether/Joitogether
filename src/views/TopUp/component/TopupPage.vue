@@ -1,15 +1,27 @@
 <script setup>
-import { UserGetApi, UserPutApi } from '@/apis/userAPIs'
-import { onMounted, ref } from 'vue'
+import { UserGetApi } from '@/apis/userAPIs'
+import { onMounted, reactive, ref } from 'vue'
 import { useUserStore } from '@/stores/userStore'
 import { NButton, NInputNumber } from 'naive-ui'
 import { useRouter } from 'vue-router'
+import { createPaymentAPI, getWalletBalanceAPI, saveTopupAPI } from '@/apis/paymentAPI'
+import dayjs from 'dayjs';
+
 
 const router = useRouter()
 const user = ref([])
+const wallet = ref([])
 const userStore = useUserStore()
-const amount = ref(1)
 const errorMessage = ref(null)
+const amounts = [100, 200, 300, 500, 666, 888, 999, 1111]
+const formatDate = (dateString) => {
+  return dayjs(dateString).format('YYYY-MM-DD HH:mm');
+};
+
+const formData = reactive({
+  amount: 1,
+  email:'',
+  itemDesc:'儲值金' })
 
 const fetchUserData = async () => {
   try {
@@ -25,21 +37,75 @@ const fetchUserData = async () => {
     errorMessage.value = err.message || '資料加載錯誤'
   }
 }
+const fetchWalletBalance = async() => {
+  const result = await getWalletBalanceAPI(userStore.user.uid)
+  wallet.value = result
+  return wallet.value
+}
+
 const createOrder = async() => {
-  user.value.pocket_money = user.value.pocket_money + amount.value
+  formData.email = user.value.email
+
   try {
-    const response = await UserPutApi(userStore.user.uid, user.value)
+    const response = await createPaymentAPI(formData)
 
-    if(response.status == '201') {
-      router.push({path: '/topupFinish'})
+    if (response) {
+      const orderData = {
+        user_id: userStore.user.uid,
+        amount: formData.amount,
+        topup_number: response.MerchantOrderNo,
+        type: formData.itemDesc,
+        topup_date: formatDate(new Date()),
+        status: 'PENDING',
+      };
+
+      const saveResponse = await saveTopupAPI(userStore.user.uid, orderData);
+      console.log('saveResponse:', saveResponse);
+      if (saveResponse ) {
+        console.log('訂單資料儲存成功');
+      } else {
+        console.log('儲存訂單資料失敗');
+      }
+
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = 'https://ccore.newebpay.com/MPG/mpg_gateway';
+
+      const newebPayParams = {
+        MerchantID: response.MerchantID,
+        TradeSha: response.shaEncrypt,
+        TradeInfo: response.aesEncrypt,
+        TimeStamp: response.TimeStamp,
+        Version: response.Version,
+        MerchantOrderNo: response.MerchantOrderNo,
+        Amt:response.Amt,
+        ItemDesc: formData.itemDesc,
+        Email: response.Email,
+        RespondType: 'JSON'
+      };
+
+      Object.keys(newebPayParams).forEach(key => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = key;
+        input.value = newebPayParams[key];
+        form.appendChild(input);
+      });
+
+      document.body.appendChild(form);
+      form.submit();
     }
-  } catch(err) {
 
+  } catch(err) {
+    console.error(err);
   }
+}
+const seeRecord = () => {
+  router.push({ path:'/topupRecord'})
 }
 
 onMounted(() => {
-  fetchUserData()
+  Promise.all([fetchUserData(),fetchWalletBalance()]).then()
 })
 </script>
 <template>
@@ -50,7 +116,7 @@ onMounted(() => {
       </div>
       <div class="mx-10">
         <div class="flex justify-end items-center mb-6">
-          <button class="border-2 rounded-md px-4 py-2 flex justify-center items-center w-[100px]">
+          <button @click="seeRecord" class="border-2 rounded-md px-4 py-2 flex justify-center items-center w-[100px]">
             儲值記錄
           </button>
         </div>
@@ -62,17 +128,18 @@ onMounted(() => {
           </div>
           <span class="ml-4 text-lg">餘額</span>
         </div>
-        <div class="first-area-bottom grid grid-cols-12 mb-6">
+        <div class="first-area-bottom grid grid-cols-12 mb-6 gap-2">
           <div
-            class="img-container overflow-hidden col-start-2 rounded-full grid- w-16 h-16 aspect-square"
+            class="img-container overflow-hidden col-start-2 justify-self-end rounded-full grid- w-16 h-16 aspect-square"
           >
             <img class="card-img w-full relative" :src="user.photo_url" alt="personImg" />
           </div>
-          <div class="block col-span-2">
-            <div class="text-lg mb-1">{{ user.display_name }}</div>
-            <div class="text-lg mb-1">{{ user.email }}</div>
+          <div class="block col-span-3 content-end">
+            <div class="mb-1">{{ user.display_name }}</div>
+            <div class="mb-1">{{ user.email }}</div>
           </div>
-          <div class="py-2 col-span-2">目前富有程度：💰{{ user.pocket_money }}</div>
+          <div class="py-2 col-span-4 text-xl content-end">目前富有程度：💰{{ wallet.balance || '0(就快要變富人了！)' }}</div>
+
         </div>
         <div class="second-area-title flex items-center mb-4">
           <div
@@ -84,84 +151,34 @@ onMounted(() => {
         </div>
         <div class="second-area-bottom grid grid-cols-4 gap-4 mx-14 my-6">
           <n-button
+            v-for="value in amounts"
+            :key="value"
             secondary
             type="warning"
             class="border-2 rounded-md px-6 py-2 text-lg"
-            @click="amount = 100"
+            @click="formData.amount = value"
           >
-            💰100
-          </n-button>
-          <n-button
-            secondary
-            type="warning"
-            class="border-2 rounded-md px-6 py-2 text-lg"
-            @click="amount = 200"
-          >
-            💰200
-          </n-button>
-          <n-button
-            secondary
-            type="warning"
-            class="border-2 rounded-md px-6 py-2 text-lg"
-            @click="amount = 300"
-          >
-            💰300
-          </n-button>
-          <n-button
-            secondary
-            type="warning"
-            class="border-2 rounded-md px-6 py-2 text-lg"
-            @click="amount = 500"
-          >
-            💰500
-          </n-button>
-          <n-button
-            secondary
-            type="warning"
-            class="border-2 rounded-md px-6 py-2 text-lg"
-            @click="amount = 666"
-          >
-            💰666
-          </n-button>
-          <n-button
-            secondary
-            type="warning"
-            class="border-2 rounded-md px-6 py-2 text-lg"
-            @click="amount = 888"
-          >
-            💰888
-          </n-button>
-          <n-button
-            secondary
-            type="warning"
-            class="border-2 rounded-md px-6 py-2 text-lg"
-            @click="amount = 999"
-          >
-            💰999
-          </n-button>
-          <n-button
-            secondary
-            type="warning"
-            class="border-2 rounded-md px-6 py-2 text-lg"
-            @click="amount = 1111"
-          >
-            💰1111
+            💰{{ value }}
           </n-button>
         </div>
         <div class="flex justify-center mt-10">
           <div class="amount-input flex mr-5 items-center">
             金額：
-            <n-input-number :min="1" :value="amount" placeholder="也可自訂金額唷" />
+            <n-input-number
+              v-model:value="formData.amount"
+              :min="1"
+              placeholder="也可自訂金額唷"
+            />
           </div>
-          <div class="topup-button">
-            <n-button
-              type="warning"
-              class="text-center border-2 rounded-md py-2 px-10 text-lg"
-              @click="createOrder"
-            >
-              立即儲值
-            </n-button>
-          </div>
+        </div>
+        <div class="topup-button flex justify-center mt-10">
+          <n-button
+            type="warning"
+            class="text-center border-2 rounded-md py-2 px-10 text-lg"
+            @click="createOrder"
+          >
+            立即儲值
+          </n-button>
         </div>
       </div>
     </div>

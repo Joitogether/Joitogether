@@ -7,6 +7,10 @@ const router = useRouter()
 const goSpend = () => {
   router.push({ path:'/activity'})
 }
+
+const seeRecord = () => {
+  router.push({ path:'/topupRecord'})
+}
 </script>
 <template>
   <n-result status="success" title="儲值成功" description="以下為本次交易明細" class="mt-10 mx-14 ">
@@ -30,7 +34,8 @@ const goSpend = () => {
           </tr>
         </tbody>
       </n-table>
-      <div class="flex justify-center">
+      <div class="flex justify-center gap-7">
+        <n-button ghost round @click="seeRecord">儲值紀錄</n-button>
         <n-button ghost round type="warning" @click="goSpend">花錢去💰💰💰</n-button>
       </div>
   </n-result>
