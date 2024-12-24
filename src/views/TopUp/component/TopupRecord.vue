@@ -28,8 +28,7 @@ const fetchWalletBalance = async() => {
 
     if(result) {
       wallet.value = result
-      let runningBalance = Number(wallet.value.balance);
-
+      let runningBalance = 0;
       topupRecords.value = topupRecords.value.map(record => {
         record.amount = Number(record.amount);
         runningBalance += record.amount;
@@ -38,11 +37,6 @@ const fetchWalletBalance = async() => {
           balance: runningBalance
         };
       });
-
-
-    }else {
-      console.log('錢包沒有資料');
-
     }
   } catch (err) {
     console.error(err)
@@ -52,9 +46,9 @@ const fetchWalletBalance = async() => {
 const goback = () => {
   router.push({ path:'/topup' })
 }
-onMounted(() => {
-  getAllRecords()
-  fetchWalletBalance()
+onMounted(async() => {
+  await getAllRecords(),
+  await fetchWalletBalance()
 
 })
 

@@ -4,7 +4,7 @@ import { onMounted, reactive, ref } from 'vue'
 import { useUserStore } from '@/stores/userStore'
 import { NButton, NInputNumber } from 'naive-ui'
 import { useRouter } from 'vue-router'
-import { createPaymentAPI, getWalletBalanceAPI, saveTopupAPI } from '@/apis/paymentAPI'
+import { createPaymentAPI, getWalletBalanceAPI, saveTopupAPI, addDepositAPI } from '@/apis/paymentAPI'
 import dayjs from 'dayjs';
 
 
@@ -17,6 +17,7 @@ const amounts = [100, 200, 300, 500, 666, 888, 999, 1111]
 const formatDate = (dateString) => {
   return dayjs(dateString).format('YYYY-MM-DD HH:mm');
 };
+
 
 const formData = reactive({
   amount: 1,
@@ -66,6 +67,14 @@ const createOrder = async() => {
       } else {
         console.log('儲存訂單資料失敗');
       }
+      //將儲值金額加至錢包（這部分之後移到儲值完成頁面）
+      const increaseWallet = await addDepositAPI(userStore.user.uid, {deposit: orderData.amount})
+      console.log('increaseWallet', increaseWallet);
+      if (increaseWallet ) {
+        console.log('錢包增加成功');
+      } else {
+        console.log('錢包增加失敗');
+      }
 
       const form = document.createElement('form');
       form.method = 'POST';
@@ -93,6 +102,8 @@ const createOrder = async() => {
       });
 
       document.body.appendChild(form);
+      console.log('已加密：',newebPayParams);
+
       form.submit();
     }
 
