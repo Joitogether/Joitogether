@@ -4,11 +4,14 @@ import { getTopupRecordAPI } from '@/apis/paymentAPI';
 import { useUserStore } from '@/stores/userStore';
 import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
+import { getWalletBalanceAPI } from '@/apis/paymentAPI';
 import dayjs from 'dayjs';
 
 const router = useRouter()
 const userStore = useUserStore()
 const topupRecords = ref([])
+const wallet = ref([])
+
 const formatDate = (dateString) => {
   return dayjs(dateString).format('YYYY-MM-DD HH:mm');
 };
@@ -16,14 +19,43 @@ const formatDate = (dateString) => {
 const getAllRecords = async() => {
   const response = await getTopupRecordAPI(userStore.user.uid)
   topupRecords.value = response
-  console.log('前端頁面資料', topupRecords.value);
   return response
 }
+
+const fetchWalletBalance = async() => {
+  try{
+    const result = await getWalletBalanceAPI(userStore.user.uid)
+
+    if(result) {
+      wallet.value = result
+      let runningBalance = Number(wallet.value.balance);
+
+      topupRecords.value = topupRecords.value.map(record => {
+        record.amount = Number(record.amount);
+        runningBalance += record.amount;
+        return {
+          ...record,
+          balance: runningBalance
+        };
+      });
+
+
+    }else {
+      console.log('錢包沒有資料');
+
+    }
+  } catch (err) {
+    console.error(err)
+  }
+}
+
 const goback = () => {
   router.push({ path:'/topup' })
 }
 onMounted(() => {
   getAllRecords()
+  fetchWalletBalance()
+
 })
 
 </script>
@@ -35,9 +67,9 @@ onMounted(() => {
   <n-table :bordered="false" :single-line="false" class="my-14 mx-10">
         <thead>
           <tr>
-            <th>交易日期</th>
+            <th>儲值日期</th>
             <th>交易類別</th>
-            <th>交易金額</th>
+            <th>儲值金額</th>
             <th>交易序號</th>
             <th>錢包餘額</th>
           </tr>
@@ -48,7 +80,7 @@ onMounted(() => {
             <td>{{ record.type }}</td>
             <td>${{ record.amount }}</td>
             <td>Joimoney{{ record.topup_number }}</td>
-            <td>$99999999</td>
+            <td>${{ record.balance }}</td>
           </tr>
         </tbody>
       </n-table>
