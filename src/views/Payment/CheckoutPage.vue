@@ -22,6 +22,7 @@ const fetchCartItems = async () => {
       title: item.activities.name,
       photo: item.activities.img_url,
       price: Number(item.activities.price),
+      require_approval: item.activities.require_approval,
     }))
 
     subtotal.value = cartItems.value.reduce((total, item) => total + item.price, 0)
@@ -73,10 +74,10 @@ const handleCheckout = async () => {
         quantity: 1,
         price: item.price,
         subtotal: item.price,
+        require_approval: item.require_approval,
       })),
       activity_id: cartItems.value[0]?.id,
       comment: '已付款，自動報名',
-      register_validated: 0,
     }
 
     const response = await PaymentAPIs.processOrder(orderData)
