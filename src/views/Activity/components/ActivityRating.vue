@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, reactive, ref } from 'vue'
+import { onMounted, reactive, ref, watch } from 'vue'
 import { useMessage, useDialog, NRate, NSpace, NInput, NModal } from 'naive-ui'
 import { CheckCircle, CheckCircleSolid, HeartSolid } from '@iconoir/vue'
 import { useRoute, useRouter } from 'vue-router'
@@ -69,6 +69,13 @@ const ratingForm = reactive({
   ability: 0,
   credit: 0,
 })
+// 滑鼠懸停狀態
+const hoverStates = reactive({
+  overall: 0,
+  kindness: 0,
+  ability: 0,
+  credit: 0,
+})
 
 const submitRating = async () => {
   const data = {
@@ -82,11 +89,9 @@ const submitRating = async () => {
     activity_id: parseInt(route.params.activity_id),
   }
   const res = await ratingSubmitAPI(data)
-
-  if (res.message === '資料唯一性衝突') {
-    return message.error('你已評價過，無法重複評價')
+  if (res.messsage == '資料唯一性衝突') {
+    message.error('你已評價過，無法重複評價')
   }
-
   if (res.status != 201) {
     showSubmitModal.value = false
     return message.error('評價失敗')
@@ -96,6 +101,48 @@ const submitRating = async () => {
   step.value = 2
 }
 const showSubmitModal = ref(false)
+
+// 這裡是定義愛心
+// 定義 Props
+const props = defineProps({
+  score: {
+    type: Number,
+    default: 0,
+  },
+  maxHearts: {
+    type: Number,
+    default: 5,
+  },
+})
+
+// 定義 Emits
+const emit = defineEmits(['update:score'])
+
+// 當前評分的響應式狀態
+const currentScore = ref(props.score) // 初始化為 props 的 score
+const currentHover = ref(0) // 當前 hover 狀態的愛心數
+
+// 方法：更新評分
+const setRating = (index, category) => {
+  ratingForm[category] = index
+}
+
+// 方法：設置 hover 狀態
+const setHover = (index, category) => {
+  hoverStates[category] = index
+}
+
+// 方法：重置 hover 狀態
+const resetHover = (category) => {
+  hoverStates[category] = 0
+}
+// 當父組件的 `score` 改變時，更新 `currentScore`
+watch(
+  () => props.score,
+  (newScore) => {
+    currentScore.value = newScore // 保持與 props 的同步
+  },
+)
 </script>
 
 <template>
@@ -128,26 +175,18 @@ const showSubmitModal = ref(false)
 
       <!-- 評分進度 -->
       <div
-        class="flex flex-row w-full max-w-[400px] justify-around m-auto bg-white border-2 p-1 my-3 rounded-full xl:text-base xl:py-1 md:text-md sm:text-sm"
+         class="flex flex-row w-full max-w-[400px] justify-around m-auto bg-white border-2 p-1 my-3 rounded-full xl:text-base xl:py-1 md:text-md sm:text-sm"
       >
         <div>
           <!-- 團主評價到此頁面的進度顯示-->
-          <div
-            :class="{ 'text-blue-600': step == 0, 'text-gray-300': step != 0 }"
-            class="flex justify-center items-center font-bold tracking-widest"
-          >
-            <CheckCircleSolid v-if="step == 0" class="mr-1" />團主評價
-            <CheckCircle v-if="step != 0" class="mr-1" />
+          <div class="flex justify-center items-center text-blue-600 font-bold tracking-widest">
+            <CheckCircleSolid class="mr-1" />團主評價
           </div>
         </div>
         <div>
           <!-- 還沒到追蹤評價頁面的進度顯示-->
-          <div
-            :class="{ 'text-blue-600': step == 1, 'text-gray-300': step != 1 }"
-            class="flex justify-center items-center font-bold tracking-widest"
-          >
-            <CheckCircleSolid v-if="step == 1" class="mr-1" />
-            <CheckCircle v-if="step != 1" class="mr-1" />追蹤活動
+          <div class="flex justify-center items-center text-gray-300 font-bold tracking-widest">
+            <CheckCircle class="mr-1" />追蹤活動
           </div>
           <!-- 到追蹤評價頁面的進度顯示-->
 
@@ -158,8 +197,7 @@ const showSubmitModal = ref(false)
         <div>
           <!-- 還沒到最後完成頁面的進度顯示 -->
           <div class="flex justify-center items-center text-gray-300 font-bold tracking-widest">
-            <CheckCircleSolid v-if="step == 2" class="mr-1" />
-            <CheckCircle v-if="step != 2" class="mr-1" />完成
+            <CheckCircle class="mr-1" />完成
           </div>
           <!-- 到完成介面的進度顯示 -->
           <!-- <div class="flex justify-center items-center text-blue-600 font-bold tracking-widest"><CheckCircleSolid class="mr-1" />完成</div> -->
@@ -200,13 +238,14 @@ const showSubmitModal = ref(false)
             <div class="flex justify-between bg-gray-200 px-3 py-1 my-2 rounded-full">
               <div class="min-w-[60px] flex items-center xl:text-base xl:p-1">親切度</div>
               <div class="flex items-center">
-                <n-rate
-                  readonly
-                  :value="hostRatingAverage.rating_kindness"
-                  :default-value="5"
-                  color="#B91C1C"
-                  ><HeartSolid class="w-4"
-                /></n-rate>
+                <div class="static-heart-rating readonly">
+                  <span
+                    v-for="index in 5"
+                    :key="'kindness-' + index"
+                    class="static-heart"
+                    :class="{ filled: index <= hostRatingAverage.rating_kindness }"
+                  ></span>
+                </div>
                 <div class="mx-2 text-xs xl:text-base xl:p-1">
                   {{ hostRatingAverage.rating_kindness?.toFixed(1) || '0.0' }} / 5.0
                 </div>
@@ -215,13 +254,15 @@ const showSubmitModal = ref(false)
             <div class="flex justify-between bg-gray-200 px-3 py-1 mb-2 rounded-full">
               <div class="min-w-[60px] flex items-center xl:text-base xl:p-1">主辦能力</div>
               <div class="flex items-center">
-                <n-rate
-                  readonly
-                  :value="hostRatingAverage.rating_ability"
-                  :default-value="5"
-                  color="#B91C1C"
-                  ><HeartSolid class="w-4"
-                /></n-rate>
+                <div class="static-heart-rating readonly">
+                  <span
+                    v-for="index in 5"
+                    :key="'kindness-' + index"
+                    class="static-heart"
+                    :class="{ filled: index <= hostRatingAverage.rating_ability }"
+                  ></span>
+                </div>
+                
                 <div class="min-w-[45px] mx-2 text-xs xl:text-base xl:p-1">
                   {{ hostRatingAverage.rating_ability?.toFixed(1) || '0.0' }} / 5.0
                 </div>
@@ -230,13 +271,16 @@ const showSubmitModal = ref(false)
             <div class="flex justify-between bg-gray-200 px-3 py-1 mb-2 rounded-full">
               <div class="min-w-[60px] flex items-center xl:text-base xl:p-1">信用度</div>
               <div class="flex items-center">
-                <n-rate
-                  readonly
-                  :value="hostRatingAverage.rating_credit"
-                  :default-value="5"
-                  color="#B91C1C"
-                  ><HeartSolid class="w-4"
-                /></n-rate>
+                <div class="static-heart-rating readonly">
+                  <span
+                    v-for="index in 5"
+                    :key="'kindness-' + index"
+                    class="static-heart"
+                    :class="{ filled: index <= hostRatingAverage.rating_credit }"
+                  ></span>
+                </div>
+                
+                
                 <div class="mx-2 text-xs xl:text-base xl:p-1">
                   {{ hostRatingAverage.rating_credit?.toFixed(1) || '0.0' }} / 5.0
                 </div>
@@ -271,7 +315,7 @@ const showSubmitModal = ref(false)
                 </div>
               </div>
               <div class="text-xs tracking-wider truncate mt-2 xl:text-base xl:p-1">
-                {{ latestHostRating.user_comment }}
+                團主真的超用心的，上次跟他去吃鷄肉飯還不用花錢，而且都介紹很强的小吃，真的很推啦!!
               </div>
             </div>
             <p v-else class="mt-2 xl:text-base xl:p-1">暫無用戶評價</p>
@@ -290,27 +334,55 @@ const showSubmitModal = ref(false)
         </div>
         <div class="flex mt-3 px-14">
           <div class="text-base w-full">您對於本次揪團的評價為</div>
-          <n-rate clearable v-model:value="ratingForm.overall" color="#B91C1C">
-            <HeartSolid class="w-5 h-5" />
-          </n-rate>
+          <div class="heart-rating" @mouseleave="resetHover('overall')">
+            <span
+              v-for="index in maxHearts"
+              :key="'overall-' + index"
+              class="heart"
+              :class="{ filled: index <= hoverStates.overall || index <= ratingForm.overall }"
+              @mouseenter="setHover(index, 'overall')"
+              @click="setRating(index, 'overall')"
+            ></span>
+          </div>
         </div>
         <div class="flex mt-3 px-14">
           <div class="text-base w-full">團主的親切度，您願意給到幾分呢？</div>
-          <n-rate clearable v-model:value="ratingForm.kindness" color="#B91C1C">
-            <HeartSolid class="w-5 h-5" />
-          </n-rate>
+          <div class="heart-rating" @mouseleave="resetHover('kindness')">
+            <span
+              v-for="index in maxHearts"
+              :key="'kindness-' + index"
+              class="heart"
+              :class="{ filled: index <= hoverStates.kindness || index <= ratingForm.kindness }"
+              @mouseenter="setHover(index, 'kindness')"
+              @click="setRating(index, 'kindness')"
+            ></span>
+          </div>
         </div>
         <div class="flex mt-3 px-14">
           <div class="text-base w-full">團主的主辦能力，您願意給到幾分呢？</div>
-          <n-rate clearable v-model:value="ratingForm.ability" color="#B91C1C">
-            <HeartSolid class="w-5 h-5" />
-          </n-rate>
+          <div class="heart-rating" @mouseleave="resetHover('ability')">
+            <span
+              v-for="index in maxHearts"
+              :key="'ability-' + index"
+              class="heart"
+              :class="{ filled: index <= hoverStates.ability || index <= ratingForm.ability }"
+              @mouseenter="setHover(index, 'ability')"
+              @click="setRating(index, 'ability')"
+            ></span>
+          </div>
         </div>
         <div class="flex mt-3 px-14">
           <div class="text-base w-full">團主的信用度，您願意給到幾分呢？</div>
-          <n-rate clearable v-model:value="ratingForm.credit" color="#B91C1C">
-            <HeartSolid class="w-5 h-5" />
-          </n-rate>
+          <div class="heart-rating" @mouseleave="resetHover('credit')">
+            <span
+              v-for="index in maxHearts"
+              :key="'credit-' + index"
+              class="heart"
+              :class="{ filled: index <= hoverStates.credit || index <= ratingForm.credit }"
+              @mouseenter="setHover(index, 'credit')"
+              @click="setRating(index, 'credit')"
+            ></span>
+          </div>
         </div>
 
         <div class="flex flex-col mt-5 xl:text-base">
@@ -409,4 +481,39 @@ const showSubmitModal = ref(false)
     </div>
   </body>
 </template>
-<style scoped></style>
+<style scoped>
+.static-heart-rating {
+  display: flex;
+  gap: 6px;
+}
+.static-heart {
+  width: 16px; /* 愛心寬度 */
+  height: 16px; /* 愛心高度 */
+  background-image: url('../../../assets/heartred.png'); /* 預設為實心愛心 */
+  background-repeat: no-repeat;
+  background-size: contain;
+  cursor: default;
+}
+.static-heart.filled {
+  background-image: url('../../../assets/heartred.png'); /* 實心愛心 */
+}
+
+.heart-rating {
+  display: flex;
+  gap: 8px; /* 愛心間距 */
+}
+
+.heart {
+  width: 20px; /* 愛心寬度 */
+  height: 20px; /* 愛心高度 */
+  background-image: url('../../../assets/heartnored.png');
+  background-repeat: no-repeat;
+  background-size: contain;
+  cursor: pointer;
+  transition: background-image 0.3s ease; /* 動畫效果 */
+}
+
+.heart.filled {
+  background-image: url('../../../assets/heartred.png'); /* 填滿愛心的圖片 */
+}
+</style>
