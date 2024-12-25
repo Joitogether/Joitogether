@@ -71,7 +71,6 @@ export const getLatestPostsAPI = async () => {
   try {
     const response = await apiAxios.get('/posts/latest')
     if (response && response.status === 200) {
-      console.log('最新貼文這裡', response.data.data)
       return response.data.data
     } else {
       return
