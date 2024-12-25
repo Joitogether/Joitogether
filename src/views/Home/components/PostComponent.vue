@@ -95,171 +95,120 @@ const formatDate = (isoString) => {
 </script>
 
 <template>
-  <div class="flex flex-col justify-center items-center bg-gray-100 w-full p-4">
-    <div v-for="item in posts" :key="item.id" class="m-6 mb-0 w-full h-full max-w-[600px] relative">
-      <!-- 頭貼區 -->
-      <div class="flex items-center pl-10">
-        <div class="w-[40px] h-[40px]">
-          <img
-            :src="item.user_photo || defaultAvatar"
-            alt=""
-            class="bg-slate-700 w-full h-full rounded-full"
-            @error="onAvatarImageError"
-          />
-        </div>
-        <div class="mx-2">{{ item.users.display_name }}</div>
-      </div>
-      <div
-        class="absolute top-[44px] left-5 border-l-[20px] border-l-transparent border-b-[20px] border-b-red-700"
-      ></div>
-      <!-- 內文 -->
-      <div class="flex flex-col bg-white w-full my-4 p-4 rounded-xl">
-        <div class="flex">
-          <div class="mx-4 w-full min-w-[180px] max-w-[200px]">
-            <div class="">{{ formatDate(item.created_at) }}</div>
-            <div class="my-2">{{ item.post_title }}</div>
-            <div class="line-clamp-2 w-full">
-              {{ item.post_content }}
-            </div>
-          </div>
-          <div class="">
-            <img
-              :src="item.post_img"
-              alt="文章照片"
-              class="object-cover aspect-square rounded-xl max-w-[100px] max-h-[100px]"
-              @error="onPostImageError"
-            />
-          </div>
-        </div>
-        <div class="flex border-t-2 mt-4 pt-4">
-          <div class="">👍🏻{{ item._count.post_likes }}讚</div>
-          <div class="">💬{{ item._count.post_comments }}留言</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="home-posts-area bg-gray-100 px-28 py-10">
+  <div class="bg-gray-100 w-full min-w-[300px] p-4 px-28 py-10">
     <div>
-      <h2 class="text-3xl">最新貼文</h2>
+      <h2 class="text-3xl min-w-[200px]">最新貼文</h2>
     </div>
 
     <div class="post-label-area flex py-7 border-b-[1px] border-solid border-[rgba(61,57,44,0.1)]">
       <n-button
         circle
-        type="warning"
+        type="success"
         @click="switchTab('latest')"
-        class="w-16 text-gray-700 hover:font-bold hover:scale-110 transition-all duration-300"
+        class="w-16 text-white hover:scale-110 transition-all duration-300"
         >最新</n-button
       >
       <n-button
         circle
-        type="warning"
+        type="success"
         @click="switchTab('popular')"
-        class="w-16 text-gray-700 hover:font-bold hover:scale-110 transition-all duration-300 mx-3"
+        class="w-16 text-white hover:scale-110 transition-all duration-300 mx-3"
         >熱門</n-button
       >
     </div>
+    <div
+      class="flex flex-col justify-center items-center bg-gray-100 w-full min-w-[300px] p-4 lg:flex-row lg:gap-6"
+    >
+      <!-- 卡片區塊 -->
 
-    <div class="post-posts-area grid grid-cols-1 gap-4">
       <div
         @click="router.push(`/post/${item.post_id}`)"
         v-for="item in posts"
         :key="item.id"
-        class="post-onepost"
+        class="flex flex-col justify-center items-center m-6 mb-0 w-full h-full relative max-w-[350px] sm:w-full sm:max-w-[400px] md:w-full md:max-w-[600px] cursor-pointer"
       >
-        <div class="post-onepost-top flex pt-5 pl-10 items-center cursor-pointer">
-          <div class="one-post-img w-10 h-10 rounded-full overflow-hidden">
+        <!-- 頭貼區 -->
+        <div class="flex w-full justify-start items-center px-4 md:px-8 lg:px-4">
+          <div class="w-[40px] h-[40px]">
             <img
-              :src="item.user_photo || defaultAvatar"
-              alt="發文者大頭照"
-              class="object-cover w-full h-full"
+              :src="item.users.photo_url || defaultAvatar"
+              alt="頭像"
+              class="bg-slate-700 w-full h-full rounded-full aspect-square object-cover"
               @error="onAvatarImageError"
             />
           </div>
-
-          <p class="ml-5 text-sm">{{ item.users.display_name }}</p>
+          <div class="ml-3 tracking-wider text-sm lg:text-base">{{ item.users.display_name }}</div>
         </div>
-        <div class="one-post-bottom mt-2.5 px-6 bg-white rounded-2xl pb-4 cursor-pointer">
-          <div
-            class="post-bottom-top flex flex-row items-start w-full h-full border-b-[1px] border-solid border-[rgba(61,57,44,0.1)]"
-          >
-            <div class="post-bottom-left w-full h-full lg:max-w-[300px] leading-loose">
-              <p class="text-slate-300 text-sm h-8 mt-6">{{ formatDate(item.created_at) }}</p>
 
-              <h3 class="text-xl font-bold">{{ item.post_title }}</h3>
-              <p class="post_content text-[16px]">
+        <!-- 內文區 -->
+        <div
+          class="flex flex-col bg-white w-full min-w-[250px] my-4 p-4 rounded-xl shadow-md lg:h-[230px]"
+        >
+          <!-- 小三角形 -->
+          <div
+            class="absolute top-[44px] left-5 md:left-10 lg:left-5 border-l-[22px] border-b-[15px] border-l-transparent border-b-white"
+          ></div>
+
+          <div class="flex w-full py-2 lg:max-h-[150px] flex-nowrap">
+            <!-- 內文區塊 -->
+            <div class="flex-1 mx-4 tracking-wide min-w-[100px]">
+              <div class="text-xs text-gray-400 sm:text-xs md:text-sm lg:text-sm lg:min-w-[150px]">
+                {{ formatDate(item.created_at) }}
+              </div>
+              <div class="my-1 text-base font-bold md:text-lg lg:text-xl lg:min-w-[150px]">
+                {{ item.post_title }}
+              </div>
+              <div
+                class="line-clamp-2 tracking-wider text-[12.5px] leading-5 md:text-sm lg:text-base lg:min-w-[150px]"
+              >
                 {{ item.post_content }}
-              </p>
+              </div>
             </div>
+
+            <!-- 圖片區塊 -->
             <div
-              class="post-bottom-right max-h-[180px] max-w-[180px] rounded-3xl overflow-hidden ml-2.5 mt-4"
+              class="w-full min-w-[70px] max-w-[100px] sm:max-w-[100px] md:max-w-[120px] lg:h-[130px] lg:w-[130px] h-auto"
             >
               <img
                 :src="item.post_img"
                 alt="文章照片"
+                class="object-cover aspect-square rounded-xl w-full h-full"
                 @error="onPostImageError"
-                class="w-full h-full max-h-[180px] max-w-[180px] object-cover aspect-square"
+                loading="lazy"
               />
             </div>
           </div>
-          <div class="post-bottom-bottom flex leading-loose mt-6 mx-6">
-            <div class="mr-8">👍🏻 {{ item._count.post_likes }}讚</div>
-            <div>💬 {{ item._count.post_comments }} 留言</div>
+
+          <!-- 互動區 -->
+          <div
+            class="flex justify-evenly items-center w-full text-xs border-t-2 mt-2 pt-2 md:text-sm lg:text-[14.5px] lg:py-4"
+          >
+            <div class="mx-5">👍🏻 {{ item._count.post_likes }} 讚</div>
+            <div class="mx-5">💬 {{ item._count.post_comments }} 留言</div>
           </div>
         </div>
       </div>
     </div>
-  </div>
-  <div class="pagination-container mt-5 flex justify-center">
-    <n-pagination
-      v-model:page="currentPage"
-      :page-count="Math.min(Math.ceil(totalPosts.length / postsPerPage), 5)"
-      @update:page="handlePageChange"
-    />
-  </div>
-  <div class="flex justify-center">
-    <n-button
-      circle
-      type="warning"
-      @click="goToPostsPage"
-      class="mt-5 p-2 w-40 text-gray-700 hover:font-bold hover:scale-110 transition-all duration-300"
-      >顯示更多貼文</n-button
-    >
+    <div class="pagination-container mt-5 flex justify-center">
+      <n-pagination
+        v-model:page="currentPage"
+        :page-count="Math.min(Math.ceil(totalPosts.length / postsPerPage), 5)"
+        @update:page="handlePageChange"
+      />
+    </div>
+    <div class="flex justify-center">
+      <n-button
+        circle
+        type="success"
+        @click="goToPostsPage"
+        class="mt-5 p-2 w-40 text-white hover:scale-110 transition-all duration-300"
+        >顯示更多貼文</n-button
+      >
+    </div>
   </div>
 </template>
 <style scoped>
-.one-post-bottom::before {
-  content: '';
-  float: left;
-  border-color: transparent transparent rgb(255, 255, 255);
-  border-style: solid;
-  border-width: 8px 0px 10px 19px;
-  position: relative;
-  top: -18px;
-}
-@media screen and (768px <= width < 1024px) {
-  .post-posts-area {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-@media screen and (width >= 1024px) {
-  .switch-btn-left,
-  .switch-btn-right {
-    display: flex;
-  }
-  .page-number {
-    display: block;
-  }
-  .post-posts-area {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-.post_content {
-  display: -webkit-box; /* 設定為彈性盒子 */
-  -webkit-line-clamp: 2; /* 限制顯示的行數 */
-  -webkit-box-orient: vertical; /* 垂直方向排列 */
-  overflow: hidden; /* 隱藏多餘內容 */
-  text-overflow: ellipsis; /* 添加省略號 */
+* {
+  font-family: '微軟正黑體';
 }
 </style>
