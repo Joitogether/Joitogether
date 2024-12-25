@@ -20,6 +20,12 @@ import forgotPassword from '@/views/Login/ForgotPassword.vue'
 import ShoppingCart from '@/views/CashFlow/index.vue'
 import Layout from '@/views/Layout/index.vue'
 import { getCurrentUser } from '@/utils/firebaseConfig'
+import TopUp from '@/views/TopUp/index.vue'
+import TopupFinish from '@/views/TopUp/component/TopupFinish.vue'
+import TopupRecord from '@/views/TopUp/component/TopupRecord.vue'
+import { onAuthStateChanged } from 'firebase/auth'
+import { auth } from '@/utils/firebaseConfig.js'
+import { useUserStore } from '@/stores/userStore'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -133,6 +139,21 @@ const router = createRouter({
         },
       ],
     },
+    {
+      path:'/topup',
+      name: 'topup',
+      component: TopUp,
+    },
+    {
+      path: '/topupFinish',
+      name: 'topupFinish',
+      component: TopupFinish
+    },
+    {
+      path: '/topupRecord',
+      name: 'topupRecord',
+      component: TopupRecord
+    }
   ],
 })
 
