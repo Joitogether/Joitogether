@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { Clock, CreditCard, MoneySquare, Group, MapPin, NavArrowLeft, MoreVert } from '@iconoir/vue'
 import dayjs from 'dayjs'
 import 'dayjs/locale/zh-tw.js'
@@ -28,7 +28,7 @@ const registerComment = ref('')
 const activityId = route.params.id
 const recentActivities = ref([])
 async function getActivityDetail() {
-  const activityDetail = await activityGetDetailAPI(activityId)
+  const activityDetail = await activityGetDetailAPI(route.params.id)
 
   // 有資料或null
   if (!activityDetail) {
@@ -258,6 +258,15 @@ const handleDropSelect = async (key, comment_id) => {
     await getActivityDetail()
   }
 }
+
+watch(
+  () => route.params.id,
+  async () => {
+    await getActivityDetail()
+    searchQuery.value = activity.value.location
+    await previewMap(searchQuery.value)
+  },
+)
 </script>
 <template>
   <div v-if="activity.id" class="bg-[#E5E7EB]">
@@ -509,6 +518,7 @@ const handleDropSelect = async (key, comment_id) => {
         <ActivityCard
           v-for="item in recentActivities"
           :key="item.img_url"
+          :id="item.id"
           horizontal="true"
           :title="item.name"
           :actImgUrl="item.img_url"
