@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/userStore.js'
 import { useMessage } from 'naive-ui'
 import * as PaymentAPIs from '../../apis/paymentAPIs.js'
+import { handleError } from '../../utils/handleError.js'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -26,9 +27,8 @@ const fetchCartItems = async () => {
     }))
 
     subtotal.value = cartItems.value.reduce((total, item) => total + item.price, 0)
-  } catch (error) {
-    message.error('購物車資料獲取失敗')
-    console.error('購物車資料獲取失敗:', error)
+  } catch {
+    handleError()
   }
 }
 
@@ -44,9 +44,8 @@ const fetchWalletBalance = async () => {
     const response = await PaymentAPIs.getWalletBalanceAPI(userStore.user.uid)
     balance.value = response.data.balance
     return balance.value
-  } catch (error) {
-    message.error('餘額獲取失敗')
-    console.error('餘額獲取失敗:', error)
+  } catch {
+    handleError()
   }
 }
 
@@ -61,7 +60,7 @@ const handleCheckout = async () => {
   try {
     // 檢查餘額
     if (!isBalanceEnough.value) {
-      message.error('餘額不足，請先充值')
+      handleError('')
       return
     }
 
@@ -82,18 +81,13 @@ const handleCheckout = async () => {
 
     const response = await PaymentAPIs.processOrder(orderData)
     if (response.success) {
-      message.success('訂單與報名成功完成')
+      message.success('訂單完成，報名成功！🚀 快準備迎接精彩的活動吧！')
       goCheckoutSuccess(response.data.order.order_id)
     }
-  } catch (error) {
-    if (error.message === 409) {
-      message.error('已有待處理的訂單，請先完成或取消該訂單')
-    } else if (error.message === 402) {
-      message.error('餘額不足，請先充值')
-    } else {
-      message.error('結帳失敗，請稍後再試')
-    }
-    console.error('結帳失敗:', error)
+  } catch {
+    handleError(
+      '結帳失敗！看起來我們遇到了一點麻煩 🤔💔\n別擔心！請稍後再試，或者重整頁面試試看～🙏',
+    )
   }
 }
 
@@ -103,8 +97,8 @@ const backToCart = async () => {
     const selectedIds = cartItems.value.map((item) => item.id)
     await Promise.all(selectedIds.map((id) => PaymentAPIs.updateCartSelectionAPI(id, false)))
     goShoppingCart()
-  } catch (error) {
-    console.error('清空購物車失敗:', error)
+  } catch {
+    handleError()
   }
 }
 
@@ -124,8 +118,8 @@ const goCheckoutSuccess = (orderId) => {
 onMounted(async () => {
   try {
     await Promise.all([fetchCartItems(), fetchWalletBalance()])
-  } catch (error) {
-    console.error('資料加載失敗:', error)
+  } catch {
+    handleError('😢 資料溜走了，找不到它們！\n不過別擔心，我們正在努力召喚它們回來 🚀✨')
   }
 })
 </script>
@@ -224,9 +218,9 @@ onMounted(async () => {
           :mask-closable="false"
           preset="dialog"
           title="確認付款"
-          content="最後機會了！即將扣除餘額 💰"
-          positive-text="買了 💸"
-          negative-text="再想想"
+          content="🌟 最後確認！按下去後你就正式擁有這些活動了 🎉"
+          positive-text="我準備好了！💸"
+          negative-text="再猶豫一下 🥸"
           @positive-click="handleCheckout"
           @negative-click="showModal = false"
         />

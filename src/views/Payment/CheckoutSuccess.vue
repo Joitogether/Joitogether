@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import { useRoute } from 'vue-router'
 import { useUserStore } from '@/stores/userStore'
 import * as PaymentAPIs from '../../apis/paymentAPIs.js'
+import { handleError } from '../../utils/handleError.js'
 
 const router = useRouter()
 const route = useRoute()
@@ -11,13 +12,14 @@ const userStore = useUserStore()
 
 // 獲取訂單資料
 const orderDetails = ref([])
-const orderId = ref(route.params.order_id)
+const orderId = ref(null)
 const fetchOrderDetails = async () => {
   try {
     // 確認 order_id 是否存在
-    if (!orderId.value) {
+    if (!route.params.order_id) {
       throw new Error('無法獲取 order_id')
     }
+    orderId.value = route.params.order_id
 
     const response = await PaymentAPIs.getOrderAPI(orderId.value)
     if (response) {
@@ -28,10 +30,10 @@ const fetchOrderDetails = async () => {
         activity_id: item.activity_id,
       }))
     } else {
-      console.error('無法獲取訂單資料')
+      throw new Error('無法獲取訂單資料')
     }
-  } catch (error) {
-    console.error('資料加載失敗:', error)
+  } catch {
+    handleError()
   }
 }
 
@@ -49,20 +51,20 @@ const fetchWalletBalance = async () => {
     const response = await PaymentAPIs.getWalletBalanceAPI(userStore.user.uid)
     balance.value = response.data.balance
     return balance.value
-  } catch (error) {
-    console.error('餘額獲取失敗:', error)
+  } catch {
+    handleError()
   }
 }
 
 const goHome = () => {
-  router.push('/')
+  router.replace('/')
 }
 
 onMounted(async () => {
   try {
     await Promise.all([fetchOrderDetails(), fetchWalletBalance()])
-  } catch (error) {
-    console.error('資料加載失敗:', error)
+  } catch {
+    handleError('😢 資料溜走了，找不到它們！\n不過別擔心，我們正在努力召喚它們回來 🚀✨')
   }
 })
 </script>
