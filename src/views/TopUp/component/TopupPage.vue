@@ -5,8 +5,7 @@ import { useUserStore } from '@/stores/userStore'
 import { NButton, NInputNumber } from 'naive-ui'
 import { useRouter } from 'vue-router'
 import { createPaymentAPI, getWalletBalanceAPI, saveTopupAPI, addDepositAPI } from '@/apis/paymentAPI'
-import dayjs from 'dayjs';
-
+import { formatDate } from '@/utils/dayjsDate'
 
 const router = useRouter()
 const user = ref([])
@@ -14,10 +13,6 @@ const wallet = ref([])
 const userStore = useUserStore()
 const errorMessage = ref(null)
 const amounts = [100, 200, 300, 500, 666, 888, 999, 1111]
-const formatDate = (dateString) => {
-  return dayjs(dateString).format('YYYY-MM-DD HH:mm');
-};
-
 
 const formData = reactive({
   amount: 1,

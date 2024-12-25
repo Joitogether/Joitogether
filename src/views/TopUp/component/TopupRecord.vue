@@ -5,16 +5,12 @@ import { useUserStore } from '@/stores/userStore';
 import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { getWalletBalanceAPI } from '@/apis/paymentAPI';
-import dayjs from 'dayjs';
+import { formatDate } from '@/utils/dayjsDate';
 
 const router = useRouter()
 const userStore = useUserStore()
 const topupRecords = ref([])
 const wallet = ref([])
-
-const formatDate = (dateString) => {
-  return dayjs(dateString).format('YYYY-MM-DD HH:mm');
-};
 
 const getAllRecords = async() => {
   const response = await getTopupRecordAPI(userStore.user.uid)
