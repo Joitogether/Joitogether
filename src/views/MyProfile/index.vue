@@ -54,7 +54,7 @@ const currentPage = ref('PersonInfo')
 </script>
 
 <template>
-  <div class="container mx-auto">
+  <div class="container mx-auto p-4">
     <CardList
       :display_name="user.display_name"
       :age="user.age"
@@ -66,7 +66,7 @@ const currentPage = ref('PersonInfo')
       @edit="openEditModal"
     />
     <EditModal v-if="isEditModalOpen" @close="closeEditModal" @save="handleSave" />
-    <div class="flex justify-between px-10 py-5">
+    <div class="flex justify-between px-4 py-5 md:px-8">
       <button
         @click="currentPage = 'PersonInfo'"
         :class="{ 'text-green-600': currentPage === 'PersonInfo' }"

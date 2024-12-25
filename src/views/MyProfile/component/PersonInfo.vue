@@ -24,42 +24,52 @@ const props = defineProps({
 })
 </script>
 <template>
-  <div v-if="props" class="personInfo mx-8 my-5">
-    <div class="photoArea grid grid-cols-2 gap-4 overflow-hidden">
-      <div class="firstPhoto justify-self-center self-center">
+  <div v-if="props" class="personInfo pt-2 pb-5 rounded-md">
+    <div class="flex flex-col gap-4 mb-5 md:flex-row md:justify-between md:gap-4 md:max-h-48">
+      <div class="rounded-md overflow-hidden md:w-1/2">
         <img
           :src="
             props.life_photo_1 ||
             'https://firebasestorage.googleapis.com/v0/b/login-demo1-9d3cb.firebasestorage.app/o/lifephoto%2F1733574359943_defaultimg.jpg?alt=media&token=c5486472-dadd-4276-8666-97a538e46e5f'
           "
           alt="lifePhoto-1"
-          class="rounded-3xl"
+          class="w-full h-full object-cover"
         />
       </div>
-      <div class="secondPhoto justify-self-center self-center">
+      <div class="rounded-md overflow-hidden md:w-1/2">
         <img
           :src="
             props.life_photo_2 ||
             'https://firebasestorage.googleapis.com/v0/b/login-demo1-9d3cb.firebasestorage.app/o/lifephoto%2F1733574359943_defaultimg.jpg?alt=media&token=c5486472-dadd-4276-8666-97a538e46e5f'
           "
           alt="lifePhoto1-2"
-          class="rounded-3xl"
+          class="w-full h-full object-cover"
         />
       </div>
     </div>
-    <div class="contentArea sm:leading-loose sm:text-xl text-sm mt-5">
-      <p class="bg-orange-200">自我介紹：{{ props.self_introduction || '自我介紹還未填寫唷👀' }}</p>
-      <p class="bg-red-200">星座：{{ props.zodiac || '星座還未填寫唷👀' }}</p>
-      <p class="bg-yellow-200">嗜好：{{ props.hobby || '嗜好還未填寫唷👀' }}</p>
-      <p class="bg-lime-200">專長：{{ props.expertise || '專長還未填寫唷👀' }}</p>
-      <p class="bg-violet-200">興趣的活動：{{ props.interested_in || '興趣的活動還未填寫唷👀' }}</p>
+    <div class="flex flex-col gap-4">
+      <p class="bg-gray-50 h-10 text-sm p-2 flex items-center rounded-md tracking-wide">
+        🗣️ 自我介紹：{{ props.self_introduction || '還沒有自我介紹呦' }}
+      </p>
+      <p class="bg-gray-50 h-10 text-sm p-2 flex items-center rounded-md tracking-wide">
+        🌟 星座：{{ props.zodiac || '咦是什麼星座呢' }}
+      </p>
+      <p class="bg-gray-50 h-10 text-sm p-2 flex items-center rounded-md tracking-wide">
+        🥎 興趣：{{ props.hobby || '有什麼興趣呢' }}
+      </p>
+      <p class="bg-gray-50 h-10 text-sm p-2 flex items-center rounded-md tracking-wide">
+        💼 專長：{{ props.expertise || '專長還沒填寫餒 ' }}
+      </p>
+      <p class="bg-gray-50 h-10 text-sm p-2 flex items-center rounded-md tracking-wide">
+        🎡 興趣的活動：{{ props.interested_in || '興趣的活動還沒填寫耶 ' }}
+      </p>
     </div>
   </div>
   <div v-else>趕快去填寫更多資料吧！</div>
 </template>
 
 <style scoped>
-@media screen and (width < 768px) {
+/* @media screen and (width < 768px) {
   .photoArea {
     display: block;
   }
@@ -75,5 +85,5 @@ const props = defineProps({
   line-height: 2.5;
   text-align: center;
   border-radius: 9999px;
-}
+} */
 </style>
