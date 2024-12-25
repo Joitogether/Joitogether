@@ -24,7 +24,7 @@ const props = defineProps({
 })
 </script>
 <template>
-  <div v-if="props" class="personInfo bg-gray-50 px-5 pt-5 pb-5 rounded-md">
+  <div v-if="props" class="personInfo pt-2 pb-5 rounded-md">
     <div class="flex flex-col gap-4 mb-5 md:flex-row md:justify-between md:gap-4 md:max-h-48">
       <div class="rounded-md overflow-hidden md:w-1/2">
         <img
@@ -48,19 +48,19 @@ const props = defineProps({
       </div>
     </div>
     <div class="flex flex-col gap-4">
-      <p class="bg-white h-10 text-sm p-2 flex items-center rounded-md tracking-wide">
+      <p class="bg-gray-50 h-10 text-sm p-2 flex items-center rounded-md tracking-wide">
         🗣️ 自我介紹：{{ props.self_introduction || '還沒有自我介紹呦' }}
       </p>
-      <p class="bg-white h-10 text-sm p-2 flex items-center rounded-md tracking-wide">
+      <p class="bg-gray-50 h-10 text-sm p-2 flex items-center rounded-md tracking-wide">
         🌟 星座：{{ props.zodiac || '咦是什麼星座呢' }}
       </p>
-      <p class="bg-white h-10 text-sm p-2 flex items-center rounded-md tracking-wide">
+      <p class="bg-gray-50 h-10 text-sm p-2 flex items-center rounded-md tracking-wide">
         🥎 興趣：{{ props.hobby || '有什麼興趣呢' }}
       </p>
-      <p class="bg-white h-10 text-sm p-2 flex items-center rounded-md tracking-wide">
+      <p class="bg-gray-50 h-10 text-sm p-2 flex items-center rounded-md tracking-wide">
         💼 專長：{{ props.expertise || '專長還沒填寫餒 ' }}
       </p>
-      <p class="bg-white h-10 text-sm p-2 flex items-center rounded-md tracking-wide">
+      <p class="bg-gray-50 h-10 text-sm p-2 flex items-center rounded-md tracking-wide">
         🎡 興趣的活動：{{ props.interested_in || '興趣的活動還沒填寫耶 ' }}
       </p>
     </div>

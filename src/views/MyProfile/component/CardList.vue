@@ -66,7 +66,7 @@ const emit = defineEmits(['edit', 'close'])
         <span> • {{ props.career || '職業還沒填寫唷👀' }}</span>
       </div>
       <div
-        class="user-description w-full h-auto bg-gray-100 py-2 px-6 rounded-full mt-2 flex justify-center relative md:justify-start"
+        class="user-description w-full h-auto bg-gray-100 py-2 px-6 rounded-full flex justify-center relative md:justify-start"
       >
         <p class="text-md tracking-wide">：{{ props.favorite_sentence || '座右銘還未填寫唷👀' }}</p>
       </div>
@@ -95,7 +95,7 @@ const emit = defineEmits(['edit', 'close'])
   </div>
 </template>
 <style scope>
-.user-description::after {
+/* .user-description::after {
   content: '';
   position: absolute;
   top: -10px;
@@ -109,7 +109,7 @@ const emit = defineEmits(['edit', 'close'])
   .user-description::after {
     display: none;
   }
-}
+} */
 /* @media screen and (width >= 768px) {
   .container {
     max-width: 80%;
