@@ -1,5 +1,4 @@
 <script setup>
-import { userGetAPI } from '@/apis/userAPIs'
 import { onMounted, reactive, ref } from 'vue'
 import { useUserStore } from '@/stores/userStore'
 import { NButton, NInputNumber } from 'naive-ui'
@@ -16,7 +15,6 @@ const router = useRouter()
 const user = ref([])
 const wallet = ref([])
 const userStore = useUserStore()
-const errorMessage = ref(null)
 const amounts = [100, 200, 300, 500, 666, 888, 999, 1111]
 
 const formData = reactive({
@@ -25,20 +23,6 @@ const formData = reactive({
   itemDesc: '儲值金',
 })
 
-const fetchUserData = async () => {
-  try {
-    const result = await userGetAPI(userStore.user.uid)
-
-    if (result) {
-      user.value = result
-      return user.value
-    } else {
-      console.log('沒有結果')
-    }
-  } catch (err) {
-    errorMessage.value = err.message || '資料加載錯誤'
-  }
-}
 const fetchWalletBalance = async () => {
   const result = await getWalletBalanceAPI(userStore.user.uid)
   wallet.value = result
@@ -53,7 +37,7 @@ const createOrder = async () => {
 
     if (response) {
       const orderData = {
-        user_id: userStore.user.uid,
+        topuper_id: userStore.user.uid,
         amount: formData.amount,
         topup_number: response.MerchantOrderNo,
         type: formData.itemDesc,
@@ -69,8 +53,8 @@ const createOrder = async () => {
         console.log('儲存訂單資料失敗')
       }
       //將儲值金額加至錢包（這部分之後移到儲值完成頁面）
-      const increaseWallet = await addDepositAPI(userStore.user.uid, { deposit: orderData.amount })
-      console.log('increaseWallet', increaseWallet)
+      const increaseWallet = await addDepositAPI(userStore.user.uid, { amount: orderData.amount })
+      console.log('increaseWallet', increaseWallet.data)
       if (increaseWallet) {
         console.log('錢包增加成功')
       } else {
@@ -116,7 +100,7 @@ const seeRecord = () => {
 }
 
 onMounted(() => {
-  Promise.all([fetchUserData(), fetchWalletBalance()]).then()
+  fetchWalletBalance()
 })
 </script>
 <template>
@@ -146,11 +130,11 @@ onMounted(() => {
           <div
             class="img-container overflow-hidden col-start-2 justify-self-end rounded-full grid- w-16 h-16 aspect-square"
           >
-            <img class="card-img w-full relative" :src="user.photo_url" alt="personImg" />
+            <img class="card-img w-full relative" :src="userStore.user.photo_url" alt="personImg" />
           </div>
           <div class="block col-span-3 content-end">
-            <div class="mb-1">{{ user.display_name }}</div>
-            <div class="mb-1">{{ user.email }}</div>
+            <div class="mb-1">{{ userStore.user.display_name }}</div>
+            <div class="mb-1">{{ userStore.user.email }}</div>
           </div>
           <div class="py-2 col-span-4 text-xl content-end">
             目前富有程度：💰{{ wallet.balance || '0(就快要變富人了！)' }}
