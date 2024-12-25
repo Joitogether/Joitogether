@@ -48,64 +48,62 @@ const createOrder = async() => {
   formData.email = user.value.email
 
   try {
-    const response = await createPaymentAPI(formData)
-
-    if (response) {
-      const orderData = {
-        user_id: userStore.user.uid,
-        amount: formData.amount,
-        topup_number: response.MerchantOrderNo,
-        type: formData.itemDesc,
-        topup_date: formatDate(new Date()),
-        status: 'PENDING',
-      };
-
-      const saveResponse = await saveTopupAPI(userStore.user.uid, orderData);
-      console.log('saveResponse:', saveResponse);
-      if (saveResponse ) {
-        console.log('訂單資料儲存成功');
-      } else {
-        console.log('儲存訂單資料失敗');
-      }
-      //將儲值金額加至錢包（這部分之後移到儲值完成頁面）
-      const increaseWallet = await addDepositAPI(userStore.user.uid, {deposit: orderData.amount})
-      console.log('increaseWallet', increaseWallet);
-      if (increaseWallet ) {
-        console.log('錢包增加成功');
-      } else {
-        console.log('錢包增加失敗');
-      }
-
-      const form = document.createElement('form');
-      form.method = 'POST';
-      form.action = 'https://ccore.newebpay.com/MPG/mpg_gateway';
-
-      const newebPayParams = {
-        MerchantID: response.MerchantID,
-        TradeSha: response.shaEncrypt,
-        TradeInfo: response.aesEncrypt,
-        TimeStamp: response.TimeStamp,
-        Version: response.Version,
-        MerchantOrderNo: response.MerchantOrderNo,
-        Amt:response.Amt,
-        ItemDesc: formData.itemDesc,
-        Email: response.Email,
-        RespondType: 'JSON'
-      };
-
-      Object.keys(newebPayParams).forEach(key => {
-        const input = document.createElement('input');
-        input.type = 'hidden';
-        input.name = key;
-        input.value = newebPayParams[key];
-        form.appendChild(input);
-      });
-
-      document.body.appendChild(form);
-      console.log('已加密：',newebPayParams);
-
-      form.submit();
+    const orderData = {
+      user_id: userStore.user.uid,
+      amount: formData.amount,
+      topup_number: response.MerchantOrderNo,
+      type: formData.itemDesc,
+      topup_date: formatDate(new Date()),
+      status: 'PENDING',
+    };
+    //先儲存本次訂單資料
+    const saveResponse = await saveTopupAPI(userStore.user.uid, orderData);
+    console.log('saveResponse:', saveResponse);
+    if (saveResponse ) {
+      console.log('訂單資料儲存成功');
+    } else {
+      console.log('儲存訂單資料失敗');
     }
+    //將本次儲值金額加至錢包（這部分之後移到儲值完成頁面）
+    const increaseWallet = await addDepositAPI(userStore.user.uid, {deposit: orderData.amount})
+    console.log('increaseWallet', increaseWallet);
+    if (increaseWallet ) {
+      console.log('錢包增加成功');
+    } else {
+      console.log('錢包增加失敗');
+    }
+    //資料送後端加密
+    const response = await createPaymentAPI(formData)
+    // 處理要送給藍新的資料
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = 'https://ccore.newebpay.com/MPG/mpg_gateway';
+
+    const newebPayParams = {
+      MerchantID: response.MerchantID,
+      TradeSha: response.shaEncrypt,
+      TradeInfo: response.aesEncrypt,
+      TimeStamp: response.TimeStamp,
+      Version: response.Version,
+      MerchantOrderNo: response.MerchantOrderNo,
+      Amt:response.Amt,
+      ItemDesc: formData.itemDesc,
+      Email: response.Email,
+      RespondType: 'JSON'
+    };
+
+    Object.keys(newebPayParams).forEach(key => {
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = key;
+      input.value = newebPayParams[key];
+      form.appendChild(input);
+    });
+
+    document.body.appendChild(form);
+    console.log('已加密：',newebPayParams);
+
+    form.submit();
 
   } catch(err) {
     console.error(err);
@@ -181,6 +179,7 @@ onMounted(() => {
               placeholder="也可自訂金額唷"
             />
           </div>
+          <div></div>
         </div>
         <div class="topup-button flex justify-center mt-10">
           <n-button
