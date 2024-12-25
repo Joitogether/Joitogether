@@ -47,7 +47,7 @@ const seeRecord = () => {
 }
 </script>
 <template>
-  <n-result v-if="newebpayStatus.value.success" status="success" title="儲值成功" description="以下為本次交易明細" class="mt-10 mx-14 ">
+  <n-result status="success" title="儲值成功" description="以下為本次交易明細" class="mt-10 mx-14 ">
       <n-table :bordered="false" :single-line="false" class="my-14">
         <thead>
           <tr>
@@ -73,5 +73,5 @@ const seeRecord = () => {
         <n-button ghost round type="warning" @click="goSpend">花錢去💰💰💰</n-button>
       </div>
   </n-result>
-  <div v-else>儲值狀態有問題，請查看終端機</div>
+  <!-- <div>儲值狀態有問題，請查看終端機</div> -->
 </template>
