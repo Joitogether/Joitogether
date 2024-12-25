@@ -1,7 +1,10 @@
 // firebase 初始化配置
 import { initializeApp } from 'firebase/app'
-import { getAuth } from 'firebase/auth'
+import { getAuth, onAuthStateChanged } from 'firebase/auth'
 import { getStorage } from 'firebase/storage'
+import { useSocketStore } from '@/stores/socketStore'
+import { useNotificationStore } from '@/stores/notificationStore'
+import { useUserStore } from '@/stores/userStore'
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -17,4 +20,25 @@ const app = initializeApp(firebaseConfig)
 const auth = getAuth(app)
 const storage = getStorage(app)
 
-export { auth, storage }
+const getCurrentUser = () => {
+  return new Promise((resolve) => {
+    onAuthStateChanged(auth, async (user) => {
+      const userStore = useUserStore()
+      const socketStore = useSocketStore()
+      const notificationStore = useNotificationStore()
+      if (user) {
+        const notificationStore = useNotificationStore()
+        await userStore.getUser(user.uid)
+        // 登入完就開啟socket去拿通知
+        socketStore.initSocket(user.uid)
+        notificationStore.getNotifications(user.uid, 1, 5)
+      } else {
+        socketStore.disconnectSocket()
+        userStore.clearUser()
+        notificationStore.clearNotifications()
+      }
+      resolve(user)
+    })
+  })
+}
+export { auth, storage, getCurrentUser }

@@ -3,186 +3,55 @@ import { ref, computed, onMounted } from 'vue'
 import {
   NavArrowLeft,
   ThumbsUp,
-  CheckCircle,
   CheckCircleSolid,
   FireFlame,
   Leaf,
   ArrowUpLeftSquareSolid,
-  Search,
   XmarkCircle,
 } from '@iconoir/vue'
 import defaultAvatar from '@/assets/avatar.png'
 
 import { useDialog, useMessage } from 'naive-ui'
-import { apiAxios } from '@/utils/request'
 import {
   ActivityGetApplicationsAPI,
   ActivityReviewApplicationsAPI,
   ActivityGetActivitiesAPI,
-} from '@/apis/activityApi'
+} from '@/apis/activityAPIs'
 import { useRoute } from 'vue-router'
 import { useUserStore } from '@/stores/userStore'
 
 const route = useRoute()
 const activity_id = route.params.activity_id
-// onMounted(async () => {
-//   const response = await ActivityGetApplicationsAPI(10)
-//   console.log(response)
-// })
-const userStore = useUserStore()
 
+const userStore = useUserStore()
 const activity = ref([null]) // 活動詳細資料
-const attendees = ref([]) // 參加者資料
 
 onMounted(async () => {
   try {
     const response = await ActivityGetActivitiesAPI(activity_id)
-    console.log(response)
     if (response.status === 200 && response.data) {
-      activity.value = response.data.data // API 返回的活動資料
-      console.log('活動資料2:', activity.value)
+      activity.value = response.data.data
+      console.log('成功', response.data.data)
     }
   } catch (error) {
     console.error('無法獲取活動資料:', error)
   }
 })
 
-onMounted(async () => {
-  try {
-    // 獲取參加者資料
-    const response = await ActivityGetApplicationsAPI(activity_id)
-    if (response.status === 200 && response.data) {
-      attendees.value = response.data.data.map((item) => ({
-        id: item.application_id,
-        name: item.participant_info.full_name,
-        avatar: item.participant_info.photo_url || defaultAvatar,
-        message: item.comment || '無留言',
-      }))
-    } else {
-      console.error('拉取參加者資料失敗:', response.data)
-    }
-  } catch (error) {
-    console.error('API 請求失敗:', error)
-  }
-})
-console.log('Activity', activity.value)
-// console.log('活動資料UID:', activity.data)
-
 const refreshAttendees = async () => {
-  try {
-    const response = await ActivityGetApplicationsAPI(activity_id)
-    if (response.status === 200) {
-      attendee.value = response.data.data.map((item) => ({
-        id: item.application_id,
-        name: item.participant_info.full_name,
-        avatar: item.participant_info.photo_url || defaultAvatar,
-        number: `@${item.participant_id}` || '未提供 ID',
-        message: item.comment || '這位參加者尚無留言',
-        date: new Date().toLocaleDateString(),
-        approved: item.status === 'approved',
-        host_declined: item.status === 'host_declined',
-        registered: item.status === 'registered',
-        participant_cancelled: item.status === 'participant_cancelled',
-        replies: '',
-      }))
-    } else {
-      console.error('拉取參加者資料失敗:', response.data)
-    }
-  } catch (error) {
-    console.error('數據刷新失敗:', error)
-  }
+  attendee.value = await ActivityGetApplicationsAPI(activity_id, defaultAvatar)
 }
+
 onMounted(async () => {
-  try {
-    const response = await ActivityGetApplicationsAPI(activity_id)
-    if (response.status === 200 && response.data) {
-      const storedReplies = JSON.parse(localStorage.getItem('attendeeReplies')) || {}
-
-      attendee.value = response.data.data.map((item) => ({
-        id: item.application_id,
-        name: item.participant_info.full_name,
-        avatar: item.participant_info.photo_url || defaultAvatar,
-        number: `@${item.participant_id}` || '未提供 ID',
-        message: item.comment || '這位參加者尚無留言',
-        date: new Date().toLocaleDateString(),
-        approved: item.status === 'approved',
-        host_declined: item.status === 'host_declined',
-        registered: item.status === 'registered',
-        participant_cancelled: item.status === 'participant_cancelled',
-        replies: storedReplies[item.application_id] || [], // 加載保存的回覆
-      }))
-    } else {
-      console.error('拉取參加者資料失敗:', response.data)
-    }
-  } catch (error) {
-    console.error('數據刷新失敗:', error)
-  }
+  attendee.value = await ActivityGetApplicationsAPI(activity_id, defaultAvatar)
 })
-
-// onMounted(async () => {
-//   try {
-//     const response = await ActivityGetApplicationsAPI(activity_id)
-//     console.log('API 返回資料:', response)
-
-//     if (response.status === 200 && response.data) {
-//       attendee.value = response.data.data.map((item) => ({
-//         id: item.application_id,
-//         name: item.participant_info.full_name,
-//         avatar: item.avatar,
-//         number: `@${item.participant_id}` || '未提供 ID',
-//         message: item.comment || '這位參加者尚無留言',
-//         date: new Date().toLocaleDateString(),
-//         approved: item.status === 'approved',
-//         host_declined: item.status === 'host_declined',
-//         registered: item.status === 'registered',
-//         participant_cancelled: item.status === 'participant_cancelled',
-//         replies: '',
-//       }))
-//       console.log('格式化後的 attendee:', attendee.value)
-
-//       // 為每個 item 調用 API
-//       for (const item of response.data.data) {
-//         const res = await ActivityReviewApplicationsAPI(item.application_id, item.status)
-//         // console.log('單個審核 API 返回:', res)
-//       }
-//     }
-//   } catch (error) {
-//     console.error('獲取後端資料失敗:', error)
-//   }
-// })
 
 const dialog = useDialog()
 const message = useMessage()
 const attendee = ref([])
-// const attendee = ref([
-//   {
-//     id: 1,
-//     name: '財哥',
-//     avatar: '@/assets/avatar.png',
-//     number: '@2af60e4cc341a435',
-//     message: '好期待這次的遊戲類型會是什麼！',
-//     date: '周一,11月18日 2024',
-//     approved: false,
-//     rejected: false,
-//     replies: '',
-//
-//   },
-// ])
 
 //切換報名,截止報名功能
 const registrationStatus = ref('open')
-const toggleRegistration = async (status) => {
-  if (status === 'closed') {
-    const checkClose = confirm('您是否確認截止報名？')
-    if (!checkClose) return
-    registrationStatus.value = 'closed'
-  } else if (status === 'open') {
-    const checkOpen = confirm('您是否確認開放報名？')
-    if (!checkOpen) return
-    registrationStatus.value = 'open'
-  }
-  await refreshAttendees()
-}
 
 // 切換開放、截止報名的UI
 const openRegistration = () => {
@@ -224,21 +93,6 @@ const filteredAttendees = computed(() => {
   )
 })
 
-const handleAttendeeClick = (callback, id) => {
-  const approvalAttendee = attendee.value.find((item) => item.id === id)
-
-  if (registrationStatus.value === 'closed') {
-    message.warning('目前報名已截止，無法操作。請返回開放報名繼續操作。')
-    return
-  }
-
-  if (approvalAttendee && approvalAttendee.rejected) {
-    message.warning(`${approvalAttendee.name} 已經被拒絕參加，無法進行操作！`)
-    return
-  }
-
-  callback()
-}
 const handleApproveClick = async (id) => {
   const attendeeToUpdate = attendee.value.find((item) => item.id === id)
   if (!attendeeToUpdate) {
@@ -248,6 +102,10 @@ const handleApproveClick = async (id) => {
 
   if (attendeeToUpdate.approved) {
     message.warning(`${attendeeToUpdate.name} 已經被允許參加，無需再次操作！`)
+    return
+  }
+  if (approvedCount.value >= activity.value.max_participants) {
+    message.warning('該活動人數已滿，無法再允許更多用戶參加')
     return
   }
 
@@ -375,36 +233,6 @@ const handleCancelClick = async (id) => {
 }
 
 // 切換審核狀態
-const toggleApproval = (id) => {
-  const approvalAttendee = attendee.value.find((item) => item.id === id)
-  if (!approvalAttendee) {
-    message.error('找不到該參加者！')
-    return
-  }
-
-  dialog.warning({
-    title: '確認操作',
-    content: approvalAttendee.approved
-      ? `您確定要取消 ${approvalAttendee.name} 的參加資格嗎？`
-      : `您確定要允許 ${approvalAttendee.name} 參加嗎？`,
-    positiveText: '確認',
-    negativeText: '取消',
-    onPositiveClick: () => {
-      if (approvalAttendee.approved) {
-        approvalAttendee.rejected = true
-        approvalAttendee.approved = false
-        message.success(`已解除 ${approvalAttendee.name} 的參加資格！`)
-      } else {
-        approvalAttendee.approved = true
-        approvalAttendee.rejected = false
-        message.success(`已允許 ${approvalAttendee.name} 參加！`)
-      }
-    },
-    onNegativeClick: () => {
-      message.info('您已取消操作！')
-    },
-  })
-}
 
 const approvedCount = computed(() => {
   return attendee.value.filter((item) => item.approved).length
@@ -416,7 +244,6 @@ const rejectCount = computed(() => {
 
 const quickReplyVisible = ref(false)
 const selectedReplies = ref([])
-const sentReplies = ref([])
 
 const currentAttendeeId = ref(null)
 
@@ -558,7 +385,7 @@ const sendReplies = async () => {
 
         <!-- 未審核通過時畫面 -->
         <div
-          v-for="(item, index) in filteredAttendees"
+          v-for="item in filteredAttendees"
           :key="item.id"
           class="flex flex-col text-gray-500 bg-gray-100 border-[1px] border-gray-200 rounded-xl p-2 my-2 w-full"
         >
