@@ -4,9 +4,10 @@ import { useRouter } from 'vue-router'
 import * as PaymentAPIs from '../../../apis/paymentAPIs.js'
 import { useUserStore } from '@/stores/userStore'
 import { useMessage } from 'naive-ui'
+import { handleError } from '../../utils/handleError.js'
 
-const cartItems = ref([]) // 存放購物車資料
-const isLoading = ref(true) // 載入狀態
+const cartItems = ref([])
+const isLoading = ref(true)
 const userStore = useUserStore()
 
 // 取得購物車資料並轉換格式
@@ -26,9 +27,8 @@ const fetchCartItems = async () => {
       image: item.activities.img_url || 'https://via.placeholder.com/200',
       selected: item.is_selected,
     }))
-  } catch (error) {
-    console.error('購物車資料獲取失敗:', error.message)
-    message.error('購物車資料獲取失敗，請稍後再試！')
+  } catch {
+    handleError()
   } finally {
     isLoading.value = false
   }
@@ -60,8 +60,8 @@ const removeSelected = async () => {
       selectedIds.map((id) => PaymentAPIs.deleteUserCartDetailsAPI(userStore.user.uid, id)),
     )
     cartItems.value = cartItems.value.filter((item) => !item.Selected)
-  } catch (error) {
-    console.error('刪除所選商品失敗:', error)
+  } catch {
+    handleError()
   }
 }
 
@@ -79,9 +79,8 @@ const goToCheckout = async () => {
       selectedItems.map((item) => PaymentAPIs.updateCartSelectionAPI(item.cartItemsId, true)),
     )
     goCheckoutPage()
-  } catch (error) {
-    console.error('同步選中狀態失敗:', error)
-    message.error('無法選中商品，請稍後再試！')
+  } catch {
+    handleError()
   }
 }
 
