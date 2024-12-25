@@ -19,6 +19,8 @@ import ResetPassword from '@/views/Login/ResetPassword.vue'
 import forgotPassword from '@/views/Login/ForgotPassword.vue'
 import ShoppingCart from '@/views/CashFlow/index.vue'
 import Layout from '@/views/Layout/index.vue'
+import CheckoutPage from '@/views/Payment/CheckoutPage.vue'
+import CheckoutSuccess from '@/views/Payment/CheckoutSuccess.vue'
 import { getCurrentUser } from '@/utils/firebaseConfig'
 import TopUp from '@/views/TopUp/index.vue'
 import TopupFinish from '@/views/TopUp/component/TopupFinish.vue'
@@ -140,20 +142,30 @@ const router = createRouter({
       ],
     },
     {
-      path:'/topup',
+      path: '/checkout',
+      name: 'checkout',
+      component: CheckoutPage,
+    },
+    {
+      path: '/checkout-success/:order_id',
+      name: 'checkoutSuccess',
+      component: CheckoutSuccess,
+    },
+    {
+      path: '/topup',
       name: 'topup',
       component: TopUp,
     },
     {
       path: '/topupFinish',
       name: 'topupFinish',
-      component: TopupFinish
+      component: TopupFinish,
     },
     {
       path: '/topupRecord',
       name: 'topupRecord',
-      component: TopupRecord
-    }
+      component: TopupRecord,
+    },
   ],
 })
 
