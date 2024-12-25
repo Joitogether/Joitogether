@@ -277,7 +277,9 @@ const handleSearchClick = (e) => {
             <a href="#" class="mx-3 tracking-wide hover:text-green-600"> 購物車</a>
           </li>
           <li class="py-1">
-            <a href="#" class="mx-3 tracking-wide hover:text-green-600"> 儲值中心</a>
+            <RouterLink to="/topup" class="mx-3 tracking-wide hover:text-green-600"
+              >儲值中心</RouterLink
+            >
           </li>
         </ul>
       </div>
