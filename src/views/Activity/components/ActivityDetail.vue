@@ -426,12 +426,14 @@ watch(
             v-model:show="showCancelRegisterModal"
             preset="dialog"
             title="取消報名"
-            content="你確定要取消報名嗎？經活動取消報名後有可能無法再次報名"
             positive-text="確定"
             negative-text="再想想"
             @positive-click="onPositiveClick"
             @negative-click="onNegativeClick"
-          />
+          >
+            <p>你確定要取消報名嗎？<br />一但取消報名有可能無法再次報名</p>
+          </n-modal>
+
           <n-modal
             v-model:show="showReviewModal"
             preset="dialog"
