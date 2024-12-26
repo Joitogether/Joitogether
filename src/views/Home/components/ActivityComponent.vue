@@ -7,8 +7,9 @@ import { useActivityStore } from '@/stores/useActivityStore'
 import { useRoute } from 'vue-router'
 
 const activityStore = useActivityStore()
-const { activities, loading, error } = storeToRefs(activityStore)
-const { fetchAllActivities, fetchActivitiesByCategory, searchActivities } = activityStore
+const { activities, loading, error, triggerAction } = storeToRefs(activityStore)
+const { fetchAllActivities, fetchActivitiesByCategory, searchActivities, triggerActivityAction } =
+  activityStore
 
 const route = useRoute()
 
@@ -33,15 +34,17 @@ const categoryMap = {
   '': '', // 全部
   美食: 'food',
   購物: 'shopping',
-  旅行: 'travel',
+  旅遊: 'travel',
   運動: 'sports',
   教育: 'education',
   其他: 'others',
 }
 
 const selectCategory = (category) => {
+  console.log(category)
   selectedCategory.value = category
   const mappedCategory = categoryMap[category]
+
   if (mappedCategory === '') {
     fetchAllActivities()
   } else {
@@ -83,15 +86,35 @@ watch(
   },
   { immediate: true },
 )
+
+// 監聽 triggerAction，執行相應邏輯
+watch(
+  () => triggerAction.value,
+  (category) => {
+    if (category) {
+      selectCategory(category)
+      scrollToActivityBlock()
+      triggerActivityAction(null) // 重置動作避免重複觸發
+    }
+  },
+)
+
+// 滾動到活動區塊
+const scrollToActivityBlock = () => {
+  const activitySection = document.getElementById('activity-section')
+  if (activitySection) {
+    activitySection.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+}
 </script>
 
 <template>
-  <main class="block max-w-7xl m-auto">
+  <main id="activity-section" class="block max-w-7xl m-auto">
     <div class="text-3xl pt-40 font-bold leading-10">啾團活動</div>
     <div class="inline-flex w-full pb-7 pt-7">
       <div class="flex flex-wrap gap-3 justify-start">
         <div
-          v-for="category in ['', '美食', '購物', '旅行', '運動', '教育', '其他']"
+          v-for="category in ['', '美食', '購物', '旅遊', '運動', '教育', '其他']"
           :key="category"
           class="mr-7 py-3 pl-3 text-sm"
         >

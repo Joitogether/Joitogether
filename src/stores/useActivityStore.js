@@ -6,6 +6,8 @@ export const useActivityStore = defineStore('activity', () => {
   const activities = ref([])
   const loading = ref(false)
   const error = ref(null)
+  const currentCategory = ref('')
+  const triggerAction = ref(null) // 用於觸發 ActivityComponent 的
 
   const fetchAllActivities = async () => {
     loading.value = true
@@ -53,27 +55,31 @@ export const useActivityStore = defineStore('activity', () => {
     error.value = null
     try {
       const response = await activitySearchAPI(keyword)
-      console.log('API 回應:', response)
-      console.log('activities.value:', activities.value)
       if (response) {
         activities.value = response
       } else {
-        throw new Error(response.message || '找不到該聚會內容')
+        error.value = '尚無搜尋結果，請嘗試其他搜索'
+        activities.value = [] // 確保活動清單為
       }
     } catch (err) {
       error.value = err.message || '未知錯誤'
-      console.error('Error in searchActivities:', err)
     } finally {
       loading.value = false
     }
   }
 
+  const triggerActivityAction = (category) => {
+    triggerAction.value = category
+  }
   return {
     activities,
     loading,
     error,
+    triggerAction,
+    currentCategory,
     fetchAllActivities,
     fetchActivitiesByCategory,
     searchActivities,
+    triggerActivityAction,
   }
 })

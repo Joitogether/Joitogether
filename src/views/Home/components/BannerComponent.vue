@@ -16,7 +16,7 @@
             class="flex items-center gap-[210px] w-full justify-evenly mb-[60px] sm:justify-evenly"
           >
             <div v-for="area in areaData" :key="area.title">
-              <a href="#" @click.prevent="scrollToCategory(area.targetId)">
+              <a href="#" @click.prevent="handleCategoryClick(area.targetId)">
                 <img :src="area.src" alt="" class="w-full h-full aspect-square object-cover" />
                 <p class="text-center">{{ area.title }}</p>
               </a>
@@ -34,6 +34,14 @@ import { ref, onMounted, onUnmounted, watch } from 'vue'
 import joixmas from '@/assets/JoiXmas.jpg'
 import joixmasmobile from '@/assets/JoiXmasMobile.jpg'
 import joigif from '@/assets/joitogether.gif'
+import { useActivityStore } from '@/stores/useActivityStore'
+
+const activityStore = useActivityStore()
+const { triggerActivityAction } = activityStore
+
+const handleCategoryClick = (category) => {
+  triggerActivityAction(category)
+}
 
 const carouselData = ref([
   {
@@ -51,32 +59,32 @@ const areaData = [
   {
     title: '美食',
     src: 'https://i.pinimg.com/originals/c3/61/70/c3617019ad42a99b25365c51060fec2f.gif',
-    targetId: 'food-category',
+    targetId: '美食',
   },
   {
     title: '購物',
     src: 'https://i.pinimg.com/originals/ff/fc/5a/fffc5a92c68455f331036891970b1fb9.gif',
-    targetId: 'shopping-category',
+    targetId: '購物',
   },
   {
     title: '旅遊',
     src: 'https://i.pinimg.com/originals/49/77/3b/49773b089b09c93a7885699500633691.gif',
-    targetId: 'travel-category',
+    targetId: '旅遊',
   },
   {
     title: '運動',
     src: 'https://i.pinimg.com/originals/bf/3e/73/bf3e73c60355c69103555b2083d1822d.gif',
-    targetId: 'sports-category',
+    targetId: '運動',
   },
   {
     title: '教育',
     src: 'https://i.pinimg.com/originals/f0/4f/4e/f04f4e57612f6d0426e725dadb334e42.gif',
-    targetId: 'education-category',
+    targetId: '教育',
   },
   {
     title: '其他',
     src: 'https://i.pinimg.com/originals/5a/b5/9a/5ab59a91d9c8d3cc19be0cff707a1f60.gif',
-    targetId: 'others-category',
+    targetId: '其他',
   },
 ]
 
@@ -102,15 +110,6 @@ watch(isMobile, (newVal) => {
     carouselData.value[1].src = joixmas // 替換回桌面版圖片
   }
 })
-
-const scrollToCategory = (id) => {
-  const targetElement = document.getElementById(id)
-  if (targetElement) {
-    targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    // 傳送訊息給 ActivityComponent
-    window.postMessage({ action: 'selectCategory', category: id.replace('-category', '') }, '*')
-  }
-}
 </script>
 
 <style scoped>
