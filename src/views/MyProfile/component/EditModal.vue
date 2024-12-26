@@ -247,14 +247,14 @@ const handleSave = () => {
     })
 }
 const handleConfirm = () => {
-  dialog.warning({
+  dialog.success({
     title: '確定下次再填嗎？',
     content: '本次修改資料將不被保存喔！',
-    positiveText: '确定肯定一定',
+    positiveText: '對啦我下次再填',
     negativeText: '好啦繼續填',
     onPositiveClick: () => {
       emit('close')
-      message.info('等你下次回來')
+      message.success('等你下次回來')
       showModal.value = false
     },
     onNegativeClick: () => {
@@ -347,8 +347,10 @@ const emit = defineEmits(['close', 'save'])
           </div>
         </div>
         <div id="target2" class="innerPart_2" v-show="currentRef === 2">
-          <div class="flex flex-col gap-5 border-b-2 border-gray-100 pb-6 md:flex-row">
-            <div class="flex flex-col gap-3">
+          <div
+            class="flex flex-col gap-5 border-b-2 border-gray-100 pb-6 md:flex-row md:justify-between"
+          >
+            <div class="flex flex-col gap-3 md:w-1/2">
               <div
                 class="flex justify-between items-center w-full bg-gray-100 p-2 pl-4 rounded-full"
               >
@@ -376,7 +378,7 @@ const emit = defineEmits(['close', 'save'])
                 <span v-else>第一張照片還沒上傳</span>
               </div>
             </div>
-            <div class="flex flex-col gap-3">
+            <div class="flex flex-col gap-3 md:w-1/2">
               <div
                 class="flex justify-between items-center w-full bg-gray-100 p-2 pl-4 rounded-full"
               >
