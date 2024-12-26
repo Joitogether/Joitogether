@@ -28,18 +28,22 @@
 
 <script setup>
 import { NCarousel } from 'naive-ui'
+import { ref, onMounted, onUnmounted, watch } from 'vue'
+import joixmas from '@/assets/JoiXmas.jpg'
+import joixmasmobile from '@/assets/JoiXmasMobile.jpg'
+import joigif from '@/assets/joitogether.gif'
 
-const carouselData = [
+const carouselData = ref([
   {
-    src: 'https://i.pinimg.com/736x/54/63/f8/5463f879dafecd317b771aaee0d4a0aa.jpg',
+    src: joigif,
   },
+  // {
+  //   src: 'https://i.pinimg.com/originals/aa/06/9f/aa069f2356b0397342892fd712f604c2.gif',
+  // },
   {
-    src: 'https://cdn.eatgether.com/images/website/banner/02.jpeg',
+    src: joixmas,
   },
-  {
-    src: 'https://cdn.eatgether.com/images/website/banner/03.jpeg',
-  },
-]
+])
 
 const areaData = [
   {
@@ -68,25 +72,38 @@ const areaData = [
     targetId: 'education-category',
   },
   {
-    title: '其他',
-    src: 'https://i.pinimg.com/originals/5a/b5/9a/5ab59a91d9c8d3cc19be0cff707a1f60.gif',
-    targetId: 'others-category',
+    title: '高雄市',
+    src: 'https://www.eatgether.com/static/media/KHH.da56765a.png',
   },
 ]
-const scrollToCategory = (id) => {
-  const targetElement = document.getElementById(id)
-  if (targetElement) {
-    targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    // 傳送訊息給 ActivityComponent
-    window.postMessage({ action: 'selectCategory', category: id.replace('-category', '') }, '*')
-  }
+const isMobile = ref(false)
+
+const updateScreenSize = () => {
+  isMobile.value = window.innerWidth < 768
 }
+
+onMounted(() => {
+  updateScreenSize()
+  window.addEventListener('resize', updateScreenSize)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', updateScreenSize)
+})
+
+watch(isMobile, (newVal) => {
+  if (newVal) {
+    carouselData.value[1].src = joixmasmobile // 替換成手機版圖片
+  } else {
+    carouselData.value[1].src = joixmas // 替換回桌面版圖片
+  }
+})
 </script>
 
 <style scoped>
 .carousel-img {
   width: 100%;
-  height: 450px;
+  height: 480px;
   object-fit: cover;
 }
 a img {

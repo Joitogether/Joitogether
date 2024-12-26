@@ -42,15 +42,18 @@ const filteredItems = computed(() => {
       return true
     })
     .sort((a, b) => new Date(a.event_time) - new Date(b.event_time))
-    .map((activity) => ({
-      id: activity.id,
-      name: activity.name,
-      img_url: activity.img_url || '/src/assets/UserUpdata1.jpg',
-      location: activity.location || '未知地點',
-      dateTime: formatDate(activity.event_time),
-      user: userMap.value[activity.host_id] || '未知用戶',
-      participants: activity.max_participants || 0,
-    }))
+    .map((activity) => {
+      return {
+        id: activity.id,
+        name: activity.name,
+        img_url: activity.img_url || '/src/assets/UserUpdata1.jpg',
+        location: activity.location || '未知地點',
+        dateTime: formatDate(activity.event_time),
+        user: userMap.value[activity.host_id] || '未知用戶',
+        participants: activity.max_participants || 0,
+        userImg: activity.users.photo_url,
+      }
+    })
 })
 
 const currentPage = ref(1) // 當前頁碼
@@ -100,7 +103,6 @@ const handleMessage = (event) => {
     selectCategory(event.data.category)
   }
 }
-
 
 onMounted(async () => {
   window.addEventListener('message', handleMessage)
@@ -241,6 +243,7 @@ watch(
           :date-time="item.dateTime"
           :participants="item.participants"
           :host="item.user"
+          :hostImgUrl="item.userImg"
           :id="item.id"
         ></ActivityCard>
       </div>

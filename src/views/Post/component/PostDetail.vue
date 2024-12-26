@@ -369,6 +369,32 @@ onMounted(() => {
         @click="toggleMenu"
       ></MoreVert>
 
+      <template v-if="postDetails.isPostAuthor">
+        <div
+          v-if="isEditing"
+          class="flex space-x-2 absolute right-1 top-1/2 transform -translate-y-1/2"
+        >
+          <button
+            @click="saveEdit"
+            class="bg-green-600 text-white px-3 py-1 rounded-full hover:bg-green-700"
+          >
+            儲存
+          </button>
+          <button
+            @click="toggleEdit"
+            class="bg-gray-500 text-white px-3 py-1 rounded-full hover:bg-gray-600"
+          >
+            取消
+          </button>
+        </div>
+
+        <MoreVert
+          v-else
+          class="w-7 h-7 cursor-pointer absolute right-1 top-1/2 transform -translate-y-1/2"
+          @click="toggleMenu"
+        ></MoreVert>
+      </template>
+
       <!-- 彈窗內容 -->
       <transition name="fade-slide">
         <div
@@ -376,15 +402,8 @@ onMounted(() => {
           class="absolute right-2 top-12 bg-white shadow-md rounded-md p-2 z-10 w-40"
         >
           <ul>
-            <li
-              v-if="isEditing"
-              @click="saveEdit"
-              class="cursor-pointer hover:bg-gray-200 p-2 rounded-md"
-            >
-              儲存文章
-            </li>
             <li @click="toggleEdit" class="cursor-pointer hover:bg-gray-200 p-2 rounded-md">
-              {{ isEditing ? '取消編輯' : '編輯文章' }}
+              編輯文章
             </li>
             <li
               v-if="!isEditing"
@@ -401,7 +420,9 @@ onMounted(() => {
   <div class="bg-gray-100">
     <div class="p-6 md:mx-auto md:w-3/4 lg:w-1/2 bg-white">
       <div class="">
-        <p v-if="!isEditing" class="text-xl font-bold">{{ postDetails.title }}</p>
+        <p v-if="!isEditing" class="text-2xl font-bold text-gray-700 tracking-wide">
+          {{ postDetails.title }}
+        </p>
         <textarea
           v-else
           v-model="editPostTitle"
@@ -434,7 +455,12 @@ onMounted(() => {
         </div>
         <!-- 文章資訊區 -->
         <div class="items-center">
-          <div v-if="!isEditing" class="mb-6 text-base">{{ postDetails.content }}</div>
+          <div
+            v-if="!isEditing"
+            class="mb-6 text-base text-gray-600 whitespace-pre-wrap tracking-wide"
+          >
+            {{ postDetails.content }}
+          </div>
           <textarea
             v-else
             v-model="editPostContent"
@@ -503,7 +529,7 @@ onMounted(() => {
           </div>
 
           <!-- 留言區 -->
-          <div class="p-3 bg-gray-100 rounded-md shadow-sm">
+          <div class="p-3 min-h-screen bg-gray-100 rounded-md shadow-sm">
             <!-- 新增留言 -->
             <div class="flex justify-between space-x-3 border-b border-gray-200">
               <div class="w-14 h-14 rounded-full overflow-hidden flex-shrink-0">
@@ -543,7 +569,7 @@ onMounted(() => {
                 class="flex items-start space-x-3 border-b pb-4 mt-6 relative"
               >
                 <div
-                  class="w-14 h-14 rounded-full overflow-hidden flex items-center justify-center"
+                  class="w-14 h-14 rounded-full overflow-hidden flex items-center justify-center flex-shrink-0"
                 >
                   <img
                     alt="User Avatar"
@@ -556,7 +582,9 @@ onMounted(() => {
                 </div>
                 <div>
                   <p class="font-semibold text-gray-800 text-sm">{{ comment.name }}</p>
-                  <p class="text-gray-600 text-base">{{ comment.content }}</p>
+                  <p class="text-gray-600 text-sm whitespace-pre-wrap tracking-wide">
+                    {{ comment.content }}
+                  </p>
                   <p class="text-gray-400 text-sm">{{ dayjs(comment.time).fromNow() }}</p>
                 </div>
                 <n-button

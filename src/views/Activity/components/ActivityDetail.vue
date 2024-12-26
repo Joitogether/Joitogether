@@ -144,7 +144,7 @@ onMounted(async () => {
 })
 // 根據抓取回來的資料判斷使用者是否已註冊該活動
 const isRegistered = computed(() => {
-  return activity.value.participants?.some(
+  return activity.value.applications?.some(
     (participant) =>
       participant.participant_id === userStore.user.uid && participant.status === 'registered',
   )
@@ -511,7 +511,7 @@ const handleDropSelect = async (key, comment_id) => {
           :key="item.img_url"
           horizontal="true"
           :title="item.name"
-          :actImgUrl="item.photo_url"
+          :actImgUrl="item.img_url"
           :location="item.location"
           :dateTime="dayjs(item.event_time).format('YYYY年MM月DD日')"
           :participants="registerCount"
