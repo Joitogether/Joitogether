@@ -9,14 +9,16 @@
           :src="carouselImg.src"
         />
       </n-carousel>
-      <div class="container mx-auto aria">
-        <div class="flex flex-col items-center mt-10">
-          <h1>熱門聚會地點</h1>
-          <div class="flex items-center w-full justify-evenly">
-            <div v-for="aria in ariaData" :key="aria.title">
-              <a href="#">
-                <img :src="aria.src" alt="" />
-                <p class="text-center">{{ aria.title }}</p>
+      <div class="w-full h-full bg-slate-300">
+        <div class="flex flex-col h-full items-center">
+          <h1 class="text-[36px] font-bold my-[60px]">熱門揪團類型</h1>
+          <div
+            class="flex items-center gap-[210px] w-full justify-evenly mb-[60px] sm:justify-evenly"
+          >
+            <div v-for="area in areaData" :key="area.title">
+              <a href="#" @click.prevent="scrollToCategory(area.targetId)">
+                <img :src="area.src" alt="" class="w-full h-full aspect-square object-cover" />
+                <p class="text-center">{{ area.title }}</p>
               </a>
             </div>
           </div>
@@ -45,32 +47,39 @@ const carouselData = ref([
   },
 ])
 
-const ariaData = [
+const areaData = [
   {
-    title: '大台北',
-    src: 'https://www.eatgether.com/static/media/TPE.91790170.png',
+    title: '美食',
+    src: 'https://i.pinimg.com/originals/c3/61/70/c3617019ad42a99b25365c51060fec2f.gif',
+    targetId: 'food-category',
   },
   {
-    title: '桃園市',
-    src: 'https://www.eatgether.com/static/media/TAO.68ddb6e3.png',
+    title: '購物',
+    src: 'https://i.pinimg.com/originals/ff/fc/5a/fffc5a92c68455f331036891970b1fb9.gif',
+    targetId: 'shopping-category',
   },
   {
-    title: '新竹市',
-    src: 'https://www.eatgether.com/static/media/HSZ.417cf6b8.png',
+    title: '旅遊',
+    src: 'https://i.pinimg.com/originals/49/77/3b/49773b089b09c93a7885699500633691.gif',
+    targetId: 'travel-category',
   },
   {
-    title: '臺中市',
-    src: 'https://www.eatgether.com/static/media/TXG.c136bf99.png',
+    title: '運動',
+    src: 'https://i.pinimg.com/originals/bf/3e/73/bf3e73c60355c69103555b2083d1822d.gif',
+    targetId: 'sports-category',
   },
   {
-    title: '臺南市',
-    src: 'https://www.eatgether.com/static/media/TNN.1ab27f99.png',
+    title: '教育',
+    src: 'https://i.pinimg.com/originals/f0/4f/4e/f04f4e57612f6d0426e725dadb334e42.gif',
+    targetId: 'education-category',
   },
   {
-    title: '高雄市',
-    src: 'https://www.eatgether.com/static/media/KHH.da56765a.png',
+    title: '其他',
+    src: 'https://i.pinimg.com/originals/5a/b5/9a/5ab59a91d9c8d3cc19be0cff707a1f60.gif',
+    targetId: 'others-category',
   },
 ]
+
 const isMobile = ref(false)
 
 const updateScreenSize = () => {
@@ -93,32 +102,29 @@ watch(isMobile, (newVal) => {
     carouselData.value[1].src = joixmas // 替換回桌面版圖片
   }
 })
+
+const scrollToCategory = (id) => {
+  const targetElement = document.getElementById(id)
+  if (targetElement) {
+    targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    // 傳送訊息給 ActivityComponent
+    window.postMessage({ action: 'selectCategory', category: id.replace('-category', '') }, '*')
+  }
+}
 </script>
 
 <style scoped>
 .carousel-img {
   width: 100%;
-  height: 480px;
+  height: 450px;
   object-fit: cover;
 }
-a img {
-  border-radius: 50%;
-  max-width: 100px;
-  height: auto;
-  margin: 0 auto;
-}
+
 a img:hover {
   transform: scale(1.05);
   transition: transform 0.3s ease-in-out;
 }
-h1 {
-  padding: 10px;
-  margin-bottom: 15px;
-  font-size: 32px;
-  line-height: 46px;
-  font-weight: bold;
-  color: rgb(59, 59, 58);
-}
+
 p {
   margin-top: 16px;
   font-size: 20px;
@@ -129,7 +135,6 @@ p {
   .flex.items-center.w-full.justify-evenly {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 50px;
   }
 }
 
@@ -137,7 +142,14 @@ p {
   .flex.items-center.w-full.justify-evenly {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 60px;
+  }
+  a img {
+    border-radius: 50%;
+    max-width: 150px;
+    max-height: 150px;
+    width: 100px;
+    height: 100px;
+    margin: 0 auto;
   }
 }
 </style>
