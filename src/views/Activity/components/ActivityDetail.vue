@@ -27,16 +27,20 @@ const userComment = ref('')
 const registerComment = ref('')
 const activityId = route.params.id
 const recentActivities = ref([])
+const currentTime = ref(new Date().toISOString())
+const getCurrentTime = () => {
+  currentTime.value = new Date().toISOString()
+}
 async function getActivityDetail() {
   const activityDetail = await activityGetDetailAPI(route.params.id)
 
   // 有資料或null
   if (!activityDetail) {
     message.error('獲取活動失敗')
-    // 這裡應該要針對沒有拿到id的狀態處理
+    // 這裡應該要針對沒有拿到id的狀態處理，去not found
     return
   }
-
+  getCurrentTime()
   activity.value = activityDetail
   host.value = activityDetail.host_info
   comments.value = activityDetail.comments
@@ -64,21 +68,16 @@ const payment = computed(() => {
       return '各付各的'
     case 'host':
       return '團主請客'
+    case 'paymentRequired':
+      return '先付款'
     default:
       return 'null'
   }
 })
 
-const registerCount = computed(() => {
-  // 不用審核的用，報名人數就是validated的人數，
-  if (!activity.value.require_approval) {
-    return activity.value.applications.reduce((count, application) => {
-      return count + application.register_validated
-    }, 0)
-  }
-  // 要審核的話，報名人數就是在表單裡有出現且為Registered的
+const participantsCount = computed(() => {
   return activity.value.applications.reduce((count, application) => {
-    if (application.status === 'registered') {
+    if (application.register_validated) {
       return ++count
     }
     return count
@@ -96,8 +95,34 @@ const toggleRegisterModal = () => {
   showRegisterModal.value = !showRegisterModal.value
 }
 
-// 只有不用付款的報名會跑到這個function
+const validateRegister = async () => {
+  getCurrentTime()
+
+  // 需審核並且超過最後審核時間
+  if (activity.value.require_approval && currentTime.value >= activity.value.approval_deadline) {
+    await getActivityDetail()
+    message.error('已超過報名時間')
+    return
+  }
+  // 不需審核但報名的時候已超過最後報名時間（活動時間）
+  if (activity.value.require_approval && currentTime.value >= activity.value.event_time) {
+    await getActivityDetail()
+    message.error('已超過報名時間')
+    return
+  }
+  // 參加人數滿了，禁止報名
+  if (participantsCount.value >= activity.value.register_limit) {
+    message.error('該活動已達報名上限')
+    return
+  }
+  return true
+}
+
 const registerActivity = async () => {
+  const status = await validateRegister()
+  if (!status) {
+    return toggleRegisterModal()
+  }
   const data = {
     participant_id: userStore.user.uid,
     comment: registerComment.value,
@@ -106,16 +131,19 @@ const registerActivity = async () => {
   }
 
   const res = await activityRegisterAPI(activityId, data)
+
   if (res.status !== 201) {
     if (res.message === '報名上限已達') {
       message.error('報名已達上限')
     } else {
-      message.error('報名失敗')
+      message.error('報名失敗，請稍後再試')
     }
     toggleRegisterModal()
     return
   }
+
   await getActivityDetail()
+
   //報名成功
   message.success('報名成功！')
   const notiData = {
@@ -127,9 +155,8 @@ const registerActivity = async () => {
     message: '報名了你的活動',
     link: `/activity/detail/${activity.value.id}`,
   }
-
+  // 送通知
   socketStore.sendNotification(notiData)
-
   toggleRegisterModal()
 }
 // 根據活動判斷當前使用者是否為主辦者
@@ -142,17 +169,18 @@ onMounted(async () => {
   searchQuery.value = activity.value.location
   await previewMap(searchQuery.value)
 })
-// 根據抓取回來的資料判斷使用者是否已註冊該活動
+// 根據抓取回來的資料判斷使用者是否已註冊該活動，狀態若為isRegistered，則可以取消報名
 const isRegistered = computed(() => {
   return activity.value.applications?.some(
     (participant) =>
-      participant.participant_id === userStore.user.uid && participant.status === 'registered',
+      participant.participant_id === userStore.user.uid &&
+      (participant.status === 'registered' || participant.status == 'approved'),
   )
 })
 
-const showConfirmModal = ref(false)
+const showCancelRegisterModal = ref(false)
 const toggleConfirmModal = () => {
-  showConfirmModal.value = !showConfirmModal.value
+  showCancelRegisterModal.value = !showCancelRegisterModal.value
 }
 const onNegativeClick = () => {
   toggleConfirmModal()
@@ -160,6 +188,9 @@ const onNegativeClick = () => {
 
 // 取消報名
 const onPositiveClick = async () => {
+  if (currentTime.value >= activity.value.event_time) {
+    return message.error('已超過取消報名時間')
+  }
   const res = await activityCancelRegisterAPI(activity.value.id, userStore.user.uid)
   if (res.status != 200) {
     toggleConfirmModal()
@@ -184,23 +215,27 @@ const onReviewNegativeClick = () => {
   toggleReviewModal
 }
 
-const showCancelModal = ref(false)
-const toggleCancelModal = () => {
-  showCancelModal.value = !showCancelModal.value
+const showCancelActivityModal = ref(false)
+const toggleCancelActivityModal = () => {
+  showCancelActivityModal.value = !showCancelActivityModal.value
 }
-const onCancelNegativeClick = () => {
-  toggleCancelModal()
+const onCancelCancelActivityClick = () => {
+  toggleCancelActivityModal()
 }
 
-const onCancelPositiveClick = async () => {
+// 取消活動
+const onConfirmCancelActivityClick = async () => {
+  getCurrentTime()
+  if (currentTime.value >= activity.value.event_time) {
+    return message.error('已超過取消活動時間')
+  }
   const res = await activityCancelAPI(activity.value.id)
   if (res.status !== 200) {
-    toggleCancelModal()
+    toggleCancelActivityModal()
     return message.error('取消活動失敗')
   }
   await getActivityDetail()
-  // 取消活動是不是要改一夏夜面
-  toggleCancelModal()
+  toggleCancelActivityModal()
   message.success('取消活動成功')
 }
 
@@ -210,12 +245,12 @@ const submitComment = async () => {
     participant_id: userStore.user.uid,
   }
   const res = await activityNewCommentAPI(activity.value.id, data)
-  if (res.status !== 201) {
-    console.log(res)
+  if (!res) {
     return message.error('留言失敗')
   }
   await getActivityDetail()
   message.success('新增留言成功')
+
   socketStore.sendNotification({
     actor_id: userStore.user.uid,
     user_id: activity.value.host_id,
@@ -228,12 +263,16 @@ const submitComment = async () => {
   clearComment()
 }
 
-const addToCart = () => {
+const addToCart = async () => {
+  const status = await validateRegister()
+  if (!status) {
+    return toggleRegisterModal()
+  }
   const data = {
     activity_id: activity.value.id,
     uid: userStore.user.uid,
   }
-  console.log('加到購物車', data)
+  console.log(data)
   toggleRegisterModal()
 }
 
@@ -251,8 +290,8 @@ const options = [
 const handleDropSelect = async (key, comment_id) => {
   if (key === 'delete') {
     const res = await activityDeleteCommentAPI(comment_id)
-    if (res.status !== 200) {
-      message.error('刪除留言失敗')
+    if (!res) {
+      return message.error('刪除留言失敗')
     }
     message.success('刪除留言成功')
     await getActivityDetail()
@@ -297,49 +336,53 @@ watch(
               `${dayjs(activity.event_time).format('YYYY年MM月DD日dddd HH:mm')}`
             }}</span>
           </div>
-          <span class="text-sm text-red-500">{{
-            `最後審核時間 ${dayjs(activity.approval_deadline).format('YYYY年MM月DD日dddd HH:mm')}`
-          }}</span>
-          <p v-if="activity.status === 'registrationOpen'" class="font-bold text-lg text-end">
-            {{ `${registerCount}人報名` }}
+          <div v-if="activity.require_approval" class="text-sm text-red-500">
+            <p>該活動須經審核才視同報名成功</p>
+            <p>
+              {{
+                `最後審核時間 ${dayjs(activity.approval_deadline).format('YYYY年MM月DD日dddd HH:mm')}`
+              }}
+            </p>
+          </div>
+
+          <p class="font-bold text-lg text-end">
+            {{ `${participantsCount}名參加者` }}
           </p>
-          <div v-if="activity.status === 'registrationOpen'">
-            <div v-if="isHost">
+          <div v-if="isHost">
+            <NButton
+              v-if="activity.require_approval && currentTime < activity.approval_deadline"
+              class="w-full mt-3 font-bold text-lg py-5"
+              round
+              type="primary"
+              @click="toggleReviewModal"
+              >審核報名</NButton
+            >
+            <NButton
+              v-else
+              class="w-full mt-3 font-bold text-lg py-5"
+              round
+              type="primary"
+              @click="toggleReviewModal"
+              >瀏覽報名</NButton
+            >
+            <NButton
+              v-if="activity.event_time > currentTime"
+              class="w-full mt-3 font-bold text-lg py-5"
+              round
+              type="warning"
+              @click="toggleCancelActivityModal"
+              >取消活動</NButton
+            >
+          </div>
+          <div v-else>
+            <div
+              v-if="
+                (!activity.require_approval && currentTime < activity.event_time) ||
+                (activity.require_approval && currentTime < activity.approval_deadline)
+              "
+            >
               <NButton
-                v-if="activity.require_approval"
-                class="w-full mt-3 font-bold text-lg py-5"
-                round
-                type="primary"
-                @click="toggleReviewModal"
-                >審核報名</NButton
-              >
-              <NButton
-                v-else
-                class="w-full mt-3 font-bold text-lg py-5"
-                round
-                type="primary"
-                @click="toggleReviewModal"
-                >瀏覽報名</NButton
-              >
-              <NButton
-                class="w-full mt-3 font-bold text-lg py-5"
-                round
-                type="warning"
-                @click="toggleCancelModal"
-                >取消活動</NButton
-              >
-            </div>
-            <div v-else>
-              <NButton
-                v-if="isRegistered"
-                class="w-full mt-3 font-bold text-lg py-5"
-                round
-                type="primary"
-                @click="toggleConfirmModal"
-                >取消報名</NButton
-              >
-              <NButton
-                v-else
+                v-if="!isRegistered"
                 class="w-full mt-3 font-bold text-lg py-5"
                 round
                 type="primary"
@@ -347,13 +390,31 @@ watch(
                 >報名</NButton
               >
             </div>
+
+            <div v-else>
+              <NButton
+                v-if="!isRegistered"
+                disabled
+                class="w-full mt-3 font-bold text-lg py-5"
+                round
+                type="primary"
+                >該活動已無法報名</NButton
+              >
+            </div>
+            <NButton
+              v-if="isRegistered && currentTime < activity.event_time"
+              class="w-full mt-3 font-bold text-lg py-5"
+              round
+              type="primary"
+              @click="toggleConfirmModal"
+              >取消報名</NButton
+            >
           </div>
-          <div v-else class="text-3xl font-bold">該活動已無法報名</div>
           <n-modal
-            v-model:show="showConfirmModal"
+            v-model:show="showCancelRegisterModal"
             preset="dialog"
             title="取消報名"
-            content="你確定要取消報名嗎？"
+            content="你確定要取消報名嗎？經活動取消報命後有可能無法再次報名"
             positive-text="確定"
             negative-text="再想想"
             @positive-click="onPositiveClick"
@@ -370,14 +431,14 @@ watch(
             @negative-click="onReviewNegativeClick"
           />
           <n-modal
-            v-model:show="showCancelModal"
+            v-model:show="showCancelActivityModal"
             preset="dialog"
             title="取消活動"
             content="你確定要取消該活動？"
             positive-text="確定"
             negative-text="再想想"
-            @positive-click="onCancelPositiveClick"
-            @negative-click="onCancelNegativeClick"
+            @positive-click="onConfirmCancelActivityClick"
+            @negative-click="onCancelCancelActivityClick"
           />
           <n-modal class="rounded-lg" v-model:show="showRegisterModal" :auto-focus="false">
             <n-card
@@ -524,7 +585,7 @@ watch(
           :actImgUrl="item.img_url"
           :location="item.location"
           :dateTime="dayjs(item.event_time).format('YYYY年MM月DD日')"
-          :participants="registerCount"
+          :participants="participantsCount"
           :host="item.users.display_name"
           :imageHeight="'100%'"
           :hostImgUrl="item.users.photo_url"
