@@ -300,7 +300,7 @@ const handleSearchClick = (e) => {
           <button
             class="border border-gray-600 text-gray-600 rounded-full px-3 py-1 hover:border-green-600 hover:text-green-600"
           >
-            建立活動
+            活動建立
           </button>
         </router-link>
       </div>

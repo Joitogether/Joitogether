@@ -1,47 +1,62 @@
 <script setup>
 import ActivityCard from '@/views/components/ActivityCard.vue'
-import { activityGetAllAPI, activityGetUsersAPI, activitySearchAPI } from '@/apis/activityAPIs.js'
-import { ref, onMounted, computed, onUnmounted, nextTick, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { ref, onMounted, computed, watch } from 'vue'
+import { storeToRefs } from 'pinia'
 import { formatDate } from '@/utils/useDateTime'
+import { useActivityStore } from '@/stores/useActivityStore'
+import { useRoute } from 'vue-router'
 
-const allActivities = ref([]) // 存放所有活動資料（未篩選）
-const userMap = ref({})
+const activityStore = useActivityStore()
+const { activities, loading, error } = storeToRefs(activityStore)
+const { fetchAllActivities, fetchActivitiesByCategory, searchActivities } = activityStore
+
 const route = useRoute()
+
+onMounted(() => {
+  if (route.query.q) {
+    return
+  }
+  fetchAllActivities()
+})
+
 // 計算今天日期的字串
-const today = new Date()
-const yyyy = today.getFullYear()
-const mm = String(today.getMonth() + 1).padStart(2, '0')
-const dd = String(today.getDate()).padStart(2, '0')
-const todayString = `${yyyy}-${mm}-${dd}`
+const todayString = new Date().toISOString().split('T')[0]
+const selectedStartDate = ref('')
 
+const setStartDate = (date) => {
+  selectedStartDate.value = date
+}
 // 篩選條件
-const selectedCategory = ref('') // 預設顯示全部
-const selectedStartDate = ref('') // 使用者選擇的開始篩選日期
+const selectedCategory = ref('')
 
-// 定義篩選函式
+const categoryMap = {
+  '': '', // 全部
+  美食: 'food',
+  購物: 'shopping',
+  旅行: 'travel',
+  運動: 'sports',
+  教育: 'education',
+  其他: 'others',
+}
+
 const selectCategory = (category) => {
   selectedCategory.value = category
+  const mappedCategory = categoryMap[category]
+  if (mappedCategory === '') {
+    fetchAllActivities()
+  } else {
+    fetchActivitiesByCategory(mappedCategory)
+  }
 }
 
-const setStartDate = (dateStr) => {
-  selectedStartDate.value = dateStr
-}
-
-// 使用 computed 來動態取得符合條件的 items
-const filteredItems = computed(() => {
-  const today = new Date()
-  const startFilterDate = selectedStartDate.value ? new Date(selectedStartDate.value) : today
-
-  return allActivities.value
+const filteredActivities = computed(() =>
+  activities.value
     .filter((activity) => {
+      if (!selectedStartDate.value) return true // 如果未選擇日期，顯示所有活動
       const eventDate = new Date(activity.event_time)
-      if (eventDate < today) return false
-      if (eventDate < startFilterDate) return false
-      if (selectedCategory.value && activity.category !== selectedCategory.value) return false
-      return true
+      const filterDate = new Date(selectedStartDate.value)
+      return eventDate >= filterDate // 篩選日期大於或等於選擇的日期
     })
-    .sort((a, b) => new Date(a.event_time) - new Date(b.event_time))
     .map((activity) => {
       return {
         id: activity.id,
@@ -49,100 +64,24 @@ const filteredItems = computed(() => {
         img_url: activity.img_url || '/src/assets/UserUpdata1.jpg',
         location: activity.location || '未知地點',
         dateTime: formatDate(activity.event_time),
-        user: userMap.value[activity.host_id] || '未知用戶',
-        participants: activity.max_participants || 0,
+        participants: activity.max_participants,
+        host: activity.users?.display_name || '未知用戶',
         userImg: activity.users.photo_url,
       }
     })
-})
-
-const currentPage = ref(1) // 當前頁碼
-const isLoading = ref(false) // 正在加載中
-const hasMore = ref(true) // 是否還有更多資料
-const observer = ref(null) // IntersectionObserver 實例
-
-const fetchActivitiesAndUsers = async () => {
-  if (isLoading.value || !hasMore.value) return
-
-  isLoading.value = true
-  try {
-    const [activities, users] = await Promise.all([
-      activityGetAllAPI({ page: currentPage.value, limit: 10 }), // 分頁參數
-      activityGetUsersAPI(),
-    ])
-
-    // 處理使用者資料
-    if (users.status === 200 && Array.isArray(users.data)) {
-      userMap.value = Object.fromEntries(users.data.map((user) => [user.uid, user.display_name]))
-    }
-
-    // 處理活動資料
-    if (activities.status === 200 && Array.isArray(activities.data)) {
-      activities.data.forEach((activity) => {
-        const exists = allActivities.value.some((item) => item.id === activity.id)
-        if (!exists) {
-          allActivities.value.push(activity)
-        }
-      })
-
-      if (activities.data.length < 10) hasMore.value = false // 最後一頁
-      currentPage.value++ // 下一頁
-    } else {
-      hasMore.value = false
-    }
-  } catch (err) {
-    console.error('取得活動資料失敗:', err)
-  } finally {
-    isLoading.value = false
-  }
-}
-
-// 監聽 BannerComponent 的訊息
-const handleMessage = (event) => {
-  if (event.data?.action === 'selectCategory' && event.data.category) {
-    selectCategory(event.data.category)
-  }
-}
-
-onMounted(async () => {
-  window.addEventListener('message', handleMessage)
-
-  if (route.query.q) {
-    return
-  }
-  await fetchActivitiesAndUsers()
-
-  nextTick(() => {
-    const loadMoreTrigger = document.querySelector('#load-more')
-    if (loadMoreTrigger) {
-      observer.value = new IntersectionObserver((entries) => {
-        if (entries[0].isIntersecting && !isLoading.value && hasMore.value) {
-          setTimeout(() => {
-            fetchActivitiesAndUsers()
-          }, 300) // 加入 300ms 延遲，避免過於頻繁觸發
-        }
-      })
-      observer.value.observe(loadMoreTrigger)
-    }
-  })
-})
-
-onUnmounted(() => {
-  window.removeEventListener('message', handleMessage)
-  if (observer.value) observer.value.disconnect()
-})
+    .sort((a, b) => a.event_time - b.event_time),
+)
 
 watch(
   () => route.query.q,
-  async (keyword) => {
-    isLoading.value = true
-    const acitvities = await activitySearchAPI(keyword)
-    allActivities.value = acitvities
-    isLoading.value = false
+  (keyword) => {
+    if (keyword) {
+      searchActivities(keyword)
+    } else {
+      fetchAllActivities()
+    }
   },
-  {
-    immediate: true,
-  },
+  { immediate: true },
 )
 </script>
 
@@ -151,69 +90,21 @@ watch(
     <div class="text-3xl pt-40 font-bold leading-10">啾團活動</div>
     <div class="inline-flex w-full pb-7 pt-7">
       <div class="flex flex-wrap gap-3 justify-start">
-        <!-- 預設顯示全部 -->
-        <div class="mr-7 py-3 pl-3 text-sm">
-          <button
-            class="p-1 md:p-2 w-full md:w-auto text-center"
-            @click="selectCategory('')"
-            :class="{ 'bg-gray-300 rounded-md': selectedCategory === '' }"
-          >
-            全部
-          </button>
-        </div>
-        <div id="food-category" class="mr-7 py-3 pl-3 text-sm">
-          <button
-            class="p-1 md:p-2 w-full md:w-auto text-center"
-            @click="selectCategory('food')"
-            :class="{ 'bg-gray-300 rounded-md': selectedCategory === 'food' }"
-          >
-            美食
-          </button>
-        </div>
-        <div id="shopping-category" class="mr-7 py-3 pl-3 text-sm">
-          <button
-            class="p-1 md:p-2 w-full md:w-auto text-center"
-            @click="selectCategory('shopping')"
-            :class="{ 'bg-gray-300 rounded-md': selectedCategory === 'shopping' }"
-          >
-            購物
-          </button>
-        </div>
-        <div id="travel-category" class="mr-7 py-3 pl-3 text-sm">
-          <button
-            class="p-1 md:p-2 w-full md:w-auto text-center"
-            @click="selectCategory('travel')"
-            :class="{ 'bg-gray-300 rounded-md': selectedCategory === 'travel' }"
-          >
-            旅遊
-          </button>
-        </div>
-        <div id="sports-category" class="mr-7 py-3 pl-3 text-sm">
-          <button
-            class="p-1 md:p-2 w-full md:w-auto text-center"
-            @click="selectCategory('sports')"
-            :class="{ 'bg-gray-300 rounded-md': selectedCategory === 'sports' }"
-          >
-            運動
-          </button>
-        </div>
-        <div id="education-category" class="mr-7 py-3 pl-3 text-sm">
-          <button
-            class="p-1 md:p-2 w-full md:w-auto text-center"
-            @click="selectCategory('education')"
-            :class="{ 'bg-gray-300 rounded-md': selectedCategory === 'education' }"
-          >
-            教育
-          </button>
-        </div>
-        <div id="others-category" class="mr-7 py-3 pl-3 text-sm">
-          <button
-            class="p-1 md:p-2 w-full md:w-auto text-center"
-            @click="selectCategory('others')"
-            :class="{ 'bg-gray-300 rounded-md': selectedCategory === 'others' }"
-          >
-            其他
-          </button>
+        <div
+          v-for="category in ['', '美食', '購物', '旅行', '運動', '教育', '其他']"
+          :key="category"
+          class="mr-7 py-3 pl-3 text-sm"
+        >
+          <!-- 預設顯示全部 -->
+          <div class="mr-7 py-3 pl-3 text-sm">
+            <button
+              class="p-1 md:p-2 w-full md:w-auto text-center"
+              @click="selectCategory(category)"
+              :class="{ 'bg-gray-300 rounded-md': selectedCategory === category }"
+            >
+              {{ category || '全部' }}
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -224,7 +115,6 @@ watch(
         <span class="ml-1"></span>
       </div>
       <div class="text-xl flex items-center">
-        篩選日期
         <span class="ml-1">
           <input type="date" :min="todayString" @change="setStartDate($event.target.value)"
         /></span>
@@ -233,25 +123,24 @@ watch(
 
     <!-- 卡片區域 -->
     <div class="mt-7 mb-7">
-      <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-        <ActivityCard
-          v-for="item in filteredItems"
-          :key="item.id"
-          :title="item.name"
-          :actImgUrl="item.img_url"
-          :location="item.location"
-          :date-time="item.dateTime"
-          :participants="item.participants"
-          :host="item.user"
-          :hostImgUrl="item.userImg"
-          :id="item.id"
-        ></ActivityCard>
+      <div v-if="loading" class="text-center my-5">加載中...</div>
+      <div v-else-if="error" class="text-center my-5 text-red-500">{{ error }}</div>
+      <div v-else>
+        <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+          <ActivityCard
+            v-for="activity in filteredActivities"
+            :key="activity.id"
+            :title="activity.name"
+            :actImgUrl="activity.img_url"
+            :location="activity.location"
+            :date-time="activity.dateTime"
+            :participants="activity.participants"
+            :host="activity.host"
+            :hostImgUrl="activity.userImg"
+            :id="activity.id"
+          ></ActivityCard>
+        </div>
       </div>
-      <div v-if="allActivities.length === 0" class="text-center text-xl">查無活動</div>
-      <div v-if="isLoading" class="text-center my-5">加載中...</div>
-      <div id="load-more" style="height: 20px"></div>
-      <!-- 底部觸發點 -->
-      <div v-if="!hasMore" class="text-center my-5 text-gray-500"></div>
     </div>
   </main>
 </template>
