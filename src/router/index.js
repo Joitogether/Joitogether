@@ -22,7 +22,7 @@ import Layout from '@/views/Layout/index.vue'
 import { getCurrentUser } from '@/utils/firebaseConfig'
 import TopUp from '@/views/TopUp/index.vue'
 import TopupFinish from '@/views/TopUp/component/TopupFinish.vue'
-import TopupRecord from '@/views/TopUp/component/TopupRecord.vue'
+import WalletRecord from '@/views/TopUp/component/WalletRecord.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -145,9 +145,9 @@ const router = createRouter({
           component: TopupFinish,
         },
         {
-          path: '/topupRecord',
-          name: 'topupRecord',
-          component: TopupRecord,
+          path: '/walletRecord',
+          name: 'walletRecord',
+          component: WalletRecord,
         },
       ],
     },

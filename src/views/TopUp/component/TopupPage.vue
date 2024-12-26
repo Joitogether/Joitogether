@@ -96,7 +96,7 @@ const createOrder = async () => {
   }
 }
 const seeRecord = () => {
-  router.push({ path: '/topupRecord' })
+  router.push({ path: '/walletRecord' })
 }
 
 onMounted(() => {
