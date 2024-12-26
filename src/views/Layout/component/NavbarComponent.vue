@@ -230,6 +230,14 @@ const handleSearchClick = (e) => {
               </div>
             </li>
             <li>
+              <router-link
+                :to="{ name: 'activityCreate' }"
+                class="font-bold py-3 block text-base text-gray-500 hover:text-green-600 border-b border-gray-300"
+              >
+                •&nbsp;&nbsp;建立活動
+              </router-link>
+            </li>
+            <li>
               <a
                 href="#"
                 class="font-bold py-3 block text-base text-gray-500 hover:text-green-600 border-b border-gray-300"
@@ -290,7 +298,7 @@ const handleSearchClick = (e) => {
           <button
             class="border border-gray-600 text-gray-600 rounded-full px-3 py-1 hover:border-green-600 hover:text-green-600"
           >
-            活動創建
+            建立活動
           </button>
         </router-link>
       </div>
@@ -303,7 +311,7 @@ const handleSearchClick = (e) => {
         :show="showPopover"
         :style="{
           '--n-arrow-offset': '30px',
-          transform: ' translateY(10%) translateX(8%)',
+          transform: ' translateY(3%) translateX(8%)',
           '--n-color': '#f9fafb',
         }"
       >
