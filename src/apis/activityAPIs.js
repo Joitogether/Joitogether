@@ -53,16 +53,16 @@ export const activityGetAPI = async () => {
 export const activityNewCommentAPI = async (activity_id, data) => {
   try {
     return await apiAxios.post(`/activities/comment/${activity_id}`, data)
-  } catch (err) {
-    return err.response.data
+  } catch {
+    return null
   }
 }
 
 export const activityDeleteCommentAPI = async (comment_id) => {
   try {
     return await apiAxios.delete(`/activities/comment/${comment_id}`)
-  } catch (err) {
-    return err.response.data
+  } catch {
+    return null
   }
 }
 
