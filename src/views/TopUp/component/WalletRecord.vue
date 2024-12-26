@@ -40,7 +40,7 @@ onMounted(() => {
 </script>
 <template>
   <div class="mx-10 pt-10">
-    <n-button type="info" dashed @click="goback">回上頁</n-button>
+    <n-button type="info" dashed @click="goback" class="hidden sm:block">回上頁</n-button>
   </div>
   <div class="text-3xl flex justify-center">花錢買快樂的紀錄💸</div>
   <n-table :bordered="false" :single-line="false" class="my-14 w-fit m-auto">
@@ -49,7 +49,7 @@ onMounted(() => {
         <th>交易日期</th>
         <th>交易類別</th>
         <th>交易金額</th>
-        <th>交易序號</th>
+        <th class="hidden sm:block">交易序號</th>
         <th>錢包餘額</th>
       </tr>
     </thead>
@@ -58,16 +58,25 @@ onMounted(() => {
         <td>{{ formatDate(record.created_at) }}</td>
         <td v-if="record.action == 'deposit'">儲值金</td>
         <td v-if="record.action == 'spend'">揪團活動</td>
-        <td v-if="record.action == 'deposit'" class="flex justify-between">
-          <plus class="text-green-500" />
-          {{ record.amount }}
+        <td v-if="record.action == 'deposit'">
+          <div class="flex justify-between">
+            <plus class="text-green-500" />
+            {{ record.amount }}
+          </div>
         </td>
-        <td v-if="record.action == 'spend'" class="flex justify-between">
-          <minus class="text-red-500" />
-          {{ record.amount }}
+        <td v-if="record.action == 'spend'">
+          <div class="flex justify-between">
+            <minus class="text-red-500" />
+            {{ record.amount }}
+          </div>
         </td>
-        <td>Joimoney{{ record.action }}{{ record.tradeTime }}</td>
-        <td class="text-center">${{ record.updated_balance }}</td>
+        <td class="hidden sm:block">Joimoney{{ record.action }}{{ record.tradeTime }}</td>
+        <td>
+          <div class="flex justify-between">
+            <span>$</span>
+            {{ record.updated_balance }}
+          </div>
+        </td>
       </tr>
     </tbody>
   </n-table>
