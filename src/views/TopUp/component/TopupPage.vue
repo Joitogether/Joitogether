@@ -126,17 +126,17 @@ onMounted(() => {
           </div>
           <span class="ml-4 text-lg">餘額</span>
         </div>
-        <div class="first-area-bottom grid grid-cols-12 mb-6 gap-2">
+        <div class="first-area-bottom grid mb-6 gap-2 sm:grid-cols-12">
           <div
-            class="img-container overflow-hidden col-start-2 justify-self-end rounded-full grid- w-16 h-16 aspect-square"
+            class="img-container overflow-hidden rounded-full grid- w-16 h-16 aspect-square justify-self-end sm:col-start-2"
           >
             <img class="card-img w-full relative" :src="userStore.user.photo_url" alt="personImg" />
           </div>
-          <div class="block col-span-3 content-end">
+          <div class="block content-end sm:col-span-3">
             <div class="mb-1">{{ userStore.user.display_name }}</div>
             <div class="mb-1">{{ userStore.user.email }}</div>
           </div>
-          <div class="py-2 col-span-4 text-xl content-end">
+          <div class="py-2 text-xl text-center col-span-4 sm:content-end">
             目前富有程度：💰{{ wallet.balance || '0(就快要變富人了！)' }}
           </div>
         </div>
@@ -148,7 +148,7 @@ onMounted(() => {
           </div>
           <span class="ml-4 text-lg">本次儲值金額</span>
         </div>
-        <div class="second-area-bottom grid grid-cols-4 gap-4 mx-14 my-6">
+        <div class="second-area-bottom grid gap-4 mx-14 my-6 sm:grid-cols-4">
           <n-button
             v-for="value in amounts"
             :key="value"
