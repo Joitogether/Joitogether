@@ -109,7 +109,7 @@ onMounted(() => {
       <div class="text-center mb-6">
         <div class="border-2 rounded-md mt-4 py-4 font-title text-2xl">儲值中心</div>
       </div>
-      <div class="mx-10">
+      <div class="mx-10 mb-10 topup-body">
         <div class="flex justify-end items-center mb-6">
           <button
             @click="seeRecord"
