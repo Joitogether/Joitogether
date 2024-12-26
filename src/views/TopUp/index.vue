@@ -1,20 +1,14 @@
 <script setup>
-import NavbarComponent from '../Home/components/NavbarComponent.vue';
+import NavbarComponent from '../../views/Layout/component/NavbarComponent.vue'
 import TopupPage from './component/TopupPage.vue'
-
-
 </script>
 <template>
   <header>
-    <NavbarComponent/>
+    <NavbarComponent />
   </header>
   <body>
-    <TopupPage/>
+    <TopupPage />
   </body>
-
-
 </template>
 
-<style scoped>
-
-</style>
+<style scoped></style>
