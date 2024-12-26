@@ -348,73 +348,85 @@ watch(
           <p class="font-bold text-lg text-end">
             {{ `${participantsCount}名參加者` }}
           </p>
-          <div v-if="isHost">
-            <NButton
-              v-if="activity.require_approval && currentTime < activity.approval_deadline"
-              class="w-full mt-3 font-bold text-lg py-5"
-              round
-              type="primary"
-              @click="toggleReviewModal"
-              >審核報名</NButton
-            >
-            <NButton
-              v-else
-              class="w-full mt-3 font-bold text-lg py-5"
-              round
-              type="primary"
-              @click="toggleReviewModal"
-              >瀏覽報名</NButton
-            >
-            <NButton
-              v-if="activity.event_time > currentTime"
-              class="w-full mt-3 font-bold text-lg py-5"
-              round
-              type="warning"
-              @click="toggleCancelActivityModal"
-              >取消活動</NButton
-            >
+          <div v-if="activity.status != 'cancelled'">
+            <div v-if="isHost">
+              <NButton
+                v-if="activity.require_approval && currentTime < activity.approval_deadline"
+                class="w-full mt-3 font-bold text-lg py-5"
+                round
+                type="primary"
+                @click="toggleReviewModal"
+                >審核報名</NButton
+              >
+              <NButton
+                v-else
+                class="w-full mt-3 font-bold text-lg py-5"
+                round
+                type="primary"
+                @click="toggleReviewModal"
+                >瀏覽報名</NButton
+              >
+              <NButton
+                v-if="activity.event_time > currentTime"
+                class="w-full mt-3 font-bold text-lg py-5"
+                round
+                type="warning"
+                @click="toggleCancelActivityModal"
+                >取消活動</NButton
+              >
+            </div>
+            <div v-else>
+              <div
+                v-if="
+                  (!activity.require_approval && currentTime < activity.event_time) ||
+                  (activity.require_approval && currentTime < activity.approval_deadline)
+                "
+              >
+                <NButton
+                  v-if="!isRegistered"
+                  class="w-full mt-3 font-bold text-lg py-5"
+                  round
+                  type="primary"
+                  @click="toggleRegisterModal"
+                  >報名</NButton
+                >
+              </div>
+
+              <div v-else>
+                <NButton
+                  v-if="!isRegistered"
+                  disabled
+                  class="w-full mt-3 font-bold text-lg py-5"
+                  round
+                  type="primary"
+                  >該活動已無法報名</NButton
+                >
+              </div>
+              <NButton
+                v-if="isRegistered && currentTime < activity.event_time"
+                class="w-full mt-3 font-bold text-lg py-5"
+                round
+                type="primary"
+                @click="toggleConfirmModal"
+                >取消報名</NButton
+              >
+            </div>
           </div>
           <div v-else>
-            <div
-              v-if="
-                (!activity.require_approval && currentTime < activity.event_time) ||
-                (activity.require_approval && currentTime < activity.approval_deadline)
-              "
-            >
-              <NButton
-                v-if="!isRegistered"
-                class="w-full mt-3 font-bold text-lg py-5"
-                round
-                type="primary"
-                @click="toggleRegisterModal"
-                >報名</NButton
-              >
-            </div>
-
-            <div v-else>
-              <NButton
-                v-if="!isRegistered"
-                disabled
-                class="w-full mt-3 font-bold text-lg py-5"
-                round
-                type="primary"
-                >該活動已無法報名</NButton
-              >
-            </div>
             <NButton
-              v-if="isRegistered && currentTime < activity.event_time"
+              v-if="!isRegistered"
+              disabled
               class="w-full mt-3 font-bold text-lg py-5"
               round
               type="primary"
-              @click="toggleConfirmModal"
-              >取消報名</NButton
+              >該活動已遭團主取消</NButton
             >
           </div>
           <n-modal
             v-model:show="showCancelRegisterModal"
             preset="dialog"
             title="取消報名"
-            content="你確定要取消報名嗎？經活動取消報命後有可能無法再次報名"
+            content="你確定要取消報名嗎？經活動取消報名後有可能無法再次報名"
             positive-text="確定"
             negative-text="再想想"
             @positive-click="onPositiveClick"
