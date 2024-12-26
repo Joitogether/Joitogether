@@ -1,12 +1,12 @@
 import { apiAxios } from '@/utils/request'
 
-// 創建文章
+// 建立文章
 export const createPostAPI = async (postData) => {
   try {
     const response = await apiAxios.post('/posts', postData)
     return response.data
   } catch (error) {
-    console.error('創建文章失敗:', error)
+    console.error('建立文章失敗:', error)
     return null
   }
 }
