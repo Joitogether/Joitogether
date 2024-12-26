@@ -15,7 +15,7 @@
           <div class="flex items-center w-full justify-evenly">
             <div v-for="area in areaData" :key="area.title">
               <a href="#" @click.prevent="scrollToCategory(area.targetId)">
-                <img :src="area.src" alt="" class="" />
+                <img :src="area.src" alt="" class="w-full h-full aspect-square object-cover" />
                 <p class="text-center">{{ area.title }}</p>
               </a>
             </div>
@@ -44,32 +44,32 @@ const carouselData = [
 const areaData = [
   {
     title: '美食',
-    src: 'https://i.pinimg.com/736x/54/63/f8/5463f879dafecd317b771aaee0d4a0aa.jpg',
+    src: 'https://i.pinimg.com/originals/c3/61/70/c3617019ad42a99b25365c51060fec2f.gif',
     targetId: 'food-category',
   },
   {
     title: '購物',
-    src: 'https://i.pinimg.com/736x/80/c4/f7/80c4f7e387cc05ce50f2906a59f621d5.jpg',
+    src: 'https://i.pinimg.com/originals/ff/fc/5a/fffc5a92c68455f331036891970b1fb9.gif',
     targetId: 'shopping-category',
   },
   {
     title: '旅遊',
-    src: 'https://i.pinimg.com/736x/15/f0/e0/15f0e0372d1e04df5f325d00e5899069.jpg',
+    src: 'https://i.pinimg.com/originals/49/77/3b/49773b089b09c93a7885699500633691.gif',
     targetId: 'travel-category',
   },
   {
     title: '運動',
-    src: 'https://i.pinimg.com/736x/b6/74/ca/b674ca0f776433f737615236d466a02d.jpg',
+    src: 'https://i.pinimg.com/originals/bf/3e/73/bf3e73c60355c69103555b2083d1822d.gif',
     targetId: 'sports-category',
   },
   {
     title: '教育',
-    src: 'https://i.pinimg.com/736x/ec/80/62/ec80622845d58a8cf0dcea9681ea353a.jpg',
+    src: 'https://i.pinimg.com/originals/f0/4f/4e/f04f4e57612f6d0426e725dadb334e42.gif',
     targetId: 'education-category',
   },
   {
     title: '其他',
-    src: 'https://i.pinimg.com/736x/55/7c/64/557c64034ecc52a10522dd77a80c8700.jpg',
+    src: 'https://i.pinimg.com/originals/5a/b5/9a/5ab59a91d9c8d3cc19be0cff707a1f60.gif',
     targetId: 'others-category',
   },
 ]
