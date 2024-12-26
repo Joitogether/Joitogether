@@ -45,7 +45,7 @@ onMounted(() => {
   <div class="text-3xl flex justify-center">花錢買快樂的紀錄💸</div>
   <n-table :bordered="false" :single-line="false" class="my-14 w-fit m-auto">
     <thead>
-      <tr>
+      <tr class="text-center text-base">
         <th>交易日期</th>
         <th>交易類別</th>
         <th>交易金額</th>
@@ -54,20 +54,20 @@ onMounted(() => {
       </tr>
     </thead>
     <tbody>
-      <tr v-for="record in wallet" :key="record.id">
+      <tr v-for="record in wallet" :key="record.id" class="text-base">
         <td>{{ formatDate(record.created_at) }}</td>
         <td v-if="record.action == 'deposit'">儲值金</td>
         <td v-if="record.action == 'spend'">揪團活動</td>
         <td v-if="record.action == 'deposit'" class="flex justify-between">
           <plus class="text-green-500" />
-          ${{ record.amount }}
+          {{ record.amount }}
         </td>
         <td v-if="record.action == 'spend'" class="flex justify-between">
           <minus class="text-red-500" />
-          ${{ record.amount }}
+          {{ record.amount }}
         </td>
         <td>Joimoney{{ record.action }}{{ record.tradeTime }}</td>
-        <td>${{ record.updated_balance }}</td>
+        <td class="text-center">${{ record.updated_balance }}</td>
       </tr>
     </tbody>
   </n-table>
