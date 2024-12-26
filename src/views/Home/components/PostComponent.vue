@@ -186,7 +186,7 @@ const formatDate = (isoString) => {
               <img
                 :src="item.post_img"
                 alt="文章照片"
-                class="object-cover aspect-square rounded-xl w-full h-full"
+                class="object-cover aspect-square rounded-xl w-full h-full shadow"
                 @error="onPostImageError"
                 loading="lazy"
               />

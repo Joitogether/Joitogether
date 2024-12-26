@@ -113,7 +113,11 @@ const scrollToCategory = (id) => {
                   alt=""
                   class="w-full h-full aspect-square object-cover rounded-full border-[4px] border-gray-100 hover:border-[8px] hover:border-green-300 transition-all duration-300"
                 />
-                <p class="text-center text-xl font-bold mt-8">{{ area.title }}</p>
+                <p
+                  class="text-center text-xl font-bold mt-8 border-gray-100 hover:scale-[1.35] hover:text-green-600 transition-all duration-300"
+                >
+                  {{ area.title }}
+                </p>
               </div>
             </div>
           </div>
@@ -126,5 +130,6 @@ const scrollToCategory = (id) => {
 <style scoped>
 * {
   color: #444;
+  font-family: '微軟正黑體';
 }
 </style>
