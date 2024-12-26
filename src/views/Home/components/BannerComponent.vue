@@ -9,14 +9,14 @@
           :src="carouselImg.src"
         />
       </n-carousel>
-      <div class="container mx-auto aria">
-        <div class="flex flex-col items-center mt-10">
-          <h1>熱門聚會地點</h1>
+      <div class="container mx-auto area">
+        <div class="flex flex-col items-center mt-10 mb-10">
+          <h1>熱門揪團類型</h1>
           <div class="flex items-center w-full justify-evenly">
-            <div v-for="aria in ariaData" :key="aria.title">
-              <a href="#">
-                <img :src="aria.src" alt="" />
-                <p class="text-center">{{ aria.title }}</p>
+            <div v-for="area in areaData" :key="area.title">
+              <a href="#" @click.prevent="scrollToCategory(area.targetId)">
+                <img :src="area.src" alt="" class="w-full h-full aspect-square object-cover" />
+                <p class="text-center">{{ area.title }}</p>
               </a>
             </div>
           </div>
@@ -45,26 +45,31 @@ const carouselData = ref([
   },
 ])
 
-const ariaData = [
+const areaData = [
   {
-    title: '大台北',
-    src: 'https://www.eatgether.com/static/media/TPE.91790170.png',
+    title: '美食',
+    src: 'https://i.pinimg.com/originals/c3/61/70/c3617019ad42a99b25365c51060fec2f.gif',
+    targetId: 'food-category',
   },
   {
-    title: '桃園市',
-    src: 'https://www.eatgether.com/static/media/TAO.68ddb6e3.png',
+    title: '購物',
+    src: 'https://i.pinimg.com/originals/ff/fc/5a/fffc5a92c68455f331036891970b1fb9.gif',
+    targetId: 'shopping-category',
   },
   {
-    title: '新竹市',
-    src: 'https://www.eatgether.com/static/media/HSZ.417cf6b8.png',
+    title: '旅遊',
+    src: 'https://i.pinimg.com/originals/49/77/3b/49773b089b09c93a7885699500633691.gif',
+    targetId: 'travel-category',
   },
   {
-    title: '臺中市',
-    src: 'https://www.eatgether.com/static/media/TXG.c136bf99.png',
+    title: '運動',
+    src: 'https://i.pinimg.com/originals/bf/3e/73/bf3e73c60355c69103555b2083d1822d.gif',
+    targetId: 'sports-category',
   },
   {
-    title: '臺南市',
-    src: 'https://www.eatgether.com/static/media/TNN.1ab27f99.png',
+    title: '教育',
+    src: 'https://i.pinimg.com/originals/f0/4f/4e/f04f4e57612f6d0426e725dadb334e42.gif',
+    targetId: 'education-category',
   },
   {
     title: '高雄市',
@@ -103,8 +108,10 @@ watch(isMobile, (newVal) => {
 }
 a img {
   border-radius: 50%;
-  max-width: 100px;
-  height: auto;
+  max-width: 150px;
+  max-height: 150px;
+  width: 100px;
+  height: 100px;
   margin: 0 auto;
 }
 a img:hover {
@@ -138,6 +145,14 @@ p {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 60px;
+  }
+  a img {
+    border-radius: 50%;
+    max-width: 150px;
+    max-height: 150px;
+    width: 100px;
+    height: 100px;
+    margin: 0 auto;
   }
 }
 </style>
