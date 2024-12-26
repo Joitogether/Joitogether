@@ -55,8 +55,8 @@ export const useActivityStore = defineStore('activity', () => {
       const response = await activitySearchAPI(keyword)
       console.log('API 回應:', response)
       console.log('activities.value:', activities.value)
-      if (response && response.status === 200) {
-        activities.value = response.data
+      if (response) {
+        activities.value = response
       } else {
         throw new Error(response.message || '找不到該聚會內容')
       }

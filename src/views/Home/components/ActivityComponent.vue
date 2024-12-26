@@ -13,6 +13,9 @@ const { fetchAllActivities, fetchActivitiesByCategory, searchActivities } = acti
 const route = useRoute()
 
 onMounted(() => {
+  if (route.query.q) {
+    return
+  }
   fetchAllActivities()
 })
 
