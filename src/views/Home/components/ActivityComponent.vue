@@ -97,7 +97,16 @@ const fetchActivitiesAndUsers = async () => {
   }
 }
 
+// 監聽 BannerComponent 的訊息
+const handleMessage = (event) => {
+  if (event.data?.action === 'selectCategory' && event.data.category) {
+    selectCategory(event.data.category)
+  }
+}
+
 onMounted(async () => {
+  window.addEventListener('message', handleMessage)
+
   if (route.query.q) {
     return
   }
@@ -119,6 +128,7 @@ onMounted(async () => {
 })
 
 onUnmounted(() => {
+  window.removeEventListener('message', handleMessage)
   if (observer.value) observer.value.disconnect()
 })
 
@@ -151,7 +161,7 @@ watch(
             全部
           </button>
         </div>
-        <div class="mr-7 py-3 pl-3 text-sm">
+        <div id="food-category" class="mr-7 py-3 pl-3 text-sm">
           <button
             class="p-1 md:p-2 w-full md:w-auto text-center"
             @click="selectCategory('food')"
@@ -160,7 +170,7 @@ watch(
             美食
           </button>
         </div>
-        <div class="mr-7 py-3 pl-3 text-sm">
+        <div id="shopping-category" class="mr-7 py-3 pl-3 text-sm">
           <button
             class="p-1 md:p-2 w-full md:w-auto text-center"
             @click="selectCategory('shopping')"
@@ -169,7 +179,7 @@ watch(
             購物
           </button>
         </div>
-        <div class="mr-7 py-3 pl-3 text-sm">
+        <div id="travel-category" class="mr-7 py-3 pl-3 text-sm">
           <button
             class="p-1 md:p-2 w-full md:w-auto text-center"
             @click="selectCategory('travel')"
@@ -178,7 +188,7 @@ watch(
             旅遊
           </button>
         </div>
-        <div class="mr-7 py-3 pl-3 text-sm">
+        <div id="sports-category" class="mr-7 py-3 pl-3 text-sm">
           <button
             class="p-1 md:p-2 w-full md:w-auto text-center"
             @click="selectCategory('sports')"
@@ -187,7 +197,7 @@ watch(
             運動
           </button>
         </div>
-        <div class="mr-7 py-3 pl-3 text-sm">
+        <div id="education-category" class="mr-7 py-3 pl-3 text-sm">
           <button
             class="p-1 md:p-2 w-full md:w-auto text-center"
             @click="selectCategory('education')"
@@ -196,7 +206,7 @@ watch(
             教育
           </button>
         </div>
-        <div class="mr-7 py-3 pl-3 text-sm">
+        <div id="others-category" class="mr-7 py-3 pl-3 text-sm">
           <button
             class="p-1 md:p-2 w-full md:w-auto text-center"
             @click="selectCategory('others')"

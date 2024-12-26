@@ -169,14 +169,10 @@ const informPostUpdate = () => {
             @click="handlePostClick(post.id)"
           >
             <!-- 左邊區塊 -->
-
             <div class="flex flex-col md:flex-row w-full space-y-4 md:space-y-0">
-              <!-- 左側內容區塊 -->
               <div class="flex flex-col w-full md:w-9/12 space-y-2 md:pr-5">
-                <!-- 使用者資訊與時間 -->
                 <div class="flex items-center justify-between space-x-3">
                   <div class="flex flex-row items-center gap-3">
-                    <!-- 大頭貼 -->
                     <div class="w-10 h-10 rounded-full overflow-hidden">
                       <img
                         :src="
@@ -187,24 +183,19 @@ const informPostUpdate = () => {
                         alt="使用者大頭貼"
                       />
                     </div>
-                    <!-- 使用者名稱 -->
                     <p class="font-bold text-sm">{{ post.name }}</p>
                   </div>
-                  <!-- 發佈時間 -->
                   <p class="text-sm text-gray-500">{{ dayjs(post.time).fromNow() }}</p>
                 </div>
-                <!-- 文章標題 -->
                 <h2 class="text-lg font-bold truncate">{{ post.title }}</h2>
-                <!-- 文章內容 -->
                 <p class="text-sm text-gray-700 line-clamp-2">{{ post.content }}</p>
-                <!-- 讚與留言 -->
                 <div class="flex space-x-8 text-sm text-gray-600">
                   <div>👍🏻 {{ post.likesCount }} 讚</div>
                   <div>💬 {{ post.commentsCount }} 留言</div>
                 </div>
               </div>
 
-              <!-- 文章圖片區塊 (可選) -->
+              <!-- 右邊區塊 -->
               <div
                 v-if="post.img"
                 class="w-full md:w-3/12 aspect-square rounded-lg overflow-hidden mt-4 md:mt-0"

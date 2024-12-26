@@ -95,12 +95,14 @@ const formatDate = (isoString) => {
 </script>
 
 <template>
-  <div class="bg-gray-100 w-full min-w-[300px] p-4 px-28 py-10">
-    <div>
-      <h2 class="text-3xl min-w-[200px]">最新貼文</h2>
+  <div class="bg-gray-100 w-full min-w-[300px] p-4 py-10 sm:px-[140px] md:px-[180px] lg:px-[20px]">
+    <div class="w-full px-[100px] sm:px-[20px] md:px-[20px] lg:px-[10px]">
+      <h2 class="text-3xl">最新貼文</h2>
     </div>
 
-    <div class="post-label-area flex py-7 border-b-[1px] border-solid border-[rgba(61,57,44,0.1)]">
+    <div
+      class="flex py-7 border-b-[1px] border-solid border-[rgba(61,57,44,0.1)] justify-between px-[100px] sm:px-[20px] md:px-[20px] lg:px-[10px]"
+    >
       <n-button
         circle
         type="success"
@@ -125,10 +127,10 @@ const formatDate = (isoString) => {
         @click="router.push(`/post/${item.post_id}`)"
         v-for="item in posts"
         :key="item.id"
-        class="flex flex-col justify-center items-center m-6 mb-0 w-full h-full relative max-w-[350px] sm:w-full sm:max-w-[400px] md:w-full md:max-w-[600px] cursor-pointer"
+        class="flex flex-col justify-center items-center m-0 mb-0 w-full h-full relative max-w-[350px] sm:w-full sm:max-w-[400px] md:w-full md:max-w-[600px] cursor-pointer"
       >
         <!-- 頭貼區 -->
-        <div class="flex w-full justify-start items-center px-4 md:px-8 lg:px-4">
+        <div class="flex w-full justify-start items-center px-4 md:px-8 lg:px-8">
           <div class="w-[40px] h-[40px]">
             <img
               :src="item.users.photo_url || defaultAvatar"

@@ -86,32 +86,45 @@ onMounted(() => {
     <div
       v-for="post in userPostList"
       :key="post.post_id"
-      class="one-post-bottom cursor-pointer bg-gray-50 rounded-md mb-3 px-5 py-3"
+      class="one-post-bottom cursor-pointer bg-gray-50 rounded-md mb-3 px-5 py-3 md:px-3 md:py-1"
     >
       <div class="post-bottom-top">
-        <div class="post-bottom-left flex flex-col gap-1">
-          <div class="flex justify-between">
-            <p class="text-xl font-bold">{{ post.post_title }}</p>
-            <p class="text-gray-400 text-sm">{{ timeSince(post.created_at) }}</p>
-          </div>
+        <div class="post-bottom-left flex flex-col gap-1 md:flex-row md:justify-between md:gap-6">
+          <div class="md:w-3/4 md:p-3 md:flex md:flex-col md:justify-between">
+            <div class="flex flex-col gap-2">
+              <div class="flex justify-between">
+                <p class="text-xl font-bold">{{ post.post_title }}</p>
+                <p class="text-gray-400 text-sm">{{ timeSince(post.created_at) }}</p>
+              </div>
 
-          <div class="flex justify-between">
-            <p class="post-content text-[16px] text-slate-600 line-clamp-2">
-              {{ post.post_content }}
-            </p>
-            <!-- <div
+              <div class="flex justify-between">
+                <p class="post-content text-[16px] text-slate-600 line-clamp-2">
+                  {{ post.post_content }}
+                </p>
+              </div>
+              <div
+                v-if="post.post_img"
+                class="md:hidden post-bottom-right rounded-md overflow-hidden my-3"
+              >
+                <img :src="post.post_img" alt="Post Image" class="object-cover w-full h-full" />
+              </div>
+            </div>
+
+            <div class="post-bottom-bottom flex leading-loose">
+              <div class="mr-8">👍🏻 {{ post.likeCount || 0 }} 讚</div>
+              <div>💬 {{ post.commentCount || 0 }} 留言</div>
+            </div>
+          </div>
+          <div
+            class="hidden md:block post-bottom-right w-1/4 aspect-square rounded-md overflow-hidden my-3"
+          >
+            <img
               v-if="post.post_img"
-              class="post-bottom-right rounded-md overflow-hidden my-3 w-28 h-28"
-            >
-              <img :src="post.post_img" alt="Post Image" class="object-cover w-full h-full" />
-            </div> -->
-          </div>
-          <div v-if="post.post_img" class="post-bottom-right rounded-md overflow-hidden my-3">
-            <img :src="post.post_img" alt="Post Image" class="object-cover w-full h-full" />
-          </div>
-          <div class="post-bottom-bottom flex leading-loose">
-            <div class="mr-8">👍🏻 {{ post.likeCount || 0 }} 讚</div>
-            <div>💬 {{ post.commentCount || 0 }} 留言</div>
+              :src="post.post_img"
+              alt="Post Image"
+              class="object-cover w-full h-full"
+            />
+            <div v-else class="w-full h-full"></div>
           </div>
         </div>
       </div>

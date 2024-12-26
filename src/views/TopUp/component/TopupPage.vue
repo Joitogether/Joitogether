@@ -9,7 +9,7 @@ import {
   getWalletBalanceAPI,
   saveTopupAPI,
   addDepositAPI,
-} from '@/apis/topupAPI.js'
+} from '@/apis/paymentAPI'
 import { formatDate } from '@/utils/dayjsDate'
 
 const router = useRouter()
