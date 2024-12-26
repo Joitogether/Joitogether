@@ -9,10 +9,12 @@
           :src="carouselImg.src"
         />
       </n-carousel>
-      <div class="container mx-auto area">
-        <div class="flex flex-col items-center mt-10 mb-10">
-          <h1>熱門揪團類型</h1>
-          <div class="flex items-center w-full justify-evenly">
+      <div class="w-full h-full bg-slate-300">
+        <div class="flex flex-col h-full items-center">
+          <h1 class="text-[36px] font-bold my-[60px]">熱門揪團類型</h1>
+          <div
+            class="flex items-center gap-[210px] w-full justify-evenly mb-[60px] sm:justify-evenly"
+          >
             <div v-for="area in areaData" :key="area.title">
               <a href="#" @click.prevent="scrollToCategory(area.targetId)">
                 <img :src="area.src" alt="" class="w-full h-full aspect-square object-cover" />
@@ -72,10 +74,12 @@ const areaData = [
     targetId: 'education-category',
   },
   {
-    title: '高雄市',
-    src: 'https://www.eatgether.com/static/media/KHH.da56765a.png',
+    title: '其他',
+    src: 'https://i.pinimg.com/originals/5a/b5/9a/5ab59a91d9c8d3cc19be0cff707a1f60.gif',
+    targetId: 'others-category',
   },
 ]
+
 const isMobile = ref(false)
 
 const updateScreenSize = () => {
@@ -98,34 +102,29 @@ watch(isMobile, (newVal) => {
     carouselData.value[1].src = joixmas // 替換回桌面版圖片
   }
 })
+
+const scrollToCategory = (id) => {
+  const targetElement = document.getElementById(id)
+  if (targetElement) {
+    targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    // 傳送訊息給 ActivityComponent
+    window.postMessage({ action: 'selectCategory', category: id.replace('-category', '') }, '*')
+  }
+}
 </script>
 
 <style scoped>
 .carousel-img {
   width: 100%;
-  height: 480px;
+  height: 450px;
   object-fit: cover;
 }
-a img {
-  border-radius: 50%;
-  max-width: 150px;
-  max-height: 150px;
-  width: 100px;
-  height: 100px;
-  margin: 0 auto;
-}
+
 a img:hover {
   transform: scale(1.05);
   transition: transform 0.3s ease-in-out;
 }
-h1 {
-  padding: 10px;
-  margin-bottom: 15px;
-  font-size: 32px;
-  line-height: 46px;
-  font-weight: bold;
-  color: rgb(59, 59, 58);
-}
+
 p {
   margin-top: 16px;
   font-size: 20px;
@@ -136,7 +135,6 @@ p {
   .flex.items-center.w-full.justify-evenly {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 50px;
   }
 }
 
@@ -144,7 +142,6 @@ p {
   .flex.items-center.w-full.justify-evenly {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 60px;
   }
   a img {
     border-radius: 50%;
