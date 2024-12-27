@@ -1,33 +1,3 @@
-<template>
-  <div class="w-screen">
-    <div class="banner flex flex-col">
-      <n-carousel autoplay>
-        <img
-          v-for="carouselImg in carouselData"
-          :key="carouselImg.src"
-          class="carousel-img"
-          :src="carouselImg.src"
-        />
-      </n-carousel>
-      <div class="w-full h-full bg-slate-300">
-        <div class="flex flex-col h-full items-center">
-          <h1 class="text-[36px] font-bold my-[60px]">熱門揪團類型</h1>
-          <div
-            class="flex items-center gap-[210px] w-full justify-evenly mb-[60px] sm:justify-evenly"
-          >
-            <div v-for="area in areaData" :key="area.title">
-              <a href="#" @click.prevent="handleCategoryClick(area.targetId)">
-                <img :src="area.src" alt="" class="w-full h-full aspect-square object-cover" />
-                <p class="text-center">{{ area.title }}</p>
-              </a>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</template>
-
 <script setup>
 import { NCarousel } from 'naive-ui'
 import { ref, onMounted, onUnmounted, watch } from 'vue'
@@ -111,44 +81,54 @@ watch(isMobile, (newVal) => {
   }
 })
 </script>
+<template>
+  <div class="w-screen">
+    <!-- 輪播圖 -->
+    <div class="flex flex-col h-full">
+      <n-carousel autoplay>
+        <img
+          v-for="carouselImg in carouselData"
+          :key="carouselImg.src"
+          class="w-full max-h-[600px] object-cover aspect-video"
+          :src="carouselImg.src"
+        />
+      </n-carousel>
+
+      <div class="w-full h-full min-w-[300px]">
+        <div class="flex flex-col h-full justify-center items-center">
+          <h1 class="text-[30px] font-bold my-[60px] sm:text-[38px] md:text-[40px] lg:text-[42px]">
+            熱門揪團類型
+          </h1>
+          <div
+            class="flex flex-wrap w-full justify-around px-[60px] md:px-[120px] lg:px-[32px] cursor-pointer"
+          >
+            <div v-for="area in areaData" :key="area.title" class="m-6">
+              <div
+                @click.prevent="handleCategoryClick(area.targetId)"
+                class="min-w-[40px] max-w-[80px] sm:max-w-[80px] md:m-[40px] md:max-w-[120px] lg:min-w-[120px] lg:max-w-[160px] hover:scale-[1.15] transition-all duration-200"
+              >
+                <img
+                  :src="area.src"
+                  alt=""
+                  class="w-full h-full aspect-square object-cover rounded-full border-[4px] border-gray-100 hover:border-[8px] hover:border-green-300 transition-all duration-300"
+                />
+                <p
+                  class="text-center text-xl font-bold mt-8 border-gray-100 hover:scale-[1.35] hover:text-green-600 transition-all duration-300"
+                >
+                  {{ area.title }}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
 
 <style scoped>
-.carousel-img {
-  width: 100%;
-  height: 450px;
-  object-fit: cover;
-}
-
-a img:hover {
-  transform: scale(1.05);
-  transition: transform 0.3s ease-in-out;
-}
-
-p {
-  margin-top: 16px;
-  font-size: 20px;
-  line-height: 29px;
-  font-weight: bold;
-}
-@media (max-width: 768px) {
-  .flex.items-center.w-full.justify-evenly {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-@media (min-width: 768px) and (max-width: 1024px) {
-  .flex.items-center.w-full.justify-evenly {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-  a img {
-    border-radius: 50%;
-    max-width: 150px;
-    max-height: 150px;
-    width: 100px;
-    height: 100px;
-    margin: 0 auto;
-  }
+* {
+  color: #444;
+  font-family: '微軟正黑體';
 }
 </style>
