@@ -3,16 +3,9 @@ import { apiAxios } from '@/utils/request.js'
 export const userRegisterAPI = async (data) => {
   try {
     const response = await apiAxios.post('/users/register', data)
-    if (response.status >= 200 && response.status < 300) {
-      console.log('註冊資料後端傳送成功', response.data)
-      return response
-    } else {
-      console.log('註冊資料後端傳送失敗', response)
-      throw new Error(`註冊資料後端回應失敗，狀態碼：${response.status}`)
-    }
-  } catch (error) {
-    console.error('註冊資料 API 呼叫失敗：', error.message)
-    throw error
+    return response
+  } catch {
+    return null
   }
 }
 
@@ -61,12 +54,12 @@ export const userAuthLoginAPI = async (data) => {
 export const userGetAPI = async (uid) => {
   try {
     const response = await apiAxios.get(`/users/${uid}`)
+    // console.log('取得用戶資料成功', response.data.data)
+    return response.data.data
+  } catch (error) {
+    console.log(error)
 
-    if (response && response.status === 200) {
-      return response.data.data
-    }
-  } catch (err) {
-    return err.response.message
+    return null
   }
 }
 

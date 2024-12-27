@@ -28,7 +28,10 @@ const formData = reactive({
 const fetchUserData = async () => {
   try {
     const result = await userGetAPI(userStore.user.uid)
-
+    if (result.length === 0) {
+      user.value = {}
+      return
+    }
     if (result) {
       user.value = result
       return user.value

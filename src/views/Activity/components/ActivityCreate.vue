@@ -42,7 +42,12 @@ if (userStore.user.isLogin) {
   const fetchUserData = async () => {
     try {
       const result = await userGetAPI(userStore.user.uid)
+
       if (result) {
+        if (result.length === 0) {
+          user.value = {}
+          return
+        }
         user.value = result
       }
       return result

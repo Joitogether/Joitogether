@@ -16,10 +16,16 @@ const userStore = useUserStore()
 const user = ref({})
 const loading = ref(true)
 const errorMessage = ref(null)
+const isEditModalOpen = ref(false)
 
 const fetchUserData = async () => {
   try {
     const result = await userGetAPI(userStore.user.uid)
+    console.log(result)
+    if (result.length === 0) {
+      user.value = {}
+      return
+    }
     if (result) {
       user.value = result
 
@@ -34,13 +40,11 @@ const fetchUserData = async () => {
 
 const handleSave = async () => {
   await fetchUserData()
-  isEditModalOpen.value = false
 }
 onMounted(async () => {
   await fetchUserData()
 })
 
-const isEditModalOpen = ref(false)
 // 開啟編輯視窗
 const openEditModal = () => {
   isEditModalOpen.value = true // 顯示編輯視窗
@@ -65,7 +69,12 @@ const currentPage = ref('PersonInfo')
       :photo_url="user.photo_url"
       @edit="openEditModal"
     />
-    <EditModal v-if="isEditModalOpen" @close="closeEditModal" @save="handleSave" />
+    <EditModal
+      @save="handleSave"
+      :user="userStore.user"
+      @close="closeEditModal"
+      :show="isEditModalOpen"
+    />
     <div class="flex justify-between px-4 py-5 md:px-8">
       <button
         @click="currentPage = 'PersonInfo'"

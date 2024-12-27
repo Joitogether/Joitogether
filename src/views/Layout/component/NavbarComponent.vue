@@ -48,21 +48,30 @@ defineProps({
     required: true,
   },
 })
+
 // 檢查用戶登入狀態並獲取用戶資料
 const fetchUserData = async () => {
   try {
     const result = await userGetAPI(userStore.user.uid)
-    if (result) {
-      user.value = result
+
+    if (!result || result.length === 0) {
+      user.value = {}
+      userLogin.value = false
       loading.value = false
-      userLogin.value = true
+      return
     }
-  } catch {
-    message.error('載入用戶資料錯誤')
+
+    user.value = result
+    userLogin.value = true
     loading.value = false
+  } catch {
+    message.error('載入用戶資料錯誤，請稍後再試')
+    user.value = {}
     userLogin.value = false
+    loading.value = false
   }
 }
+
 const getPostCount = async () => {
   try {
     const result = await getPostsAPI(userStore.user.uid).catch(() => ({ data: [] }))
@@ -402,7 +411,10 @@ const handleSearchClick = (e) => {
           class="user-photo rounded-full w-40 h-40 aspect-square overflow-hidden flex justify-self-center md:w-24 md:h-24"
         >
           <img
-            :src="user.photo_url || 'default_image_path.jpg'"
+            :src="
+              userStore.user.photo_url ||
+              'https://drive.google.com/file/d/15Ff4C5EZfkuho34yCpfVjtzQyuA2APff/view'
+            "
             alt="userPhoto"
             class="w-full h-full object-cover"
           />
