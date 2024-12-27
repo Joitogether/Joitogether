@@ -5,11 +5,19 @@ import { storeToRefs } from 'pinia'
 import { formatDate } from '@/utils/useDateTime'
 import { useActivityStore } from '@/stores/useActivityStore'
 import { useRoute } from 'vue-router'
+import { NSelect } from 'naive-ui'
 
 const activityStore = useActivityStore()
-const { activities, loading, error, triggerAction } = storeToRefs(activityStore)
-const { fetchAllActivities, fetchActivitiesByCategory, searchActivities, triggerActivityAction } =
-  activityStore
+const { activities, loading, error, triggerAction, selectedRegions, regionOptions } =
+  storeToRefs(activityStore)
+
+const {
+  fetchAllActivities,
+  fetchActivitiesByCategory,
+  searchActivities,
+  triggerActivityAction,
+  fetchActivitiesByRegion,
+} = activityStore
 
 const route = useRoute()
 
@@ -41,7 +49,6 @@ const categoryMap = {
 }
 
 const selectCategory = (category) => {
-  console.log(category)
   selectedCategory.value = category
   const mappedCategory = categoryMap[category]
 
@@ -99,6 +106,19 @@ watch(
   },
 )
 
+watch(
+  selectedRegions,
+  (regions) => {
+    console.log('選中的地區：', regions) // 調試用
+    if (regions.length > 0) {
+      fetchActivitiesByRegion(regions)
+    } else {
+      fetchAllActivities()
+    }
+  },
+  { immediate: true },
+)
+
 // 滾動到活動區塊
 const scrollToActivityBlock = () => {
   const activitySection = document.getElementById('activity-section')
@@ -135,7 +155,13 @@ const scrollToActivityBlock = () => {
     <!-- 篩選器 -->
     <div class="mt-7 flex justify-between items-center">
       <div class="text-xl flex items-center">
-        <span class="ml-1"></span>
+        <n-select
+          v-model:value="selectedRegions"
+          :options="regionOptions"
+          clearable
+          placeholder="選擇地區"
+          style="width: 200px; margin-right: 16px"
+        />
       </div>
       <div class="text-xl flex items-center">
         <span class="ml-1">
