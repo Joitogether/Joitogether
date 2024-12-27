@@ -37,6 +37,9 @@ export const useSocketStore = defineStore('socket', () => {
 
     // 接收通知事件
     socket.value.on('newNotification', (notification) => {
+      if (notification.actor_id == notification.user_id) {
+        return
+      }
       addNotification(notification)
     })
   }

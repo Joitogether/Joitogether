@@ -196,6 +196,17 @@ const onPositiveClick = async () => {
     toggleConfirmModal()
     return message.error('取消報名失敗')
   }
+  const notiData = {
+    actor_id: userStore.user.uid,
+    user_id: activity.value.host_id,
+    target_id: activity.value.id,
+    action: 'register',
+    target_type: 'activity',
+    message: '取消報名了你的活動',
+    link: `/activity/detail/${activity.value.id}`,
+  }
+  socketStore.sendNotification(notiData)
+
   await getActivityDetail()
   //  取消報名成功
   toggleConfirmModal()
