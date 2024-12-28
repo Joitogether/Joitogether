@@ -1,6 +1,6 @@
 <script setup>
 import { NTable, NButton } from 'naive-ui'
-import { getWalletBalanceAPI } from '@/apis/topupAPI.js'
+import { getWalletTransactionAPI } from '@/apis/topupAPI.js'
 import { useUserStore } from '@/stores/userStore'
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
@@ -13,7 +13,7 @@ const wallet = ref([])
 
 const fetchWalletBalance = async () => {
   try {
-    const result = await getWalletBalanceAPI(userStore.user.uid)
+    const result = await getWalletTransactionAPI(userStore.user.uid)
 
     if (result) {
       let changeTime = 0

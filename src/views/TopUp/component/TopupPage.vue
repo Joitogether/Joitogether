@@ -3,93 +3,55 @@ import { onMounted, reactive, ref } from 'vue'
 import { useUserStore } from '@/stores/userStore'
 import { NButton, NInputNumber } from 'naive-ui'
 import { useRouter } from 'vue-router'
-import {
-  createPaymentAPI,
-  getWalletBalanceAPI,
-  saveTopupAPI,
-  addDepositAPI,
-} from '@/apis/topupAPI.js'
-import { formatDate } from '@/utils/dayjsDate'
+import { getWalletTransactionAPI, handleTopupAPI } from '@/apis/topupAPI.js'
 
 const router = useRouter()
-const user = ref([])
 const wallet = ref([])
 const userStore = useUserStore()
 const amounts = [100, 200, 300, 500, 666, 888, 999, 1111]
+const paymentForm = ref(null)
+const newebPayParams = ref(null)
 
 const formData = reactive({
   amount: 1,
-  email: '',
   itemDesc: '儲值金',
 })
 
 const fetchWalletBalance = async () => {
-  const result = await getWalletBalanceAPI(userStore.user.uid)
+  const result = await getWalletTransactionAPI(userStore.user.uid)
+  console.log('walletbalance', result.balance)
+
   wallet.value = result
   return wallet.value
 }
 
 const createOrder = async () => {
-  formData.email = user.value.email
-
   try {
-    const response = await createPaymentAPI(formData)
-
-    if (response) {
-      const orderData = {
-        topuper_id: userStore.user.uid,
-        amount: formData.amount,
-        topup_number: response.MerchantOrderNo,
-        type: formData.itemDesc,
-        topup_date: formatDate(new Date()),
-        status: 'PENDING',
-      }
-
-      const saveResponse = await saveTopupAPI(userStore.user.uid, orderData)
-      console.log('saveResponse:', saveResponse)
-      if (saveResponse) {
-        console.log('訂單資料儲存成功')
-      } else {
-        console.log('儲存訂單資料失敗')
-      }
-      //將儲值金額加至錢包（這部分之後移到儲值完成頁面）
-      const increaseWallet = await addDepositAPI(userStore.user.uid, { amount: orderData.amount })
-      console.log('increaseWallet', increaseWallet.data)
-      if (increaseWallet) {
-        console.log('錢包增加成功')
-      } else {
-        console.log('錢包增加失敗')
-      }
-
-      const form = document.createElement('form')
-      form.method = 'POST'
-      form.action = 'https://ccore.newebpay.com/MPG/mpg_gateway'
-
-      const newebPayParams = {
-        MerchantID: response.MerchantID,
-        TradeSha: response.shaEncrypt,
-        TradeInfo: response.aesEncrypt,
-        TimeStamp: response.TimeStamp,
-        Version: response.Version,
-        MerchantOrderNo: response.MerchantOrderNo,
-        Amt: response.Amt,
-        ItemDesc: formData.itemDesc,
-        Email: response.Email,
-        RespondType: 'JSON',
-      }
-
-      Object.keys(newebPayParams).forEach((key) => {
-        const input = document.createElement('input')
-        input.type = 'hidden'
-        input.name = key
-        input.value = newebPayParams[key]
-        form.appendChild(input)
-      })
-
-      document.body.appendChild(form)
-      console.log('已加密：', newebPayParams)
-
-      form.submit()
+    const orderData = {
+      email: userStore.user.email,
+      topuper_id: userStore.user.uid,
+      amount: formData.amount,
+      type: formData.itemDesc,
+      payment_status: 'PENDING',
+    }
+    const response = await handleTopupAPI(orderData)
+    const newebpay_data = response
+    newebPayParams.value = {
+      MerchantID: newebpay_data.MerchantID,
+      TradeSha: newebpay_data.shaEncrypt,
+      TradeInfo: newebpay_data.aesEncrypt,
+      TimeStamp: newebpay_data.TimeStamp,
+      Version: newebpay_data.Version,
+      MerchantOrderNo: newebpay_data.MerchantOrderNo,
+      Amt: newebpay_data.Amt,
+      ItemDesc: newebpay_data.itemDesc,
+      Email: newebpay_data.email,
+      RespondType: 'JSON',
+    }
+    if (paymentForm.value) {
+      setTimeout(() => paymentForm.value.submit(), 3000)
+    } else {
+      throw new Error('Payment form not found')
     }
   } catch (err) {
     console.error(err)
@@ -168,13 +130,22 @@ onMounted(() => {
           <div></div>
         </div>
         <div class="topup-button flex justify-center mt-10">
-          <n-button
-            type="warning"
-            class="text-center border-2 rounded-md py-2 px-10 text-lg"
-            @click="createOrder"
-          >
-            立即儲值
-          </n-button>
+          <form ref="paymentForm" method="POST" action="https://ccore.newebpay.com/MPG/mpg_gateway">
+            <input
+              v-for="(value, key) in newebPayParams"
+              :key="key"
+              type="hidden"
+              :name="key"
+              :value="value"
+            />
+            <n-button
+              type="warning"
+              class="text-center border-2 rounded-md py-2 px-10 text-lg"
+              @click="createOrder"
+            >
+              立即儲值
+            </n-button>
+          </form>
         </div>
       </div>
     </div>

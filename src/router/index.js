@@ -21,8 +21,10 @@ import ShoppingCart from '@/views/CashFlow/index.vue'
 import Layout from '@/views/Layout/index.vue'
 import { getCurrentUser } from '@/utils/firebaseConfig'
 import TopUp from '@/views/TopUp/index.vue'
-import TopupFinish from '@/views/TopUp/component/TopupFinish.vue'
 import WalletRecord from '@/views/TopUp/component/WalletRecord.vue'
+import TopupResult from '@/views/TopUp/component/TopupResult.vue'
+import TopupSuccess from '@/views/TopUp/component/TopupSuccess.vue'
+import TopupFail from '@/views/TopUp/component/TopupFail.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -135,17 +137,27 @@ const router = createRouter({
           ],
         },
         {
-          path: '/topup',
+          path: 'topup',
           name: 'topup',
           component: TopUp,
         },
         {
-          path: '/topupFinish',
-          name: 'topupFinish',
-          component: TopupFinish,
+          path: 'topup/result/:id',
+          name: 'topupResult',
+          component: TopupResult,
         },
         {
-          path: '/walletRecord',
+          path: 'topup/success/:id',
+          name: 'topupSuccess',
+          component: TopupSuccess,
+        },
+        {
+          path: 'topup/fail/:id',
+          name: 'topupFail',
+          component: TopupFail,
+        },
+        {
+          path: 'walletRecord',
           name: 'walletRecord',
           component: WalletRecord,
         },
