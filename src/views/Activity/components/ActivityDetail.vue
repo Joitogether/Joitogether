@@ -19,7 +19,6 @@ import {
   activityDeleteCommentAPI,
 } from '@/apis/activityAPIs.js'
 import { useSocketStore } from '@/stores/socketStore'
-
 dayjs.locale('zh-tw')
 dayjs.extend(relativeTime)
 const route = useRoute()
@@ -117,8 +116,11 @@ const validateRegister = async () => {
   }
   return true
 }
-
 const registerActivity = async () => {
+  if (!userStore.user.uid) {
+    toggleRegisterModal()
+    return message.error('您尚未登入，請先登入才能繼續此操作')
+  }
   const status = await validateRegister()
   if (!status) {
     return toggleRegisterModal()
@@ -129,9 +131,9 @@ const registerActivity = async () => {
     // 不需要審核的話，報名即視為認證報名
     register_validated: !activity.value.require_approval ? 1 : 0,
   }
-
+  // const messageReactive = message.info('報名中...', { duration: 0 })
   const res = await activityRegisterAPI(activityId, data)
-
+  // messageReactive.destroy()
   if (res.status !== 201) {
     if (res.message === '報名上限已達') {
       message.error('報名已達上限')
@@ -188,6 +190,10 @@ const onNegativeClick = () => {
 
 // 取消報名
 const onPositiveClick = async () => {
+  if (!userStore.user.uid) {
+    toggleConfirmModal()
+    return message.error('您尚未登入，請先登入才能繼續此操作')
+  }
   if (currentTime.value >= activity.value.event_time) {
     return message.error('已超過取消報名時間')
   }
@@ -219,6 +225,9 @@ const toggleReviewModal = () => {
   showReviewModal.value = !showReviewModal.value
 }
 const onReviewPositiveClick = () => {
+  if (!userStore.user.uid) {
+    return message.error('您尚未登入，請先登入才能繼續此操作')
+  }
   router.push({ name: 'activityReview', params: { activity_id: activityId } })
 }
 
@@ -236,6 +245,10 @@ const onCancelCancelActivityClick = () => {
 
 // 取消活動
 const onConfirmCancelActivityClick = async () => {
+  if (!userStore.user.uid) {
+    toggleCancelActivityModal()
+    return message.error('您尚未登入，請先登入才能繼續此操作')
+  }
   getCurrentTime()
   if (currentTime.value >= activity.value.event_time) {
     return message.error('已超過取消活動時間')
@@ -251,6 +264,9 @@ const onConfirmCancelActivityClick = async () => {
 }
 
 const submitComment = async () => {
+  if (!userStore.user.uid) {
+    return message.error('您尚未登入，請先登入才能繼續此操作')
+  }
   const data = {
     comment: userComment.value,
     participant_id: userStore.user.uid,
@@ -275,6 +291,10 @@ const submitComment = async () => {
 }
 
 const addToCart = async () => {
+  if (!userStore.user.uid) {
+    toggleRegisterModal()
+    return message.error('您尚未登入，請先登入才能繼續此操作')
+  }
   const status = await validateRegister()
   if (!status) {
     return toggleRegisterModal()
@@ -300,6 +320,9 @@ const options = [
 
 const handleDropSelect = async (key, comment_id) => {
   if (key === 'delete') {
+    if (!userStore.user.uid) {
+      return message.error('您尚未登入，請先登入才能繼續此操作')
+    }
     const res = await activityDeleteCommentAPI(comment_id)
     if (!res) {
       return message.error('刪除留言失敗')
@@ -328,11 +351,8 @@ watch(
           </router-link>
           <div class="flex h-full justify-start ml-[5%] w-full">
             <img class="w-14 aspect-square rounded-full" :src="host.photo_url" alt="" />
-            <div class="ml-3 relative w-full h-14">
-              <p class="font-bold text-lg absolute top-0">{{ host.display_name }}</p>
-              <p class="absolute bottom-0">
-                {{ `${userStore.user.city} • ${userStore.user.age} • ${userStore.user.career}` }}
-              </p>
+            <div class="ml-3 w-full h-14 flex items-center">
+              <p class="font-bold text-lg">{{ host.display_name }}</p>
             </div>
           </div>
         </div>
@@ -521,6 +541,7 @@ watch(
               </template>
             </n-card>
           </n-modal>
+
           <p class="py-8 leading-6">{{ activity.description }}</p>
           <ul class="flex justify-around text-md border border-gray-200/100 rounded-lg p-2">
             <li class="flex flex-col items-center">
