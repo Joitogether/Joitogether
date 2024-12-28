@@ -152,7 +152,7 @@ const router = createRouter({
           component: TopupSuccess,
         },
         {
-          path: 'topup/fail/:id',
+          path: 'topup/fail',
           name: 'topupFail',
           component: TopupFail,
         },
