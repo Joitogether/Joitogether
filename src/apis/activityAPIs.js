@@ -53,16 +53,16 @@ export const activityGetAPI = async () => {
 export const activityNewCommentAPI = async (activity_id, data) => {
   try {
     return await apiAxios.post(`/activities/comment/${activity_id}`, data)
-  } catch (err) {
-    return err.response.data
+  } catch {
+    return null
   }
 }
 
 export const activityDeleteCommentAPI = async (comment_id) => {
   try {
     return await apiAxios.delete(`/activities/comment/${comment_id}`)
-  } catch (err) {
-    return err.response.data
+  } catch {
+    return null
   }
 }
 
@@ -141,7 +141,7 @@ export const activityUserCreateAPI = async (file, otherData) => {
 
     if (file) {
       const filePath = `activities/${Date.now()}_${file.name}` // 設定文件路徑
-      const fileRef = storageRef(storage, filePath) // 創建文件參考
+      const fileRef = storageRef(storage, filePath) // 建立文件參考
 
       // 上傳文件至 Firebase Storage
       const snapshot = await uploadBytes(fileRef, file)
@@ -188,4 +188,9 @@ export const activitySearchAPI = async (keyword) => {
   } catch (error) {
     return error.response.data.data
   }
+}
+
+export const activityCategoryAPI = async (type, data) => {
+  const response = await apiAxios.post(`/activities/category/${type}`, data)
+  return response.data
 }

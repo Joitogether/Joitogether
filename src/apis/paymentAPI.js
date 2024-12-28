@@ -26,7 +26,7 @@ export const getTopupRecordAPI = async (uid) => {
 
 export const addDepositAPI = async (uid, data) => {
   try {
-    const response = await apiAxios.post(`/payments/wallet/${uid}/deposit`, data)
+    const response = await apiAxios.post(`/payments/deposit/${uid}`, data)
     console.log('加值結果', response)
 
     return response

@@ -24,7 +24,7 @@ import { Facebook, Instagram } from '@iconoir/vue'
                 <RouterLink to="/login" class="">註冊會員</RouterLink>
               </div>
               <div class="text-gray-600">
-                <a href="#" class="">創建活動</a>
+                <a href="#" class="">建立活動</a>
               </div>
             </div>
             <div class="md:flex md:flex-col lg:gap-2">

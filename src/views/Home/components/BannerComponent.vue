@@ -1,37 +1,17 @@
-<template>
-  <div class="w-screen">
-    <div class="banner flex flex-col">
-      <n-carousel autoplay>
-        <img
-          v-for="carouselImg in carouselData"
-          :key="carouselImg.src"
-          class="carousel-img"
-          :src="carouselImg.src"
-        />
-      </n-carousel>
-      <div class="container mx-auto aria">
-        <div class="flex flex-col items-center mt-10">
-          <h1>熱門聚會地點</h1>
-          <div class="flex items-center w-full justify-evenly">
-            <div v-for="aria in ariaData" :key="aria.title">
-              <a href="#">
-                <img :src="aria.src" alt="" />
-                <p class="text-center">{{ aria.title }}</p>
-              </a>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</template>
-
 <script setup>
 import { NCarousel } from 'naive-ui'
 import { ref, onMounted, onUnmounted, watch } from 'vue'
 import joixmas from '@/assets/JoiXmas.jpg'
 import joixmasmobile from '@/assets/JoiXmasMobile.jpg'
 import joigif from '@/assets/joitogether.gif'
+import { useActivityStore } from '@/stores/useActivityStore'
+
+const activityStore = useActivityStore()
+const { triggerActivityAction } = activityStore
+
+const handleCategoryClick = (category) => {
+  triggerActivityAction(category)
+}
 
 const carouselData = ref([
   {
@@ -45,32 +25,39 @@ const carouselData = ref([
   },
 ])
 
-const ariaData = [
+const areaData = [
   {
-    title: '大台北',
-    src: 'https://www.eatgether.com/static/media/TPE.91790170.png',
+    title: '美食',
+    src: 'https://i.pinimg.com/originals/c3/61/70/c3617019ad42a99b25365c51060fec2f.gif',
+    targetId: '美食',
   },
   {
-    title: '桃園市',
-    src: 'https://www.eatgether.com/static/media/TAO.68ddb6e3.png',
+    title: '購物',
+    src: 'https://i.pinimg.com/originals/ff/fc/5a/fffc5a92c68455f331036891970b1fb9.gif',
+    targetId: '購物',
   },
   {
-    title: '新竹市',
-    src: 'https://www.eatgether.com/static/media/HSZ.417cf6b8.png',
+    title: '旅遊',
+    src: 'https://i.pinimg.com/originals/49/77/3b/49773b089b09c93a7885699500633691.gif',
+    targetId: '旅遊',
   },
   {
-    title: '臺中市',
-    src: 'https://www.eatgether.com/static/media/TXG.c136bf99.png',
+    title: '運動',
+    src: 'https://i.pinimg.com/originals/bf/3e/73/bf3e73c60355c69103555b2083d1822d.gif',
+    targetId: '運動',
   },
   {
-    title: '臺南市',
-    src: 'https://www.eatgether.com/static/media/TNN.1ab27f99.png',
+    title: '教育',
+    src: 'https://i.pinimg.com/originals/f0/4f/4e/f04f4e57612f6d0426e725dadb334e42.gif',
+    targetId: '教育',
   },
   {
-    title: '高雄市',
-    src: 'https://www.eatgether.com/static/media/KHH.da56765a.png',
+    title: '其他',
+    src: 'https://i.pinimg.com/originals/5a/b5/9a/5ab59a91d9c8d3cc19be0cff707a1f60.gif',
+    targetId: '其他',
   },
 ]
+
 const isMobile = ref(false)
 
 const updateScreenSize = () => {
@@ -94,50 +81,54 @@ watch(isMobile, (newVal) => {
   }
 })
 </script>
+<template>
+  <div class="w-screen">
+    <!-- 輪播圖 -->
+    <div class="flex flex-col h-full">
+      <n-carousel autoplay>
+        <img
+          v-for="carouselImg in carouselData"
+          :key="carouselImg.src"
+          class="w-full max-h-[600px] object-cover aspect-video"
+          :src="carouselImg.src"
+        />
+      </n-carousel>
+
+      <div class="w-full h-full min-w-[300px]">
+        <div class="flex flex-col h-full justify-center items-center">
+          <h1 class="text-[30px] font-bold my-[60px] sm:text-[38px] md:text-[40px] lg:text-[42px]">
+            熱門揪團類型
+          </h1>
+          <div
+            class="flex flex-wrap w-full justify-around px-[60px] md:px-[120px] lg:px-[32px] cursor-pointer"
+          >
+            <div v-for="area in areaData" :key="area.title" class="m-6">
+              <div
+                @click.prevent="handleCategoryClick(area.targetId)"
+                class="min-w-[40px] max-w-[80px] sm:max-w-[80px] md:m-[40px] md:max-w-[120px] lg:min-w-[120px] lg:max-w-[160px] hover:scale-[1.15] transition-all duration-200"
+              >
+                <img
+                  :src="area.src"
+                  alt=""
+                  class="w-full h-full aspect-square object-cover rounded-full border-[4px] border-gray-100 hover:border-[8px] hover:border-green-300 transition-all duration-300"
+                />
+                <p
+                  class="text-center text-xl font-bold mt-8 border-gray-100 hover:scale-[1.35] hover:text-green-600 transition-all duration-300"
+                >
+                  {{ area.title }}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
 
 <style scoped>
-.carousel-img {
-  width: 100%;
-  height: 480px;
-  object-fit: cover;
-}
-a img {
-  border-radius: 50%;
-  max-width: 100px;
-  height: auto;
-  margin: 0 auto;
-}
-a img:hover {
-  transform: scale(1.05);
-  transition: transform 0.3s ease-in-out;
-}
-h1 {
-  padding: 10px;
-  margin-bottom: 15px;
-  font-size: 32px;
-  line-height: 46px;
-  font-weight: bold;
-  color: rgb(59, 59, 58);
-}
-p {
-  margin-top: 16px;
-  font-size: 20px;
-  line-height: 29px;
-  font-weight: bold;
-}
-@media (max-width: 768px) {
-  .flex.items-center.w-full.justify-evenly {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 50px;
-  }
-}
-
-@media (min-width: 768px) and (max-width: 1024px) {
-  .flex.items-center.w-full.justify-evenly {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 60px;
-  }
+* {
+  color: #444;
+  font-family: '微軟正黑體';
 }
 </style>
