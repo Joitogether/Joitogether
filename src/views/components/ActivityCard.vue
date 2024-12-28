@@ -30,7 +30,7 @@ const props = defineProps({
       :to="{
         name: 'activityDetail',
         params: {
-          id: props.id,
+          id: props.id || 0,
         },
       }"
       :class="{ ['flex']: props.horizontal }"
