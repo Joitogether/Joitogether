@@ -184,12 +184,12 @@ const showCancelRegisterModal = ref(false)
 const toggleConfirmModal = () => {
   showCancelRegisterModal.value = !showCancelRegisterModal.value
 }
-const onNegativeClick = () => {
+const onNegativeCancelRegister = () => {
   toggleConfirmModal()
 }
 
 // 取消報名
-const onPositiveClick = async () => {
+const onPositiveCancelRegister = async () => {
   if (!userStore.user.uid) {
     toggleConfirmModal()
     return message.error('您尚未登入，請先登入才能繼續此操作')
@@ -202,6 +202,17 @@ const onPositiveClick = async () => {
     toggleConfirmModal()
     return message.error('取消報名失敗')
   }
+  const notiData = {
+    actor_id: userStore.user.uid,
+    user_id: activity.value.host_id,
+    target_id: activity.value.id,
+    action: 'register',
+    target_type: 'activity',
+    message: '取消報名了你的活動',
+    link: `/activity/detail/${activity.value.id}`,
+  }
+  socketStore.sendNotification(notiData)
+
   await getActivityDetail()
   //  取消報名成功
   toggleConfirmModal()
@@ -448,8 +459,8 @@ watch(
             title="取消報名"
             positive-text="確定"
             negative-text="再想想"
-            @positive-click="onPositiveClick"
-            @negative-click="onNegativeClick"
+            @positive-click="onPositiveCancelRegister"
+            @negative-click="onNegativeCancelRegister"
           >
             <p>你確定要取消報名嗎？<br />一但取消報名有可能無法再次報名</p>
           </n-modal>
