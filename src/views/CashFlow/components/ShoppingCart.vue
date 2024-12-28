@@ -3,7 +3,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import * as PaymentAPIs from '../../../apis/paymentAPIs.js'
 import { useUserStore } from '@/stores/userStore'
-import { handleError } from '../../utils/handleError.js'
+import { handleError } from '../../../utils/handleError.js'
 
 const cartItems = ref([])
 const isLoading = ref(true)

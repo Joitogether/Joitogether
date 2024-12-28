@@ -15,6 +15,7 @@ import { useMessage, NButton } from 'naive-ui'
 import dayjs from 'dayjs'
 import 'dayjs/locale/zh-tw.js'
 import relativeTime from 'dayjs/plugin/relativeTime'
+import { useSocketStore } from '@/stores/socketStore'
 
 dayjs.locale('zh-tw')
 dayjs.extend(relativeTime)
@@ -29,7 +30,7 @@ const isEditing = ref(false)
 const editPostTitle = ref('')
 const editPostContent = ref('')
 const editPostImg = ref('')
-
+const socketStore = useSocketStore()
 // 留言打進後端的資料
 const newComment = ref('')
 const message = useMessage()
@@ -58,6 +59,7 @@ const postDetails = reactive({
   img: '',
   name: '',
   avatar: '',
+  authorUid: '',
 })
 
 const categoryMap = {
@@ -85,6 +87,7 @@ const fetchPostDetails = async () => {
     postDetails.name = user.users.display_name
     postDetails.avatar = user.users.photo_url
     postDetails.isPostAuthor = user.uid === userStore.user.uid
+    postDetails.authorUid = user.uid
   } catch (error) {
     console.error(`獲取 ${postId}文章資料失敗`, error.response?.data || error.message)
   }
@@ -140,6 +143,18 @@ const addComment = async () => {
 
   try {
     await createPostCommentAPI(postId, commentData)
+
+    const notiData = {
+      actor_id: userStore.user.uid,
+      user_id: postDetails.authorUid,
+      target_id: postId,
+      action: 'comment',
+      target_type: 'post',
+      message: '留言了你的文章',
+      link: `/post/${postId}`,
+    }
+    socketStore.sendNotification(notiData)
+
     message.success('留言新增成功')
     console.log('傳送', commentData)
     newComment.value = ''
@@ -217,6 +232,17 @@ const toggleLike = async () => {
       await deleteLikeAPI(likeId.value, 'unlike')
     } else {
       await addLikeAPI(postId, userStore.user.uid, 'liked')
+
+      const notiData = {
+        actor_id: userStore.user.uid,
+        user_id: postDetails.authorUid,
+        target_id: postId,
+        action: 'like',
+        target_type: 'post',
+        message: '按讚了你的文章',
+        link: `/post/${postId}`,
+      }
+      socketStore.sendNotification(notiData)
     }
     fetchPostLikes()
     return likeData
