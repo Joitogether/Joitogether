@@ -1,5 +1,13 @@
 import { apiAxios } from '@/utils/request'
 
+export const handleTopupAPI = async (data) => {
+  try {
+    const response = await apiAxios.post('/topups/process', data)
+    return response.data.data
+  } catch (err) {
+    console.error('處理訂單儲存錯誤：', err)
+  }
+}
 export const createPaymentAPI = async (data) => {
   try {
     const response = await apiAxios.post('/payments/encrypt', data)
@@ -9,6 +17,20 @@ export const createPaymentAPI = async (data) => {
     throw err
   }
 }
+export const addDepositAPI = async (uid, data) => {
+  try {
+    const response = await apiAxios.post(`/payments/wallet/${uid}/deposit`, data)
+    return response
+  } catch (err) {
+    return err.response.data
+  }
+}
+
+export const getWalletTransactionAPI = async (uid) => {
+  const response = await apiAxios.get(`/payments/wallet/${uid}/transactions`)
+  return response.data.data
+}
+// 建立訂單，暫時用不到
 export const saveTopupAPI = async (uid, deposit) => {
   try {
     const response = await apiAxios.post(`/topups/orderdetail/${uid}`, deposit)
@@ -20,33 +42,32 @@ export const saveTopupAPI = async (uid, deposit) => {
 }
 
 export const getTopupRecordAPI = async (uid) => {
-  const response = await apiAxios.get(`/topups/records/${uid}`)
-  return response.data.data
-}
-
-export const addDepositAPI = async (uid, data) => {
-  try {
-    const response = await apiAxios.post(`/payments/wallet/${uid}/deposit`, data)
-    console.log('加值結果', response)
-
-    return response
-  } catch (err) {
-    return err.response.data
+  const recordResponse = await apiAxios.get(`/topups/records/${uid}`)
+  const walletResponse = await apiAxios.get(`/payments/wallet/${uid}`)
+  return {
+    recordData: recordResponse.data.data,
+    walletBalance: walletResponse.data,
   }
 }
 
-export const getWalletBalanceAPI = async (uid) => {
-  const response = await apiAxios.get(`/payments/wallet/${uid}`)
-  return response.data.data
-}
+// export const getNewebpayStatusAPI = async () => {
+//   try {
+//     const response = await apiAxios.post('/topups/newebpay_return')
+//     console.log('藍新回傳資訊：', response)
+//     return response.data
+//   } catch (error) {
+//     console.error('取得藍新狀態失敗：', error)
+//     throw error
+//   }
+// }
 
-export const getNewebpayStatusAPI = async () => {
+//更新topup_record table status狀態＋新增錢包交易＋更新錢包餘額，成功會拿到201
+export const updateTopupStatusAPI = async (uid, data) => {
   try {
-    const response = await apiAxios.post('/topups/newebpay_return')
-    console.log('藍新回傳資訊：', response)
+    const response = await apiAxios.put(`/topups/updatestatus/${uid}`, data)
+    // res拿到：wallet_id, action, amount, updated_balance, created_at,
     return response.data
   } catch (error) {
-    console.error('取得藍新狀態失敗：', error)
-    throw error
+    console.error('更新儲值紀錄狀態失敗', error)
   }
 }
