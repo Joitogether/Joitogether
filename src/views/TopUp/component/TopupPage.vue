@@ -9,8 +9,9 @@ import {
   getWalletBalanceAPI,
   saveTopupAPI,
   addDepositAPI,
-} from '@/apis/paymentAPI'
+} from '@/apis/paymentAPIs'
 import { formatDate } from '@/utils/dayjsDate'
+import { handleError } from '@/utils/handleError'
 
 const router = useRouter()
 const user = ref([])
@@ -42,10 +43,19 @@ const fetchUserData = async () => {
     errorMessage.value = err.message || '資料加載錯誤'
   }
 }
+
 const fetchWalletBalance = async () => {
-  const result = await getWalletBalanceAPI(userStore.user.uid)
-  wallet.value = result
-  return wallet.value
+  try {
+    const result = await getWalletBalanceAPI(userStore.user.uid)
+
+    if (!result || result.length === 0) {
+      wallet.value = 0
+      return
+    }
+    wallet.value = result
+  } catch {
+    handleError()
+  }
 }
 
 const createOrder = async () => {

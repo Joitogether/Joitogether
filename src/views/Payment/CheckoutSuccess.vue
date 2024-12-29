@@ -5,16 +5,19 @@ import { useRoute } from 'vue-router'
 import { useUserStore } from '@/stores/userStore'
 import * as PaymentAPIs from '../../apis/paymentAPIs.js'
 import { handleError } from '../../utils/handleError.js'
+import { useMessage } from 'naive-ui'
 
 const router = useRouter()
 const route = useRoute()
 const userStore = useUserStore()
+const message = useMessage()
 
 // 獲取訂單資料
 const orderDetails = ref([])
 const orderId = ref(null)
 const fetchOrderDetails = async () => {
   try {
+    console.log('orderId:', orderId.value)
     // 確認 order_id 是否存在
     if (!route.params.order_id) {
       throw new Error('無法獲取 order_id')
@@ -49,7 +52,7 @@ const balance = ref(0)
 const fetchWalletBalance = async () => {
   try {
     const response = await PaymentAPIs.getWalletBalanceAPI(userStore.user.uid)
-    balance.value = response.data.balance
+    balance.value = response.balance
     return balance.value
   } catch {
     handleError()
@@ -64,14 +67,14 @@ onMounted(async () => {
   try {
     await Promise.all([fetchOrderDetails(), fetchWalletBalance()])
   } catch {
-    handleError('😢 資料溜走了，找不到它們！\n不過別擔心，我們正在努力召喚它們回來 🚀✨')
+    message.error('😢 資料溜走了，找不到它們！\n不過別擔心，我們正在努力召喚它們回來 🚀✨')
   }
 })
 </script>
 
 <template>
   <div class="bg-gray-100 min-h-screen flex justify-center items-center px-4">
-    <div class="bg-white rounded-lg shadow-md mt-6 p-6 w-full max-w-4xl sm:w-[90%]">
+    <div class="bg-white rounded-lg shadow-md mt-6 mb-6 p-6 w-full max-w-4xl sm:w-[90%]">
       <div class="text-center">
         <h1 class="text-3xl font-bold text-green-600 mb-6">付款成功 🎉</h1>
       </div>

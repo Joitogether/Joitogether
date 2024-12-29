@@ -1,6 +1,7 @@
 <script setup>
 import { NTable, NButton } from 'naive-ui'
-import { getTopupRecordAPI, getWalletBalanceAPI } from '@/apis/topupAPI.js'
+import { getTopupRecordAPI } from '@/apis/topupAPI.js'
+import { getWalletBalanceAPI } from '@/apis/paymentAPIs.js'
 import { useUserStore } from '@/stores/userStore'
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
