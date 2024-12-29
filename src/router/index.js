@@ -151,6 +151,11 @@ const router = createRouter({
           name: 'topupRecord',
           component: TopupRecord,
         },
+        {
+          path: '/:catchAll(.*)', // 匹配所有未定義路由
+          name: 'NotFound',
+          component: () => import('@/NotFound.vue'), // 導向自訂的 404 頁面 隨時可改
+        },
       ],
     },
   ],
