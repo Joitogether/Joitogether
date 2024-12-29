@@ -452,7 +452,7 @@ const previewActivity = () => {
                 <textarea
                   placeholder="請填活動描述"
                   rows="4"
-                  class="w-full p-3 border rounded-md focus:outline-none text-base"
+                  class="w-full p-3 border rounded-md focus:outline-none text-base resize-none"
                   v-model="inputValues.describe"
                   @blur="checkInput('describe')"
                 ></textarea>
