@@ -1,3 +1,10 @@
+import dayjs from 'dayjs'
+import utc from 'dayjs/plugin/utc'
+import timezone from 'dayjs/plugin/timezone'
+
+dayjs.extend(utc)
+dayjs.extend(timezone)
+
 // 計算台灣時區的 minTime 和 maxTime
 export function taiwanTime() {
   const taiwanTimeOffset = 8 * 60 * 60 * 1000
@@ -20,6 +27,9 @@ export function taiwanTime() {
 // 格式化日期為 ISO 時區格式
 export function formatToISOWithTimezone(dateString) {
   const date = new Date(dateString)
+
+  date.setHours(date.getHours() - 8)
+
   const year = date.getFullYear()
   const month = String(date.getMonth() + 1).padStart(2, '0')
   const day = String(date.getDate()).padStart(2, '0')
@@ -31,15 +41,7 @@ export function formatToISOWithTimezone(dateString) {
 }
 
 export function formatDate(dateString) {
-  const date = new Date(dateString)
-  const formattedDate = date.toLocaleString('zh-TW', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-    hour12: false,
-  })
-  return formattedDate.replace(/\//g, '-').replace(/:\d{2}$/, '')
+  const taiwanTime = dayjs.utc(dateString).tz('Asia/Taipei')
+
+  return taiwanTime.format('YYYY-MM-DD HH:mm')
 }

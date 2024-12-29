@@ -88,6 +88,7 @@ const ActivityDataPush = async () => {
 
   try {
     await activityUserCreateAPI(selectedFile.value || null, activityData)
+    message.success('活動建立成功了喔!!') // 成功訊息提示
     router.replace('/')
   } catch (err) {
     console.error('錯誤回應:', err)
@@ -452,7 +453,7 @@ const previewActivity = () => {
                 <textarea
                   placeholder="請填活動描述"
                   rows="4"
-                  class="w-full p-3 border rounded-md focus:outline-none text-base"
+                  class="w-full p-3 border rounded-md focus:outline-none text-base resize-none"
                   v-model="inputValues.describe"
                   @blur="checkInput('describe')"
                 ></textarea>

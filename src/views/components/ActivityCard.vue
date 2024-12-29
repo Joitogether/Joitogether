@@ -60,7 +60,7 @@ const props = defineProps({
             <img class="w-6 h-6 rounded-full mr-2" :src="props.hostImgUrl" alt="團主頭像" />
             <span>{{ props.host }}</span>
           </div>
-          <div class="flex items-center">可報名人數:{{ props.participants }}</div>
+          <div class="flex items-center">該活動人數上限: {{ props.participants }}</div>
         </div>
       </div>
     </router-link>

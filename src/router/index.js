@@ -67,6 +67,7 @@ const router = createRouter({
           path: 'profile',
           name: 'profile',
           component: Profile,
+          meta: { requiresAuth: true },
           redirect: { name: 'personInfo' },
           children: [
             {
@@ -120,6 +121,7 @@ const router = createRouter({
             {
               path: 'create',
               name: 'activityCreate',
+              meta: { requiresAuth: true },
               component: ActivityCreate,
             },
             {
@@ -130,6 +132,7 @@ const router = createRouter({
             {
               path: 'rating/:activity_id',
               name: 'activityRating',
+              meta: { requiresAuth: true },
               component: ActivityRating,
             },
           ],
@@ -149,15 +152,24 @@ const router = createRouter({
           name: 'topupRecord',
           component: TopupRecord,
         },
+        {
+          path: '/:catchAll(.*)', // 匹配所有未定義路由
+          name: 'NotFound',
+          component: () => import('@/NotFound.vue'), // 導向自訂的 404 頁面 隨時可改
+        },
       ],
     },
   ],
 })
 
 router.beforeEach(async (to, from, next) => {
-  await getCurrentUser()
-  console.log('router觸發了')
-  next()
+  const user = await getCurrentUser()
+  const requiresAuth = to.matched.some((record) => record.meta.requiresAuth)
+  if (requiresAuth && !user) {
+    next({ name: 'login' })
+  } else {
+    next()
+  }
 })
 
 export default router

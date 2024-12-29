@@ -122,6 +122,7 @@ const handleLogout = async () => {
   }
 
   try {
+    userLogin.value = false
     // 調用 Firebase 登出邏輯
     await auth.signOut()
 
