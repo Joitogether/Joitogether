@@ -26,6 +26,7 @@ const userComment = ref('')
 const registerComment = ref('')
 const activityId = route.params.id
 const recentActivities = ref([])
+const ratings = ref({})
 const currentTime = ref(new Date().toISOString())
 const getCurrentTime = () => {
   currentTime.value = new Date().toISOString()
@@ -44,6 +45,7 @@ async function getActivityDetail() {
   host.value = activityDetail.host_info
   comments.value = activityDetail.comments
   recentActivities.value = activityDetail.recent_activities
+  ratings.value = activityDetail.ratings
 }
 
 const userStore = useUserStore()
@@ -564,8 +566,37 @@ watch(
           <div id="map" class="border w-full h-52 text-5xl font-bold">這裡放地圖</div>
 
           <div class="mt-3">
-            <span class="block text-2xl font-bold mb-2">阿勳的評價與評分</span>
-            <div class="border h-52 text-5xl font-bold">這裡放星星評分</div>
+            <span class="block text-2xl font-bold mb-2">{{
+              `${host.display_name}的評價與評分`
+            }}</span>
+            <div class="border h-52 text-5xl font-bold">
+              <div class="flex justify-center">
+                <div class="flex flex-row items-center gap-1">
+                  <p class="text-4xl">♡</p>
+                  <div class="text-5xl">{{ ratings.averageHeart }}</div>
+                </div>
+              </div>
+              <div class="my-3">
+                <ol class="flex flex-col gap-2">
+                  <li
+                    v-for="(item, index) in 5"
+                    :key="index"
+                    class="flex items-center gap-4 text-xl"
+                  >
+                    {{ 5 - index }}
+                    <n-progress
+                      type="line"
+                      color="#625B57"
+                      :height="20"
+                      :percentage="ratings.ratingPercentages[`heart${5 - index}`]"
+                      indicator-placement="inside"
+                    >
+                      <span>{{ ratings.heartCounts[`heart${5 - index}`] }}</span>
+                    </n-progress>
+                  </li>
+                </ol>
+              </div>
+            </div>
             <span class="block mt-10 mb-2 text-lg">留言</span>
           </div>
           <div class="comment-section border-b border-gray-300 pb-4">
@@ -631,10 +662,10 @@ watch(
           :actImgUrl="item.img_url"
           :location="item.location"
           :dateTime="dayjs(item.event_time).format('YYYY年MM月DD日')"
-          :participants="participantsCount"
           :host="item.users.display_name"
           :imageHeight="'100%'"
           :hostImgUrl="item.users.photo_url"
+          :participants="item.max_participants"
           class="mb-[3%] h-36"
         ></ActivityCard>
       </div>
