@@ -120,7 +120,7 @@ const goTopUp = () => {
 }
 
 const goCheckoutSuccess = (orderId) => {
-  router.replace({ name: 'checkout-success', params: { order_id: orderId } })
+  router.replace({ name: 'checkoutSuccess', params: { order_id: orderId } })
 }
 
 onMounted(async () => {

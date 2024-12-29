@@ -6,6 +6,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { ratingGetDetailAPI, ratingSubmitAPI } from '@/apis/ratingAPIs'
 import dayjs from 'dayjs'
 import { useUserStore } from '@/stores/userStore'
+import { handleError } from '@/utils/handleError.js'
 
 dayjs.locale('zh-tw')
 const userStore = useUserStore()
@@ -50,12 +51,30 @@ const backStep0 = () => {
 }
 
 const getDetailForRating = async () => {
-  const { activity_id } = route.params
-  const res = await ratingGetDetailAPI(activity_id)
-  activityDetail.value = res.activity
-  hostInfo.value = res.activity.users
-  hostRatingAverage.value = res.hostRatingAverage['_avg']
-  latestHostRating.value = res.latestHostRating
+  try {
+    const { activity_id } = route.params
+    const res = await ratingGetDetailAPI(activity_id)
+
+    if (!res || !res.activity) {
+      message.warn(`活動 ${activity_id} 查無資料`)
+      activityDetail.value = {}
+      hostInfo.value = {}
+      hostRatingAverage.value = {}
+      latestHostRating.value = null
+      return
+    }
+
+    activityDetail.value = res.activity
+    hostInfo.value = res.activity.users || {}
+    hostRatingAverage.value = res.hostRatingAverage['_avg'] || {}
+    latestHostRating.value = res.latestHostRating || null
+  } catch (error) {
+    activityDetail.value = {}
+    hostInfo.value = {}
+    hostRatingAverage.value = {}
+    latestHostRating.value = null
+    handleError(message, '無法加載活動資料，請稍後再試 🙏', error)
+  }
 }
 
 onMounted(async () => {
@@ -116,11 +135,9 @@ const props = defineProps({
 })
 
 // 定義 Emits
-const emit = defineEmits(['update:score'])
 
 // 當前評分的響應式狀態
-const currentScore = ref(props.score) // 初始化為 props 的 score
-const currentHover = ref(0) // 當前 hover 狀態的愛心數
+const currentScore = ref(props.score)
 
 // 方法：更新評分
 const setRating = (index, category) => {
@@ -175,7 +192,7 @@ watch(
 
       <!-- 評分進度 -->
       <div
-         class="flex flex-row w-full max-w-[400px] justify-around m-auto bg-white border-2 p-1 my-3 rounded-full xl:text-base xl:py-1 md:text-md sm:text-sm"
+        class="flex flex-row w-full max-w-[400px] justify-around m-auto bg-white border-2 p-1 my-3 rounded-full xl:text-base xl:py-1 md:text-md sm:text-sm"
       >
         <div>
           <!-- 團主評價到此頁面的進度顯示-->
@@ -262,7 +279,7 @@ watch(
                     :class="{ filled: index <= hostRatingAverage.rating_ability }"
                   ></span>
                 </div>
-                
+
                 <div class="min-w-[45px] mx-2 text-xs xl:text-base xl:p-1">
                   {{ hostRatingAverage.rating_ability?.toFixed(1) || '0.0' }} / 5.0
                 </div>
@@ -279,8 +296,7 @@ watch(
                     :class="{ filled: index <= hostRatingAverage.rating_credit }"
                   ></span>
                 </div>
-                
-                
+
                 <div class="mx-2 text-xs xl:text-base xl:p-1">
                   {{ hostRatingAverage.rating_credit?.toFixed(1) || '0.0' }} / 5.0
                 </div>

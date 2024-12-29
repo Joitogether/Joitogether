@@ -157,8 +157,8 @@ const router = createRouter({
           component: CheckoutPage,
         },
         {
-          path: '/checkout-Success/:order_id',
-          name: 'checkout-success',
+          path: '/checkout-success/:order_id',
+          name: 'checkoutSuccess',
           component: CheckoutSuccess,
         },
       ],
