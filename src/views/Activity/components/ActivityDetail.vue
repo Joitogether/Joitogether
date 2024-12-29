@@ -19,6 +19,7 @@ import {
   activityDeleteCommentAPI,
 } from '@/apis/activityAPIs.js'
 import { useSocketStore } from '@/stores/socketStore'
+import { handleError } from '@/utils/handleError.js'
 
 dayjs.locale('zh-tw')
 dayjs.extend(relativeTime)
@@ -32,19 +33,23 @@ const getCurrentTime = () => {
   currentTime.value = new Date().toISOString()
 }
 async function getActivityDetail() {
-  const activityDetail = await activityGetDetailAPI(route.params.id)
+  try {
+    const activityDetail = await activityGetDetailAPI(route.params.id)
 
-  // 有資料或null
-  if (!activityDetail) {
-    message.error('獲取活動失敗')
-    // 這裡應該要針對沒有拿到id的狀態處理，去not found
-    return
+    if (!activityDetail || activityDetail.length === 0) {
+      handleError('目前無相關活動資料')
+      // 這裡應該要針對沒有拿到id的狀態處理，去 not found
+      // router.push({ name: 'notFound' });
+      return
+    }
+    getCurrentTime()
+    activity.value = activityDetail
+    host.value = activityDetail.host_info
+    comments.value = activityDetail.comments
+    recentActivities.value = activityDetail.recent_activities
+  } catch {
+    handleError()
   }
-  getCurrentTime()
-  activity.value = activityDetail
-  host.value = activityDetail.host_info
-  comments.value = activityDetail.comments
-  recentActivities.value = activityDetail.recent_activities
 }
 
 const userStore = useUserStore()

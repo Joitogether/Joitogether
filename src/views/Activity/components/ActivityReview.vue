@@ -19,6 +19,7 @@ import {
 } from '@/apis/activityAPIs'
 import { useRoute } from 'vue-router'
 import { useUserStore } from '@/stores/userStore'
+import { handleError } from '@/utils/handleError.js'
 
 const route = useRoute()
 const activity_id = route.params.activity_id
@@ -29,12 +30,14 @@ const activity = ref([null]) // 活動詳細資料
 onMounted(async () => {
   try {
     const response = await ActivityGetActivitiesAPI(activity_id)
-    if (response.status === 200 && response.data) {
+    if (response?.data?.data) {
       activity.value = response.data.data
-      console.log('成功', response.data.data)
+    } else {
+      handleError('目前無相關活動資料')
+      activity.value = {}
     }
-  } catch (error) {
-    console.error('無法獲取活動資料:', error)
+  } catch {
+    handleError()
   }
 })
 
@@ -43,7 +46,7 @@ const refreshAttendees = async () => {
 }
 
 onMounted(async () => {
-  attendee.value = await ActivityGetApplicationsAPI(activity_id, defaultAvatar)
+  refreshAttendees()
 })
 
 const dialog = useDialog()
@@ -126,11 +129,10 @@ const handleApproveClick = async (id) => {
           message.success(`${attendeeToUpdate.name} 已被允許參加`)
           await refreshAttendees()
         } else {
-          message.error('操作失敗，請稍後再試！')
+          handleError()
         }
-      } catch (error) {
-        console.error('API 請求失敗:', error)
-        message.error('操作失敗，請稍後再試！')
+      } catch {
+        handleError()
       }
     },
     onNegativeClick: () => {

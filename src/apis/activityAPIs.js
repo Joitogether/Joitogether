@@ -5,27 +5,24 @@ import DefaultImage from '@/assets/UserUpdata1.jpg'
 export const activityCancelRegisterAPI = async (activityId, participant_id) => {
   try {
     return await apiAxios.put(`/applications/cancel/${activityId}`, { participant_id })
-  } catch (err) {
-    return err.response.data
+  } catch {
+    return null
   }
 }
 
 export const activityRegisterAPI = async (activity_id, data) => {
   try {
     return await apiAxios.post(`/applications/register/${activity_id}`, data)
-  } catch (err) {
-    return err.response.data
+  } catch {
+    return null
   }
 }
 
 export const activityGetDetailAPI = async (activityId) => {
   try {
     const response = await apiAxios.get(`/activities/${activityId}`)
-    if (response && response.status === 200) {
-      return response.data.data
-    }
+    return response.data.data
   } catch {
-    //沒抓到
     return null
   }
 }
@@ -33,22 +30,19 @@ export const activityGetDetailAPI = async (activityId) => {
 export const activityCancelAPI = async (activityId) => {
   try {
     return await apiAxios.put(`/activities/cancel/${activityId}`)
-  } catch (err) {
-    return err.response.data
-  }
-}
-
-export const activityGetAPI = async () => {
-  try {
-    const response = await apiAxios.get(`/activities`)
-    if (response && response.status === 200) {
-      return response.data.data
-    }
   } catch {
-    //沒抓到
     return null
   }
 }
+
+// export const activityGetAPI = async () => {
+//   try {
+//     const response = await apiAxios.get(`/activities`)
+//     return response.data.data
+//   } catch {
+//     return null
+//   }
+// }
 
 export const activityNewCommentAPI = async (activity_id, data) => {
   try {
@@ -69,70 +63,63 @@ export const activityDeleteCommentAPI = async (comment_id) => {
 export const ActivityGetApplicationsAPI = async (activity_id, defaultAvatar) => {
   try {
     const response = await apiAxios.get(`/applications/${activity_id}`)
-    if (response.status === 200) {
-      return response.data.data.map((item) => ({
-        id: item.application_id,
-        name: item.participant_info.full_name,
-        avatar: item.participant_info.photo_url || defaultAvatar,
-        number: `@${item.participant_id}`,
-        message: item.comment || '這位參加者尚無留言',
-        date: new Date().toLocaleDateString(),
-        approved: item.status === 'approved',
-        host_declined: item.status === 'host_declined',
-        registered: item.status === 'registered',
-        participant_cancelled: item.status === 'participant_cancelled',
-        replies: '',
-      }))
-    } else {
-      console.error('拉取參加者資料失敗:', response.data)
-      return []
-    }
-  } catch (error) {
-    console.error('數據刷新失敗:', error)
-    return []
+    return response.data.data.map((item) => ({
+      id: item.application_id,
+      name: item.participant_info.full_name,
+      avatar: item.participant_info.photo_url || defaultAvatar,
+      number: `@${item.participant_id}`,
+      message: item.comment || '這位參加者尚無留言',
+      date: new Date().toLocaleDateString(),
+      approved: item.status === 'approved',
+      host_declined: item.status === 'host_declined',
+      registered: item.status === 'registered',
+      participant_cancelled: item.status === 'participant_cancelled',
+      replies: '',
+    }))
+  } catch {
+    return null
   }
 }
 
 // 用來抓host_id判斷的API
 export const ActivityGetActivitiesAPI = async (activity_id) => {
-  return await apiAxios.get(`/activities/${activity_id}`)
+  try {
+    return await apiAxios.get(`/activities/${activity_id}`)
+  } catch {
+    return null
+  }
 }
 
 export const ActivityReviewApplicationsAPI = async (application_id, status) => {
   try {
-    const res = await apiAxios.put(
+    const response = await apiAxios.put(
       `/applications/verify/${application_id}`,
       { status },
       { headers: { 'Content-Type': 'application/json' } },
     )
-    return res
-  } catch (err) {
-    console.error('審核失敗:', err.response?.data || err.message)
-    throw err
+    return response
+  } catch {
+    return null
   }
 }
 
 export const activityGetAllAPI = async () => {
   try {
     const response = await apiAxios.get(`/activities/`)
-    if (response && response.status === 200) {
-      return response.data
-    }
-  } catch (err) {
-    return err.response.data
+    return response.data
+  } catch {
+    return null
   }
 }
 
-export const activityGetUsersAPI = async () => {
-  try {
-    const response = await apiAxios.get(`/users/`)
-    if (response && response.status === 200) {
-      return response.data
-    }
-  } catch (err) {
-    return err.response.data
-  }
-}
+// export const activityGetUsersAPI = async () => {
+//   try {
+//     const response = await apiAxios.get(`/users/`)
+//     return response.data
+//   } catch {
+//     return null
+//   }
+// }
 
 export const activityUserCreateAPI = async (file, otherData) => {
   try {
@@ -158,39 +145,46 @@ export const activityUserCreateAPI = async (file, otherData) => {
       img_url: imgUrl,
       ...otherData, // 包含其他活動資訊
     }
-    console.log('活動資料:', activityData)
     // 將資料發送到後端
     const response = await apiAxios.post('/activities', activityData)
-    if (response.status >= 200 && response.status < 300) {
-      console.log('活動資料送出成功:', response.data)
-      return response.data // 返回成功響應
-    }
-  } catch (error) {
-    console.error('上傳或資料發送失敗:', error)
-    throw error // 重新拋出錯誤以便處理
+    return response.data // 返回成功響應
+  } catch {
+    return null
   }
 }
 
 export const activityAutocompleteAPI = async (query) => {
-  return await apiAxios.post('/activities/autocomplete', { query })
+  try {
+    return await apiAxios.post('/activities/autocomplete', { query })
+  } catch {
+    return null
+  }
 }
 
 export const activityGeocodeAPI = async (address) => {
-  return await apiAxios.post('/activities/geocode', { address })
+  try {
+    return await apiAxios.post('/activities/geocode', { address })
+  } catch {
+    return null
+  }
 }
 
 export const activitySearchAPI = async (keyword) => {
   try {
-    const res = await apiAxios.post('/activities/search', {
+    const response = await apiAxios.post('/activities/search', {
       keyword,
     })
-    return res.data.data
-  } catch (error) {
-    return error.response.data.data
+    return response.data.data
+  } catch {
+    return null
   }
 }
 
 export const activityCategoryAPI = async (type, data) => {
-  const response = await apiAxios.post(`/activities/category/${type}`, data)
-  return response.data
+  try {
+    const response = await apiAxios.post(`/activities/category/${type}`, data)
+    return response.data
+  } catch {
+    return null
+  }
 }

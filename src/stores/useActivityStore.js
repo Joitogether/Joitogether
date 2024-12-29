@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { handleError, ref } from 'vue'
 import { activityGetAllAPI, activityCategoryAPI, activitySearchAPI } from '@/apis/activityAPIs'
 
 export const useActivityStore = defineStore('activity', () => {
@@ -12,16 +12,16 @@ export const useActivityStore = defineStore('activity', () => {
   const fetchAllActivities = async () => {
     loading.value = true
     error.value = null
+    activities.value = []
     try {
       const response = await activityGetAllAPI()
-      if (response.status === 200) {
-        activities.value = response.data //
-      } else {
-        throw new Error(response.message || '獲取活動失敗')
+      if (!response || response.length === 0) {
+        activities.value = []
+        handleError('目前無相關活動資料')
       }
-    } catch (err) {
-      error.value = err.message || '未知錯誤'
-      console.error('Error in fetchAllActivities:', err)
+      activities.value = response.data
+    } catch {
+      handleError()
     } finally {
       loading.value = false
     }
