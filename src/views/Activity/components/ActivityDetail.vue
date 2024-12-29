@@ -623,11 +623,8 @@ watch(
             <div v-for="comment in comments" :key="comment.comment_id">
               <div class="flex h-full justify-start w-full mt-10">
                 <img class="w-14 aspect-square rounded-full" :src="comment.photo_url" alt="" />
-                <div class="ml-3 relative w-full h-14">
-                  <p class="font-bold text-lg absolute top-0">{{ comment.display_name }}</p>
-                  <p class="absolute bottom-0 text-md">
-                    {{ `${comment.location} • ${comment.age} • ${comment.career}` }}
-                  </p>
+                <div class="ml-3 relative flex items-center w-full h-14">
+                  <p class="font-bold text-lg">{{ comment.display_name }}</p>
                   <p class="absolute bottom-0 text-sm right-0">
                     {{ dayjs(comment.created_at).fromNow() }}
                   </p>
