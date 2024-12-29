@@ -42,7 +42,7 @@ const createOrder = async () => {
       TradeInfo: newebpay_data.aesEncrypt,
       TimeStamp: newebpay_data.TimeStamp,
       Version: newebpay_data.Version,
-      MerchantOrderNo: newebpay_data.merchant_order_no,
+      MerchantOrderNo: newebpay_data.MerchantOrderNo,
       Amt: newebpay_data.Amt,
       ItemDesc: newebpay_data.itemDesc,
       Email: newebpay_data.email,
