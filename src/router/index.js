@@ -120,6 +120,7 @@ const router = createRouter({
             {
               path: 'create',
               name: 'activityCreate',
+              meta: { requiresAuth: true },
               component: ActivityCreate,
             },
             {
@@ -130,6 +131,7 @@ const router = createRouter({
             {
               path: 'rating/:activity_id',
               name: 'activityRating',
+              meta: { requiresAuth: true },
               component: ActivityRating,
             },
           ],
@@ -155,9 +157,13 @@ const router = createRouter({
 })
 
 router.beforeEach(async (to, from, next) => {
-  await getCurrentUser()
-  console.log('router觸發了')
-  next()
+  const user = await getCurrentUser()
+  const requiresAuth = to.matched.some((record) => record.meta.requiresAuth)
+  if (requiresAuth && !user) {
+    next({ name: 'login' })
+  } else {
+    next()
+  }
 })
 
 export default router
