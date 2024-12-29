@@ -88,6 +88,7 @@ const ActivityDataPush = async () => {
 
   try {
     await activityUserCreateAPI(selectedFile.value || null, activityData)
+    message.success('活動建立成功了喔!!') // 成功訊息提示
     router.replace('/')
   } catch (err) {
     console.error('錯誤回應:', err)
