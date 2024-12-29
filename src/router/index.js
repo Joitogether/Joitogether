@@ -67,6 +67,7 @@ const router = createRouter({
           path: 'profile',
           name: 'profile',
           component: Profile,
+          meta: { requiresAuth: true },
           redirect: { name: 'personInfo' },
           children: [
             {
