@@ -35,15 +35,6 @@ export const activityCancelAPI = async (activityId) => {
   }
 }
 
-// export const activityGetAPI = async () => {
-//   try {
-//     const response = await apiAxios.get(`/activities`)
-//     return response.data.data
-//   } catch {
-//     return null
-//   }
-// }
-
 export const activityNewCommentAPI = async (activity_id, data) => {
   try {
     return await apiAxios.post(`/activities/comment/${activity_id}`, data)
@@ -111,15 +102,6 @@ export const activityGetAllAPI = async () => {
     return null
   }
 }
-
-// export const activityGetUsersAPI = async () => {
-//   try {
-//     const response = await apiAxios.get(`/users/`)
-//     return response.data
-//   } catch {
-//     return null
-//   }
-// }
 
 export const activityUserCreateAPI = async (file, otherData) => {
   try {

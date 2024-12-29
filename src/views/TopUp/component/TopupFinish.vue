@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import { getNewebpayStatusAPI, saveTopupAPI } from '@/apis/topupAPI.js'
 import { useUserStore } from '@/stores/userStore'
 import { onMounted, ref } from 'vue'
+import { handleError } from '@/utils/handleError.js'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -12,27 +13,28 @@ const newebpayStatus = ref([])
 const getStatus = async () => {
   try {
     const result = await getNewebpayStatusAPI()
-    console.log('取得藍新狀態：', result)
+
+    if (!result || result.length === 0) {
+      newebpayStatus.value = []
+      return
+    }
+
     newebpayStatus.value = result
+
     if (newebpayStatus.value.success) {
-      console.log('(前端)藍新交易成功')
       try {
         const saveResponse = await saveTopupAPI(userStore.user.uid, {
           status: 'SUCCESS',
         })
         if (saveResponse) {
-          console.log('資料庫狀態更新成功')
           return saveResponse
         }
       } catch (error) {
-        console.error('更新資料庫狀態失敗：', error)
-        throw error
+        handleError(error)
       }
-    } else {
-      console.log('藍新交易失敗')
     }
   } catch (error) {
-    console.error('處理藍新狀態時發生錯誤：', error)
+    handleError(error)
   }
 }
 onMounted(async () => {

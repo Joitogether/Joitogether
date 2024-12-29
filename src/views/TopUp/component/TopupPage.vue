@@ -4,12 +4,8 @@ import { onMounted, reactive, ref } from 'vue'
 import { useUserStore } from '@/stores/userStore'
 import { NButton, NInputNumber } from 'naive-ui'
 import { useRouter } from 'vue-router'
-import {
-  createPaymentAPI,
-  getWalletBalanceAPI,
-  saveTopupAPI,
-  addDepositAPI,
-} from '@/apis/paymentAPIs'
+import { createPaymentAPI, saveTopupAPI, addDepositAPI } from '@/apis/topupAPI'
+import { getWalletBalanceAPI } from '@/apis/paymentAPIs'
 import { formatDate } from '@/utils/dayjsDate'
 import { handleError } from '@/utils/handleError'
 

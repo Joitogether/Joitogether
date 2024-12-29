@@ -24,7 +24,7 @@ export const userAuthLoginAPI = async (data) => {
 
     return response
   } catch (error) {
-    // 特殊處理 409 錯誤，返回結構化數據
+    // 特殊處理 409 錯誤
     if (error.response?.status === 409) {
       return {
         status: 409,

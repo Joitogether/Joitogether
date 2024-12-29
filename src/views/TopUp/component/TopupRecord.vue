@@ -6,16 +6,27 @@ import { useUserStore } from '@/stores/userStore'
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { formatDate } from '@/utils/dayjsDate'
+import { handleError } from '@/utils/handleError.js'
+import { useMessage } from 'naive-ui'
 
 const router = useRouter()
 const userStore = useUserStore()
+const message = useMessage()
 const topupRecords = ref([])
 const wallet = ref([])
 
 const getAllRecords = async () => {
-  const response = await getTopupRecordAPI(userStore.user.uid)
-  topupRecords.value = response
-  return response
+  try {
+    const response = await getTopupRecordAPI(userStore.user.uid)
+    if (!response || response.length === 0) {
+      topupRecords.value = []
+      return
+    }
+    topupRecords.value = response
+    return response
+  } catch (error) {
+    handleError(message, error)
+  }
 }
 
 const fetchWalletBalance = async () => {

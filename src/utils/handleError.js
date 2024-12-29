@@ -14,11 +14,7 @@ export const handleError = (
 ) => {
   const errorMessage =
     typeof customizeMessage === 'string' ? customizeMessage : '❌ 發生了一些小問題，請稍後再試試 🙏'
-
-  // 顯示錯誤提示
   message.error(`🚨 錯誤：${errorMessage}`)
-
-  // 日誌輸出以便調試
   if (errorContext) {
     console.error('Error context:', errorContext)
   }
