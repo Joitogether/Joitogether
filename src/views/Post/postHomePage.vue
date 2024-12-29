@@ -37,7 +37,6 @@ const options = [
 // 文章排序
 const selectValue = ref('newest')
 const handleFilterSelect = (value) => {
-  console.log(value)
   selectValue.value = value
 
   postList.sort((a, b) => {

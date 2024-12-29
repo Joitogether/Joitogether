@@ -15,6 +15,7 @@ import { useMessage, NButton } from 'naive-ui'
 import dayjs from 'dayjs'
 import 'dayjs/locale/zh-tw.js'
 import relativeTime from 'dayjs/plugin/relativeTime'
+import { handleError } from '@/utils/handleError.js'
 
 dayjs.locale('zh-tw')
 dayjs.extend(relativeTime)
@@ -33,8 +34,6 @@ const editPostImg = ref('')
 // 留言打進後端的資料
 const newComment = ref('')
 const message = useMessage()
-
-console.log('來這裡看看:', userStore)
 
 const likesCount = computed(() => {
   return likesList.value.length || 0
@@ -98,7 +97,7 @@ const fetchPostDetails = async () => {
     postDetails.avatar = user.users.photo_url
     postDetails.isPostAuthor = user.uid === userStore.user.uid
   } catch (error) {
-    console.error(`獲取 ${postId}文章資料失敗`, error.response?.data || error.message)
+    handleError(message, error)
   }
 }
 
@@ -108,7 +107,11 @@ const fetchComments = async () => {
     const res = await getPostCommentsAPI(postId)
     const comments = res.data
 
-    console.log(`API回傳的留言：`, comments)
+    if (!comments || comments.length === 0) {
+      commentList.value = []
+      commentCount.value = 0
+      return
+    }
 
     commentCount.value = comments.length || 0
 
@@ -123,11 +126,8 @@ const fetchComments = async () => {
     }))
 
     commentList.value = formattedComments
-
-    console.log(`文章 ${postId} 的留言已更新：`, commentList.value)
-    console.log(`文章 ${postId} 的留言數量：`, commentCount.value)
   } catch (error) {
-    console.error(`取得使用者資料失敗`, error)
+    handleError(message, error)
   }
 }
 
@@ -146,7 +146,6 @@ const addComment = async () => {
     post_id: postId,
     uid: userStore.user.uid,
     comment_content: newComment.value,
-    // created_at: dayjs().format('YYYY-MM-DD HH:mm:ss'),
     comment_status: 'active',
   }
 
@@ -202,14 +201,12 @@ const toggleDelete = async () => {
 const fetchPostLikes = async () => {
   try {
     const res = await getPostLikesAPI(postId)
-    if (res === null) {
+    if (!res || res.data.length === 0) {
       likesList.value = []
     }
     likesList.value = res.data
-    console.log(likesList.value)
-    console.log(`取得文章 ${postId} 的按讚數成功`, likesList.value)
   } catch (error) {
-    console.error(`${postId}沒有任何按讚紀錄`, error)
+    handleError(message, error)
   }
 }
 
@@ -233,8 +230,7 @@ const toggleLike = async () => {
     fetchPostLikes()
     return likeData
   } catch (error) {
-    console.log('按讚失敗', error)
-    message.error('按讚失敗')
+    handleError(message, '按讚失敗', error)
   }
 }
 
