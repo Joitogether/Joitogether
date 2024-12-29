@@ -4,8 +4,11 @@ import { userGetActivityAPI } from '@/apis/userAPIs'
 import { useUserStore } from '@/stores/userStore'
 import dayjs from 'dayjs'
 import { handleError } from '@/utils/handleError.js'
+import { useMessage } from 'naive-ui'
 
 const userStore = useUserStore()
+const message = useMessage()
+
 const loading = ref(true)
 const activity = ref([])
 const afterToday = ref([])
@@ -31,8 +34,8 @@ const fetchActivityData = async () => {
       afterToday.value = []
       beforeToday.value = []
     }
-  } catch {
-    handleError()
+  } catch (error) {
+    handleError(message, undefined, error)
   } finally {
     loading.value = false
   }

@@ -25,7 +25,7 @@ const route = useRoute()
 const activity_id = route.params.activity_id
 
 const userStore = useUserStore()
-const activity = ref([null]) // 活動詳細資料
+const activity = ref([null])
 
 onMounted(async () => {
   try {
@@ -33,11 +33,11 @@ onMounted(async () => {
     if (response?.data?.data) {
       activity.value = response.data.data
     } else {
-      handleError('目前無相關活動資料')
+      message.error('目前無相關活動資料')
       activity.value = {}
     }
-  } catch {
-    handleError()
+  } catch (error) {
+    handleError(message, undefined, error)
   }
 })
 
@@ -129,10 +129,10 @@ const handleApproveClick = async (id) => {
           message.success(`${attendeeToUpdate.name} 已被允許參加`)
           await refreshAttendees()
         } else {
-          handleError()
+          message.error('操作失敗，請稍後再試！')
         }
-      } catch {
-        handleError()
+      } catch (error) {
+        handleError(message, undefined, error)
       }
     },
     onNegativeClick: () => {
@@ -173,8 +173,7 @@ const handleDeclinedClick = async (id) => {
           message.error('操作失敗，請稍後再試！')
         }
       } catch (error) {
-        console.error('API 請求失敗:', error)
-        message.error('操作失敗，請稍後再試！')
+        handleError(message, undefined, error)
       }
     },
     onNegativeClick: () => {
@@ -224,8 +223,7 @@ const handleCancelClick = async (id) => {
           message.error('操作失敗，請稍後再試！')
         }
       } catch (error) {
-        console.error('API 請求失敗:', error)
-        message.error('操作失敗，請稍後再試！')
+        handleError(message, undefined, error)
       }
     },
     onNegativeClick: () => {

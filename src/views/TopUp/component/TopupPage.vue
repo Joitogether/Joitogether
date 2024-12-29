@@ -2,18 +2,18 @@
 import { userGetAPI } from '@/apis/userAPIs'
 import { onMounted, reactive, ref } from 'vue'
 import { useUserStore } from '@/stores/userStore'
-import { NButton, NInputNumber } from 'naive-ui'
+import { NButton, NInputNumber, useMessage } from 'naive-ui'
 import { useRouter } from 'vue-router'
 import { createPaymentAPI, saveTopupAPI, addDepositAPI } from '@/apis/topupAPI'
 import { getWalletBalanceAPI } from '@/apis/paymentAPIs'
 import { formatDate } from '@/utils/dayjsDate'
 import { handleError } from '@/utils/handleError'
 
+const message = useMessage()
 const router = useRouter()
 const user = ref([])
 const wallet = ref([])
 const userStore = useUserStore()
-const errorMessage = ref(null)
 const amounts = [100, 200, 300, 500, 666, 888, 999, 1111]
 
 const formData = reactive({
@@ -25,18 +25,13 @@ const formData = reactive({
 const fetchUserData = async () => {
   try {
     const result = await userGetAPI(userStore.user.uid)
-    if (result.length === 0) {
+    if (!result || result.length === 0) {
       user.value = {}
       return
     }
-    if (result) {
-      user.value = result
-      return user.value
-    } else {
-      console.log('沒有結果')
-    }
-  } catch (err) {
-    errorMessage.value = err.message || '資料加載錯誤'
+    user.value = result
+  } catch (error) {
+    handleError(message, undefined, error)
   }
 }
 
@@ -49,8 +44,8 @@ const fetchWalletBalance = async () => {
       return
     }
     wallet.value = result
-  } catch {
-    handleError()
+  } catch (error) {
+    handleError(message, undefined, error)
   }
 }
 
@@ -70,21 +65,10 @@ const createOrder = async () => {
         status: 'PENDING',
       }
 
-      const saveResponse = await saveTopupAPI(userStore.user.uid, orderData)
-      console.log('saveResponse:', saveResponse)
-      if (saveResponse) {
-        console.log('訂單資料儲存成功')
-      } else {
-        console.log('儲存訂單資料失敗')
-      }
+      await saveTopupAPI(userStore.user.uid, orderData)
+
       //將儲值金額加至錢包（這部分之後移到儲值完成頁面）
-      const increaseWallet = await addDepositAPI(userStore.user.uid, { deposit: orderData.amount })
-      console.log('increaseWallet', increaseWallet)
-      if (increaseWallet) {
-        console.log('錢包增加成功')
-      } else {
-        console.log('錢包增加失敗')
-      }
+      await addDepositAPI(userStore.user.uid, { deposit: orderData.amount })
 
       const form = document.createElement('form')
       form.method = 'POST'
@@ -112,12 +96,11 @@ const createOrder = async () => {
       })
 
       document.body.appendChild(form)
-      console.log('已加密：', newebPayParams)
 
       form.submit()
     }
-  } catch (err) {
-    console.error(err)
+  } catch (error) {
+    handleError(message, undefined, error)
   }
 }
 const seeRecord = () => {

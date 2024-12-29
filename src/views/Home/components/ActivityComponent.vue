@@ -41,7 +41,6 @@ const categoryMap = {
 }
 
 const selectCategory = (category) => {
-  console.log(category)
   selectedCategory.value = category
   const mappedCategory = categoryMap[category]
 

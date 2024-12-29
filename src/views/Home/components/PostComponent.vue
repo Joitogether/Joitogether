@@ -66,7 +66,7 @@ const fetchLatestPostsData = async () => {
     totalPosts.value = latestPosts.value
     updatePosts()
   } catch (error) {
-    handleError(message, error)
+    handleError(message, undefined, error)
     latestPosts.value = []
     totalPosts.value = []
     updatePosts()
@@ -94,7 +94,7 @@ const fetchPopularPostsData = async () => {
       updatePosts()
     }
   } catch (error) {
-    handleError(message, error)
+    handleError(message, undefined, error)
     popularPosts.value = []
     totalPosts.value = []
     if (activieTab.value === 'popular') {

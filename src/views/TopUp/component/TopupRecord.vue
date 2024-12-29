@@ -25,7 +25,7 @@ const getAllRecords = async () => {
     topupRecords.value = response
     return response
   } catch (error) {
-    handleError(message, error)
+    handleError(message, undefined, error)
   }
 }
 
@@ -45,8 +45,8 @@ const fetchWalletBalance = async () => {
         }
       })
     }
-  } catch (err) {
-    console.error(err)
+  } catch (error) {
+    handleError(message, undefined, error)
   }
 }
 

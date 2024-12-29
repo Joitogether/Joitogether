@@ -1,10 +1,11 @@
 <script setup>
 import { onMounted, ref } from 'vue'
-import { NTabs, NTabPane } from 'naive-ui'
+import { NTabs, NTabPane, useMessage } from 'naive-ui'
 import { userGetFollowerAPI, userGetFollowingAPI } from '../../../apis/userAPIs'
 import { useUserStore } from '@/stores/userStore'
 import { handleError } from '@/utils/handleError.js'
 
+const message = useMessage()
 const follower = ref(null)
 const following = ref(null)
 const loading = ref(true)
@@ -28,8 +29,8 @@ const fetchFollowerData = async () => {
     } else {
       follower.value = []
     }
-  } catch {
-    handleError()
+  } catch (error) {
+    handleError(message, undefined, error)
   } finally {
     loading.value = false
   }
@@ -52,8 +53,8 @@ const fetchFollowingData = async () => {
       following.value = []
       followingList.value = []
     }
-  } catch {
-    handleError()
+  } catch (error) {
+    handleError(message, undefined, error)
   } finally {
     loading.value = false
   }

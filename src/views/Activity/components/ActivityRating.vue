@@ -42,7 +42,6 @@ const clickTheFollowBtn = () => {
 const step = ref(0)
 
 const goStep1 = () => {
-  console.log(ratingForm)
   step.value = 1
 }
 
@@ -134,8 +133,6 @@ const props = defineProps({
   },
 })
 
-// 定義 Emits
-
 // 當前評分的響應式狀態
 const currentScore = ref(props.score)
 
@@ -157,7 +154,7 @@ const resetHover = (category) => {
 watch(
   () => props.score,
   (newScore) => {
-    currentScore.value = newScore // 保持與 props 的同步
+    currentScore.value = newScore
   },
 )
 </script>

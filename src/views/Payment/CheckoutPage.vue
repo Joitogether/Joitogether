@@ -33,7 +33,7 @@ const fetchCartItems = async () => {
 
     subtotal.value = cartItems.value.reduce((total, item) => total + item.price, 0)
   } catch (error) {
-    handleError(message, error)
+    handleError(message, undefined, error)
   }
 }
 
@@ -54,8 +54,8 @@ const fetchWalletBalance = async () => {
 
     balance.value = response.balance
     return balance.value
-  } catch {
-    handleError()
+  } catch (error) {
+    handleError(message, undefined, error)
   }
 }
 
@@ -105,8 +105,8 @@ const backToCart = async () => {
     const selectedIds = cartItems.value.map((item) => item.id)
     await Promise.all(selectedIds.map((id) => PaymentAPIs.updateCartSelectionAPI(id, false)))
     goShoppingCart()
-  } catch {
-    handleError()
+  } catch (error) {
+    handleError(message, undefined, error)
   }
 }
 
@@ -126,8 +126,12 @@ const goCheckoutSuccess = (orderId) => {
 onMounted(async () => {
   try {
     await Promise.all([fetchCartItems(), fetchWalletBalance()])
-  } catch {
-    handleError('😢 資料溜走了，找不到它們！不過別擔心，我們正在努力召喚它們回來 🚀✨')
+  } catch (error) {
+    handleError(
+      message,
+      '😢 資料溜走了，找不到它們！不過別擔心，我們正在努力召喚它們回來 🚀✨',
+      error,
+    )
   }
 })
 </script>

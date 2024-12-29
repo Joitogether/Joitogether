@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import { HeartSolid, PeopleTag, Group, HandCard } from '@iconoir/vue'
-import { NProgress, NRate } from 'naive-ui'
+import { NProgress, NRate, useMessage } from 'naive-ui'
 import { useUserStore } from '@/stores/userStore'
 import { getRatingsAPI } from '@/apis/userAPIs'
 import { handleError } from '@/utils/handleError.js'
@@ -11,6 +11,7 @@ function formatDate(date) {
   return dayjs(date).format('YYYY-MM-DD HH:mm')
 }
 
+const message = useMessage()
 const userStore = useUserStore()
 const loading = ref(true)
 const userRatings = ref([])
@@ -22,7 +23,7 @@ const fetchUserRatings = async () => {
     const result = await getRatingsAPI(userStore.user.uid)
 
     if (!result || result.length === 0) {
-      handleError()
+      loading.value = false
       userRatings.value = []
       averageRating.value = 0
       ratingDistribution.value = [0, 0, 0, 0, 0]
@@ -49,8 +50,8 @@ const fetchUserRatings = async () => {
       averageRating.value = 0
       ratingDistribution.value = [0, 0, 0, 0, 0]
     }
-  } catch {
-    handleError()
+  } catch (error) {
+    handleError(message, undefined, error)
   } finally {
     loading.value = false
   }

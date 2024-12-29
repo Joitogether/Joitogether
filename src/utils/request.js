@@ -31,8 +31,6 @@ apiAxios.interceptors.request.use(
       } catch (error) {
         console.warn('無法獲取 Token，繼續發送請求', error)
       }
-    } else {
-      console.log('用戶未登入，跳過 Authorization 設置')
     }
     return config
   },

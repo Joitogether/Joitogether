@@ -15,10 +15,9 @@ const message = useMessage()
 // 獲取訂單資料
 const orderDetails = ref([])
 const orderId = ref(null)
+
 const fetchOrderDetails = async () => {
   try {
-    console.log('orderId:', orderId.value)
-    // 確認 order_id 是否存在
     if (!route.params.order_id) {
       throw new Error('無法獲取 order_id')
     }
@@ -35,8 +34,8 @@ const fetchOrderDetails = async () => {
     } else {
       throw new Error('無法獲取訂單資料')
     }
-  } catch {
-    handleError()
+  } catch (error) {
+    handleError(message, undefined, error)
   }
 }
 
@@ -54,8 +53,8 @@ const fetchWalletBalance = async () => {
     const response = await PaymentAPIs.getWalletBalanceAPI(userStore.user.uid)
     balance.value = response.balance
     return balance.value
-  } catch {
-    handleError()
+  } catch (error) {
+    handleError(message, undefined, error)
   }
 }
 

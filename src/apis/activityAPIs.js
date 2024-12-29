@@ -117,7 +117,6 @@ export const activityUserCreateAPI = async (file, otherData) => {
 
       // 獲取下載 URL
       imgUrl = await getDownloadURL(snapshot.ref)
-      console.log('下載的 URL:', imgUrl)
     } else {
       // 如果沒有上傳文件，使用預設圖片的 URL
       imgUrl = DefaultImage

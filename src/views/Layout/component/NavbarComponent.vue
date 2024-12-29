@@ -65,8 +65,8 @@ const fetchUserData = async () => {
     user.value = result
     userLogin.value = true
     loading.value = false
-  } catch {
-    handleError()
+  } catch (error) {
+    handleError(message, undefined, error)
     user.value = {}
     userLogin.value = false
     loading.value = false
@@ -83,8 +83,8 @@ const getPostCount = async () => {
     }
 
     postNumber.value = result.data.length
-  } catch {
-    handleError()
+  } catch (error) {
+    handleError(message, undefined, error)
   }
 }
 
@@ -98,8 +98,8 @@ const getFollowerCount = async () => {
     }
 
     followerNumber.value = result.length
-  } catch {
-    handleError()
+  } catch (error) {
+    handleError(message, undefined, error)
   }
 }
 const getActivityCount = async () => {
@@ -111,8 +111,8 @@ const getActivityCount = async () => {
       return
     }
     activityNumber.value = result.length
-  } catch {
-    handleError()
+  } catch (error) {
+    handleError(message, undefined, error)
   }
 }
 
@@ -128,8 +128,6 @@ onMounted(() => {
   }
 })
 
-// 切換選單顯示
-
 // 註冊/登入按鈕跳轉
 const navigateToLogin = () => {
   router.push({ name: 'login' })
@@ -139,35 +137,28 @@ const navigateToLogin = () => {
 const handleLogout = async () => {
   const currentUser = auth.currentUser
   if (!currentUser) {
-    // 如果用戶未登入，顯示未登入提示
     message.warning('🚫 尚未登入，無法執行登出操作喔！💡')
     return
   }
 
   try {
-    // 調用 Firebase 登出邏輯
     await auth.signOut()
 
-    // 更新 userStore 狀態為未登入
-    userStore.clearUser() // 清空使用者狀態，方法來自 userStore.js
+    userStore.clearUser()
 
     // 顯示成功訊息
     message.success('🎉 成功登出！期待下次見到你～ 👋')
   } catch (error) {
-    message.error('😵 登出時發生錯誤啦！請稍後再試一次吧 💔')
-    console.error('登出錯誤：', error)
+    handleError(message, '😵 登出時發生錯誤啦！請稍後再試一次吧 💔', error)
   }
 }
 
 const showPopover = ref(false)
 
 const handleNotificationRead = async (value) => {
-  // 掌握開關
   showPopover.value = value
-  // 關起來的話做檢查
   if (!value) {
     if (unreadList.value.length > 0) {
-      // 調用 API 更新未讀的通知狀態
       await updateNotifications(userStore.user.uid, unreadList.value)
     }
   }

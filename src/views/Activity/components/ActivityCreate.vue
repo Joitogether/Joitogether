@@ -12,6 +12,7 @@ import { activityUserCreateAPI } from '@/apis/activityAPIs.js'
 import { useAutocomplete } from '@/utils/useAutocomplete'
 import { useGoogleMaps } from '@/utils/useGoogleMaps'
 import { usePreviewMode } from '@/utils/usePreviewMode'
+import { handleError } from '@/utils/handleError'
 
 const { previewMap } = useGoogleMaps()
 const { isPreviewMode, enterPreviewMode, exitPreviewMode } = usePreviewMode(previewMap)
@@ -94,10 +95,10 @@ const ActivityDataPush = async () => {
   try {
     await activityUserCreateAPI(selectedFile.value || null, activityData)
     router.replace('/')
-  } catch (err) {
-    console.error('錯誤回應:', err)
+  } catch (error) {
+    handleError(message, undefined, error)
   } finally {
-    isSubmitting.value = false // 完成後恢復按鈕可用狀態
+    isSubmitting.value = false
   }
 }
 

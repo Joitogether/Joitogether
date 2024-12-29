@@ -6,9 +6,11 @@ import { useUserStore } from '@/stores/userStore'
 import { getPostLikesAPI } from '@/apis/postLikeAPIs'
 import { getPostCommentsAPI } from '@/apis/postCommentAPIs'
 import { handleError } from '@/utils/handleError.js'
+import { useMessage } from 'naive-ui'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 
+const message = useMessage()
 const userStore = useUserStore()
 const loading = ref(true)
 const userPostList = ref([])
@@ -23,7 +25,7 @@ function timeSince(date) {
 const fetchUserPosts = async () => {
   try {
     if (!userStore.user?.uid) {
-      handleError('用戶未登入')
+      message.error('未登入')
       userPostList.value = []
       return
     }
@@ -48,8 +50,8 @@ const fetchUserPosts = async () => {
             commentCount: commentsResult.data.length,
             likeCount: likesResult.data.length,
           }
-        } catch {
-          handleError()
+        } catch (error) {
+          handleError(message, undefined, error)
           return {
             ...post,
             commentCount: 0,
@@ -60,8 +62,8 @@ const fetchUserPosts = async () => {
     )
 
     userPostList.value = enrichedPosts
-  } catch {
-    handleError()
+  } catch (error) {
+    handleError(message, undefined, error)
     userPostList.value = []
   } finally {
     loading.value = false

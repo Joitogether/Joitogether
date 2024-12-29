@@ -1,13 +1,17 @@
 import { defineStore } from 'pinia'
-import { handleError, ref } from 'vue'
+import { ref } from 'vue'
+import { handleError } from '@/utils/handleError.js'
+import { useMessage } from 'naive-ui'
 import { activityGetAllAPI, activityCategoryAPI, activitySearchAPI } from '@/apis/activityAPIs'
+
+const message = useMessage()
 
 export const useActivityStore = defineStore('activity', () => {
   const activities = ref([])
   const loading = ref(false)
   const error = ref(null)
   const currentCategory = ref('')
-  const triggerAction = ref(null) // 用於觸發 ActivityComponent 的
+  const triggerAction = ref(null)
 
   const fetchAllActivities = async () => {
     loading.value = true
@@ -17,11 +21,11 @@ export const useActivityStore = defineStore('activity', () => {
       const response = await activityGetAllAPI()
       if (!response || response.length === 0) {
         activities.value = []
-        handleError('目前無相關活動資料')
+        handleError(message, '目前無相關活動資料', error)
       }
       activities.value = response.data
     } catch {
-      handleError()
+      handleError(message, undefined, error)
     } finally {
       loading.value = false
     }
@@ -29,7 +33,6 @@ export const useActivityStore = defineStore('activity', () => {
 
   const fetchActivitiesByCategory = async (category) => {
     loading.value = true
-    error.value = null
     try {
       const data = {
         page: 1,
@@ -37,14 +40,15 @@ export const useActivityStore = defineStore('activity', () => {
         category: category,
       }
       const response = await activityCategoryAPI('category', data)
-      if (response && response.status === 200) {
-        activities.value = response.data
-      } else {
-        throw new Error(response.message || '分類活動獲取失敗')
+
+      if (!response || response.length === 0) {
+        activities.value = []
+        return
       }
-    } catch (err) {
-      error.value = err.message || '未知錯誤'
-      console.error('Error', err)
+
+      activities.value = response.data
+    } catch (error) {
+      handleError(message, undefined, error)
     } finally {
       loading.value = false
     }
@@ -52,17 +56,16 @@ export const useActivityStore = defineStore('activity', () => {
   // 根據搜尋詞獲取活動
   const searchActivities = async (keyword) => {
     loading.value = true
-    error.value = null
     try {
       const response = await activitySearchAPI(keyword)
       if (response) {
         activities.value = response
       } else {
-        error.value = '尚無搜尋結果，請嘗試其他搜索'
-        activities.value = [] // 確保活動清單為
+        message.error('尚無搜尋結果，請嘗試其他搜索')
+        activities.value = []
       }
-    } catch (err) {
-      error.value = err.message || '未知錯誤'
+    } catch (error) {
+      handleError(message, undefined, error)
     } finally {
       loading.value = false
     }

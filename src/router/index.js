@@ -168,7 +168,6 @@ const router = createRouter({
 
 router.beforeEach(async (to, from, next) => {
   await getCurrentUser()
-  console.log('router觸發了')
   next()
 })
 

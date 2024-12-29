@@ -1,11 +1,12 @@
 <script setup>
-import { NResult, NButton, NTable } from 'naive-ui'
+import { NResult, NButton, NTable, useMessage } from 'naive-ui'
 import { useRouter } from 'vue-router'
 import { getNewebpayStatusAPI, saveTopupAPI } from '@/apis/topupAPI.js'
 import { useUserStore } from '@/stores/userStore'
 import { onMounted, ref } from 'vue'
 import { handleError } from '@/utils/handleError.js'
 
+const message = useMessage()
 const router = useRouter()
 const userStore = useUserStore()
 const newebpayStatus = ref([])
@@ -30,11 +31,11 @@ const getStatus = async () => {
           return saveResponse
         }
       } catch (error) {
-        handleError(error)
+        handleError(message, undefined, error)
       }
     }
   } catch (error) {
-    handleError(error)
+    handleError(message, undefined, error)
   }
 }
 onMounted(async () => {

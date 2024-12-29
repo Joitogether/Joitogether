@@ -24,20 +24,23 @@ import { handleError } from '@/utils/handleError.js'
 dayjs.locale('zh-tw')
 dayjs.extend(relativeTime)
 const route = useRoute()
+const message = useMessage()
 const userComment = ref('')
 const registerComment = ref('')
 const activityId = route.params.id
 const recentActivities = ref([])
 const currentTime = ref(new Date().toISOString())
+
 const getCurrentTime = () => {
   currentTime.value = new Date().toISOString()
 }
+
 async function getActivityDetail() {
   try {
     const activityDetail = await activityGetDetailAPI(route.params.id)
 
     if (!activityDetail || activityDetail.length === 0) {
-      handleError('目前無相關活動資料')
+      message.error('目前無相關活動資料')
       // 這裡應該要針對沒有拿到id的狀態處理，去 not found
       // router.push({ name: 'notFound' });
       return
@@ -47,13 +50,13 @@ async function getActivityDetail() {
     host.value = activityDetail.host_info
     comments.value = activityDetail.comments
     recentActivities.value = activityDetail.recent_activities
-  } catch {
-    handleError()
+  } catch (error) {
+    handleError(message, undefined, error)
   }
 }
 
 const userStore = useUserStore()
-const message = useMessage()
+
 const socketStore = useSocketStore()
 
 import { useGoogleMaps } from '@/utils/useGoogleMaps'
@@ -277,7 +280,6 @@ const addToCart = async () => {
     activity_id: activity.value.id,
     uid: userStore.user.uid,
   }
-  console.log(data)
   toggleRegisterModal()
 }
 

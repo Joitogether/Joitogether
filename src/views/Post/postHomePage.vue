@@ -89,7 +89,7 @@ const fetchPostsByCategory = async () => {
 
     handleFilterSelect(selectValue.value)
   } catch (error) {
-    handleError(message, error)
+    handleError(message, undefined, error)
   }
 }
 

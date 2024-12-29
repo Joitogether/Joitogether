@@ -34,8 +34,8 @@ const fetchCartItems = async () => {
       image: item.activities.img_url || 'https://via.placeholder.com/200',
       selected: item.is_selected,
     }))
-  } catch {
-    handleError()
+  } catch (error) {
+    handleError(message, undefined, error)
   } finally {
     isLoading.value = false
   }
@@ -67,8 +67,8 @@ const removeSelected = async () => {
       selectedIds.map((id) => PaymentAPIs.deleteUserCartDetailsAPI(userStore.user.uid, id)),
     )
     cartItems.value = cartItems.value.filter((item) => !item.Selected)
-  } catch {
-    handleError()
+  } catch (error) {
+    handleError(message, undefined, error)
   }
 }
 
@@ -86,7 +86,7 @@ const goToCheckout = async () => {
     )
     goCheckoutPage()
   } catch (error) {
-    handleError(error)
+    handleError(message, undefined, error)
   }
 }
 

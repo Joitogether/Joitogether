@@ -11,8 +11,10 @@ import PersonActivity from './component/PersonActivity.vue'
 import { userGetAPI } from '@/apis/userAPIs'
 import { useUserStore } from '@/stores/userStore'
 import { handleError } from '@/utils/handleError.js'
+import { useMessage } from 'naive-ui'
 
 const userStore = useUserStore()
+const message = useMessage()
 const user = ref({})
 const loading = ref(true)
 const isEditModalOpen = ref(false)
@@ -30,8 +32,8 @@ const fetchUserData = async () => {
       loading.value = false
       return user.value
     }
-  } catch {
-    handleError()
+  } catch (error) {
+    handleError(message, undefined, error)
   } finally {
     loading.value = false
   }
