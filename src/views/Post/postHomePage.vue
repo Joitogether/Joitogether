@@ -1,9 +1,10 @@
 <script setup>
 import NewPostArea from './component/NewPostArea.vue'
 import { onMounted, reactive, ref } from 'vue'
-import { NSpace, NSelect } from 'naive-ui'
+import { NSpace, NSelect, useMessage } from 'naive-ui'
 import { getPostsByCategoryAPI } from '@/apis/postAPIs'
 import { useRouter } from 'vue-router'
+import { handleError } from '@/utils/handleError.js'
 
 import dayjs from 'dayjs'
 import 'dayjs/locale/zh-tw.js'
@@ -11,6 +12,8 @@ import relativeTime from 'dayjs/plugin/relativeTime'
 
 dayjs.locale('zh-tw')
 dayjs.extend(relativeTime)
+
+const message = useMessage()
 
 const options = [
   {
@@ -66,7 +69,11 @@ const fetchPostsByCategory = async () => {
   try {
     const res = await getPostsByCategoryAPI(selectedTag.value)
 
-    const formattedPosts = res.data.map((post) => ({
+    if (!res || res.length === 0) {
+      postList.splice(0, postList.length)
+    }
+
+    const formattedPosts = res.map((post) => ({
       id: post.post_id,
       title: post.post_title,
       content: post.post_content,
@@ -82,15 +89,13 @@ const fetchPostsByCategory = async () => {
     postList.splice(0, postList.length, ...formattedPosts)
 
     handleFilterSelect(selectValue.value)
-
-    console.log(`分類 ${selectedTag.value}文章已更新：`, postList)
   } catch (error) {
-    console.error(`撈取分類 ${selectedTag.value} 文章失敗：`, error)
+    handleError(message, error)
   }
 }
 
 onMounted(async () => {
-  await fetchPostsByCategory() // 確保先撈取分類文章
+  await fetchPostsByCategory()
 })
 
 const router = useRouter()

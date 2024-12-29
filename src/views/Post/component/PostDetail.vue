@@ -73,7 +73,19 @@ const categoryMap = {
 const fetchPostDetails = async () => {
   try {
     const post = await getPostByIdAPI(postId)
-    console.log(`API回傳的文章：`, post)
+
+    if (!post.data || Object.keys(post.data).length === 0) {
+      console.warn(`查無文章資料：文章 ID ${postId}`)
+      postDetails.category = '未分類'
+      postDetails.title = '查無此文章'
+      postDetails.content = '很抱歉，我們無法找到這篇文章的內容'
+      postDetails.time = ''
+      postDetails.img = null
+      postDetails.name = '未知用戶'
+      postDetails.avatar = null
+      postDetails.isPostAuthor = false
+      return
+    }
 
     const user = post.data
 
