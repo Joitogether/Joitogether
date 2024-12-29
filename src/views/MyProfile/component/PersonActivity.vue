@@ -3,10 +3,10 @@ import { onMounted, ref } from 'vue'
 import { userGetActivityAPI } from '@/apis/userAPIs'
 import { useUserStore } from '@/stores/userStore'
 import dayjs from 'dayjs'
+import { handleError } from '@/utils/handleError.js'
 
 const userStore = useUserStore()
 const loading = ref(true)
-const errorMessage = ref(null)
 const activity = ref([])
 const afterToday = ref([])
 const beforeToday = ref([])
@@ -17,45 +17,26 @@ const formatDate = (dateString) => {
 const fetchActivityData = async () => {
   try {
     const result = await userGetActivityAPI(userStore.user.uid)
-    console.log('活動資料：', result)
 
-    if (result) {
+    // 確保返回的資料是陣列
+    if (result && result.length > 0) {
       activity.value = result
-      console.log(activity.value)
-      let allActivities = []
 
-      activity.value.forEach((item) => {
-        if (item.activities) {
-          const activityData = item.activities
-          console.log('活動:', activityData)
+      const allActivities = result.filter((item) => item.activities).map((item) => item.activities)
 
-          allActivities.push(activityData)
-        }
-      })
-      afterToday.value = allActivities.filter((item) => {
-        const itemDate = new Date(item.event_time)
-        return itemDate > new Date()
-      })
-
-      console.log('afterToday資料', afterToday.value)
-      loading.value = false
-
-      beforeToday.value = allActivities.filter((item) => {
-        const itemDate = new Date(item.event_time)
-        return itemDate < new Date()
-      })
-      console.log('beforeToday資料', beforeToday.value)
-      loading.value = false
+      afterToday.value = allActivities.filter((item) => new Date(item.event_time) > new Date())
+      beforeToday.value = allActivities.filter((item) => new Date(item.event_time) < new Date())
     } else {
-      console.log('該用戶還沒有活動')
+      activity.value = []
+      afterToday.value = []
+      beforeToday.value = []
     }
-  } catch (err) {
-    errorMessage.value = err.message || '資料加載錯誤'
+  } catch {
+    handleError()
+  } finally {
     loading.value = false
-    console.error('Error:', err)
   }
 }
-
 onMounted(() => {
   fetchActivityData()
 })

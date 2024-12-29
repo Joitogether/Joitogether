@@ -15,6 +15,7 @@ import { ref, onMounted } from 'vue'
 import { getPostsAPI } from '@/apis/userAPIs'
 import { userGetFollowerAPI } from '@/apis/userAPIs'
 import { userGetActivityAPI } from '@/apis/userAPIs'
+import { handleError } from '@/utils/handleError.js'
 
 const message = useMessage()
 const userStore = useUserStore()
@@ -65,7 +66,7 @@ const fetchUserData = async () => {
     userLogin.value = true
     loading.value = false
   } catch {
-    message.error('載入用戶資料錯誤，請稍後再試')
+    handleError()
     user.value = {}
     userLogin.value = false
     loading.value = false
@@ -74,34 +75,47 @@ const fetchUserData = async () => {
 
 const getPostCount = async () => {
   try {
-    const result = await getPostsAPI(userStore.user.uid).catch(() => ({ data: [] }))
+    const result = await getPostsAPI(userStore.user.uid)
+
+    if (!result || result.length === 0) {
+      postNumber.value = 0
+      return
+    }
+
     postNumber.value = result.data.length
-  } catch (err) {
-    console.log('抓取文章數量發生錯誤', err)
-    postNumber.value = 0
+  } catch {
+    handleError()
   }
 }
+
 const getFollowerCount = async () => {
   try {
-    const result = await userGetFollowerAPI(userStore.user.uid).catch(() => ({ data: [] }))
-    followerNumber.value = result.data.length
-  } catch (err) {
-    console.log('抓取粉絲數量發生錯誤', err)
-    followerNumber.value = 0
+    const result = await userGetFollowerAPI(userStore.user.uid)
+
+    if (!result || result.length === 0) {
+      followerNumber.value = 0
+      return
+    }
+
+    followerNumber.value = result.length
+  } catch {
+    handleError()
   }
 }
 const getActivityCount = async () => {
   try {
     const result = await userGetActivityAPI(userStore.user.uid)
-    console.log('活動資料：', result)
-    console.log(result.length)
 
+    if (!result || result.length === 0) {
+      activityNumber.value = 0
+      return
+    }
     activityNumber.value = result.length
-  } catch (err) {
-    console.log('抓取活動數量發生錯誤', err)
-    activityNumber.value = 0
+  } catch {
+    handleError()
   }
 }
+
 // 註冊登入邏輯
 onMounted(() => {
   if (userStore.user.isLogin) {

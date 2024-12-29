@@ -1,18 +1,18 @@
 <script setup>
 import { ref, onMounted } from 'vue'
-// import { useRouter } from 'vue-router'
+import { useRouter } from 'vue-router'
 import { getPostsAPI } from '@/apis/userAPIs'
 import { useUserStore } from '@/stores/userStore'
-import { getPostsCommentAPI } from '@/apis/userAPIs'
-import { getPostsLikeAPI } from '@/apis/userAPIs'
+import { getPostLikesAPI } from '@/apis/postLikeAPIs'
+import { getPostCommentsAPI } from '@/apis/postCommentAPIs'
+import { handleError } from '@/utils/handleError.js'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 
 const userStore = useUserStore()
 const loading = ref(true)
-const errorMessage = ref(null)
 const userPostList = ref([])
-// const router = useRouter()
+const router = useRouter()
 
 dayjs.extend(relativeTime)
 
@@ -23,26 +23,24 @@ function timeSince(date) {
 const fetchUserPosts = async () => {
   try {
     if (!userStore.user?.uid) {
-      console.warn('用戶uid不存在')
+      handleError('用戶未登入')
+      userPostList.value = []
       return
     }
 
     const result = await getPostsAPI(userStore.user.uid)
 
     if (!result?.data?.length) {
-      console.log('該用戶還沒有文章')
       userPostList.value = []
       return
     }
 
-    // 使用並發處理
     const enrichedPosts = await Promise.all(
       result.data.map(async (post) => {
         try {
-          // 同時獲取留言和按讚數
           const [commentsResult, likesResult] = await Promise.all([
-            getPostsCommentAPI(post.post_id).catch(() => ({ data: [] })),
-            getPostsLikeAPI(post.post_id).catch(() => ({ data: [] })),
+            getPostCommentsAPI(post.post_id).catch(() => ({ data: [] })),
+            getPostLikesAPI(post.post_id).catch(() => ({ data: [] })),
           ])
 
           return {
@@ -50,8 +48,8 @@ const fetchUserPosts = async () => {
             commentCount: commentsResult.data.length,
             likeCount: likesResult.data.length,
           }
-        } catch (postError) {
-          console.error(`處理貼文 ${post.post_id} 時出錯:`, postError)
+        } catch {
+          handleError()
           return {
             ...post,
             commentCount: 0,
@@ -61,21 +59,19 @@ const fetchUserPosts = async () => {
       }),
     )
 
-    // 更新貼文列表
     userPostList.value = enrichedPosts
-
-    console.log('貼文數據:', enrichedPosts)
-  } catch (err) {
-    console.error('獲取用戶貼文出錯:', err)
-    errorMessage.value = err.message || '數據加載錯誤'
+  } catch {
+    handleError()
     userPostList.value = []
   } finally {
     loading.value = false
   }
 }
-// const handlePostClick = (postId) => {
-//   router.push(`/post/${postId}`)
-// }
+
+const handlePostClick = (postId) => {
+  router.push(`/post/${postId}`)
+}
+
 onMounted(() => {
   fetchUserPosts()
 })
@@ -87,6 +83,7 @@ onMounted(() => {
       v-for="post in userPostList"
       :key="post.post_id"
       class="one-post-bottom cursor-pointer bg-gray-50 rounded-md mb-3 px-5 py-3 md:px-3 md:py-1"
+      @click="handlePostClick(post.post_id)"
     >
       <div class="post-bottom-top">
         <div class="post-bottom-left flex flex-col gap-1 md:flex-row md:justify-between md:gap-6">
@@ -133,10 +130,4 @@ onMounted(() => {
 
   <div v-else>用戶還沒有任何貼文</div>
 </template>
-<style scoped>
-/* .blockArea {
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-} */
-</style>
+<style scoped></style>

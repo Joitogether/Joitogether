@@ -8,20 +8,18 @@ import PersonRate from './component/PersonRate.vue'
 import PersonFollow from './component/PersonFollow.vue'
 import PersonPost from './component/PersonPost.vue'
 import PersonActivity from './component/PersonActivity.vue'
-
 import { userGetAPI } from '@/apis/userAPIs'
 import { useUserStore } from '@/stores/userStore'
+import { handleError } from '@/utils/handleError.js'
 
 const userStore = useUserStore()
 const user = ref({})
 const loading = ref(true)
-const errorMessage = ref(null)
 const isEditModalOpen = ref(false)
 
 const fetchUserData = async () => {
   try {
     const result = await userGetAPI(userStore.user.uid)
-    console.log(result)
     if (result.length === 0) {
       user.value = {}
       return
@@ -32,8 +30,9 @@ const fetchUserData = async () => {
       loading.value = false
       return user.value
     }
-  } catch (err) {
-    errorMessage.value = err.message || '資料加載錯誤'
+  } catch {
+    handleError()
+  } finally {
     loading.value = false
   }
 }
@@ -47,7 +46,7 @@ onMounted(async () => {
 
 // 開啟編輯視窗
 const openEditModal = () => {
-  isEditModalOpen.value = true // 顯示編輯視窗
+  isEditModalOpen.value = true
 }
 
 // 關閉編輯視窗
