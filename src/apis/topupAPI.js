@@ -40,14 +40,10 @@ export const saveTopupAPI = async (uid, deposit) => {
     console.error(err)
   }
 }
-
+//拿到藍新交易紀錄以及錢包餘額
 export const getTopupRecordAPI = async (uid) => {
-  const recordResponse = await apiAxios.get(`/topups/records/${uid}`)
-  const walletResponse = await apiAxios.get(`/payments/wallet/${uid}`)
-  return {
-    recordData: recordResponse.data.data,
-    walletBalance: walletResponse.data,
-  }
+  const response = await apiAxios.get(`/topups/records/${uid}`)
+  return response.data.data
 }
 
 // export const getNewebpayStatusAPI = async () => {

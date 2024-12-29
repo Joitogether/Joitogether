@@ -4,6 +4,7 @@ import { onMounted, ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { getTopupRecordAPI } from '@/apis/topupAPI'
 import { useUserStore } from '@/stores/userStore'
+import { formatDate } from '@/utils/useDateTime'
 
 const userStore = useUserStore()
 const route = useRoute()
@@ -12,11 +13,10 @@ const oneRecord = ref(null)
 
 const getOneTopupRecord = async () => {
   const id = route.params.id
-  const { recordData, walletBalance } = await getTopupRecordAPI(userStore.user.uid)
-  if (recordData && walletBalance) {
-    oneRecord.value = recordData.find((record) => record.id == id)
-    console.log('成功頁面取得的資料', oneRecord.value)
+  const response = await getTopupRecordAPI(userStore.user.uid)
 
+  if (response) {
+    oneRecord.value = response.find((record) => record.id == id)
     return oneRecord.value
   }
 }
@@ -26,7 +26,6 @@ const goSpend = () => {
 const seeRecord = () => {
   router.push({ path: '/walletRecord' })
 }
-
 onMounted(() => {
   getOneTopupRecord()
 })
@@ -43,11 +42,11 @@ onMounted(() => {
         </tr>
       </thead>
       <tbody>
-        <tr>
-          <td>{{ oneRecord.created_at }}</td>
+        <tr v-if="oneRecord">
+          <td>{{ formatDate(oneRecord.created_at) }}</td>
           <td>儲值金</td>
           <td>{{ oneRecord.amount }}</td>
-          <td>{{ walletBalance.balance }}</td>
+          <td>{{ oneRecord.wallet.balance }}</td>
         </tr>
       </tbody>
     </n-table>
