@@ -40,7 +40,7 @@ const registerUser = async ({ email, password, fullName, displayName, phoneNumbe
     // Step 2: 發送驗證信件
     // 設定驗證信的跳轉連結
     const actionCodeSettings = {
-      url: `${window.location.origin}/signup-success`, // 前面那段是localhost
+      url: `https://joitogether-production.up.railway.app/signup-success`, // 前面那段是localhost
       handleCodeInApp: true,
     }
     // 發送驗證信件
