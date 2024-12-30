@@ -50,6 +50,7 @@ const fetUserSummary = async () => {
 onMounted(() => {
   if (userStore.user.isLogin) {
     fetUserSummary()
+    userLogin.value = true
   } else {
     loading.value = false
   }
