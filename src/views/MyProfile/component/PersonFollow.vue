@@ -40,7 +40,7 @@ const fetchFollowingData = async () => {
   try {
     const result = await userGetFollowingAPI(userStore.user.uid)
 
-    if (result || result.data.length > 0) {
+    if (result || result.length > 0) {
       following.value = result.data
 
       following.value.forEach((item) => {
@@ -89,7 +89,7 @@ onMounted(() => {
         <div v-else class="text-center text-gray-500">還沒有關注中的人喔！</div>
       </n-tab-pane>
       <n-tab-pane name="chap2" tab="粉絲">
-        <div v-if="follower.length > 0">
+        <div v-if="follower">
           <div
             v-for="follower in followerList"
             :key="follower.follower_id"

@@ -1,29 +1,17 @@
 import { apiAxios } from '@/utils/request'
 
 export const handleTopupAPI = async (data) => {
-  try {
-    const response = await apiAxios.post('/topups/encrypt/process', data)
-    return response.data.data
-  } catch (err) {
-    console.error('處理訂單儲存錯誤：', err)
-  }
+  const response = await apiAxios.post('/topups/encrypt/process', data)
+  return response.data.data
 }
 export const createPaymentAPI = async (data) => {
-  try {
-    const response = await apiAxios.post('/payments/encrypt', data)
-    return response.data.data
-  } catch {
-    return null
-  }
+  const response = await apiAxios.post('/payments/encrypt', data)
+  return response.data.data
 }
 
 export const addDepositAPI = async (uid, data) => {
-  try {
-    const response = await apiAxios.post(`/payments/wallet/${uid}/deposit`, data)
-    return response
-  } catch (err) {
-    return err.response.data
-  }
+  const response = await apiAxios.post(`/payments/wallet/${uid}/deposit`, data)
+  return response
 }
 
 export const getWalletTransactionAPI = async (uid) => {
@@ -32,10 +20,6 @@ export const getWalletTransactionAPI = async (uid) => {
 }
 
 export const getTopupRecordAPI = async (uid) => {
-  try {
-    const response = await apiAxios.get(`/topups/records/${uid}`)
-    return response.data.data
-  } catch {
-    return null
-  }
+  const response = await apiAxios.get(`/topups/records/${uid}`)
+  return response.data.data
 }

@@ -110,7 +110,6 @@ watch(
 watch(
   selectedRegions,
   (regions) => {
-    console.log('選中的地區：', regions) // 調試用
     if (regions.length > 0) {
       fetchActivitiesByRegion(regions)
     } else {
