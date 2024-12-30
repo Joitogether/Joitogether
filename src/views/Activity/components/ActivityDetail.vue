@@ -342,6 +342,14 @@ watch(
     await previewMap(searchQuery.value)
   },
 )
+
+const handleCardClick = () => {
+  // 點擊後進行頁面滾動
+  window.scrollTo({
+    top: 0,
+    behavior: 'smooth',
+  })
+}
 </script>
 <template>
   <div v-if="activity.id" class="bg-[#E5E7EB]">
@@ -664,6 +672,7 @@ watch(
           :hostImgUrl="item.users.photo_url"
           :participants="item.max_participants"
           class="mb-[3%] h-36"
+          @click="handleCardClick(item)"
         ></ActivityCard>
       </div>
     </div>
