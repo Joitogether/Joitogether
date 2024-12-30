@@ -115,12 +115,8 @@ const props = defineProps({
   },
 })
 
-// 定義 Emits
-const emit = defineEmits(['update:score'])
-
 // 當前評分的響應式狀態
 const currentScore = ref(props.score) // 初始化為 props 的 score
-const currentHover = ref(0) // 當前 hover 狀態的愛心數
 
 // 方法：更新評分
 const setRating = (index, category) => {
@@ -175,18 +171,26 @@ watch(
 
       <!-- 評分進度 -->
       <div
-         class="flex flex-row w-full max-w-[400px] justify-around m-auto bg-white border-2 p-1 my-3 rounded-full xl:text-base xl:py-1 md:text-md sm:text-sm"
+        class="flex flex-row w-full max-w-[400px] justify-around m-auto bg-white border-2 p-1 my-3 rounded-full xl:text-base xl:py-1 md:text-md sm:text-sm"
       >
         <div>
           <!-- 團主評價到此頁面的進度顯示-->
-          <div class="flex justify-center items-center text-blue-600 font-bold tracking-widest">
-            <CheckCircleSolid class="mr-1" />團主評價
+          <div
+            :class="{ 'text-blue-600': step == 0, 'text-gray-300': step != 0 }"
+            class="flex justify-center items-center font-bold tracking-widest"
+          >
+            <CheckCircleSolid v-if="step == 0" class="mr-1" />團主評價
+            <CheckCircle v-if="step != 0" class="mr-1" />
           </div>
         </div>
         <div>
           <!-- 還沒到追蹤評價頁面的進度顯示-->
-          <div class="flex justify-center items-center text-gray-300 font-bold tracking-widest">
-            <CheckCircle class="mr-1" />追蹤活動
+          <div
+            :class="{ 'text-blue-600': step == 1, 'text-gray-300': step != 1 }"
+            class="flex justify-center items-center font-bold tracking-widest"
+          >
+            <CheckCircleSolid v-if="step == 1" class="mr-1" />
+            <CheckCircle v-if="step != 1" class="mr-1" />追蹤活動
           </div>
           <!-- 到追蹤評價頁面的進度顯示-->
 
@@ -197,7 +201,8 @@ watch(
         <div>
           <!-- 還沒到最後完成頁面的進度顯示 -->
           <div class="flex justify-center items-center text-gray-300 font-bold tracking-widest">
-            <CheckCircle class="mr-1" />完成
+            <CheckCircleSolid v-if="step == 2" class="mr-1" />
+            <CheckCircle v-if="step != 2" class="mr-1" />完成
           </div>
           <!-- 到完成介面的進度顯示 -->
           <!-- <div class="flex justify-center items-center text-blue-600 font-bold tracking-widest"><CheckCircleSolid class="mr-1" />完成</div> -->
@@ -262,7 +267,7 @@ watch(
                     :class="{ filled: index <= hostRatingAverage.rating_ability }"
                   ></span>
                 </div>
-                
+
                 <div class="min-w-[45px] mx-2 text-xs xl:text-base xl:p-1">
                   {{ hostRatingAverage.rating_ability?.toFixed(1) || '0.0' }} / 5.0
                 </div>
@@ -279,8 +284,7 @@ watch(
                     :class="{ filled: index <= hostRatingAverage.rating_credit }"
                   ></span>
                 </div>
-                
-                
+
                 <div class="mx-2 text-xs xl:text-base xl:p-1">
                   {{ hostRatingAverage.rating_credit?.toFixed(1) || '0.0' }} / 5.0
                 </div>
