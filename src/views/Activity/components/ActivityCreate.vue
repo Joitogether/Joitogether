@@ -157,6 +157,9 @@ const updateParticipants = (value) => {
   if (newCount < 1) {
     participantsError.value = '人數不得低於 1 人'
     participants.value = 1
+  } else if (newCount > 99999) {
+    participantsError.value = '人數太多了'
+    participants.value = 99999
   } else {
     participantsError.value = ''
     participants.value = newCount
@@ -180,6 +183,9 @@ const validateInput = (event) => {
   value = value.replace(/[^0-9]/g, '')
   value = value.replace(/^0+/, '')
 
+  if (value > 99999) {
+    value = 99999
+  }
   event.target.value = value
 }
 
