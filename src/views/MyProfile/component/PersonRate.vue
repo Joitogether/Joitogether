@@ -1,19 +1,19 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { HeartSolid, PeopleTag, Group, HandCard } from '@iconoir/vue'
-import { NProgress, NRate } from 'naive-ui'
+import { NProgress, NRate, useMessage } from 'naive-ui'
 import { useUserStore } from '@/stores/userStore'
 import { getRatingsAPI } from '@/apis/userAPIs'
-import { computed } from 'vue'
+import { handleError } from '@/utils/handleError.js'
 import dayjs from 'dayjs'
 
 function formatDate(date) {
   return dayjs(date).format('YYYY-MM-DD HH:mm')
 }
 
+const message = useMessage()
 const userStore = useUserStore()
 const loading = ref(true)
-const errorMessage = ref(null)
 const userRatings = ref([])
 const averageRating = ref(0)
 const ratingDistribution = ref([0, 0, 0, 0, 0])
@@ -21,24 +21,38 @@ const ratingDistribution = ref([0, 0, 0, 0, 0])
 const fetchUserRatings = async () => {
   try {
     const result = await getRatingsAPI(userStore.user.uid)
-    console.log('API回傳資料:', result.data)
+
+    if (!result || result.length === 0) {
+      loading.value = false
+      userRatings.value = []
+      averageRating.value = 0
+      ratingDistribution.value = [0, 0, 0, 0, 0]
+      return
+    }
+
     userRatings.value = result.data
-    // console.log(result.length)
+
     if (userRatings.value.length > 0) {
+      // 計算平均分數
       const total = userRatings.value.reduce((sum, rating) => sum + rating.rating_heart, 0)
       averageRating.value = parseFloat(total / userRatings.value.length).toFixed(1)
+
+      // 計算評分分佈
       const counts = [0, 0, 0, 0, 0]
       userRatings.value.forEach((rating) => {
         counts[rating.rating_heart - 1] += 1
-        const totalRatings = userRatings.value.length
-        ratingDistribution.value = counts.map((count) => Math.round((count / totalRatings) * 100))
       })
+
+      const totalRatings = userRatings.value.length
+      ratingDistribution.value = counts.map((count) => Math.round((count / totalRatings) * 100))
     } else {
+      // 無評價時，設置預設值
       averageRating.value = 0
+      ratingDistribution.value = [0, 0, 0, 0, 0]
     }
-    // console.log('平均 rating_heart:', average.toFixed(2))
-  } catch (err) {
-    errorMessage.value = err.message || '資料加載錯誤'
+  } catch (error) {
+    handleError(message, undefined, error)
+  } finally {
     loading.value = false
   }
 }

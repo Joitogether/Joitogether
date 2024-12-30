@@ -5,13 +5,14 @@ import { useMessage } from 'naive-ui'
 import { useUserStore } from '/src/stores/userStore.js'
 import { auth } from '@/utils/firebaseConfig.js'
 import { useRouter, RouterLink } from 'vue-router'
+import dayjs from 'dayjs'
 import 'dayjs/locale/zh-tw.js'
 import relativeTime from 'dayjs/plugin/relativeTime'
-import dayjs from 'dayjs'
 import { useNotificationStore } from '@/stores/notificationStore'
 import { storeToRefs } from 'pinia'
 import { getUserSummaryAPI } from '@/apis/userAPIs'
 import { ref, onMounted } from 'vue'
+import { handleError } from '@/utils/handleError.js'
 
 const message = useMessage()
 const userStore = useUserStore()
@@ -25,7 +26,7 @@ const loading = ref(true)
 const postNumber = ref(null)
 const followerNumber = ref(null)
 const activityNumber = ref(null)
-const userLogin = ref(false) //檢查登入
+const userLogin = ref(false)
 
 const clearNumbers = () => {
   followerNumber.value = null
@@ -49,13 +50,12 @@ const fetUserSummary = async () => {
 // 註冊登入邏輯
 onMounted(() => {
   if (userStore.user.isLogin) {
+    userLogin.value = true
     fetUserSummary()
   } else {
     loading.value = false
   }
 })
-
-// 切換選單顯示
 
 // 註冊/登入按鈕跳轉
 const navigateToLogin = () => {
@@ -66,7 +66,6 @@ const navigateToLogin = () => {
 const handleLogout = async () => {
   const currentUser = auth.currentUser
   if (!currentUser) {
-    // 如果用戶未登入，顯示未登入提示
     message.warning('🚫 尚未登入，無法執行登出操作喔！💡')
     return
   }
@@ -82,20 +81,16 @@ const handleLogout = async () => {
     // 顯示成功訊息
     message.success('🎉 成功登出！期待下次見到你～ 👋')
   } catch (error) {
-    message.error('😵 登出時發生錯誤啦！請稍後再試一次吧 💔')
-    console.error('登出錯誤：', error)
+    handleError(message, '😵 登出時發生錯誤啦！請稍後再試一次吧 💔', error)
   }
 }
 
 const showPopover = ref(false)
 
 const handleNotificationRead = async (value) => {
-  // 掌握開關
   showPopover.value = value
-  // 關起來的話做檢查
   if (!value) {
     if (unreadList.value.length > 0) {
-      // 調用 API 更新未讀的通知狀態
       await updateNotifications(userStore.user.uid, unreadList.value)
     }
   }

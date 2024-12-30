@@ -1,13 +1,14 @@
 <script setup>
 import { onMounted, ref } from 'vue'
-import { NTabs, NTabPane } from 'naive-ui'
+import { NTabs, NTabPane, useMessage } from 'naive-ui'
 import { userGetFollowerAPI, userGetFollowingAPI } from '../../../apis/userAPIs'
 import { useUserStore } from '@/stores/userStore'
+import { handleError } from '@/utils/handleError.js'
 
+const message = useMessage()
 const follower = ref(null)
 const following = ref(null)
 const loading = ref(true)
-const errorMessage = ref(null)
 const userStore = useUserStore()
 const followerList = ref([])
 const followingList = ref([])
@@ -15,20 +16,22 @@ const followingList = ref([])
 const fetchFollowerData = async () => {
   try {
     const result = await userGetFollowerAPI(userStore.user.uid)
-    if (result) {
+
+    if (result || result.length > 0) {
       follower.value = result.data
 
-      follower.value.map((item) => {
+      follower.value.forEach((item) => {
         if (item.users_followers_follower_idTousers) {
-          const followerData = JSON.parse(JSON.stringify(item.users_followers_follower_idTousers))
+          const followerData = { ...item.users_followers_follower_idTousers }
           followerList.value.push(followerData)
-        } else {
-          return errorMessage.value
         }
       })
+    } else {
+      follower.value = []
     }
-  } catch (err) {
-    errorMessage.value = err.message || '資料加載錯誤'
+  } catch (error) {
+    handleError(message, undefined, error)
+  } finally {
     loading.value = false
   }
 }
@@ -37,20 +40,22 @@ const fetchFollowingData = async () => {
   try {
     const result = await userGetFollowingAPI(userStore.user.uid)
 
-    if (result) {
+    if (result || result.data.length > 0) {
       following.value = result.data
-      following.value.map((item) => {
+
+      following.value.forEach((item) => {
         if (item.users_followers_user_idTousers) {
-          const followingData = JSON.parse(JSON.stringify(item.users_followers_user_idTousers))
+          const followingData = { ...item.users_followers_user_idTousers }
           followingList.value.push(followingData)
-          loading.value = false
-        } else {
-          return errorMessage.value
         }
       })
+    } else {
+      following.value = []
+      followingList.value = []
     }
-  } catch (err) {
-    errorMessage.value = err.message || '資料加載錯誤'
+  } catch (error) {
+    handleError(message, undefined, error)
+  } finally {
     loading.value = false
   }
 }
@@ -84,7 +89,7 @@ onMounted(() => {
         <div v-else class="text-center text-gray-500">還沒有關注中的人喔！</div>
       </n-tab-pane>
       <n-tab-pane name="chap2" tab="粉絲">
-        <div v-if="follower">
+        <div v-if="follower.length > 0">
           <div
             v-for="follower in followerList"
             :key="follower.follower_id"

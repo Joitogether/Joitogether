@@ -1,7 +1,7 @@
 let isAPILoaded = false
 let onLoadCallbacks = []
 
-// 動態渲染google 地圖
+// 動態渲染 google 地圖
 export const loadGoogleMapsAPI = (apiKey, libraries = 'places', language = 'zh-TW') => {
   return new Promise((resolve, reject) => {
     if (isAPILoaded) {

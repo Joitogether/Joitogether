@@ -5,19 +5,7 @@ export const createPostAPI = async (postData) => {
   try {
     const response = await apiAxios.post('/posts', postData)
     return response.data
-  } catch (error) {
-    console.error('建立文章失敗:', error)
-    return null
-  }
-}
-
-// 取得所有文章
-export const getPostsAPI = async () => {
-  try {
-    const response = await apiAxios.get('/posts')
-    return response.data
-  } catch (error) {
-    console.error('找不到文章', error)
+  } catch {
     return null
   }
 }
@@ -26,9 +14,8 @@ export const getPostsAPI = async () => {
 export const getPostsByCategoryAPI = async (category) => {
   try {
     const response = await apiAxios.get(`/posts/category/${category}`)
-    return response.data
-  } catch (error) {
-    console.error('找不到分類文章', error)
+    return response.data.data
+  } catch {
     return null
   }
 }
@@ -38,8 +25,7 @@ export const getPostByIdAPI = async (postId) => {
   try {
     const response = await apiAxios.get(`/posts/${postId}`)
     return response.data
-  } catch (error) {
-    console.error('找不到單一文章', error)
+  } catch {
     return null
   }
 }
@@ -49,8 +35,7 @@ export const updatePostAPI = async (postId, updatePostData) => {
   try {
     const response = await apiAxios.put(`/posts/${postId}`, updatePostData)
     return response.data
-  } catch (error) {
-    console.error('更新文章失敗:', error)
+  } catch {
     return null
   }
 }
@@ -60,8 +45,7 @@ export const deletePostAPI = async (postId) => {
   try {
     const response = await apiAxios.delete(`/posts/${postId}`)
     return response.data
-  } catch (error) {
-    console.error('刪除文章失敗:', error)
+  } catch {
     return null
   }
 }
@@ -70,13 +54,9 @@ export const deletePostAPI = async (postId) => {
 export const getLatestPostsAPI = async () => {
   try {
     const response = await apiAxios.get('/posts/latest')
-    if (response && response.status === 200) {
-      return response.data.data
-    } else {
-      return
-    }
+    return response.data.data
   } catch {
-    return
+    return null
   }
 }
 
@@ -84,11 +64,7 @@ export const getLatestPostsAPI = async () => {
 export const getPopularPostsAPI = async () => {
   try {
     const response = await apiAxios.get('/posts/popular')
-    if (response && response.status === 200) {
-      return response.data.data
-    } else {
-      return
-    }
+    return response.data.data
   } catch {
     return null
   }

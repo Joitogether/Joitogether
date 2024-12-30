@@ -17,9 +17,6 @@ const carouselData = ref([
   {
     src: joigif,
   },
-  // {
-  //   src: 'https://i.pinimg.com/originals/aa/06/9f/aa069f2356b0397342892fd712f604c2.gif',
-  // },
   {
     src: joixmas,
   },
@@ -75,9 +72,9 @@ onUnmounted(() => {
 
 watch(isMobile, (newVal) => {
   if (newVal) {
-    carouselData.value[1].src = joixmasmobile // 替換成手機版圖片
+    carouselData.value[1].src = joixmasmobile
   } else {
-    carouselData.value[1].src = joixmas // 替換回桌面版圖片
+    carouselData.value[1].src = joixmas
   }
 })
 </script>

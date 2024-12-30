@@ -20,7 +20,22 @@ import { storage } from '@/utils/firebaseConfig'
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage'
 
 const showModal = ref(false)
-const user = ref(null)
+const user = ref({
+  photo_url: '',
+  life_photo_1: '',
+  life_photo_2: '',
+  display_name: '',
+  zodiac: '',
+  age: '',
+  career: '',
+  city: '',
+  self_introduction: '',
+  hobby: '',
+  expertise: '',
+  interested_in: '',
+  tags: '',
+  favorite_sentence: '',
+})
 const userStore = useUserStore()
 const errorMessage = ref(null)
 const loading = ref(true)
@@ -28,7 +43,6 @@ const tagsArray = ref([])
 const fileListSec = ref([])
 const fileListAva = ref([])
 const currentRef = ref(1)
-// const currentStatus = ref('process')
 const message = useMessage()
 const dialog = useDialog()
 
@@ -75,17 +89,18 @@ const zodiacOptions = [
 const fetchUserData = async () => {
   try {
     const result = await userGetAPI(userStore.user.uid)
-    if (result) {
-      user.value = result
-      if (user.value.tags) {
-        tagsArray.value = user.value.tags.split(',')
-        loading.value = false
-        showModal.value = true
-      } else {
-        user.value.tags = '未填寫'
-        loading.value = false
-        showModal.value = true
-      }
+
+    if (!result.display_name) {
+      return
+    }
+
+    user.value = result
+    if (user.value.tags) {
+      tagsArray.value = user.value.tags.split(',')
+      loading.value = false
+    } else {
+      user.value.tags = '未填寫'
+      loading.value = false
     }
   } catch (err) {
     errorMessage.value = err.message || '資料加載錯誤'
@@ -269,10 +284,32 @@ const closeModal = () => {
   emit('close')
 }
 const emit = defineEmits(['close', 'save'])
+
+const props = defineProps({
+  show: {
+    type: Boolean,
+  },
+})
+
+watch(
+  () => props.show,
+  (newVal) => {
+    showModal.value = newVal
+  },
+)
+
+watch(
+  () => showModal.value,
+  (newVal) => {
+    if (!newVal) {
+      emit('close')
+    }
+  },
+)
 </script>
 <template>
   <div class="btn-container flex gap-2 mt-8 mb-8">
-    <n-modal v-model:show="showModal" @mask-click="closeModal">
+    <n-modal :show="showModal" @mask-click="closeModal">
       <n-card style="width: 600px" :bordered="false" size="huge" role="dialog" aria-modal="true">
         <p class="text-2xl font-bold text-center mb-4 text-gray-600">編輯檔案</p>
         <input type="checkbox" id="slide1" class="hidden" checked />

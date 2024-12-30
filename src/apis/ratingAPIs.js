@@ -13,7 +13,7 @@ export const ratingSubmitAPI = async (data) => {
   try {
     const res = await apiAxios.post('/ratings/', data)
     return res.data
-  } catch (error) {
-    return error.response.data
+  } catch {
+    return null
   }
 }

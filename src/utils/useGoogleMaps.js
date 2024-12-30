@@ -23,7 +23,7 @@ export function useGoogleMaps() {
           return
         }
 
-        // 初始化Google Maps
+        // 初始化 Google Maps
         map.value = new google.maps.Map(mapElement, {
           center: location,
           zoom: 14,

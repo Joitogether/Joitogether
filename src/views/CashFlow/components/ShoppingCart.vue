@@ -3,19 +3,27 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import * as PaymentAPIs from '../../../apis/paymentAPIs.js'
 import { useUserStore } from '@/stores/userStore'
+import { useMessage } from 'naive-ui'
 import { handleError } from '../../../utils/handleError.js'
 
 const cartItems = ref([])
 const isLoading = ref(true)
 const userStore = useUserStore()
+const message = useMessage()
 
 // 取得購物車資料並轉換格式
 const fetchCartItems = async () => {
   isLoading.value = true
+  cartItems.value = []
   try {
     const response = await PaymentAPIs.getUserCartDetailsAPI(userStore.user.uid)
+    if (!response || response.cartItems.length === 0) {
+      cartItems.value = []
+      message.info('🛒 購物車是空的，快去挑選你的商品吧！')
+      return
+    }
 
-    const cartItemsData = response.data.cartItems
+    const cartItemsData = response.cartItems
     cartItems.value = cartItemsData.map((item) => ({
       cartItemsId: item.id,
       cartActivityId: item.activity_id,
@@ -26,8 +34,8 @@ const fetchCartItems = async () => {
       image: item.activities.img_url || 'https://via.placeholder.com/200',
       selected: item.is_selected,
     }))
-  } catch {
-    handleError()
+  } catch (error) {
+    handleError(message, undefined, error)
   } finally {
     isLoading.value = false
   }
@@ -59,8 +67,8 @@ const removeSelected = async () => {
       selectedIds.map((id) => PaymentAPIs.deleteUserCartDetailsAPI(userStore.user.uid, id)),
     )
     cartItems.value = cartItems.value.filter((item) => !item.Selected)
-  } catch {
-    handleError()
+  } catch (error) {
+    handleError(message, undefined, error)
   }
 }
 
@@ -69,7 +77,7 @@ const router = useRouter()
 const goToCheckout = async () => {
   const selectedItems = cartItems.value.filter((item) => item.Selected)
   if (selectedItems.length === 0) {
-    handleError('🛒 請選擇你的商品，我們馬上幫你打包結帳！ 🎉✨')
+    message.info('🛒 請選擇你的商品，我們馬上幫你打包結帳！ 🎉✨')
     return
   }
   try {
@@ -77,8 +85,8 @@ const goToCheckout = async () => {
       selectedItems.map((item) => PaymentAPIs.updateCartSelectionAPI(item.cartItemsId, true)),
     )
     goCheckoutPage()
-  } catch {
-    handleError()
+  } catch (error) {
+    handleError(message, undefined, error)
   }
 }
 

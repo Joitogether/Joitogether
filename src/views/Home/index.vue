@@ -11,10 +11,7 @@ import { useRoute } from 'vue-router'
 const userStore = useUserStore()
 const message = useMessage()
 
-// 判斷當前登入狀態彈窗顯示不同信息
-// 初始化完成標誌
 const hasInitialized = ref(false)
-// 用於屏蔽初始化後的 watch 執行
 const skipNextWatch = ref(false)
 
 onMounted(() => {
@@ -30,18 +27,15 @@ watch(
   () => userStore.user.isLogin,
   (isLogin, prevLogin) => {
     if (skipNextWatch.value) {
-      skipNextWatch.value = false // 重置標誌，允許後續監聽
-      return // 跳過本次 watch 執行
+      skipNextWatch.value = false
+      return
     }
 
     // 僅在初始化完成且狀態真正變化時觸發
     if (hasInitialized.value && isLogin !== prevLogin) {
       if (isLogin) {
-        // 登入提示
-        // message.success('🎉 歡迎回來～開心見到您！✨')
         message.success(`歡迎回來 ${userStore.user.display_name} 🎉`)
       } else {
-        // 未登入提示
         message.warning('😵 您尚未登入，部分功能可能無法使用喔！💔')
       }
     }
