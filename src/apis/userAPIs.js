@@ -160,9 +160,9 @@ export const getAllPostAPI = async () => {
     console.error('沒有任何貼文', error)
   }
 }
-export const getRatingsAPI = async (user_id) => {
+export const getRatingsAPI = async (host_id) => {
   try {
-    const response = await apiAxios.get(`/ratings/userDetails/${user_id}`)
+    const response = await apiAxios.get(`/ratings/hostDetails/${host_id}`)
     return response.data
   } catch (error) {
     console.error('找不到留言者', error)

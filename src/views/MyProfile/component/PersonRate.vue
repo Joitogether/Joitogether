@@ -186,12 +186,12 @@ onMounted(() => {
               <div class="flex items-center gap-2">
                 <div class="w-12 h-12 overflow-hidden rounded-full">
                   <img
-                    :src="ratings.users_ratings_host_idTousers.photo_url"
+                    :src="ratings.users_ratings_user_idTousers.photo_url"
                     class="w-full h-full object-cover"
                   />
                 </div>
                 <p class="text-base font-bold">
-                  {{ ratings.users_ratings_host_idTousers.display_name }}
+                  {{ ratings.users_ratings_user_idTousers.display_name }}
                 </p>
               </div>
               <n-rate color="#dd4b2f" readonly :default-value="ratings.rating_heart">
