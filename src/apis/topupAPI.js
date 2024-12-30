@@ -2,7 +2,7 @@ import { apiAxios } from '@/utils/request'
 
 export const handleTopupAPI = async (data) => {
   try {
-    const response = await apiAxios.post('/topups/process', data)
+    const response = await apiAxios.post('/topups/encrypt/process', data)
     return response.data.data
   } catch (err) {
     console.error('處理訂單儲存錯誤：', err)
