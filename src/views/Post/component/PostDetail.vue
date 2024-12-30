@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, reactive, ref, computed } from 'vue'
+import { onMounted, reactive, ref, computed, watch } from 'vue'
 import { NavArrowLeft, MoreVert } from '@iconoir/vue'
 import { useRoute, useRouter } from 'vue-router'
 import { getPostByIdAPI, updatePostAPI, deletePostAPI } from '@/apis/postAPIs'
@@ -48,7 +48,7 @@ const likeId = computed(() => {
 const hasLiked = computed(() => {
   return likesList.value.some((like) => like.uid === userStore.user.uid)
 })
-const postId = Number(route.params.post_id) // 轉換為數字
+let postId = Number(route.params.post_id) // 轉換為數字
 console.log('postId:', postId)
 
 const postDetails = reactive({
@@ -76,7 +76,11 @@ const fetchPostDetails = async () => {
   try {
     const post = await getPostByIdAPI(postId)
     console.log(`API回傳的文章：`, post)
-
+    if (!post) {
+      return router.push({
+        path: '/notFound',
+      })
+    }
     const user = post.data
 
     postDetails.category = categoryMap[post.data.post_category] || '未分類'
@@ -253,7 +257,7 @@ const toggleLike = async () => {
 }
 
 const goPostPage = () => {
-  router.push('/post')
+  router.push('/posts')
 }
 // 切換編輯文章彈窗顯示與隱藏
 const toggleMenu = () => {
@@ -376,6 +380,16 @@ onMounted(() => {
   fetchComments()
   fetchPostLikes()
 })
+
+watch(
+  () => route.params.post_id,
+  () => {
+    postId = Number(route.params.post_id)
+    fetchPostDetails()
+    fetchComments()
+    fetchPostLikes()
+  },
+)
 </script>
 
 <template>

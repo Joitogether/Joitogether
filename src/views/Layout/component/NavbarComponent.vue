@@ -173,7 +173,7 @@ const handleSearchClick = (e) => {
 <template>
   <div
     id="navbar"
-    class="fixed z-50 top-0 left-0 w-full h-16 bg-white py-1 px-4 flex items-center justify-between shadow"
+    class="fixed z-50 top-0 left-0 w-screen h-16 bg-white py-1 px-4 flex items-center justify-between shadow"
   >
     <div class="flex items-center">
       <div class="hidden md:block w-16 md:h-9 md:overflow-hidden">
@@ -232,6 +232,7 @@ const handleSearchClick = (e) => {
             </li>
             <li>
               <router-link
+                v-if="userLogin"
                 :to="{ name: 'activityCreate' }"
                 class="font-bold py-3 block text-base text-gray-500 hover:text-green-600 border-b border-gray-300"
               >
@@ -249,7 +250,7 @@ const handleSearchClick = (e) => {
             <li
               class="font-bold py-3 block text-base text-gray-500 hover:text-green-600 border-b border-gray-300"
             >
-              <RouterLink to="/post">•&nbsp;&nbsp;社群</RouterLink>
+              <RouterLink to="/posts">•&nbsp;&nbsp;社群</RouterLink>
             </li>
             <li>
               <a
@@ -280,7 +281,9 @@ const handleSearchClick = (e) => {
             <a href="#" class="mx-3 tracking-wide hover:text-green-600"> 加入聚會</a>
           </li>
           <li class="py-1">
-            <RouterLink to="/post" class="mx-3 tracking-wide hover:text-green-600">社群</RouterLink>
+            <RouterLink to="/posts" class="mx-3 tracking-wide hover:text-green-600"
+              >社群</RouterLink
+            >
           </li>
           <li class="py-1">
             <a href="#" class="mx-3 tracking-wide hover:text-green-600"> 購物車</a>
@@ -325,41 +328,41 @@ const handleSearchClick = (e) => {
         </template>
         <n-scrollbar style="max-height: 500px">
           <div class="flex flex-col">
-            <p class="pl-2 text-xl font-bold">通知</p>
+            <p class="py-2 mb-2 text-xl text-center font-bold border-b-2 border-gray-200">通知</p>
             <div v-if="notifications.length > 0 && userStore.user.uid">
               <div v-for="notification in notifications" :key="notification.id">
                 <router-link :to="notification.link">
                   <div
-                    :class="{ 'bg-yellow-100': !notification.is_read }"
-                    class="hover:bg-yellow-100 pl-2 overflow-hidden hover:transition-colors post-onepost-top flex py-2 rounded-md items-center cursor-pointer"
+                    :class="{ 'bg-gray-100': !notification.is_read }"
+                    class="group hover:bg-gray-200 px-3 overflow-hidden post-onepost-top flex py-2 rounded-md justify-between items-center cursor-pointer"
                   >
-                    <img
-                      class="w-14 aspect-square rounded-full"
-                      :src="notification.users_notifications_actor_idTousers.photo_url"
-                      alt=""
-                    />
-                    <div class="ml-3 relative w-full h-14">
-                      <p class="font-bold text-lg absolute top-0">
-                        {{ notification.users_notifications_actor_idTousers.display_name
-                        }}<span class="pl-1 font-normal">{{ notification.message }}</span>
-                      </p>
-                      <p class="absolute bottom-0 w-full text-md truncate">
+                    <div class="w-14 h-14 aspect-square rounded-full overflow-hidden">
+                      <img
+                        class="w-full h-full object-cover"
+                        :src="notification.users_notifications_actor_idTousers.photo_url"
+                        alt=""
+                      />
+                    </div>
+
+                    <div class="ml-3 w-3/4 h-30 flex flex-col group-hover:text-green-600">
+                      <span class="font-bold text-base">
+                        {{ notification.users_notifications_actor_idTousers.display_name }}
+                      </span>
+                      <span class="text-base">
+                        {{ notification.message }}
+                      </span>
+                      <span v-if="notification.target_type === 'activity'" class="text-base">
+                        {{ notification.target_detail.name }}
+                      </span>
+                      <span v-else-if="notification.target_type === 'post'" class="text-base">
+                        {{ notification.target_detail.post_title }}
+                      </span>
+                      <span v-else-if="notification.target_type === 'rating'" class="text-base">
+                        {{ notification.target_detail.user_comment }}
+                      </span>
+
+                      <p class="w-full text-md text-gray-400">
                         {{ dayjs(notification.created_at).fromNow() }}
-                        <span
-                          v-if="notification.target_type === 'activity'"
-                          class="pl-1 font-normal text-lg"
-                          >{{ notification.target_detail.name }}</span
-                        >
-                        <span
-                          v-else-if="notification.target_type === 'post'"
-                          class="pl-1 font-normal text-lg"
-                          >{{ notification.target_detail.post_title }}</span
-                        >
-                        <span
-                          v-else-if="notification.target_type === 'rating'"
-                          class="pl-1 font-normal text-lg"
-                          >{{ notification.target_detail.user_comment }}</span
-                        >
                       </p>
                     </div>
                   </div>

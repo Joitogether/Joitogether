@@ -155,7 +155,7 @@ const router = createRouter({
         },
         {
           path: '/:catchAll(.*)', // 匹配所有未定義路由
-          name: 'NotFound',
+          name: 'notFound',
           component: NotFound, // 導向自訂的 404 頁面 隨時可改
         },
       ],
