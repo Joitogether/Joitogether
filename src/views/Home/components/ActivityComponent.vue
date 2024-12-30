@@ -27,11 +27,12 @@ const selectedStartDate = ref('')
 const setStartDate = (date) => {
   selectedStartDate.value = date
 }
+
 // 篩選條件
 const selectedCategory = ref('')
 
 const categoryMap = {
-  '': '', // 全部
+  '': '',
   美食: 'food',
   購物: 'shopping',
   旅遊: 'travel',
@@ -54,10 +55,10 @@ const selectCategory = (category) => {
 const filteredActivities = computed(() =>
   activities.value
     .filter((activity) => {
-      if (!selectedStartDate.value) return true // 如果未選擇日期，顯示所有活動
+      if (!selectedStartDate.value) return true
       const eventDate = new Date(activity.event_time)
       const filterDate = new Date(selectedStartDate.value)
-      return eventDate >= filterDate // 篩選日期大於或等於選擇的日期
+      return eventDate >= filterDate
     })
     .map((activity) => {
       return {
@@ -93,7 +94,7 @@ watch(
     if (category) {
       selectCategory(category)
       scrollToActivityBlock()
-      triggerActivityAction(null) // 重置動作避免重複觸發
+      triggerActivityAction(null)
     }
   },
 )

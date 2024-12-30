@@ -25,12 +25,12 @@ const { notifications, unreadCount, unreadList } = storeToRefs(notificationStore
 const { updateNotifications } = notificationStore
 dayjs.locale('zh-tw')
 dayjs.extend(relativeTime)
-const user = ref(null) // 儲存使用者資料
+const user = ref(null)
 const loading = ref(true)
 const postNumber = ref(null)
 const followerNumber = ref(null)
 const activityNumber = ref(null)
-const userLogin = ref(false) //檢查登入
+const userLogin = ref(false)
 
 defineProps({
   items: {

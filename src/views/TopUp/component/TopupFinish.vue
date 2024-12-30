@@ -76,5 +76,4 @@ const seeRecord = () => {
       <n-button ghost round type="warning" @click="goSpend">花錢去💰💰💰</n-button>
     </div>
   </n-result>
-  <!-- <div>儲值狀態有問題，請查看終端機</div> -->
 </template>

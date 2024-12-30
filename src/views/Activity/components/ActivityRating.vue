@@ -87,6 +87,7 @@ const ratingForm = reactive({
   ability: 0,
   credit: 0,
 })
+
 // 滑鼠懸停狀態
 const hoverStates = reactive({
   overall: 0,

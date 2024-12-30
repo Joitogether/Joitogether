@@ -68,22 +68,4 @@ const props = defineProps({
   <div v-else>趕快去填寫更多資料吧！</div>
 </template>
 
-<style scoped>
-/* @media screen and (width < 768px) {
-  .photoArea {
-    display: block;
-  }
-
-  .photoArea img {
-    margin-bottom: 20px;
-  }
-}
-
-.contentArea p {
-  margin-bottom: 20px;
-  padding: 0 15px;
-  line-height: 2.5;
-  text-align: center;
-  border-radius: 9999px;
-} */
-</style>
+<style scoped></style>

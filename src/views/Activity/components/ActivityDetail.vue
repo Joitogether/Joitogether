@@ -112,12 +112,14 @@ const validateRegister = async () => {
     message.error('已超過報名時間')
     return
   }
+
   // 不需審核但報名的時候已超過最後報名時間（活動時間）
   if (activity.value.require_approval && currentTime.value >= activity.value.event_time) {
     await getActivityDetail()
     message.error('已超過報名時間')
     return
   }
+
   // 參加人數滿了，禁止報名
   if (participantsCount.value >= activity.value.register_limit) {
     message.error('該活動已達報名上限')
@@ -134,7 +136,6 @@ const registerActivity = async () => {
   const data = {
     participant_id: userStore.user.uid,
     comment: registerComment.value,
-    // 不需要審核的話，報名即視為認證報名
     register_validated: !activity.value.require_approval ? 1 : 0,
   }
 
@@ -167,6 +168,7 @@ const registerActivity = async () => {
   socketStore.sendNotification(notiData)
   toggleRegisterModal()
 }
+
 // 根據活動判斷當前使用者是否為主辦者
 const isHost = computed(() => {
   return activity.value.host_id === userStore.user.uid
@@ -177,6 +179,7 @@ onMounted(async () => {
   searchQuery.value = activity.value.location
   await previewMap(searchQuery.value)
 })
+
 // 根據抓取回來的資料判斷使用者是否已註冊該活動，狀態若為isRegistered，則可以取消報名
 const isRegistered = computed(() => {
   return activity.value.applications?.some(
@@ -276,10 +279,12 @@ const addToCart = async () => {
   if (!status) {
     return toggleRegisterModal()
   }
-  const data = {
-    activity_id: activity.value.id,
-    uid: userStore.user.uid,
-  }
+
+  // const data = {
+  //   activity_id: activity.value.id,
+  //   uid: userStore.user.uid,
+  // }
+
   toggleRegisterModal()
 }
 

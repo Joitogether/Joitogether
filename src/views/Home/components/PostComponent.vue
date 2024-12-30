@@ -8,16 +8,16 @@ import { useMessage } from 'naive-ui'
 
 const message = useMessage()
 const router = useRouter()
-const currentPage = ref(1) // 當前頁碼
-const totalPosts = ref([]) // 全部貼文資料
-const postsPerPage = 3 // 每頁顯示 15 個貼文
+const currentPage = ref(1)
+const totalPosts = ref([])
+const postsPerPage = 3
 
-const posts = ref([]) // 用來抓貼文
-const latestPosts = ref([]) // 最新貼文
-const popularPosts = ref([]) // 熱門貼文
-const activieTab = ref('latest') //切換
+const posts = ref([])
+const latestPosts = ref([])
+const popularPosts = ref([])
+const activieTab = ref('latest')
 const goToPostsPage = () => {
-  router.push('/post') //
+  router.push('/post')
 }
 
 const postImgUrl =
@@ -35,6 +35,7 @@ const updatePosts = () => {
   const end = start + postsPerPage
   posts.value = totalPosts.value.slice(start, end)
 }
+
 // 當頁碼變動時更新貼文
 const handlePageChange = (page) => {
   currentPage.value = page

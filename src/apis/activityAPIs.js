@@ -109,8 +109,8 @@ export const activityUserCreateAPI = async (file, otherData) => {
     let imgUrl
 
     if (file) {
-      const filePath = `activities/${Date.now()}_${file.name}` // 設定文件路徑
-      const fileRef = storageRef(storage, filePath) // 建立文件參考
+      const filePath = `activities/${Date.now()}_${file.name}`
+      const fileRef = storageRef(storage, filePath)
 
       // 上傳文件至 Firebase Storage
       const snapshot = await uploadBytes(fileRef, file)
@@ -124,11 +124,11 @@ export const activityUserCreateAPI = async (file, otherData) => {
     // 組合發送的資料
     const activityData = {
       img_url: imgUrl,
-      ...otherData, // 包含其他活動資訊
+      ...otherData,
     }
     // 將資料發送到後端
     const response = await apiAxios.post('/activities', activityData)
-    return response.data // 返回成功響應
+    return response.data
   } catch {
     return null
   }

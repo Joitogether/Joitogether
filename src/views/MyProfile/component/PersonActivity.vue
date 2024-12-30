@@ -21,7 +21,6 @@ const fetchActivityData = async () => {
   try {
     const result = await userGetActivityAPI(userStore.user.uid)
 
-    // 確保返回的資料是陣列
     if (result && result.length > 0) {
       activity.value = result
 

@@ -43,7 +43,6 @@ const tagsArray = ref([])
 const fileListSec = ref([])
 const fileListAva = ref([])
 const currentRef = ref(1)
-// const currentStatus = ref('process')
 const message = useMessage()
 const dialog = useDialog()
 

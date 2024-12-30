@@ -17,7 +17,7 @@ const props = defineProps({
   },
   imageHeight: {
     type: String,
-    default: '200px', // 預設高度
+    default: '200px',
   },
   id: {
     type: Number,
