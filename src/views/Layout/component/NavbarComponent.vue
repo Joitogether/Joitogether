@@ -10,11 +10,8 @@ import relativeTime from 'dayjs/plugin/relativeTime'
 import dayjs from 'dayjs'
 import { useNotificationStore } from '@/stores/notificationStore'
 import { storeToRefs } from 'pinia'
-import { userGetAPI } from '@/apis/userAPIs'
+import { getUserSummaryAPI } from '@/apis/userAPIs'
 import { ref, onMounted } from 'vue'
-import { getPostsAPI } from '@/apis/userAPIs'
-import { userGetFollowerAPI } from '@/apis/userAPIs'
-import { userGetActivityAPI } from '@/apis/userAPIs'
 
 const message = useMessage()
 const userStore = useUserStore()
@@ -24,82 +21,35 @@ const { notifications, unreadCount, unreadList } = storeToRefs(notificationStore
 const { updateNotifications } = notificationStore
 dayjs.locale('zh-tw')
 dayjs.extend(relativeTime)
-const user = ref(null) // 儲存使用者資料
 const loading = ref(true)
 const postNumber = ref(null)
 const followerNumber = ref(null)
 const activityNumber = ref(null)
 const userLogin = ref(false) //檢查登入
 
-defineProps({
-  items: {
-    type: Object,
-    required: true,
-    default: () => ({
-      display_name: '名字加載中',
-      photo_url: '大頭照加載中',
-      city: '城市加載中',
-      age: '年齡加載中',
-      career: '職業加載中',
-    }),
-  },
-  type: {
-    type: String,
-    required: true,
-  },
-})
+const clearNumbers = () => {
+  followerNumber.value = null
+  activityNumber.value = null
+  postNumber.value = null
+}
 // 檢查用戶登入狀態並獲取用戶資料
-const fetchUserData = async () => {
-  try {
-    const result = await userGetAPI(userStore.user.uid)
-    if (result) {
-      user.value = result
-      loading.value = false
-      userLogin.value = true
-    }
-  } catch {
-    message.error('載入用戶資料錯誤')
-    loading.value = false
-    userLogin.value = false
+const fetUserSummary = async () => {
+  if (!userStore.user.uid) {
+    return
   }
-}
-const getPostCount = async () => {
-  try {
-    const result = await getPostsAPI(userStore.user.uid).catch(() => ({ data: [] }))
-    postNumber.value = result.data.length
-  } catch (err) {
-    console.log('抓取文章數量發生錯誤', err)
-    postNumber.value = 0
+  const res = await getUserSummaryAPI(userStore.user.uid)
+  if (res) {
+    activityNumber.value = res._count.activities
+    followerNumber.value = res._count.followers
+    postNumber.value = res._count.posts
   }
+  loading.value = false
 }
-const getFollowerCount = async () => {
-  try {
-    const result = await userGetFollowerAPI(userStore.user.uid).catch(() => ({ data: [] }))
-    followerNumber.value = result.data.length
-  } catch (err) {
-    console.log('抓取粉絲數量發生錯誤', err)
-    followerNumber.value = 0
-  }
-}
-const getActivityCount = async () => {
-  try {
-    const result = await userGetActivityAPI(userStore.user.uid)
-    console.log('活動資料：', result)
-    console.log(result.length)
 
-    activityNumber.value = result.length
-  } catch (err) {
-    console.log('抓取活動數量發生錯誤', err)
-    activityNumber.value = 0
-  }
-}
 // 註冊登入邏輯
 onMounted(() => {
   if (userStore.user.isLogin) {
-    fetchUserData()
-    getPostCount()
-    getFollowerCount()
-    getActivityCount()
+    fetUserSummary()
   } else {
     loading.value = false
   }
@@ -128,7 +78,7 @@ const handleLogout = async () => {
 
     // 更新 userStore 狀態為未登入
     userStore.clearUser() // 清空使用者狀態，方法來自 userStore.js
-
+    clearNumbers()
     // 顯示成功訊息
     message.success('🎉 成功登出！期待下次見到你～ 👋')
   } catch (error) {
@@ -399,24 +349,23 @@ const handleSearchClick = (e) => {
         class="w-full rounded-md bg-gray-50 text-black px-6 py-10 space-y-4 shadow-md md:w-1/3 md:right-2 lg:w-1/4"
       >
         <div
-          v-if="userStore.user.isLogin"
           class="user-photo rounded-full w-40 h-40 aspect-square overflow-hidden flex justify-self-center md:w-24 md:h-24"
         >
           <img
-            :src="user.photo_url || 'default_image_path.jpg'"
+            :src="userStore.user.photo_url || 'src/assets/avatar.png'"
             alt="userPhoto"
             class="w-full h-full object-cover"
           />
         </div>
-        <div v-if="userStore.user.isLogin" class="user-name text-center font-bold text-xl">
-          {{ user.display_name || '暱稱' }}
+        <div class="user-name text-center font-bold text-xl">
+          {{ userStore.user.display_name || '暱稱' }}
         </div>
-        <div v-if="userStore.user.isLogin" class="user-info text-md font-bold text-center">
-          <span>{{ user.city || '所在地' }}</span>
-          <span> • {{ user.age || '年齡' }}</span>
-          <span> • {{ user.career || '職業' }}</span>
+        <div class="user-info text-md font-bold text-center">
+          <span>{{ userStore.user.city || '所在地' }}</span>
+          <span> • {{ userStore.user.age || '年齡' }}</span>
+          <span> • {{ userStore.user.career || '職業' }}</span>
         </div>
-        <div v-if="userStore.user.isLogin" class="flex justify-center">
+        <div class="flex justify-center">
           <RouterLink to="/profile">
             <button
               class="border border-gray-600 text-gray-600 py-2 px-4 rounded-full hover:border-green-600 hover:text-green-600"
@@ -426,7 +375,7 @@ const handleSearchClick = (e) => {
           </RouterLink>
         </div>
 
-        <div v-if="userStore.user.isLogin" class="user-more-info flex justify-center gap-10">
+        <div v class="user-more-info flex justify-center gap-10">
           <div class="grid text-center">
             <span>{{ activityNumber || 0 }}</span>
             <span>聚會</span>

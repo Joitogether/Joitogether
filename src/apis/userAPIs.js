@@ -192,3 +192,12 @@ export const userUpdateNotificationAPI = async (uid, unreadList) => {
     }
   }
 }
+
+export const getUserSummaryAPI = async (uid) => {
+  try {
+    const res = await apiAxios.get(`/users/summary/${uid}`)
+    return res.data.data
+  } catch {
+    return null
+  }
+}
