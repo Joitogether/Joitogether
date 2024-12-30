@@ -29,16 +29,10 @@ function hideLoadingOverlay() {
 apiAxios.interceptors.request.use(
   async function (config) {
     if (auth.currentUser) {
-      try {
-        const token = await getIdToken(auth.currentUser)
-        if (token) {
-          config.headers.Authorization = `Bearer ${token}`
-        }
-      } catch (error) {
-        console.warn('無法獲取 Token，繼續發送請求', error)
+      const token = await getIdToken(auth.currentUser)
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`
       }
-    } else {
-      console.log('用戶未登入，跳過 Authorization 設置')
     }
     if (requestCount === 0) {
       messageInstance = message.loading('請稍後...', { duration: 0 })

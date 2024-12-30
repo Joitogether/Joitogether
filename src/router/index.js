@@ -18,6 +18,8 @@ import SignupSuccess from '@/views/Login/SignupSuccess.vue'
 import ResetPassword from '@/views/Login/ResetPassword.vue'
 import forgotPassword from '@/views/Login/ForgotPassword.vue'
 import ShoppingCart from '@/views/CashFlow/index.vue'
+import CheckoutPage from '@/views/Payment/CheckoutPage.vue'
+import CheckoutSuccess from '@/views/Payment/CheckoutSuccess.vue'
 import Layout from '@/views/Layout/index.vue'
 import { getCurrentUser } from '@/utils/firebaseConfig'
 import TopUp from '@/views/TopUp/index.vue'
@@ -160,14 +162,19 @@ const router = createRouter({
           component: TopupFail,
         },
         {
-          path: 'walletRecord',
+          path: '/walletRecord',
           name: 'walletRecord',
           component: WalletRecord,
         },
         {
-          path: '/:catchAll(.*)', // 匹配所有未定義路由
-          name: 'NotFound',
-          component: () => import('@/NotFound.vue'), // 導向自訂的 404 頁面 隨時可改
+          path: '/checkout',
+          name: 'checkout',
+          component: CheckoutPage,
+        },
+        {
+          path: '/checkout-success/:order_id',
+          name: 'checkoutSuccess',
+          component: CheckoutSuccess,
         },
       ],
     },

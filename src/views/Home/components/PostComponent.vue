@@ -3,18 +3,21 @@ import { ref, onMounted } from 'vue'
 import { getLatestPostsAPI, getPopularPostsAPI } from '@/apis/postAPIs.js'
 import defaultAvatar from '@/assets/avatar.png'
 import { useRouter } from 'vue-router'
+import { handleError } from '@/utils/handleError.js'
+import { useMessage } from 'naive-ui'
 
+const message = useMessage()
 const router = useRouter()
-const currentPage = ref(1) // 當前頁碼
-const totalPosts = ref([]) // 全部貼文資料
-const postsPerPage = 3 // 每頁顯示 15 個貼文
+const currentPage = ref(1)
+const totalPosts = ref([])
+const postsPerPage = 3
 
-const posts = ref([]) // 用來抓貼文
-const latestPosts = ref([]) // 最新貼文
-const popularPosts = ref([]) // 熱門貼文
-const activieTab = ref('latest') //切換
+const posts = ref([])
+const latestPosts = ref([])
+const popularPosts = ref([])
+const activieTab = ref('latest')
 const goToPostsPage = () => {
-  router.push('/post') //
+  router.push('/post')
 }
 
 const postImgUrl =
@@ -32,6 +35,7 @@ const updatePosts = () => {
   const end = start + postsPerPage
   posts.value = totalPosts.value.slice(start, end)
 }
+
 // 當頁碼變動時更新貼文
 const handlePageChange = (page) => {
   currentPage.value = page
@@ -50,27 +54,53 @@ const switchTab = (tab) => {
 }
 
 const fetchLatestPostsData = async () => {
-  const response = await getLatestPostsAPI()
-  if (response) {
+  try {
+    const response = await getLatestPostsAPI()
+
+    if (!response || response.data.length === 0) {
+      latestPosts.value = []
+      totalPosts.value = []
+      return updatePosts()
+    }
+
     latestPosts.value = response.data
     totalPosts.value = latestPosts.value
-    return updatePosts()
+    updatePosts()
+  } catch (error) {
+    handleError(message, undefined, error)
+    latestPosts.value = []
+    totalPosts.value = []
+    updatePosts()
   }
 }
 
 const fetchPopularPostsData = async () => {
-  const response = await getPopularPostsAPI()
-  if (response) {
+  try {
+    const response = await getPopularPostsAPI()
+
+    if (!response || response.data.length === 0) {
+      popularPosts.value = []
+      totalPosts.value = []
+      if (activieTab.value === 'popular') {
+        updatePosts()
+      }
+      return
+    }
+
     popularPosts.value = response.data.sort((a, b) => {
       return b._count.post_likes - a._count.post_likes
     })
     totalPosts.value = popularPosts.value
     if (activieTab.value === 'popular') {
-      totalPosts.value = popularPosts.value
       updatePosts()
     }
-  } else {
-    console.log('fetchPopularPostsData失敗')
+  } catch (error) {
+    handleError(message, undefined, error)
+    popularPosts.value = []
+    totalPosts.value = []
+    if (activieTab.value === 'popular') {
+      updatePosts()
+    }
   }
 }
 

@@ -17,8 +17,9 @@ app.use(pinia)
 app.use(router)
 app.use(Naive)
 
-app.config.errorHandler = () => {
+app.config.errorHandler = (err) => {
   // 統一處理沒有抓到的錯誤
+  console.log(err)
   message.error('發生未知錯誤，請稍後再試')
 }
 

@@ -8,42 +8,47 @@ import PersonRate from './component/PersonRate.vue'
 import PersonFollow from './component/PersonFollow.vue'
 import PersonPost from './component/PersonPost.vue'
 import PersonActivity from './component/PersonActivity.vue'
-
 import { userGetAPI } from '@/apis/userAPIs'
 import { useUserStore } from '@/stores/userStore'
+import { handleError } from '@/utils/handleError.js'
+import { useMessage } from 'naive-ui'
 
 const userStore = useUserStore()
+const message = useMessage()
 const user = ref({})
 const loading = ref(true)
-const errorMessage = ref(null)
+const isEditModalOpen = ref(false)
 
 const fetchUserData = async () => {
   try {
     const result = await userGetAPI(userStore.user.uid)
+    if (result.length === 0) {
+      user.value = {}
+      return
+    }
     if (result) {
       user.value = result
 
       loading.value = false
       return user.value
     }
-  } catch (err) {
-    errorMessage.value = err.message || '資料加載錯誤'
+  } catch (error) {
+    handleError(message, undefined, error)
+  } finally {
     loading.value = false
   }
 }
 
 const handleSave = async () => {
   await fetchUserData()
-  isEditModalOpen.value = false
 }
 onMounted(async () => {
   await fetchUserData()
 })
 
-const isEditModalOpen = ref(false)
 // 開啟編輯視窗
 const openEditModal = () => {
-  isEditModalOpen.value = true // 顯示編輯視窗
+  isEditModalOpen.value = true
 }
 
 // 關閉編輯視窗
@@ -65,7 +70,12 @@ const currentPage = ref('PersonInfo')
       :photo_url="user.photo_url"
       @edit="openEditModal"
     />
-    <EditModal v-if="isEditModalOpen" @close="closeEditModal" @save="handleSave" />
+    <EditModal
+      @save="handleSave"
+      :user="userStore.user"
+      @close="closeEditModal"
+      :show="isEditModalOpen"
+    />
     <div class="flex justify-between px-4 py-5 md:px-8">
       <button
         @click="currentPage = 'PersonInfo'"

@@ -15,6 +15,7 @@ import { useMessage, NButton } from 'naive-ui'
 import dayjs from 'dayjs'
 import 'dayjs/locale/zh-tw.js'
 import relativeTime from 'dayjs/plugin/relativeTime'
+import { handleError } from '@/utils/handleError.js'
 import { useSocketStore } from '@/stores/socketStore'
 
 dayjs.locale('zh-tw')
@@ -35,8 +36,6 @@ const socketStore = useSocketStore()
 const newComment = ref('')
 const message = useMessage()
 
-console.log('來這裡看看:', userStore)
-
 const likesCount = computed(() => {
   return likesList.value.length || 0
 })
@@ -49,7 +48,6 @@ const hasLiked = computed(() => {
   return likesList.value.some((like) => like.uid === userStore.user.uid)
 })
 const postId = Number(route.params.post_id) // 轉換為數字
-console.log('postId:', postId)
 
 const postDetails = reactive({
   category: '',
@@ -75,7 +73,18 @@ const categoryMap = {
 const fetchPostDetails = async () => {
   try {
     const post = await getPostByIdAPI(postId)
-    console.log(`API回傳的文章：`, post)
+
+    if (!post.data || Object.keys(post.data).length === 0) {
+      postDetails.category = '未分類'
+      postDetails.title = '查無此文章'
+      postDetails.content = '很抱歉，我們無法找到這篇文章的內容'
+      postDetails.time = ''
+      postDetails.img = null
+      postDetails.name = '未知用戶'
+      postDetails.avatar = null
+      postDetails.isPostAuthor = false
+      return
+    }
 
     const user = post.data
 
@@ -89,7 +98,7 @@ const fetchPostDetails = async () => {
     postDetails.isPostAuthor = user.uid === userStore.user.uid
     postDetails.authorUid = user.uid
   } catch (error) {
-    console.error(`獲取 ${postId}文章資料失敗`, error.response?.data || error.message)
+    handleError(message, undefined, error)
   }
 }
 
@@ -99,7 +108,11 @@ const fetchComments = async () => {
     const res = await getPostCommentsAPI(postId)
     const comments = res.data
 
-    console.log(`API回傳的留言：`, comments)
+    if (!comments || comments.length === 0) {
+      commentList.value = []
+      commentCount.value = 0
+      return
+    }
 
     commentCount.value = comments.length || 0
 
@@ -114,11 +127,8 @@ const fetchComments = async () => {
     }))
 
     commentList.value = formattedComments
-
-    console.log(`文章 ${postId} 的留言已更新：`, commentList.value)
-    console.log(`文章 ${postId} 的留言數量：`, commentCount.value)
   } catch (error) {
-    console.error(`取得使用者資料失敗`, error)
+    handleError(message, undefined, error)
   }
 }
 
@@ -137,7 +147,6 @@ const addComment = async () => {
     post_id: postId,
     uid: userStore.user.uid,
     comment_content: newComment.value,
-    // created_at: dayjs().format('YYYY-MM-DD HH:mm:ss'),
     comment_status: 'active',
   }
 
@@ -156,12 +165,11 @@ const addComment = async () => {
     socketStore.sendNotification(notiData)
 
     message.success('留言新增成功')
-    console.log('傳送', commentData)
     newComment.value = ''
     fetchComments()
     return commentData
   } catch (error) {
-    console.log(error)
+    handleError(message, undefined, error)
   }
 }
 // 刪除留言
@@ -179,7 +187,7 @@ const deleteComment = async (commentId) => {
       }
     }
   } catch (error) {
-    console.log(error)
+    handleError(message, undefined, error)
   }
 }
 
@@ -193,7 +201,7 @@ const toggleDelete = async () => {
       router.push('/post')
     }, 1000)
   } catch (error) {
-    console.log(error)
+    handleError(message, undefined, error)
     if (error.message) {
       message.error(error.message)
     } else {
@@ -205,14 +213,12 @@ const toggleDelete = async () => {
 const fetchPostLikes = async () => {
   try {
     const res = await getPostLikesAPI(postId)
-    if (res === null) {
+    if (!res || res.data.length === 0) {
       likesList.value = []
     }
     likesList.value = res.data
-    console.log(likesList.value)
-    console.log(`取得文章 ${postId} 的按讚數成功`, likesList.value)
   } catch (error) {
-    console.error(`${postId}沒有任何按讚紀錄`, error)
+    handleError(message, undefined, error)
   }
 }
 
@@ -247,8 +253,7 @@ const toggleLike = async () => {
     fetchPostLikes()
     return likeData
   } catch (error) {
-    console.log('按讚失敗', error)
-    message.error('按讚失敗')
+    handleError(message, '按讚失敗', error)
   }
 }
 
@@ -269,7 +274,6 @@ const saveEdit = async () => {
 
   try {
     const originalPost = await getPostByIdAPI(postId)
-    console.log(`API回傳的文章：`, originalPost)
 
     await updatePostAPI(postId, {
       uid: userStore.user.uid,
@@ -290,7 +294,7 @@ const saveEdit = async () => {
 
     fetchPostDetails()
   } catch (error) {
-    console.log(error)
+    handleError(message, undefined, error)
   }
 }
 
@@ -325,14 +329,14 @@ const uploadFile = async (file) => {
   try {
     const storage = getStorage()
     const fileRef = storageRef(storage, `postImages/${file.name}`)
-    const result = await uploadBytes(fileRef, file) // 上傳檔案
-    const downloadURL = await getDownloadURL(result.ref) // 獲取下載連結
-    console.log('上傳成功，下載連結:', downloadURL)
+    const result = await uploadBytes(fileRef, file)
+    const downloadURL = await getDownloadURL(result.ref)
+
     editPostImg.value = downloadURL
-    return downloadURL // 傳回下載連結
+
+    return downloadURL
   } catch (error) {
-    console.error('圖片上傳失敗')
-    throw error
+    handleError(message, '圖片上傳失敗，請檢查檔案格式或網路連線', error)
   }
 }
 
@@ -359,8 +363,7 @@ const handleImageUpload = async (event) => {
     try {
       await uploadFile(file)
     } catch (error) {
-      console.error('圖片上傳失敗:', error)
-      message.error('圖片上傳失敗，請檢查檔案格式或網路連線')
+      handleError(message, '圖片上傳失敗，請檢查檔案格式或網路連線', error)
     }
   }
 }
@@ -370,8 +373,6 @@ const removeImage = () => {
   uploadedImage.value = null
 }
 onMounted(() => {
-  console.log('正在加載文章', postId)
-
   fetchPostDetails()
   fetchComments()
   fetchPostLikes()

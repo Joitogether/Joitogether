@@ -1,10 +1,12 @@
 <script setup>
 import { onMounted, reactive, ref } from 'vue'
 import { useUserStore } from '@/stores/userStore'
-import { NButton, NInputNumber } from 'naive-ui'
+import { NButton, NInputNumber, useMessage } from 'naive-ui'
 import { useRouter } from 'vue-router'
 import { getWalletTransactionAPI, handleTopupAPI } from '@/apis/topupAPI.js'
+import { handleError } from '@/utils/handleError.js'
 
+const message = useMessage()
 const router = useRouter()
 const wallet = ref([])
 const userStore = useUserStore()
@@ -18,11 +20,17 @@ const formData = reactive({
 })
 
 const fetchWalletBalance = async () => {
-  const result = await getWalletTransactionAPI(userStore.user.uid)
-  console.log('walletbalance', result.balance)
+  try {
+    const result = await getWalletTransactionAPI(userStore.user.uid)
 
-  wallet.value = result
-  return wallet.value
+    if (!result || result.length === 0) {
+      wallet.value = 0
+      return
+    }
+    wallet.value = result
+  } catch (error) {
+    handleError(message, undefined, error)
+  }
 }
 
 const createOrder = async () => {
@@ -53,8 +61,8 @@ const createOrder = async () => {
     } else {
       throw new Error('Payment form not found')
     }
-  } catch (err) {
-    console.error(err)
+  } catch (error) {
+    handleError(message, undefined, error)
   }
 }
 const seeRecord = () => {

@@ -55,7 +55,10 @@ import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { userUpdateEmailVerifiedAPI } from '@/apis/userAPIs'
 import { useUserStore } from '@/stores/userStore'
+import { useMessage } from 'naive-ui'
+import { handleError } from '@/utils/handleError.js'
 
+const message = useMessage()
 const router = useRouter()
 const countdown = ref(10)
 
@@ -66,31 +69,19 @@ const updateEmailVerified = async (uid) => {
   }
 
   try {
-    const response = await userUpdateEmailVerifiedAPI(uid, updateData)
-    console.log('後端 email_verified 更新成功！', response.data)
+    await userUpdateEmailVerifiedAPI(uid, updateData)
   } catch (error) {
-    console.error('後端 email_verified 更新失敗：', error)
+    handleError(message, undefined, error)
   }
 }
 const userStore = useUserStore()
 
 onMounted(async () => {
-  // onAuthStateChanged(auth, async (currentUser) => {
-  //   if (currentUser) {
-  //     // 手動刷新用戶資料
-  //     await currentUser.reload()
-  //     const refreshedUser = auth.currentUser
-
-  //     // 更新用戶資料
-  //     user.value = refreshedUser
   // 檢查是否已驗證
   if (userStore.user.email_verified) {
-    console.log('用戶已驗證信箱！')
-    // 調用模組化的更新函數
     await updateEmailVerified(userStore.user.uid)
   }
-  //   }
-  // })
+
   // 開始倒數計時
   const interval = setInterval(() => {
     if (countdown.value > 0) {

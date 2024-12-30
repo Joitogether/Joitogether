@@ -1,7 +1,10 @@
 import { defineStore } from 'pinia'
 import { auth } from '@/utils/firebaseConfig.js'
 import { userGetAPI } from '@/apis/userAPIs'
-// import axios from 'axios'
+import { handleError } from '@/utils/handleError.js'
+import { useMessage } from 'naive-ui'
+
+const message = useMessage()
 
 export const useUserStore = defineStore('user', {
   state: () => ({
@@ -17,8 +20,8 @@ export const useUserStore = defineStore('user', {
     // 設定用戶資料
     setUser(user) {
       this.user = {
-        ...user, // 合併新的用戶資料
-        isLogin: true, // 設定為已登入
+        ...user,
+        isLogin: true,
       }
     },
 
@@ -32,11 +35,10 @@ export const useUserStore = defineStore('user', {
     // 登出
     async logout() {
       try {
-        await auth.signOut() // 確保登出 Firebase
-        this.clearUser() // 清空用戶狀態
-        console.log('用戶已成功登出')
+        await auth.signOut()
+        this.clearUser()
       } catch (error) {
-        console.error('登出失敗：', error)
+        handleError(message, undefined, error)
       }
     },
   },

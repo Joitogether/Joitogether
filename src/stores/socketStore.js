@@ -26,13 +26,11 @@ export const useSocketStore = defineStore('socket', () => {
     // 連線成功事件
     socket.value.on('connect', () => {
       isConnected.value = true
-      console.log('Socket 已連上')
     })
 
     // 斷線事件
     socket.value.on('disconnect', () => {
       isConnected.value = false
-      console.log('Socket 連線失敗')
     })
 
     // 接收通知事件
