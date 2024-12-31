@@ -1,27 +1,16 @@
 import { apiAxios } from '@/utils/request.js'
 
 export const userRegisterAPI = async (data) => {
-  try {
-    const response = await apiAxios.post('/users/register', data)
-    return response
-  } catch {
-    return null
-  }
+  return await apiAxios.post('/users/register', data)
 }
 
 export const userUpdateEmailVerifiedAPI = async (uid, data) => {
-  try {
-    const response = await apiAxios.put(`users/update/${uid}`, data)
-    return response
-  } catch {
-    return null
-  }
+  return await apiAxios.put(`users/update/${uid}`, data)
 }
 
 export const userAuthLoginAPI = async (data) => {
   try {
     const response = await apiAxios.post('/users/register', data)
-
     return response
   } catch (error) {
     if (error.response?.status === 409) {
@@ -32,109 +21,59 @@ export const userAuthLoginAPI = async (data) => {
       }
     }
 
-    throw null
+    return null
   }
 }
 
 export const userGetAPI = async (uid) => {
-  try {
-    const response = await apiAxios.get(`/users/${uid}`)
-    return response.data.data
-  } catch {
-    return null
-  }
+  const { data } = await apiAxios.get(`/users/${uid}`)
+  return data.data
 }
 
 export const userGetFollowerAPI = async (uid) => {
-  try {
-    const response = await apiAxios.get(`/users/userFollowers/${uid}`)
-    return response.data
-  } catch {
-    return null
-  }
+  const { data } = await apiAxios.get(`/users/userFollowers/${uid}`)
+  return data
 }
 
 export const userGetFollowingAPI = async (uid) => {
-  try {
-    const response = await apiAxios.get(`/users/following/${uid}`)
-    return response.data
-  } catch {
-    return null
-  }
+  const { data } = await apiAxios.get(`/users/following/${uid}`)
+  return data
 }
 
 export const userGetActivityAPI = async (uid) => {
-  try {
-    const response = await apiAxios.get(`/users/applications/${uid}`)
-    return response.data.data
-  } catch {
-    return null
-  }
+  const { data } = await apiAxios.get(`/users/applications/${uid}`)
+  return data.data
 }
 
 export const userPutAPI = async (uid, data) => {
-  try {
-    const response = await apiAxios.put(`/users/update/${uid}`, data)
-    return response
-  } catch {
-    return null
-  }
+  return await apiAxios.put(`/users/update/${uid}`, data)
 }
 
 export const userPostAPI = async (uid, data) => {
-  try {
-    return await apiAxios.post(`/users/register/${uid}`, data)
-  } catch {
-    return null
-  }
+  return await apiAxios.post(`/users/register/${uid}`, data)
 }
 
 export const getPostsAPI = async (uid) => {
-  try {
-    const response = await apiAxios.get(`/users/posts/${uid}`)
-    return response.data
-  } catch {
-    return null
-  }
+  const { data } = await apiAxios.get(`/users/posts/${uid}`)
+  return data
 }
 
 export const getRatingsAPI = async (host_id) => {
-  try {
-    const response = await apiAxios.get(`/ratings/hostDetails/${host_id}`)
-    return response.data
-  } catch {
-    return null
-  }
+  const { data } = await apiAxios.get(`/ratings/hostDetails/${host_id}`)
+  return data
 }
 export const userGetNotificationAPI = async (uid, page, pageSize, additionalSkip) => {
-  try {
-    const { data } = await apiAxios.get(`/users/notifications/${uid}`, {
-      params: { page, pageSize, additionalSkip },
-    })
-    return data
-  } catch (error) {
-    if (error) {
-      return null
-    }
-  }
+  const { data } = await apiAxios.get(`/users/notifications/${uid}`, {
+    params: { page, pageSize, additionalSkip },
+  })
+  return data
 }
 
 export const userUpdateNotificationAPI = async (uid, unreadList) => {
-  try {
-    const response = await apiAxios.put(`/users/notifications/${uid}`, { unreadList })
-    return response
-  } catch (error) {
-    if (error) {
-      return null
-    }
-  }
+  return await apiAxios.put(`/users/notifications/${uid}`, { unreadList })
 }
 
 export const getUserSummaryAPI = async (uid) => {
-  try {
-    const res = await apiAxios.get(`/users/summary/${uid}`)
-    return res.data.data
-  } catch {
-    return null
-  }
+  const { data } = await apiAxios.get(`/users/summary/${uid}`)
+  return data.data
 }
