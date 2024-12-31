@@ -47,7 +47,7 @@ const likeId = computed(() => {
 const hasLiked = computed(() => {
   return likesList.value.some((like) => like.uid === userStore.user.uid)
 })
-const postId = Number(route.params.post_id) // 轉換為數字
+let postId = Number(route.params.post_id) // 轉換為數字
 
 const postDetails = reactive({
   category: '',
@@ -73,23 +73,26 @@ const categoryMap = {
 const fetchPostDetails = async () => {
   try {
     const post = await getPostByIdAPI(postId)
+    console.log('正在回傳文章', post)
 
-    if (!post.data || Object.keys(post.data).length === 0) {
-      postDetails.category = '未分類'
-      postDetails.title = '查無此文章'
-      postDetails.content = '很抱歉，我們無法找到這篇文章的內容'
-      postDetails.time = ''
-      postDetails.img = null
-      postDetails.name = '未知用戶'
-      postDetails.avatar = null
-      postDetails.isPostAuthor = false
-      return
-    }
-    if (!post) {
+    if (!post.data || (Array.isArray(post.data) && post.data.length === 0)) {
       return router.push({
         path: '/notFound',
       })
     }
+
+    // if (!post.data || Object.keys(post.data).length === 0) {
+    //   postDetails.category = '未分類'
+    //   postDetails.title = '查無此文章'
+    //   postDetails.content = '很抱歉，我們無法找到這篇文章的內容'
+    //   postDetails.time = ''
+    //   postDetails.img = null
+    //   postDetails.name = '未知用戶'
+    //   postDetails.avatar = null
+    //   postDetails.isPostAuthor = false
+    //   return
+    // }
+
     const user = post.data
 
     postDetails.category = categoryMap[post.data.post_category] || '未分類'
