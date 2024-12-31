@@ -63,10 +63,17 @@ const selectCategory = (category) => {
 const filteredActivities = computed(() =>
   activities.value
     .filter((activity) => {
-      if (!selectedStartDate.value) return true
       const eventDate = new Date(activity.event_time)
-      const filterDate = new Date(selectedStartDate.value)
-      return eventDate >= filterDate
+      const today = new Date()
+      today.setHours(0, 0, 0, 0)
+
+      if (eventDate < today) return false
+
+      if (selectedStartDate.value) {
+        const filterDate = new Date(selectedStartDate.value)
+        return eventDate >= filterDate
+      }
+      return true
     })
     .map((activity) => {
       return {
@@ -80,7 +87,7 @@ const filteredActivities = computed(() =>
         userImg: activity.users.photo_url,
       }
     })
-    .sort((a, b) => a.event_time - b.event_time),
+    .sort((a, b) => new Date(a.event_time) - new Date(b.event_time)),
 )
 
 watch(
@@ -110,7 +117,6 @@ watch(
 watch(
   selectedRegions,
   (regions) => {
-    console.log('選中的地區：', regions) // 調試用
     if (regions.length > 0) {
       fetchActivitiesByRegion(regions)
     } else {
