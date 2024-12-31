@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, reactive, ref, computed } from 'vue'
+import { onMounted, reactive, ref, computed, watch } from 'vue'
 import { NavArrowLeft, MoreVert } from '@iconoir/vue'
 import { useRoute, useRouter } from 'vue-router'
 import { getPostByIdAPI, updatePostAPI, deletePostAPI } from '@/apis/postAPIs'
@@ -85,7 +85,11 @@ const fetchPostDetails = async () => {
       postDetails.isPostAuthor = false
       return
     }
-
+    if (!post) {
+      return router.push({
+        path: '/notFound',
+      })
+    }
     const user = post.data
 
     postDetails.category = categoryMap[post.data.post_category] || '未分類'
@@ -258,7 +262,7 @@ const toggleLike = async () => {
 }
 
 const goPostPage = () => {
-  router.push('/post')
+  router.push('/posts')
 }
 // 切換編輯文章彈窗顯示與隱藏
 const toggleMenu = () => {
@@ -377,6 +381,16 @@ onMounted(() => {
   fetchComments()
   fetchPostLikes()
 })
+
+watch(
+  () => route.params.post_id,
+  () => {
+    postId = Number(route.params.post_id)
+    fetchPostDetails()
+    fetchComments()
+    fetchPostLikes()
+  },
+)
 </script>
 
 <template>

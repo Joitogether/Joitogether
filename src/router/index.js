@@ -27,6 +27,7 @@ import WalletRecord from '@/views/TopUp/component/WalletRecord.vue'
 import TopupResult from '@/views/TopUp/component/TopupResult.vue'
 import TopupSuccess from '@/views/TopUp/component/TopupSuccess.vue'
 import TopupFail from '@/views/TopUp/component/TopupFail.vue'
+import NotFound from '@/views/Error/NotFound.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -102,8 +103,8 @@ const router = createRouter({
           ],
         },
         {
-          path: 'post',
-          name: 'post',
+          path: 'posts',
+          name: 'posts',
           component: PostHomePage,
         },
         {
@@ -175,6 +176,11 @@ const router = createRouter({
           path: '/checkout-success/:order_id',
           name: 'checkoutSuccess',
           component: CheckoutSuccess,
+        },
+        {
+          path: '/:catchAll(.*)', // 匹配所有未定義路由
+          name: 'notFound',
+          component: NotFound, // 導向自訂的 404 頁面 隨時可改
         },
       ],
     },

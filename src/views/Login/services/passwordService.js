@@ -44,7 +44,7 @@ export const passwordService = {
     try {
       // 設定驗證信的跳轉連結
       const actionCodeSettings = {
-        url: `${window.location.origin}/reset-password`, // 前面那段是localhost
+        url: `https://joitogether-production.up.railway.app/reset-password`, // 前面那段是localhost
         handleCodeInApp: true,
       }
 
