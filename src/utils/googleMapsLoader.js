@@ -17,7 +17,6 @@ export const loadGoogleMapsAPI = (apiKey, libraries = 'places', language = 'zh-T
       script.id = 'google-maps-script'
       script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=${libraries}&language=${language}`
       script.async = true
-      script.defer = true
       script.onload = () => {
         isAPILoaded = true
         onLoadCallbacks.forEach((callback) => callback(window.google.maps))
