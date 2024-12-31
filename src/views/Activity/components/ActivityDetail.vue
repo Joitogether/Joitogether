@@ -364,30 +364,36 @@ const handleCardClick = () => {
 </script>
 <template>
   <div v-if="activity.id" class="bg-[#E5E7EB]">
-    <div class="container">
-      <div class="detail-container">
-        <div class="flex items-center mb-4 w-full">
-          <router-link :to="{ name: 'home' }">
-            <NavArrowLeft stroke-width="2" class="w-8 h-8"></NavArrowLeft>
-          </router-link>
-          <div class="flex h-full justify-start ml-[5%] w-full">
-            <img class="w-14 aspect-square rounded-full" :src="host.photo_url" alt="" />
-            <div class="ml-3 w-full h-14 flex items-center">
-              <p class="font-bold text-lg">{{ host.display_name }}</p>
-            </div>
+    <div class="bg-gray-100">
+      <div class="flex items-center relative w-full h-14 p-2 px-4">
+        <router-link :to="{ name: 'home' }">
+          <NavArrowLeft stroke-width="2" class="w-6 h-6"></NavArrowLeft>
+        </router-link>
+        <div class="flex items-center absolute left-1/2 transform -translate-x-1/2 gap-2">
+          <div class="w-10 aspect-square rounded-full overflow-hidden">
+            <img class="w-full h-full object-cover" :src="host.photo_url" alt="" />
           </div>
+          <p class="font-bold text-lg">{{ host.display_name }}</p>
         </div>
-        <div class="aspect-square overflow-hidden rounded-md">
+      </div>
+      <div class="bg-white p-5">
+        <div class="overflow-hidden rounded-md">
           <img class="w-full h-full object-cover" :src="activity.img_url" alt="" />
         </div>
-        <div class="py-3">
-          <h3 class="font-bold text-2xl truncate">{{ activity.name }}</h3>
-          <div class="flex items-center text-gray-500">
-            <Clock />
-            <span class="pl-3">{{
-              `${dayjs(activity.event_time).format('YYYY年MM月DD日dddd HH:mm')}`
-            }}</span>
+        <div class="flex flex-col gap-2 py-3">
+          <div class="flex flex-col gap-2 border-b-2 pb-3">
+            <h3 class="font-bold text-2xl truncate whitespace-normal">{{ activity.name }}</h3>
+            <div class="flex items-center text-gray-500">
+              <Clock class="w-6 h-6" />
+              <span class="pl-1">{{
+                `${dayjs(activity.event_time).format('YYYY年MM月DD日dddd HH:mm')}`
+              }}</span>
+            </div>
           </div>
+
+          <p class="py-2 leading-6 whitespace-pre-wrap">
+            {{ activity.description }}
+          </p>
           <div v-if="activity.require_approval" class="text-sm text-red-500">
             <p>該活動須經審核才視同報名成功</p>
             <p>
@@ -397,7 +403,7 @@ const handleCardClick = () => {
             </p>
           </div>
 
-          <p class="font-bold text-lg text-end">
+          <p class="font-bold text-lg text-center">
             {{ `${participantsCount}名參加者` }}
           </p>
           <div v-if="activity.status != 'cancelled'">
@@ -410,22 +416,24 @@ const handleCardClick = () => {
                 @click="toggleReviewModal"
                 >審核報名</NButton
               >
-              <NButton
+              <button
                 v-else
-                class="w-full mt-3 font-bold text-lg py-5"
+                class="bg-green-600 text-white rounded-full w-full h-10 mt-3 font-bold text-lg py-1 hover:bg-green-500"
                 round
                 type="primary"
                 @click="toggleReviewModal"
-                >瀏覽報名</NButton
               >
-              <NButton
+                瀏覽報名
+              </button>
+              <button
                 v-if="activity.event_time > currentTime"
-                class="w-full mt-3 font-bold text-lg py-5"
+                class="bg-red-400 text-white rounded-full w-full h-10 mt-3 font-bold text-lg py-1 hover:bg-red-300"
                 round
                 type="warning"
                 @click="toggleCancelActivityModal"
-                >取消活動</NButton
               >
+                取消活動
+              </button>
             </div>
             <div v-else>
               <div
@@ -563,8 +571,7 @@ const handleCardClick = () => {
             </n-card>
           </n-modal>
 
-          <p class="py-8 leading-6">{{ activity.description }}</p>
-          <ul class="flex justify-around text-md border border-gray-200/100 rounded-lg p-2">
+          <ul class="flex justify-around text-md border border-gray-200/100 rounded-lg p-2 mt-4">
             <li class="flex flex-col items-center">
               <CreditCard height="35" width="35"></CreditCard>
               <p class="mt-2">{{ payment }}</p>
@@ -578,17 +585,17 @@ const handleCardClick = () => {
               <p class="mt-2">{{ `${activity.max_participants}人` }}</p>
             </li>
           </ul>
-          <div class="flex items-center my-5">
+          <div class="flex items-center my-4">
             <MapPin height="32" width="32"></MapPin>
             <span class="text-lg ml-5">{{ activity.location }}</span>
           </div>
           <div id="map" class="border w-full h-52 text-5xl font-bold">這裡放地圖</div>
 
-          <div class="mt-3">
-            <span class="block text-2xl font-bold mb-2">{{
+          <div class="mt-3 border-t-2 pt-3">
+            <span class="block text-center text-xl font-bold mb-2 tracking-wide">{{
               `${host.display_name}的評價與評分`
             }}</span>
-            <div class="border h-52 text-5xl font-bold">
+            <div class="text-5xl font-bold">
               <div class="flex justify-center">
                 <div class="flex flex-row items-center gap-1">
                   <p class="text-4xl">♡</p>
@@ -616,9 +623,10 @@ const handleCardClick = () => {
                 </ol>
               </div>
             </div>
-            <span class="block mt-10 mb-2 text-lg">留言</span>
           </div>
+
           <div class="comment-section border-b border-gray-300 pb-4">
+            <span class="block text-center text-xl font-bold mb-2 tracking-wide">留言</span>
             <NInput
               :autosize="{ minRows: 3, maxRows: 5 }"
               size="large"
@@ -630,7 +638,7 @@ const handleCardClick = () => {
               placeholder="留下你想說的話吧!"
             ></NInput>
             <div class="text-end mt-2">
-              <NButton secondary @click="clearComment">取消</NButton>
+              <button secondary @click="clearComment">取消</button>
               <NButton
                 :disabled="userComment.length == 0"
                 @click="submitComment"
@@ -639,8 +647,12 @@ const handleCardClick = () => {
                 >留言</NButton
               >
             </div>
-            <div v-for="comment in comments" :key="comment.comment_id">
-              <div class="flex h-full justify-start w-full mt-10">
+            <div
+              v-for="comment in comments"
+              :key="comment.comment_id"
+              class="bg-gray-100 rounded-md p-3 mt-3"
+            >
+              <div class="flex h-full justify-start w-full">
                 <img class="w-14 aspect-square rounded-full" :src="comment.photo_url" alt="" />
                 <div class="ml-3 relative flex items-center w-full h-14">
                   <p class="font-bold text-lg">{{ comment.display_name }}</p>
@@ -662,7 +674,7 @@ const handleCardClick = () => {
                   </n-button>
                 </n-dropdown>
               </div>
-              <p class="pl-[66px] pt-2 text-md">{{ comment.user_comment }}</p>
+              <p class="pl-[66px] pt-2 text-md whitespace-pre-wrap">{{ comment.user_comment }}</p>
             </div>
           </div>
         </div>
@@ -690,7 +702,7 @@ const handleCardClick = () => {
   </div>
 </template>
 <style scoped>
-.container {
+/* .container {
   margin: 0 auto;
   width: 85%;
 }
@@ -739,5 +751,5 @@ const handleCardClick = () => {
 
 :deep(.slide-left-leave-to) {
   transform: translateX(10px);
-}
+} */
 </style>

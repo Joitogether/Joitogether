@@ -109,7 +109,7 @@ const informPostUpdate = () => {
 </script>
 <template>
   <div class="w-full h-auto bg-gray-100">
-    <div class="postsArea w-full min-h-screen mx-auto px-4 pt-1 bg-white md:w-3/4 lg:w-1/2">
+    <div class="postsArea w-full min-h-screen mx-auto px-4 pt-1 bg-white md:w-3/4 lg:w-3/5">
       <NewPostArea @update="informPostUpdate" />
       <div class="w-full mb-4 md:mb-0 md:py-5">
         <div class="flex w-full md:w-full">
@@ -169,7 +169,7 @@ const informPostUpdate = () => {
       <div class="post-posts-area">
         <div v-for="post in postList" :key="post.id" class="">
           <div
-            class="flex flex-col justify-between md:flex-row p-4 cursor-pointer border-b border-gray-200 bg-gray-50 md:bg-white"
+            class="flex flex-col justify-between rounded-md md:flex-row p-4 cursor-pointer border-b border-gray-200 bg-gray-50 md:bg-white hover:bg-gray-100"
             @click="handlePostClick(post.id)"
           >
             <!-- 左邊區塊 -->
