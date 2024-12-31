@@ -96,10 +96,10 @@ watch(isMobile, (newVal) => {
 
       <div class="w-full h-full min-w-[300px]">
         <div class="flex flex-col h-full justify-center items-center">
-          <h1 class="text-3xl font-bold my-12 md:text-4xl">熱門揪團類型</h1>
-          <div class="flex justify-center mb-10 lg:max-w-[1174px]">
+          <p class="text-3xl font-bold my-12 md:text-4xl">熱門揪團類型</p>
+          <div class="flex justify-center mb-10 lg:justify-between lg:max-w-[1150px]">
             <div
-              class="grid w-3/5 gap-12 grid-cols-2 cursor-pointer md:w-1/2 md:grid-cols-3 md:gap-14 lg:w-11/12 lg:grid-cols-6 lg:justify-between"
+              class="grid w-3/5 gap-12 grid-cols-2 cursor-pointer md:w-1/2 md:grid-cols-3 md:gap-14 lg:w-11/12 lg:grid-cols-6 lg:w-full"
             >
               <div v-for="area in areaData" :key="area.title" class="">
                 <div @click.prevent="handleCategoryClick(area.targetId)" class="w-full">
