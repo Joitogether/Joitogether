@@ -6,7 +6,10 @@ import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { formatDate } from '@/utils/dayjsDate'
 import { Plus, Minus } from '@iconoir/vue'
+import { handleError } from '@/utils/handleError.js'
+import { useMessage } from 'naive-ui'
 
+const message = useMessage()
 const router = useRouter()
 const userStore = useUserStore()
 const wallet = ref([])
@@ -26,8 +29,8 @@ const fetchWalletBalance = async () => {
         }
       })
     }
-  } catch (err) {
-    console.error(err)
+  } catch (error) {
+    handleError(message, undefined, error)
   }
 }
 
