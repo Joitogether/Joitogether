@@ -7,10 +7,8 @@ export const addLikeAPI = async (postId, uid, status) => {
       uid,
       status,
     })
-    console.log('新增按讚成功', response.data.data)
     return response.data
-  } catch (error) {
-    console.error('新增按讚失敗:', error)
+  } catch {
     return null
   }
 }
@@ -19,11 +17,8 @@ export const addLikeAPI = async (postId, uid, status) => {
 export const getPostLikesAPI = async (postId) => {
   try {
     const response = await apiAxios.get(`/posts/likes/${postId}`)
-    console.log(response)
-    console.log('取得文章按讚數成功', response.data)
     return response.data
-  } catch (error) {
-    console.error('取得文章按讚數失敗:', error)
+  } catch {
     return null
   }
 }
@@ -32,10 +27,8 @@ export const getPostLikesAPI = async (postId) => {
 export const deleteLikeAPI = async (postId) => {
   try {
     const response = await apiAxios.delete(`/posts/like/${postId}`)
-    console.log('取消按讚成功', response.data)
     return response.data
-  } catch (error) {
-    console.error('取消按讚失敗:', error.response.data)
+  } catch {
     return null
   }
 }

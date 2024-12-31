@@ -7,8 +7,8 @@ export function usePreviewMode(previewMap) {
     if (!searchQuery) {
       return
     }
-    isPreviewMode.value = true // 設置預覽模式為開啟
-    previewMap(searchQuery) // 傳遞 searchQuery 給 previewMap
+    isPreviewMode.value = true
+    previewMap(searchQuery)
   }
 
   const exitPreviewMode = () => {

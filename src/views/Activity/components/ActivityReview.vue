@@ -19,31 +19,35 @@ import {
 } from '@/apis/activityAPIs'
 import { useRoute } from 'vue-router'
 import { useUserStore } from '@/stores/userStore'
+import { handleError } from '@/utils/handleError.js'
 
 const route = useRoute()
 const activity_id = route.params.activity_id
 
 const userStore = useUserStore()
-const activity = ref([null]) // 活動詳細資料
+const activity = ref([null])
 
 onMounted(async () => {
   try {
     const response = await ActivityGetActivitiesAPI(activity_id)
-    if (response.status === 200 && response.data) {
+    if (response?.data?.data) {
       activity.value = response.data.data
-      console.log('成功', response.data.data)
+    } else {
+      message.error('目前無相關活動資料')
+      activity.value = {}
     }
   } catch (error) {
-    console.error('無法獲取活動資料:', error)
+    handleError(message, undefined, error)
   }
 })
 
 const refreshAttendees = async () => {
-  attendee.value = await ActivityGetApplicationsAPI(activity_id, defaultAvatar)
+  const response = await ActivityGetApplicationsAPI(activity_id, defaultAvatar)
+  attendee.value = response
 }
 
 onMounted(async () => {
-  attendee.value = await ActivityGetApplicationsAPI(activity_id, defaultAvatar)
+  refreshAttendees()
 })
 
 const dialog = useDialog()
@@ -129,8 +133,7 @@ const handleApproveClick = async (id) => {
           message.error('操作失敗，請稍後再試！')
         }
       } catch (error) {
-        console.error('API 請求失敗:', error)
-        message.error('操作失敗，請稍後再試！')
+        handleError(message, undefined, error)
       }
     },
     onNegativeClick: () => {
@@ -171,8 +174,7 @@ const handleDeclinedClick = async (id) => {
           message.error('操作失敗，請稍後再試！')
         }
       } catch (error) {
-        console.error('API 請求失敗:', error)
-        message.error('操作失敗，請稍後再試！')
+        handleError(message, undefined, error)
       }
     },
     onNegativeClick: () => {
@@ -222,8 +224,7 @@ const handleCancelClick = async (id) => {
           message.error('操作失敗，請稍後再試！')
         }
       } catch (error) {
-        console.error('API 請求失敗:', error)
-        message.error('操作失敗，請稍後再試！')
+        handleError(message, undefined, error)
       }
     },
     onNegativeClick: () => {
@@ -235,11 +236,11 @@ const handleCancelClick = async (id) => {
 // 切換審核狀態
 
 const approvedCount = computed(() => {
-  return attendee.value.filter((item) => item.approved).length
+  return attendee.value?.filter((item) => item.approved).length
 })
 
 const rejectCount = computed(() => {
-  return attendee.value.filter((item) => item.host_declined).length
+  return attendee.value?.filter((item) => item.host_declined).length
 })
 
 const quickReplyVisible = ref(false)
@@ -327,7 +328,7 @@ const sendReplies = async () => {
           class="flex items-center bg-gray-100 border-[1px] border-gray-200 rounded-xl p-3 my-4 text-sm font-semibold"
         >
           <img src="../../../assets/Screening.png" alt="" class="w-8 mr-1" />共有{{
-            attendee.length
+            attendee?.length
           }}
           位報名( {{ approvedCount }}位審核通過，{{ rejectCount }} 位審核已拒絕)
         </div>

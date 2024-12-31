@@ -12,6 +12,7 @@ import { activityUserCreateAPI } from '@/apis/activityAPIs.js'
 import { useAutocomplete } from '@/utils/useAutocomplete'
 import { useGoogleMaps } from '@/utils/useGoogleMaps'
 import { usePreviewMode } from '@/utils/usePreviewMode'
+import { handleError } from '@/utils/handleError'
 
 const { previewMap } = useGoogleMaps()
 const { isPreviewMode, enterPreviewMode, exitPreviewMode } = usePreviewMode(previewMap)
@@ -42,7 +43,12 @@ if (userStore.user.isLogin) {
   const fetchUserData = async () => {
     try {
       const result = await userGetAPI(userStore.user.uid)
+
       if (result) {
+        if (result.length === 0) {
+          user.value = {}
+          return
+        }
         user.value = result
       }
       return result
@@ -90,10 +96,10 @@ const ActivityDataPush = async () => {
     await activityUserCreateAPI(selectedFile.value || null, activityData)
     message.success('活動建立成功了喔!!') // 成功訊息提示
     router.replace('/')
-  } catch (err) {
-    console.error('錯誤回應:', err)
+  } catch (error) {
+    handleError(message, undefined, error)
   } finally {
-    isSubmitting.value = false // 完成後恢復按鈕可用狀態
+    isSubmitting.value = false
   }
 }
 

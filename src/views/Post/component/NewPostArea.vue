@@ -4,6 +4,7 @@ import { useUserStore } from '@/stores/userStore.js'
 import { createPostAPI } from '@/apis/postAPIs'
 import { useMessage, NButton, NModal } from 'naive-ui'
 import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage'
+import { handleError } from '@/utils/handleError.js'
 
 // 版面欄位
 const showModal = ref(false)
@@ -23,7 +24,7 @@ const fileInput = ref(null)
 // 打進後端的資料
 const newPostTitle = ref('')
 const newPostContent = ref('')
-const newPostCategory = ref(null) // 不用 null 的話就不會顯示選擇文章分類
+const newPostCategory = ref(null)
 const imageUrl = ref(null)
 
 const postCategories = [
@@ -71,7 +72,6 @@ const handleSubmit = async () => {
     await createPostAPI(postData)
     message.success('文章新增成功')
     emit('update')
-    console.log('傳送')
     showModal.value = true
     setTimeout(() => {
       showModal.value = false
@@ -82,7 +82,7 @@ const handleSubmit = async () => {
       uploadedImage.value = null
     }, 1500) // 設置 1.5 秒後關閉
   } catch (error) {
-    console.log(error)
+    handleError(message, undefined, error)
   }
 }
 
@@ -99,12 +99,10 @@ const uploadFile = async (file) => {
     const fileRef = storageRef(storage, `postImages/${file.name}`)
     const result = await uploadBytes(fileRef, file) // 上傳檔案
     const downloadURL = await getDownloadURL(result.ref) // 獲取下載連結
-    console.log('上傳成功，下載連結:', downloadURL)
     imageUrl.value = downloadURL
     return downloadURL // 傳回下載連結
   } catch (error) {
-    console.error('圖片上傳失敗')
-    throw error
+    handleError(message, undefined, error)
   }
 }
 
@@ -132,8 +130,7 @@ const handleImageUpload = async (event) => {
     try {
       await uploadFile(file)
     } catch (error) {
-      console.error('圖片上傳失敗:', error)
-      message.error('圖片上傳失敗，請檢查檔案格式或網路連線')
+      handleError(message, '圖片上傳失敗，請檢查檔案格式或網路連線', error)
     }
   }
 }

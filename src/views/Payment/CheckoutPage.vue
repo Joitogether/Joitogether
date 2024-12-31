@@ -17,7 +17,12 @@ const fetchCartItems = async () => {
   try {
     const response = await PaymentAPIs.getCheckoutItemsAPI(userStore.user.uid)
 
-    cartItems.value = response.data.cartItems.map((item) => ({
+    if (!response || !response.length === 0) {
+      cartItems.value = []
+      return
+    }
+
+    cartItems.value = response.cartItems.map((item) => ({
       id: item.id,
       activity_id: item.activity_id,
       title: item.activities.name,
@@ -27,8 +32,8 @@ const fetchCartItems = async () => {
     }))
 
     subtotal.value = cartItems.value.reduce((total, item) => total + item.price, 0)
-  } catch {
-    handleError()
+  } catch (error) {
+    handleError(message, undefined, error)
   }
 }
 
@@ -42,10 +47,15 @@ const balance = ref(0)
 const fetchWalletBalance = async () => {
   try {
     const response = await PaymentAPIs.getWalletBalanceAPI(userStore.user.uid)
-    balance.value = response.data.balance
+    if (!response) {
+      balance.value = 0
+      return
+    }
+
+    balance.value = response.balance
     return balance.value
-  } catch {
-    handleError()
+  } catch (error) {
+    handleError(message, undefined, error)
   }
 }
 
@@ -60,7 +70,7 @@ const handleCheckout = async () => {
   try {
     // 檢查餘額
     if (!isBalanceEnough.value) {
-      handleError('')
+      message.error('餘額不足！')
       return
     }
 
@@ -84,10 +94,8 @@ const handleCheckout = async () => {
       message.success('訂單完成，報名成功！🚀 快準備迎接精彩的活動吧！')
       goCheckoutSuccess(response.data.order.order_id)
     }
-  } catch {
-    handleError(
-      '結帳失敗！看起來我們遇到了一點麻煩 🤔💔\n別擔心！請稍後再試，或者重整頁面試試看～🙏',
-    )
+  } catch (error) {
+    handleError(message, '結帳失敗，請稍後再試 🙇‍♂️', error)
   }
 }
 
@@ -97,8 +105,8 @@ const backToCart = async () => {
     const selectedIds = cartItems.value.map((item) => item.id)
     await Promise.all(selectedIds.map((id) => PaymentAPIs.updateCartSelectionAPI(id, false)))
     goShoppingCart()
-  } catch {
-    handleError()
+  } catch (error) {
+    handleError(message, undefined, error)
   }
 }
 
@@ -112,14 +120,18 @@ const goTopUp = () => {
 }
 
 const goCheckoutSuccess = (orderId) => {
-  router.push({ name: 'checkoutSuccess', params: { order_id: orderId } })
+  router.replace({ name: 'checkoutSuccess', params: { order_id: orderId } })
 }
 
 onMounted(async () => {
   try {
     await Promise.all([fetchCartItems(), fetchWalletBalance()])
-  } catch {
-    handleError('😢 資料溜走了，找不到它們！\n不過別擔心，我們正在努力召喚它們回來 🚀✨')
+  } catch (error) {
+    handleError(
+      message,
+      '😢 資料溜走了，找不到它們！不過別擔心，我們正在努力召喚它們回來 🚀✨',
+      error,
+    )
   }
 })
 </script>

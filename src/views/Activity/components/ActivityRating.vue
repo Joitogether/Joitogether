@@ -6,6 +6,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { ratingGetDetailAPI, ratingSubmitAPI } from '@/apis/ratingAPIs'
 import dayjs from 'dayjs'
 import { useUserStore } from '@/stores/userStore'
+import { handleError } from '@/utils/handleError.js'
 
 dayjs.locale('zh-tw')
 const userStore = useUserStore()
@@ -41,7 +42,6 @@ const clickTheFollowBtn = () => {
 const step = ref(0)
 
 const goStep1 = () => {
-  console.log(ratingForm)
   step.value = 1
 }
 
@@ -50,12 +50,29 @@ const backStep0 = () => {
 }
 
 const getDetailForRating = async () => {
-  const { activity_id } = route.params
-  const res = await ratingGetDetailAPI(activity_id)
-  activityDetail.value = res.activity
-  hostInfo.value = res.activity.users
-  hostRatingAverage.value = res.hostRatingAverage['_avg']
-  latestHostRating.value = res.latestHostRating
+  try {
+    const { activity_id } = route.params
+    const res = await ratingGetDetailAPI(activity_id)
+
+    if (!res || !res.activity) {
+      activityDetail.value = {}
+      hostInfo.value = {}
+      hostRatingAverage.value = {}
+      latestHostRating.value = null
+      return
+    }
+
+    activityDetail.value = res.activity
+    hostInfo.value = res.activity.users || {}
+    hostRatingAverage.value = res.hostRatingAverage['_avg'] || {}
+    latestHostRating.value = res.latestHostRating || null
+  } catch (error) {
+    activityDetail.value = {}
+    hostInfo.value = {}
+    hostRatingAverage.value = {}
+    latestHostRating.value = null
+    handleError(message, '無法加載活動資料，請稍後再試 🙏', error)
+  }
 }
 
 onMounted(async () => {
@@ -69,6 +86,7 @@ const ratingForm = reactive({
   ability: 0,
   credit: 0,
 })
+
 // 滑鼠懸停狀態
 const hoverStates = reactive({
   overall: 0,
@@ -116,7 +134,7 @@ const props = defineProps({
 })
 
 // 當前評分的響應式狀態
-const currentScore = ref(props.score) // 初始化為 props 的 score
+const currentScore = ref(props.score)
 
 // 方法：更新評分
 const setRating = (index, category) => {
@@ -136,7 +154,7 @@ const resetHover = (category) => {
 watch(
   () => props.score,
   (newScore) => {
-    currentScore.value = newScore // 保持與 props 的同步
+    currentScore.value = newScore
   },
 )
 </script>
@@ -491,33 +509,33 @@ watch(
   gap: 6px;
 }
 .static-heart {
-  width: 16px; /* 愛心寬度 */
-  height: 16px; /* 愛心高度 */
-  background-image: url('../../../assets/heartred.png'); /* 預設為實心愛心 */
+  width: 16px;
+  height: 16px;
+  background-image: url('../../../assets/heartred.png');
   background-repeat: no-repeat;
   background-size: contain;
   cursor: default;
 }
 .static-heart.filled {
-  background-image: url('../../../assets/heartred.png'); /* 實心愛心 */
+  background-image: url('../../../assets/heartred.png');
 }
 
 .heart-rating {
   display: flex;
-  gap: 8px; /* 愛心間距 */
+  gap: 8px;
 }
 
 .heart {
-  width: 20px; /* 愛心寬度 */
-  height: 20px; /* 愛心高度 */
+  width: 20px;
+  height: 20px;
   background-image: url('../../../assets/heartnored.png');
   background-repeat: no-repeat;
   background-size: contain;
   cursor: pointer;
-  transition: background-image 0.3s ease; /* 動畫效果 */
+  transition: background-image 0.3s ease;
 }
 
 .heart.filled {
-  background-image: url('../../../assets/heartred.png'); /* 填滿愛心的圖片 */
+  background-image: url('../../../assets/heartred.png');
 }
 </style>

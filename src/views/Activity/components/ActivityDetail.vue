@@ -19,37 +19,44 @@ import {
   activityDeleteCommentAPI,
 } from '@/apis/activityAPIs.js'
 import { useSocketStore } from '@/stores/socketStore'
+import { handleError } from '@/utils/handleError.js'
+
 dayjs.locale('zh-tw')
 dayjs.extend(relativeTime)
 const route = useRoute()
+const message = useMessage()
 const userComment = ref('')
 const registerComment = ref('')
 const activityId = route.params.id
 const recentActivities = ref([])
 const ratings = ref({})
 const currentTime = ref(new Date().toISOString())
+
 const getCurrentTime = () => {
   currentTime.value = new Date().toISOString()
 }
-async function getActivityDetail() {
-  const activityDetail = await activityGetDetailAPI(route.params.id)
 
-  // 有資料或null
-  if (!activityDetail) {
-    message.error('獲取活動失敗')
-    // 這裡應該要針對沒有拿到id的狀態處理，去not found
-    return
+async function getActivityDetail() {
+  try {
+    const activityDetail = await activityGetDetailAPI(route.params.id)
+
+    if (!activityDetail || activityDetail.length === 0) {
+      message.error('目前無相關活動資料')
+      return
+    }
+    getCurrentTime()
+    activity.value = activityDetail
+    host.value = activityDetail.host_info
+    comments.value = activityDetail.comments
+    recentActivities.value = activityDetail.recent_activities
+    ratings.value = activityDetail.ratings
+  } catch (error) {
+    handleError(message, undefined, error)
   }
-  getCurrentTime()
-  activity.value = activityDetail
-  host.value = activityDetail.host_info
-  comments.value = activityDetail.comments
-  recentActivities.value = activityDetail.recent_activities
-  ratings.value = activityDetail.ratings
 }
 
 const userStore = useUserStore()
-const message = useMessage()
+
 const socketStore = useSocketStore()
 
 import { useGoogleMaps } from '@/utils/useGoogleMaps'
@@ -105,12 +112,14 @@ const validateRegister = async () => {
     message.error('已超過報名時間')
     return
   }
+
   // 不需審核但報名的時候已超過最後報名時間（活動時間）
   if (activity.value.require_approval && currentTime.value >= activity.value.event_time) {
     await getActivityDetail()
     message.error('已超過報名時間')
     return
   }
+
   // 參加人數滿了，禁止報名
   if (participantsCount.value >= activity.value.register_limit) {
     message.error('該活動已達報名上限')
@@ -130,7 +139,6 @@ const registerActivity = async () => {
   const data = {
     participant_id: userStore.user.uid,
     comment: registerComment.value,
-    // 不需要審核的話，報名即視為認證報名
     register_validated: !activity.value.require_approval ? 1 : 0,
   }
   // const messageReactive = message.info('報名中...', { duration: 0 })
@@ -163,6 +171,7 @@ const registerActivity = async () => {
   socketStore.sendNotification(notiData)
   toggleRegisterModal()
 }
+
 // 根據活動判斷當前使用者是否為主辦者
 const isHost = computed(() => {
   return activity.value.host_id === userStore.user.uid
@@ -173,6 +182,7 @@ onMounted(async () => {
   searchQuery.value = activity.value.location
   await previewMap(searchQuery.value)
 })
+
 // 根據抓取回來的資料判斷使用者是否已註冊該活動，狀態若為isRegistered，則可以取消報名
 const isRegistered = computed(() => {
   return activity.value.applications?.some(
@@ -301,11 +311,12 @@ const addToCart = async () => {
   if (!status) {
     return toggleRegisterModal()
   }
-  const data = {
-    activity_id: activity.value.id,
-    uid: userStore.user.uid,
-  }
-  console.log(data)
+
+  // const data = {
+  //   activity_id: activity.value.id,
+  //   uid: userStore.user.uid,
+  // }
+
   toggleRegisterModal()
 }
 
