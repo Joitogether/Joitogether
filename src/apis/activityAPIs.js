@@ -1,6 +1,6 @@
 import { apiAxios } from '@/utils/request'
 import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage'
-import DefaultImage from '@/assets/UserUpdata1.jpg'
+import DefaultImage from '../assets/UserUpdata1.jpg'
 
 export const activityCancelRegisterAPI = async (activityId, participant_id) => {
   try {
