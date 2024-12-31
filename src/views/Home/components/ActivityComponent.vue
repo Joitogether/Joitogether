@@ -87,7 +87,7 @@ const filteredActivities = computed(() =>
         userImg: activity.users.photo_url,
       }
     })
-    .sort((a, b) => new Date(a.event_time) - new Date(b.event_time)),
+    .sort((a, b) => new Date(b.id) - new Date(a.id)),
 )
 
 watch(
