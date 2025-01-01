@@ -4,28 +4,55 @@ import { ref, onMounted, computed, watch } from 'vue'
 import { storeToRefs } from 'pinia'
 import { formatDate } from '@/utils/useDateTime'
 import { useActivityStore } from '@/stores/useActivityStore'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { NSelect } from 'naive-ui'
 
-const activityStore = useActivityStore()
-const { activities, loading, error, triggerAction, selectedRegions, regionOptions } =
-  storeToRefs(activityStore)
-
-const {
-  fetchAllActivities,
-  fetchActivitiesByCategory,
-  searchActivities,
-  triggerActivityAction,
-  fetchActivitiesByRegion,
-} = activityStore
-
 const route = useRoute()
+const router = useRouter()
+
+const activityStore = useActivityStore()
+const {
+  activities,
+  loading,
+  error,
+  triggerAction,
+  selectedRegions,
+  regionOptions,
+  filters,
+  totalActivities,
+} = storeToRefs(activityStore)
+
+const { fetchAllActivities, triggerActivityAction } = activityStore
+
+const activityPerPage = computed(() => Number(filters.value.pageSize || 12))
+const currentPage = ref(filters.value.page || 1)
+
+const filterByRegion = (region) => {
+  filters.value.region = region
+  filters.value.page = 1
+  currentPage.value = 1
+  fetchAllActivities()
+  router.push({ path: 'home', query: { ...filters.value } })
+}
+
+const handlePageChange = (page) => {
+  currentPage.value = page
+  filters.value.page = page
+
+  router.push({ path: '/home', query: { ...filters.value } })
+
+  fetchAllActivities(filters.value)
+}
 
 onMounted(() => {
-  if (route.query.q) {
-    return
+  if (!filters.value.pageSize) {
+    filters.value.pageSize = 12
   }
-  fetchAllActivities()
+  if (!filters.value.page) {
+    filters.value.page = 1
+  }
+  totalActivities.value = totalActivities.value || 0
+  fetchAllActivities(route.query)
 })
 
 // 計算今天日期的字串
@@ -34,10 +61,9 @@ const selectedStartDate = ref('')
 
 const setStartDate = (date) => {
   selectedStartDate.value = date
+  filters.value.page = 1 // 切換分類時回到第1頁
+  currentPage.value = 1 // 同步頁碼
 }
-
-// 篩選條件
-const selectedCategory = ref('')
 
 const categoryMap = {
   '': '',
@@ -49,15 +75,17 @@ const categoryMap = {
   其他: 'others',
 }
 
-const selectCategory = (category) => {
-  selectedCategory.value = category
-  const mappedCategory = categoryMap[category]
+const triggerCategory = (category) => {
+  const mappedCategory = categoryMap[category] || ''
+  filters.value.category = mappedCategory
+  filters.value.page = 1 // 切換分類時回到第1頁
+  currentPage.value = 1 // 同步頁碼
+  triggerActivityAction(mappedCategory)
+}
 
-  if (mappedCategory === '') {
-    fetchAllActivities()
-  } else {
-    fetchActivitiesByCategory(mappedCategory)
-  }
+const isSelected = (category) => {
+  const mappedCategory = categoryMap[category] || ''
+  return triggerAction.value === mappedCategory
 }
 
 const filteredActivities = computed(() =>
@@ -79,7 +107,7 @@ const filteredActivities = computed(() =>
       return {
         id: activity.id,
         name: activity.name,
-        img_url: activity.img_url || '/src/assets/UserUpdata1.jpg',
+        img_url: activity.img_url || './src/assets/UserUpdata1.jpg',
         location: activity.location || '未知地點',
         dateTime: formatDate(activity.event_time),
         participants: activity.max_participants,
@@ -91,13 +119,9 @@ const filteredActivities = computed(() =>
 )
 
 watch(
-  () => route.query.q,
-  (keyword) => {
-    if (keyword) {
-      searchActivities(keyword)
-    } else {
-      fetchAllActivities()
-    }
+  () => route.query,
+  (newQuery) => {
+    fetchAllActivities(newQuery)
   },
   { immediate: true },
 )
@@ -107,23 +131,11 @@ watch(
   () => triggerAction.value,
   (category) => {
     if (category) {
-      selectCategory(category)
       scrollToActivityBlock()
-      triggerActivityAction(null)
+      triggerActivityAction(category)
+      router.push({ path: 'home', query: { ...filters.value } })
     }
   },
-)
-
-watch(
-  selectedRegions,
-  (regions) => {
-    if (regions.length > 0) {
-      fetchActivitiesByRegion(regions)
-    } else {
-      fetchAllActivities()
-    }
-  },
-  { immediate: true },
 )
 
 // 滾動到活動區塊
@@ -149,8 +161,8 @@ const scrollToActivityBlock = () => {
           <div class="mr-7 py-3 pl-3 text-sm">
             <button
               class="p-1 md:p-2 w-full md:w-auto text-center"
-              @click="selectCategory(category)"
-              :class="{ 'bg-gray-300 rounded-md': selectedCategory === category }"
+              @click="triggerCategory(category)"
+              :class="{ 'bg-gray-300 rounded-md': isSelected(category) }"
             >
               {{ category || '全部' }}
             </button>
@@ -168,6 +180,7 @@ const scrollToActivityBlock = () => {
           clearable
           placeholder="選擇地區"
           style="width: 200px; margin-right: 16px"
+          @update:value="filterByRegion"
         />
       </div>
       <div class="text-xl flex items-center">
@@ -195,6 +208,14 @@ const scrollToActivityBlock = () => {
             :hostImgUrl="activity.userImg"
             :id="activity.id"
           ></ActivityCard>
+        </div>
+        <div class="pagination-container mt-5 flex justify-center">
+          <n-pagination
+            v-model:page="currentPage"
+            :page-size="activityPerPage"
+            :page-count="Math.max(1, Math.ceil(30))"
+            @update:page="handlePageChange"
+          />
         </div>
       </div>
     </div>

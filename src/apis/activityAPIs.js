@@ -53,11 +53,6 @@ export const ActivityReviewApplicationsAPI = async (application_id, status) => {
   return await apiAxios.put(`/applications/verify/${application_id}`, { status })
 }
 
-export const activityGetAllAPI = async () => {
-  const { data } = await apiAxios.get(`/activities/`)
-  return data
-}
-
 export const activityUserCreateAPI = async (file, otherData) => {
   const storage = getStorage()
   let imgUrl
@@ -93,14 +88,16 @@ export const activityGeocodeAPI = async (address) => {
   return await apiAxios.post('/activities/geocode', { address })
 }
 
-export const activitySearchAPI = async (keyword) => {
-  const { data } = await apiAxios.post('/activities/search', {
-    keyword,
-  })
-  return data.data
-}
-
-export const activityCategoryAPI = async (type, data) => {
-  const response = await apiAxios.post(`/activities/category/${type}`, data)
-  return response.data
+export const activityGetAllAndSearchAPI = async (params) => {
+  try {
+    const query = new URLSearchParams(params).toString()
+    const { data } = await apiAxios.get(`/activities?${query}`)
+    return data
+  } catch (error) {
+    console.error('API Error:', error)
+    throw {
+      message: error.response?.data?.message || 'API 發生錯誤',
+      response: error.response,
+    } // 確保錯誤結構標準化
+  }
 }
