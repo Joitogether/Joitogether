@@ -90,10 +90,8 @@ const handleCheckout = async () => {
     }
 
     const response = await PaymentAPIs.processOrder(orderData)
-    if (response.success) {
-      message.success('訂單完成，報名成功！🚀 快準備迎接精彩的活動吧！')
-      goCheckoutSuccess(response.data.order.order_id)
-    }
+    goCheckoutSuccess(response.data.order.order_id)
+    message.success('訂單完成，報名成功！🚀 快準備迎接精彩的活動吧！')
   } catch (error) {
     handleError(message, '結帳失敗，請稍後再試 🙇‍♂️', error)
   }

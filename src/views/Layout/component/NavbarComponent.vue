@@ -232,7 +232,9 @@ const handleSearchClick = (e) => {
             >
           </li>
           <li class="py-1">
-            <a href="#" class="mx-3 tracking-wide hover:text-green-600"> 購物車</a>
+            <RouterLink to="/shoppingcart" class="mx-3 tracking-wide hover:text-green-600">
+              購物車</RouterLink
+            >
           </li>
           <li class="py-1">
             <RouterLink to="/topup" class="mx-3 tracking-wide hover:text-green-600"
