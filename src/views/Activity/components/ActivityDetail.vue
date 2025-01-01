@@ -365,7 +365,7 @@ const handleCardClick = () => {
 <template>
   <div v-if="activity.id" class="bg-[#E5E7EB]">
     <div class="bg-gray-100">
-      <div class="w-full md:w-3/4 md:mx-auto lg:w-1/2 lg:max-w-[1000px]">
+      <div class="w-full md:w-3/4 md:mx-auto lg:max-w-[1000px]">
         <div class="flex items-center relative w-full h-14 p-2 px-4">
           <router-link :to="{ name: 'home' }">
             <NavArrowLeft stroke-width="2" class="w-6 h-6"></NavArrowLeft>
@@ -377,332 +377,340 @@ const handleCardClick = () => {
             <p class="font-bold text-lg">{{ host.display_name }}</p>
           </div>
         </div>
-        <div class="bg-white p-5">
-          <div class="overflow-hidden rounded-md">
-            <img class="w-full h-full object-cover" :src="activity.img_url" alt="" />
-          </div>
-          <div class="flex flex-col gap-2 py-3">
-            <div class="flex flex-col gap-2 border-b-2 pb-3">
-              <h3 class="font-bold text-2xl truncate whitespace-normal">{{ activity.name }}</h3>
-              <div class="flex items-center text-gray-500">
-                <Clock class="w-6 h-6" />
-                <span class="pl-1">{{
-                  `${dayjs(activity.event_time).format('YYYY年MM月DD日dddd HH:mm')}`
-                }}</span>
+        <div class="lg:flex lg:gap-3">
+          <div class="bg-white p-5 lg:w-3/5 lg:rounded-md">
+            <div class="overflow-hidden rounded-md">
+              <img class="w-full h-full object-cover" :src="activity.img_url" alt="" />
+            </div>
+            <div class="flex flex-col gap-2 py-3">
+              <div class="flex flex-col gap-2 border-b-2 pb-3">
+                <h3 class="font-bold text-2xl truncate whitespace-normal">{{ activity.name }}</h3>
+                <div class="flex items-center text-gray-500">
+                  <Clock class="w-6 h-6" />
+                  <span class="pl-1">{{
+                    `${dayjs(activity.event_time).format('YYYY年MM月DD日dddd HH:mm')}`
+                  }}</span>
+                </div>
               </div>
-            </div>
 
-            <p class="py-2 leading-6 whitespace-pre-wrap">
-              {{ activity.description }}
-            </p>
-            <div v-if="activity.require_approval" class="text-sm text-red-500">
-              <p>該活動須經審核才視同報名成功</p>
-              <p>
-                {{
-                  `最後審核時間 ${dayjs(activity.approval_deadline).format('YYYY年MM月DD日dddd HH:mm')}`
-                }}
+              <p class="py-2 leading-6 whitespace-pre-wrap">
+                {{ activity.description }}
               </p>
-            </div>
+              <div v-if="activity.require_approval" class="text-sm text-red-500">
+                <p>該活動須經審核才視同報名成功</p>
+                <p>
+                  {{
+                    `最後審核時間 ${dayjs(activity.approval_deadline).format('YYYY年MM月DD日dddd HH:mm')}`
+                  }}
+                </p>
+              </div>
 
-            <p class="font-bold text-lg text-center">
-              {{ `${participantsCount}名參加者` }}
-            </p>
-            <div v-if="activity.status != 'cancelled'">
-              <div v-if="isHost">
-                <NButton
-                  v-if="activity.require_approval && currentTime < activity.approval_deadline"
-                  class="w-full mt-3 font-bold text-lg py-5"
-                  round
-                  type="primary"
-                  @click="toggleReviewModal"
-                  >審核報名</NButton
-                >
-                <button
-                  v-else
-                  class="bg-green-600 text-white rounded-full w-full h-10 mt-3 font-bold text-lg py-1 hover:bg-green-500"
-                  round
-                  type="primary"
-                  @click="toggleReviewModal"
-                >
-                  瀏覽報名
-                </button>
-                <button
-                  v-if="activity.event_time > currentTime"
-                  class="bg-red-400 text-white rounded-full w-full h-10 mt-3 font-bold text-lg py-1 hover:bg-red-300"
-                  round
-                  type="warning"
-                  @click="toggleCancelActivityModal"
-                >
-                  取消活動
-                </button>
+              <p class="font-bold text-lg text-center">
+                {{ `${participantsCount}名參加者` }}
+              </p>
+              <div v-if="activity.status != 'cancelled'">
+                <div v-if="isHost">
+                  <NButton
+                    v-if="activity.require_approval && currentTime < activity.approval_deadline"
+                    class="w-full mt-3 font-bold text-lg py-5"
+                    round
+                    type="primary"
+                    @click="toggleReviewModal"
+                    >審核報名</NButton
+                  >
+                  <button
+                    v-else
+                    class="bg-green-600 text-white rounded-full w-full h-10 mt-3 font-bold text-lg py-1 hover:bg-green-500"
+                    round
+                    type="primary"
+                    @click="toggleReviewModal"
+                  >
+                    瀏覽報名
+                  </button>
+                  <button
+                    v-if="activity.event_time > currentTime"
+                    class="bg-red-400 text-white rounded-full w-full h-10 mt-3 font-bold text-lg py-1 hover:bg-red-300"
+                    round
+                    type="warning"
+                    @click="toggleCancelActivityModal"
+                  >
+                    取消活動
+                  </button>
+                </div>
+                <div v-else>
+                  <div
+                    v-if="
+                      (!activity.require_approval && currentTime < activity.event_time) ||
+                      (activity.require_approval && currentTime < activity.approval_deadline)
+                    "
+                  >
+                    <NButton
+                      v-if="!isRegistered"
+                      class="w-full mt-3 font-bold text-lg py-5"
+                      round
+                      type="primary"
+                      @click="toggleRegisterModal"
+                      >報名</NButton
+                    >
+                  </div>
+
+                  <div v-else>
+                    <NButton
+                      v-if="!isRegistered"
+                      disabled
+                      class="w-full mt-3 font-bold text-lg py-5"
+                      round
+                      type="primary"
+                      >該活動已無法報名</NButton
+                    >
+                  </div>
+                  <NButton
+                    v-if="isRegistered && currentTime < activity.event_time"
+                    class="w-full mt-3 font-bold text-lg py-5"
+                    round
+                    type="primary"
+                    @click="toggleConfirmModal"
+                    >取消報名</NButton
+                  >
+                </div>
               </div>
               <div v-else>
-                <div
-                  v-if="
-                    (!activity.require_approval && currentTime < activity.event_time) ||
-                    (activity.require_approval && currentTime < activity.approval_deadline)
-                  "
-                >
-                  <NButton
-                    v-if="!isRegistered"
-                    class="w-full mt-3 font-bold text-lg py-5"
-                    round
-                    type="primary"
-                    @click="toggleRegisterModal"
-                    >報名</NButton
-                  >
-                </div>
-
-                <div v-else>
-                  <NButton
-                    v-if="!isRegistered"
-                    disabled
-                    class="w-full mt-3 font-bold text-lg py-5"
-                    round
-                    type="primary"
-                    >該活動已無法報名</NButton
-                  >
-                </div>
                 <NButton
-                  v-if="isRegistered && currentTime < activity.event_time"
+                  v-if="!isRegistered"
+                  disabled
                   class="w-full mt-3 font-bold text-lg py-5"
                   round
                   type="primary"
-                  @click="toggleConfirmModal"
-                  >取消報名</NButton
+                  >該活動已遭團主取消</NButton
                 >
               </div>
-            </div>
-            <div v-else>
-              <NButton
-                v-if="!isRegistered"
-                disabled
-                class="w-full mt-3 font-bold text-lg py-5"
-                round
-                type="primary"
-                >該活動已遭團主取消</NButton
+              <n-modal
+                v-model:show="showCancelRegisterModal"
+                preset="dialog"
+                title="取消報名"
+                positive-text="確定"
+                negative-text="再想想"
+                @positive-click="onPositiveCancelRegister"
+                @negative-click="onNegativeCancelRegister"
               >
-            </div>
-            <n-modal
-              v-model:show="showCancelRegisterModal"
-              preset="dialog"
-              title="取消報名"
-              positive-text="確定"
-              negative-text="再想想"
-              @positive-click="onPositiveCancelRegister"
-              @negative-click="onNegativeCancelRegister"
-            >
-              <p>你確定要取消報名嗎？<br />一但取消報名有可能無法再次報名</p>
-            </n-modal>
+                <p>你確定要取消報名嗎？<br />一但取消報名有可能無法再次報名</p>
+              </n-modal>
 
-            <n-modal
-              v-model:show="showReviewModal"
-              preset="dialog"
-              title="前往審核頁面"
-              content="你確定要前往審核頁面嗎？"
-              positive-text="確定"
-              negative-text="再想想"
-              @positive-click="onReviewPositiveClick"
-              @negative-click="onReviewNegativeClick"
-            />
-            <n-modal
-              v-model:show="showCancelActivityModal"
-              preset="dialog"
-              title="取消活動"
-              content="你確定要取消該活動？"
-              positive-text="確定"
-              negative-text="再想想"
-              @positive-click="onConfirmCancelActivityClick"
-              @negative-click="onCancelCancelActivityClick"
-            />
-            <n-modal class="rounded-lg" v-model:show="showRegisterModal" :auto-focus="false">
-              <n-card
-                v-if="!activity.require_payment"
-                style="width: 500px"
-                title="報名活動"
-                :bordered="false"
-                size="huge"
-                role="dialog"
-                aria-modal="true"
+              <n-modal
+                v-model:show="showReviewModal"
+                preset="dialog"
+                title="前往審核頁面"
+                content="你確定要前往審核頁面嗎？"
+                positive-text="確定"
+                negative-text="再想想"
+                @positive-click="onReviewPositiveClick"
+                @negative-click="onReviewNegativeClick"
+              />
+              <n-modal
+                v-model:show="showCancelActivityModal"
+                preset="dialog"
+                title="取消活動"
+                content="你確定要取消該活動？"
+                positive-text="確定"
+                negative-text="再想想"
+                @positive-click="onConfirmCancelActivityClick"
+                @negative-click="onCancelCancelActivityClick"
+              />
+              <n-modal class="rounded-lg" v-model:show="showRegisterModal" :auto-focus="false">
+                <n-card
+                  v-if="!activity.require_payment"
+                  style="width: 500px"
+                  title="報名活動"
+                  :bordered="false"
+                  size="huge"
+                  role="dialog"
+                  aria-modal="true"
+                >
+                  <NInput
+                    :autosize="{ minRows: 3, maxRows: 5 }"
+                    :show-count="true"
+                    v-model:value="registerComment"
+                    :maxlength="50"
+                    :clearable="true"
+                    type="textarea"
+                    placeholder="告訴團主你為什麼想參加吧！"
+                  ></NInput>
+                  <template #footer>
+                    <NButton @click="registerActivity" type="primary" round class="font-bold w-full"
+                      >報名</NButton
+                    >
+                    <NButton
+                      type="secondary"
+                      round
+                      class="font-bold mt-2 w-full"
+                      @click="toggleRegisterModal"
+                      >取消</NButton
+                    >
+                  </template>
+                </n-card>
+                <n-card
+                  v-else
+                  style="width: 500px"
+                  title="報名活動"
+                  :bordered="false"
+                  size="huge"
+                  role="dialog"
+                  aria-modal="true"
+                >
+                  該活動需要先付費完成才視同報名成功，是否將活動加入購物車？
+                  <template #footer>
+                    <NButton type="primary" round class="font-bold w-full" @click="addToCart"
+                      >加到購物車</NButton
+                    >
+                    <NButton
+                      type="secondary"
+                      round
+                      class="font-bold mt-2 w-full"
+                      @click="toggleRegisterModal"
+                      >取消</NButton
+                    >
+                  </template>
+                </n-card>
+              </n-modal>
+
+              <ul
+                class="flex justify-around text-md border border-gray-200/100 rounded-lg p-2 mt-4"
               >
+                <li class="flex flex-col items-center">
+                  <CreditCard height="35" width="35"></CreditCard>
+                  <p class="mt-2">{{ payment }}</p>
+                </li>
+                <li class="flex flex-col items-center">
+                  <MoneySquare height="35" width="35"></MoneySquare>
+                  <p class="mt-2">{{ `$${parseInt(activity.price).toFixed()}` }}</p>
+                </li>
+                <li class="flex flex-col items-center">
+                  <Group height="35" width="35"></Group>
+                  <p class="mt-2">{{ `${activity.max_participants}人` }}</p>
+                </li>
+              </ul>
+              <div class="flex items-center my-4">
+                <MapPin height="32" width="32"></MapPin>
+                <span class="text-lg ml-5">{{ activity.location }}</span>
+              </div>
+              <div id="map" class="border w-full h-52 text-5xl font-bold">這裡放地圖</div>
+
+              <div class="mt-5 border-t-2 pt-5">
+                <span class="block text-center text-xl font-bold mb-2 tracking-wide">{{
+                  `${host.display_name}的評價與評分`
+                }}</span>
+                <div class="text-5xl font-bold">
+                  <div class="flex justify-center">
+                    <div class="flex flex-row items-center gap-1">
+                      <p class="text-4xl">♡</p>
+                      <div class="text-5xl">{{ ratings.averageHeart }}</div>
+                    </div>
+                  </div>
+                  <div class="my-3">
+                    <ol class="flex flex-col gap-2">
+                      <li
+                        v-for="(item, index) in 5"
+                        :key="index"
+                        class="flex items-center gap-4 text-xl"
+                      >
+                        {{ 5 - index }}
+                        <n-progress
+                          type="line"
+                          color="#625B57"
+                          :height="20"
+                          :percentage="ratings.ratingPercentages[`heart${5 - index}`]"
+                          indicator-placement="inside"
+                        >
+                          <span>{{ ratings.heartCounts[`heart${5 - index}`] }}</span>
+                        </n-progress>
+                      </li>
+                    </ol>
+                  </div>
+                </div>
+              </div>
+
+              <div class="comment-section border-b border-gray-300 pb-4">
+                <span class="block text-center text-xl font-bold mb-2 tracking-wide">留言</span>
                 <NInput
                   :autosize="{ minRows: 3, maxRows: 5 }"
-                  :show-count="true"
-                  v-model:value="registerComment"
-                  :maxlength="50"
-                  :clearable="true"
+                  size="large"
+                  show-count="true"
+                  maxlength="50"
+                  class="bg-transparent aspect-[5/1]"
+                  v-model:value="userComment"
                   type="textarea"
-                  placeholder="告訴團主你為什麼想參加吧！"
+                  placeholder="留下你想說的話吧!"
                 ></NInput>
-                <template #footer>
-                  <NButton @click="registerActivity" type="primary" round class="font-bold w-full"
-                    >報名</NButton
-                  >
+                <div class="text-end mt-2">
+                  <button secondary @click="clearComment">取消</button>
                   <NButton
-                    type="secondary"
-                    round
-                    class="font-bold mt-2 w-full"
-                    @click="toggleRegisterModal"
-                    >取消</NButton
+                    :disabled="userComment.length == 0"
+                    @click="submitComment"
+                    type="primary"
+                    class="ml-2"
+                    >留言</NButton
                   >
-                </template>
-              </n-card>
-              <n-card
-                v-else
-                style="width: 500px"
-                title="報名活動"
-                :bordered="false"
-                size="huge"
-                role="dialog"
-                aria-modal="true"
-              >
-                該活動需要先付費完成才視同報名成功，是否將活動加入購物車？
-                <template #footer>
-                  <NButton type="primary" round class="font-bold w-full" @click="addToCart"
-                    >加到購物車</NButton
-                  >
-                  <NButton
-                    type="secondary"
-                    round
-                    class="font-bold mt-2 w-full"
-                    @click="toggleRegisterModal"
-                    >取消</NButton
-                  >
-                </template>
-              </n-card>
-            </n-modal>
-
-            <ul class="flex justify-around text-md border border-gray-200/100 rounded-lg p-2 mt-4">
-              <li class="flex flex-col items-center">
-                <CreditCard height="35" width="35"></CreditCard>
-                <p class="mt-2">{{ payment }}</p>
-              </li>
-              <li class="flex flex-col items-center">
-                <MoneySquare height="35" width="35"></MoneySquare>
-                <p class="mt-2">{{ `$${parseInt(activity.price).toFixed()}` }}</p>
-              </li>
-              <li class="flex flex-col items-center">
-                <Group height="35" width="35"></Group>
-                <p class="mt-2">{{ `${activity.max_participants}人` }}</p>
-              </li>
-            </ul>
-            <div class="flex items-center my-4">
-              <MapPin height="32" width="32"></MapPin>
-              <span class="text-lg ml-5">{{ activity.location }}</span>
-            </div>
-            <div id="map" class="border w-full h-52 text-5xl font-bold">這裡放地圖</div>
-
-            <div class="mt-5 border-t-2 pt-5">
-              <span class="block text-center text-xl font-bold mb-2 tracking-wide">{{
-                `${host.display_name}的評價與評分`
-              }}</span>
-              <div class="text-5xl font-bold">
-                <div class="flex justify-center">
-                  <div class="flex flex-row items-center gap-1">
-                    <p class="text-4xl">♡</p>
-                    <div class="text-5xl">{{ ratings.averageHeart }}</div>
-                  </div>
                 </div>
-                <div class="my-3">
-                  <ol class="flex flex-col gap-2">
-                    <li
-                      v-for="(item, index) in 5"
-                      :key="index"
-                      class="flex items-center gap-4 text-xl"
-                    >
-                      {{ 5 - index }}
-                      <n-progress
-                        type="line"
-                        color="#625B57"
-                        :height="20"
-                        :percentage="ratings.ratingPercentages[`heart${5 - index}`]"
-                        indicator-placement="inside"
-                      >
-                        <span>{{ ratings.heartCounts[`heart${5 - index}`] }}</span>
-                      </n-progress>
-                    </li>
-                  </ol>
-                </div>
-              </div>
-            </div>
-
-            <div class="comment-section border-b border-gray-300 pb-4">
-              <span class="block text-center text-xl font-bold mb-2 tracking-wide">留言</span>
-              <NInput
-                :autosize="{ minRows: 3, maxRows: 5 }"
-                size="large"
-                show-count="true"
-                maxlength="50"
-                class="bg-transparent aspect-[5/1]"
-                v-model:value="userComment"
-                type="textarea"
-                placeholder="留下你想說的話吧!"
-              ></NInput>
-              <div class="text-end mt-2">
-                <button secondary @click="clearComment">取消</button>
-                <NButton
-                  :disabled="userComment.length == 0"
-                  @click="submitComment"
-                  type="primary"
-                  class="ml-2"
-                  >留言</NButton
+                <div
+                  v-for="comment in comments"
+                  :key="comment.comment_id"
+                  class="bg-gray-100 rounded-md p-3 mt-3"
                 >
-              </div>
-              <div
-                v-for="comment in comments"
-                :key="comment.comment_id"
-                class="bg-gray-100 rounded-md p-3 mt-3"
-              >
-                <div class="flex w-full gap-3 md:gap-4">
-                  <div class="w-14 h-14 aspect-square rounded-full overflow-hidden md:w-20 md:h-20">
-                    <img class="w-full h-full object-cover" :src="comment.photo_url" alt="" />
-                  </div>
-                  <div class="flex flex-col w-4/5 md:w-10/12">
-                    <div class="flex justify-between items-center w-full">
-                      <p class="font-semibold text-sm">{{ comment.display_name }}</p>
-                      <n-dropdown
-                        :disabled="comment.uid !== userStore.user.uid"
-                        :on-select="(key) => handleDropSelect(key, comment.comment_id)"
-                        :options="options"
-                        placement="bottom"
-                        trigger="hover"
-                      >
-                        <n-button class="" text>
-                          <n-icon size="20">
-                            <MoreVert></MoreVert>
-                          </n-icon>
-                        </n-button>
-                      </n-dropdown>
+                  <div class="flex w-full gap-3 md:gap-4">
+                    <div
+                      class="w-14 h-14 aspect-square rounded-full overflow-hidden md:w-20 md:h-20"
+                    >
+                      <img class="w-full h-full object-cover" :src="comment.photo_url" alt="" />
                     </div>
-                    <p class="text-sm whitespace-pre-wrap tracking-wide">
-                      {{ comment.user_comment }}
-                    </p>
-                    <p class="text-sm text-gray-400">
-                      {{ dayjs(comment.created_at).fromNow() }}
-                    </p>
+                    <div class="flex flex-col w-4/5 md:w-10/12">
+                      <div class="flex justify-between items-center w-full">
+                        <p class="font-semibold text-sm">{{ comment.display_name }}</p>
+                        <n-dropdown
+                          :disabled="comment.uid !== userStore.user.uid"
+                          :on-select="(key) => handleDropSelect(key, comment.comment_id)"
+                          :options="options"
+                          placement="bottom"
+                          trigger="hover"
+                        >
+                          <n-button class="" text>
+                            <n-icon size="20">
+                              <MoreVert></MoreVert>
+                            </n-icon>
+                          </n-button>
+                        </n-dropdown>
+                      </div>
+                      <p class="text-sm whitespace-pre-wrap tracking-wide">
+                        {{ comment.user_comment }}
+                      </p>
+                      <p class="text-sm text-gray-400">
+                        {{ dayjs(comment.created_at).fromNow() }}
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-        <div class="p-5 md:bg-white md:mt-5">
-          <h2 class="text-xl text-center font-bold border-b-2 pb-3 md:mb-3">近期活動</h2>
-          <ActivityCard
-            v-for="item in recentActivities"
-            :key="item.img_url"
-            :id="item.id"
-            horizontal="true"
-            :title="item.name"
-            :actImgUrl="item.img_url"
-            :location="item.location"
-            :dateTime="dayjs(item.event_time).format('YYYY年MM月DD日')"
-            :host="item.users.display_name"
-            :hostImgUrl="item.users.photo_url"
-            :participants="item.max_participants"
-            @click="handleCardClick(item)"
-            class="border-b-2 pb-3 overflow-hidden md:border-none md:bg-gray-100 md:mb-3 md:rounded-md md:px-5 md:hover:bg-gray-200"
-          ></ActivityCard>
+          <div class="p-5 md:bg-white md:mt-5 lg:w-2/5 lg:mt-0 lg:rounded-md">
+            <h2 class="text-xl text-center font-bold border-b-2 pb-3 md:mb-3 lg:text-start">
+              近期活動
+            </h2>
+            <ActivityCard
+              v-for="item in recentActivities"
+              :key="item.img_url"
+              :id="item.id"
+              horizontal="true"
+              :title="item.name"
+              :actImgUrl="item.img_url"
+              :location="item.location"
+              :dateTime="dayjs(item.event_time).format('YYYY年MM月DD日')"
+              :host="item.users.display_name"
+              :hostImgUrl="item.users.photo_url"
+              :participants="item.max_participants"
+              @click="handleCardClick(item)"
+              class="w-full border-b-2 pb-3 overflow-hidden md:border-none md:bg-gray-100 md:mb-3 md:rounded-md md:px-5 md:hover:bg-gray-200 lg:px-4"
+            ></ActivityCard>
+          </div>
         </div>
       </div>
     </div>

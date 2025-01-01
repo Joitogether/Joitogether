@@ -36,12 +36,12 @@ const props = defineProps({
       :class="{ ['flex']: props.horizontal }"
     >
       <div class="flex gap-2 w-full md:justify-start md:gap-4">
-        <div class="w-24 rounded-md aspect-square overflow-hidden">
+        <div class="w-24 rounded-md aspect-square overflow-hidden flex-shrink-0">
           <img class="w-full h-full object-cover" :src="props.actImgUrl" alt="圖片不見了ＱＱ" />
         </div>
         <div
           :class="{ 'horizontal-layout-container': props.horizontal }"
-          class="flex flex-col w-2/3 justify-between md:w-3/4"
+          class="flex flex-col w-3/4 justify-between md:w-4/5 lg:w-2/3"
         >
           <div class="flex flex-col">
             <div class="text-base font-semibold truncate">{{ props.title }}</div>
@@ -53,9 +53,9 @@ const props = defineProps({
               <div class="w-6 h-6 overflow-hidden rounded-full mr-1">
                 <img class="w-full h-full object-cover" :src="props.hostImgUrl" alt="團主頭像" />
               </div>
-              <span class="hidden md:block">{{ props.host }}</span>
+              <span>{{ props.host }}</span>
             </div>
-            <div class="flex items-center">活動人數上限: {{ props.participants }}</div>
+            <div class="flex items-center lg:hidden">活動人數上限: {{ props.participants }}</div>
           </div>
         </div>
       </div>

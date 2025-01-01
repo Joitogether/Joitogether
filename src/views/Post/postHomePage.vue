@@ -109,7 +109,7 @@ const informPostUpdate = () => {
 </script>
 <template>
   <div class="w-full h-auto bg-gray-100">
-    <div class="postsArea w-full mx-auto px-4 pt-1 bg-white md:w-3/4 lg:w-1/2 lg:lg:max-w-[1000px]">
+    <div class="postsArea w-full mx-auto px-4 pt-1 bg-white md:w-3/4 lg:w-3/5 lg:lg:max-w-[1000px]">
       <NewPostArea @update="informPostUpdate" />
       <div class="w-full mb-4 md:mb-0 md:py-5">
         <div class="flex w-full md:w-full">
