@@ -104,3 +104,9 @@ export const activityCategoryAPI = async (type, data) => {
   const response = await apiAxios.post(`/activities/category/${type}`, data)
   return response.data
 }
+
+export const activityAddToCartAPI = async (userId, activityId) => {
+  await apiAxios.post(`/carts/${userId}`, {
+    activityId,
+  })
+}

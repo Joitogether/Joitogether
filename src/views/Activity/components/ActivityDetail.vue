@@ -17,6 +17,7 @@ import {
   activityCancelAPI,
   activityNewCommentAPI,
   activityDeleteCommentAPI,
+  activityAddToCartAPI,
 } from '@/apis/activityAPIs.js'
 import { useSocketStore } from '@/stores/socketStore'
 import { handleError } from '@/utils/handleError.js'
@@ -307,16 +308,17 @@ const addToCart = async () => {
     toggleRegisterModal()
     return message.error('您尚未登入，請先登入才能繼續此操作')
   }
-  const status = await validateRegister()
-  if (!status) {
-    return toggleRegisterModal()
+  try {
+    const status = await validateRegister()
+    if (!status) {
+      return toggleRegisterModal()
+    }
+
+    await activityAddToCartAPI(userStore.user.uid, activity.value.id)
+    message.success('加入購物車成功')
+  } catch {
+    message.error('加入購物車失敗')
   }
-
-  // const data = {
-  //   activity_id: activity.value.id,
-  //   uid: userStore.user.uid,
-  // }
-
   toggleRegisterModal()
 }
 
