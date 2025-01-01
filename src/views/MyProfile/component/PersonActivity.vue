@@ -2,20 +2,18 @@
 import { onMounted, ref } from 'vue'
 import { userGetActivityAPI } from '@/apis/userAPIs'
 import { useUserStore } from '@/stores/userStore'
-import dayjs from 'dayjs'
 import { handleError } from '@/utils/handleError.js'
 import { useMessage } from 'naive-ui'
-
+import { useRouter } from 'vue-router'
+import { formatDate } from '@/utils/useDateTime'
 const userStore = useUserStore()
 const message = useMessage()
+const router = useRouter()
 
 const loading = ref(true)
 const activity = ref([])
 const afterToday = ref([])
 const beforeToday = ref([])
-const formatDate = (dateString) => {
-  return dayjs(dateString).format('YYYY-MM-DD HH:mm')
-}
 
 const fetchActivityData = async () => {
   try {
@@ -39,6 +37,10 @@ const fetchActivityData = async () => {
     loading.value = false
   }
 }
+const handleActivityClick = (activityId) => {
+  router.push(`/activity/detail/${activityId}`)
+}
+
 onMounted(() => {
   fetchActivityData()
 })
@@ -50,9 +52,10 @@ onMounted(() => {
       <div class="content-center text-center text-xl font-bold border-b-2 pb-3">即將參加</div>
       <div v-if="afterToday.length > 0" class="pt-5 flex flex-col gap-5">
         <div
-          v-for="(future_activity, id) in afterToday"
-          :key="id"
-          class="flex bg-white p-3 h-auto rounded-md"
+          v-for="future_activity in afterToday"
+          :key="future_activity.id"
+          @click="handleActivityClick(future_activity.id)"
+          class="flex bg-white p-3 h-auto rounded-md cursor-pointer"
         >
           <div class="w-full flex flex-col gap-1 md:justify-between">
             <div class="flex flex-col gap-1">
@@ -74,16 +77,17 @@ onMounted(() => {
           </div>
         </div>
       </div>
-      <div v-else>用戶沒有即將參加的活動</div>
+      <div v-else class="mt-5 text-center text-gray-600">用戶沒有即將參加的活動</div>
     </div>
 
     <div class="bg-gray-50 px-5 py-5 rounded-md">
       <div class="content-center text-center text-xl font-bold border-b-2 pb-3">聚會紀錄</div>
       <div v-if="beforeToday.length > 0" class="pt-5 flex flex-col gap-5">
         <div
-          v-for="(pre_activity, id) in beforeToday"
-          :key="id"
-          class="flex bg-white p-3 h-auto rounded-md"
+          v-for="pre_activity in beforeToday"
+          :key="pre_activity.id"
+          @click="handleActivityClick(pre_activity.id)"
+          class="flex bg-white p-3 h-auto rounded-md cursor-pointer"
         >
           <div class="w-full flex flex-col gap-1 md:justify-between">
             <div class="flex flex-col gap-1">
