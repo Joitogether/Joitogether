@@ -96,7 +96,7 @@ watch(isMobile, (newVal) => {
           <p class="text-3xl font-bold my-12 md:text-4xl">熱門揪團類型</p>
           <div class="flex justify-center mb-10 lg:justify-between lg:max-w-[1150px]">
             <div
-              class="grid w-3/5 gap-12 grid-cols-2 cursor-pointer md:w-1/2 md:grid-cols-3 md:gap-14 lg:w-11/12 lg:grid-cols-6 lg:w-full"
+              class="grid w-4/5 gap-12 grid-cols-2 cursor-pointer md:w-1/2 md:grid-cols-3 md:gap-14 lg:grid-cols-6 lg:w-full"
             >
               <div v-for="area in areaData" :key="area.title" class="">
                 <div @click.prevent="handleCategoryClick(area.targetId)" class="w-full">

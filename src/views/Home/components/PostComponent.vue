@@ -155,7 +155,7 @@ const formatDate = (isoString) => {
 
     <div class="flex justify-center">
       <div
-        class="flex flex-col w-3/5 justify-center items-center bg-gray-100 md:w-1/2 lg:flex-row lg:w-11/12 lg:max-w-[1150px] lg:justify-between"
+        class="flex flex-col w-4/5 justify-center items-center bg-gray-100 md:w-1/2 lg:flex-row lg:w-11/12 lg:max-w-[1150px] lg:justify-between"
       >
         <!-- 卡片區塊 -->
 
