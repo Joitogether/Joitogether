@@ -13,6 +13,7 @@ import { storeToRefs } from 'pinia'
 import { getUserSummaryAPI } from '@/apis/userAPIs'
 import { ref, onMounted } from 'vue'
 import { handleError } from '@/utils/handleError.js'
+import avatar from '@/assets/avatar.png'
 
 const message = useMessage()
 const userStore = useUserStore()
@@ -356,7 +357,7 @@ const handleSearchClick = (e) => {
           class="user-photo rounded-full w-40 h-40 aspect-square overflow-hidden flex justify-self-center md:w-24 md:h-24"
         >
           <img
-            :src="userStore.user.photo_url || 'src/assets/avatar.png'"
+            :src="userStore.user.photo_url || avatar"
             alt="userPhoto"
             class="w-full h-full object-cover"
           />

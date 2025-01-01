@@ -53,11 +53,6 @@ const router = createRouter({
       component: ResetPassword,
     },
     {
-      path: '/shoppingcart',
-      name: 'shpopingcart',
-      component: ShoppingCart,
-    },
-    {
       path: '/',
       name: 'layout',
       component: Layout,
@@ -141,6 +136,11 @@ const router = createRouter({
               component: ActivityRating,
             },
           ],
+        },
+        {
+          path: '/shoppingcart',
+          name: 'shpopingcart',
+          component: ShoppingCart,
         },
         {
           path: 'topup',
