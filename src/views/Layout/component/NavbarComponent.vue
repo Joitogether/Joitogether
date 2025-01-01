@@ -207,9 +207,12 @@ const handleSearchClick = (e) => {
               </a>
             </li>
             <li>
-              <a href="#" class="font-bold pt-3 block text-base text-gray-500 hover:text-green-600">
+              <RouterLink
+                to="/topup"
+                class="font-bold pt-3 block text-base text-gray-500 hover:text-green-600"
+              >
                 •&nbsp;&nbsp;儲值中心
-              </a>
+              </RouterLink>
             </li>
           </ul>
         </div>
