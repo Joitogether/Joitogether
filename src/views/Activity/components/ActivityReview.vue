@@ -18,6 +18,7 @@ import {
 } from '@/apis/activityAPIs'
 import { useRoute } from 'vue-router'
 import { useUserStore } from '@/stores/userStore'
+import { useSocketStore } from '@/stores/socketStore'
 import { handleError } from '@/utils/handleError'
 
 const route = useRoute()
@@ -34,6 +35,8 @@ const attendee = ref([])
 const isLoading = ref(true)
 const showContent = ref(false)
 const eventTime = ref(null)
+
+const socketStore = useSocketStore()
 
 const canAccessActivity = computed(() => {
   const isHost = userStore.user.uid === activity.value?.host_info?.uid
@@ -190,7 +193,7 @@ const closeRegistration = () => {
   })
 }
 
-const handleApproveClick = async (id) => {
+const handleApproveClick = async (id, activity_id) => {
   if (isReviewTimeExpired()) {
     message.error('審核時間已過，無法進行操作！')
     return
@@ -225,9 +228,25 @@ const handleApproveClick = async (id) => {
         const data = {
           status: 'approved',
           register_validated: 1,
+          activity_id,
         }
         const response = await ActivityReviewApplicationsAPI(id, data)
         if (response && response.status === 200) {
+          // 準備data
+          const notiData = {
+            actor_id: userStore.user.uid, // 誰觸發了這個行為
+            user_id: response.data.data.participant_id, // 這個行為對誰觸發
+            target_id: activity_id, // 被行為的受詞id
+            action: 'review', // 行為 (目前僅有'create','register','like','comment','review', 'rate')
+            target_type: 'activity', // 行為類型 (目前僅有'activity','post','rating')
+            message: '審核了你的報名', // 要顯示在提醒欄位的敘述
+            link: `/activity/detail/${activity_id}`, // 這個提醒要導向哪個頁面
+          }
+          console.log('noti', notiData)
+
+          // 送出提醒
+          socketStore.sendNotification(notiData)
+
           message.success(`${attendeeToUpdate.name} 已被允許參加`)
           await refreshAttendees()
         } else {
@@ -243,7 +262,7 @@ const handleApproveClick = async (id) => {
   })
 }
 
-const handleDeclinedClick = async (id) => {
+const handleDeclinedClick = async (id, activity_id) => {
   if (isReviewTimeExpired()) {
     message.error('審核時間已過，無法進行操作！')
     return
@@ -274,9 +293,23 @@ const handleDeclinedClick = async (id) => {
         const data = {
           status: 'host_declined',
           register_validated: 1,
+          activity_id,
         }
         const response = await ActivityReviewApplicationsAPI(id, data)
         if (response && response.status === 200) {
+          // 準備data
+          const notiData = {
+            actor_id: userStore.user.uid, // 誰觸發了這個行為
+            user_id: response.data.data.participant_id, // 這個行為對誰觸發
+            target_id: activity_id, // 被行為的受詞id
+            action: 'review', // 行為 (目前僅有'create','register','like','comment','review', 'rate')
+            target_type: 'activity', // 行為類型 (目前僅有'activity','post','rating')
+            message: '拒絕了你的報名', // 要顯示在提醒欄位的敘述
+            link: `/activity/detail/${activity_id}`, // 這個提醒要導向哪個頁面
+          }
+
+          // 送出提醒
+          socketStore.sendNotification(notiData)
           message.success(`${attendeeToDeclined.name} 的參加申請已被拒絕！`)
           await refreshAttendees()
         } else {
@@ -292,7 +325,7 @@ const handleDeclinedClick = async (id) => {
   })
 }
 
-const handleCancelClick = async (id) => {
+const handleCancelClick = async (id, activity_id) => {
   if (isReviewTimeExpired()) {
     message.error('審核時間已過，無法進行操作！')
     return
@@ -329,9 +362,23 @@ const handleCancelClick = async (id) => {
         const data = {
           status: 'host_declined',
           register_validated: 1,
+          activity_id,
         }
         const response = await ActivityReviewApplicationsAPI(id, data)
         if (response && response.status === 200) {
+          // 準備data
+          const notiData = {
+            actor_id: userStore.user.uid, // 誰觸發了這個行為
+            user_id: response.data.data.participant_id, // 這個行為對誰觸發
+            target_id: activity_id, // 被行為的受詞id
+            action: 'review', // 行為 (目前僅有'create','register','like','comment','review', 'rate')
+            target_type: 'activity', // 行為類型 (目前僅有'activity','post','rating')
+            message: '取消了你的報名', // 要顯示在提醒欄位的敘述
+            link: `/activity/detail/${activity_id}`, // 這個提醒要導向哪個頁面
+          }
+
+          // 送出提醒
+          socketStore.sendNotification(notiData)
           attendeeToCancel.approved = false
           attendeeToCancel.rejected = true
           message.success(`${attendeeToCancel.name} 的參加資格已被取消！`)
@@ -657,7 +704,7 @@ const sendReplies = async () => {
                   </p>
 
                   <button
-                    @click="handleApproveClick(item.id)"
+                    @click="handleApproveClick(item.id, item.activity_id)"
                     v-if="!item.approved && !item.participant_cancelled && !item.host_declined"
                     :class="[
                       'flex justify-center items-center w-32 h-8 py-2 mt-2 border-2 rounded-md text-sm transition-all duration-300',
@@ -670,7 +717,7 @@ const sendReplies = async () => {
                   </button>
 
                   <button
-                    @click="handleCancelClick(item.id)"
+                    @click="handleCancelClick(item.id, item.activity_id)"
                     v-if="item.approved && !item.participant_cancelled && !item.host_declined"
                     :class="[
                       'flex justify-center items-center w-32 h-8 py-2 mt-2 border-2 rounded-md text-sm transition-all duration-300',
@@ -683,7 +730,7 @@ const sendReplies = async () => {
                   </button>
 
                   <button
-                    @click="handleDeclinedClick(item.id)"
+                    @click="handleDeclinedClick(item.id, item.activity_id)"
                     v-if="!item.participant_cancelled && !item.approved && !item.host_declined"
                     :class="[
                       'flex justify-center items-center w-32 h-8 py-2 mt-2 border-2 rounded-md text-sm transition-all duration-300',
