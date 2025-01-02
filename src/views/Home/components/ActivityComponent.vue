@@ -1,6 +1,6 @@
 <script setup>
 import ActivityCard from '@/views/components/ActivityCard.vue'
-import { ref, onMounted, computed, watch } from 'vue'
+import { ref, onMounted, computed, watch, onUnmounted } from 'vue'
 import { storeToRefs } from 'pinia'
 import { formatDate } from '@/utils/useDateTime'
 import { useActivityStore } from '@/stores/useActivityStore'
@@ -63,17 +63,10 @@ const selectCategory = (category) => {
 const filteredActivities = computed(() =>
   activities.value
     .filter((activity) => {
+      if (!selectedStartDate.value) return true
       const eventDate = new Date(activity.event_time)
-      const today = new Date()
-      today.setHours(0, 0, 0, 0)
-
-      if (eventDate < today) return false
-
-      if (selectedStartDate.value) {
-        const filterDate = new Date(selectedStartDate.value)
-        return eventDate >= filterDate
-      }
-      return true
+      const filterDate = new Date(selectedStartDate.value)
+      return eventDate >= filterDate
     })
     .map((activity) => {
       return {
@@ -87,7 +80,7 @@ const filteredActivities = computed(() =>
         userImg: activity.users.photo_url,
       }
     })
-    .sort((a, b) => new Date(b.id) - new Date(a.id)),
+    .sort((a, b) => a.event_time - b.event_time),
 )
 
 watch(
@@ -117,6 +110,7 @@ watch(
 watch(
   selectedRegions,
   (regions) => {
+    console.log('選中的地區：', regions) // 調試用
     if (regions.length > 0) {
       fetchActivitiesByRegion(regions)
     } else {
@@ -125,6 +119,30 @@ watch(
   },
   { immediate: true },
 )
+
+const horizontal = ref(false)
+const isMobile = ref(false)
+
+const updateScreenSize = () => {
+  isMobile.value = window.innerWidth < 768
+}
+
+onMounted(() => {
+  updateScreenSize()
+  window.addEventListener('resize', updateScreenSize)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', updateScreenSize)
+})
+
+watch(isMobile, (newVal) => {
+  if (newVal) {
+    horizontal.value = true
+  } else {
+    horizontal.value = false
+  }
+})
 
 // 滾動到活動區塊
 const scrollToActivityBlock = () => {
@@ -183,7 +201,7 @@ const scrollToActivityBlock = () => {
       <div v-if="loading" class="text-center my-5">加載中...</div>
       <div v-else-if="error" class="text-center my-5 text-red-500">{{ error }}</div>
       <div v-else>
-        <div class="grid grid-cols-1 lg:grid-cols-3 lg:gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 md:gap-4 lg:grid-cols-3">
           <ActivityCard
             v-for="activity in filteredActivities"
             :key="activity.id"
@@ -195,6 +213,7 @@ const scrollToActivityBlock = () => {
             :host="activity.host"
             :hostImgUrl="activity.userImg"
             :id="activity.id"
+            :horizontal="horizontal"
             class="border-b-2 pb-3 overflow-hidden md:border-none md:bg-gray-100 md:mb-3 md:rounded-md md:px-5 md:hover:bg-gray-200 lg:mb-0"
           ></ActivityCard>
         </div>

@@ -380,7 +380,7 @@ const handleCardClick = () => {
           </div>
         </div>
         <div class="lg:flex lg:gap-3">
-          <div class="bg-white p-5 lg:w-3/5 lg:rounded-md">
+          <div class="bg-white p-5 lg:w-1/2 lg:rounded-md">
             <div class="overflow-hidden rounded-md">
               <img class="w-full h-full object-cover" :src="activity.img_url" alt="" />
             </div>
