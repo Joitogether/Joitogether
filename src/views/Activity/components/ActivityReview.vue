@@ -231,7 +231,8 @@ const handleApproveClick = async (id, activity_id) => {
           activity_id,
         }
         const response = await ActivityReviewApplicationsAPI(id, data)
-        if (response && response.status === 200) {
+
+        if (response && response.data.status === 200) {
           // 準備data
           const notiData = {
             actor_id: userStore.user.uid, // 誰觸發了這個行為
@@ -296,7 +297,7 @@ const handleDeclinedClick = async (id, activity_id) => {
           activity_id,
         }
         const response = await ActivityReviewApplicationsAPI(id, data)
-        if (response && response.status === 200) {
+        if (response && response.data.status === 200) {
           // 準備data
           const notiData = {
             actor_id: userStore.user.uid, // 誰觸發了這個行為
@@ -365,7 +366,7 @@ const handleCancelClick = async (id, activity_id) => {
           activity_id,
         }
         const response = await ActivityReviewApplicationsAPI(id, data)
-        if (response && response.status === 200) {
+        if (response && response.data.status === 200) {
           // 準備data
           const notiData = {
             actor_id: userStore.user.uid, // 誰觸發了這個行為
