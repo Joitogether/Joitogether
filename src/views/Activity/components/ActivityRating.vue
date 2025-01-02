@@ -511,13 +511,13 @@ watch(
 .static-heart {
   width: 16px;
   height: 16px;
-  background-image: url('../../../assets/heartred.png');
+  background-image: url('https://firebasestorage.googleapis.com/v0/b/login-demo1-9d3cb.firebasestorage.app/o/activities%2Fheartnored.png?alt=media&token=fa9751f1-99dc-4a2a-a709-f6b4c7fe6f85');
   background-repeat: no-repeat;
   background-size: contain;
   cursor: default;
 }
 .static-heart.filled {
-  background-image: url('../../../assets/heartred.png');
+  background-image: url('https://firebasestorage.googleapis.com/v0/b/login-demo1-9d3cb.firebasestorage.app/o/activities%2Fheartred.png?alt=media&token=01bb392b-208c-4aac-b8aa-728b27a3b71d');
 }
 
 .heart-rating {
