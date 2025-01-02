@@ -57,7 +57,10 @@ const createOrder = async () => {
       RespondType: 'JSON',
     }
     if (paymentForm.value) {
-      setTimeout(() => paymentForm.value.submit(), 3000)
+      message.loading('頁面跳轉中', {
+        duration: 2000,
+      })
+      setTimeout(() => paymentForm.value.submit(), 500)
     } else {
       throw new Error('Payment form not found')
     }
