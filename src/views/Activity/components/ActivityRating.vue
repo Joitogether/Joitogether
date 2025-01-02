@@ -7,7 +7,7 @@ import { ratingGetDetailAPI, ratingSubmitAPI } from '@/apis/ratingAPIs'
 import dayjs from 'dayjs'
 import { useUserStore } from '@/stores/userStore'
 import { handleError } from '@/utils/handleError.js'
-
+import { formatDate } from '@/utils/useDateTime'
 dayjs.locale('zh-tw')
 const userStore = useUserStore()
 const dialog = useDialog()
@@ -66,6 +66,7 @@ const getDetailForRating = async () => {
     hostInfo.value = res.activity.users || {}
     hostRatingAverage.value = res.hostRatingAverage['_avg'] || {}
     latestHostRating.value = res.latestHostRating || null
+    console.log(latestHostRating.value)
   } catch (error) {
     activityDetail.value = {}
     hostInfo.value = {}
@@ -333,11 +334,11 @@ watch(
                       ><HeartSolid class="w-2"
                     /></n-rate>
                   </div>
-                  <div class="mx-1 text-[10px]">2024/12/14</div>
+                  <div class="mx-1 text-[10px]">{{ formatDate(latestHostRating.created_at) }}</div>
                 </div>
               </div>
               <div class="text-xs tracking-wider truncate mt-2 xl:text-base xl:p-1">
-                團主真的超用心的，上次跟他去吃鷄肉飯還不用花錢，而且都介紹很强的小吃，真的很推啦!!
+                {{ latestHostRating.user_comment }}
               </div>
             </div>
             <p v-else class="mt-2 xl:text-base xl:p-1">暫無用戶評價</p>
