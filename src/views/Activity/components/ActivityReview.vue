@@ -1,5 +1,6 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useDialog, useMessage } from 'naive-ui'
 import {
   NavArrowLeft,
   ThumbsUp,
@@ -10,8 +11,6 @@ import {
   XmarkCircle,
 } from '@iconoir/vue'
 import defaultAvatar from '@/assets/avatar.png'
-
-import { useDialog, useMessage } from 'naive-ui'
 import {
   ActivityGetApplicationsAPI,
   ActivityReviewApplicationsAPI,
@@ -19,47 +18,151 @@ import {
 } from '@/apis/activityAPIs'
 import { useRoute } from 'vue-router'
 import { useUserStore } from '@/stores/userStore'
-import { handleError } from '@/utils/handleError.js'
+import { handleError } from '@/utils/handleError'
 
 const route = useRoute()
 const activity_id = route.params.activity_id
 
 const userStore = useUserStore()
-const activity = ref([null])
-
-onMounted(async () => {
-  try {
-    const response = await ActivityGetActivitiesAPI(activity_id)
-    if (response?.data?.data) {
-      activity.value = response.data.data
-    } else {
-      message.error('目前無相關活動資料')
-      activity.value = {}
-    }
-  } catch (error) {
-    handleError(message, undefined, error)
-  }
-})
-
-const refreshAttendees = async () => {
-  const response = await ActivityGetApplicationsAPI(activity_id, defaultAvatar)
-  attendee.value = response
-}
-
-onMounted(async () => {
-  refreshAttendees()
-})
+const activity = ref([]) // 活動詳細資料
 
 const dialog = useDialog()
 const message = useMessage()
 const attendee = ref([])
+
+// 計時器
+const isLoading = ref(true)
+const showContent = ref(false)
+const eventTime = ref(null)
+
+const canAccessActivity = computed(() => {
+  const isHost = userStore.user.uid === activity.value?.host_info?.uid
+  const nowTimestamp = new Date().getTime()
+  const eventTimestamp = eventTime.value ? new Date(eventTime.value).getTime() : 0
+  const isReviewExpired = nowTimestamp > eventTimestamp
+
+  const requireApproval = activity.value?.require_approval === 1
+  const requirePayment = activity.value?.require_payment === 1
+
+  let displayTemplate = ''
+
+  if (!isHost) {
+    displayTemplate = 'error' // 非團主顯示錯誤頁面
+  } else if (requireApproval) {
+    displayTemplate = '審核列表' // 需要審核時顯示審核列表
+  } else if (requirePayment) {
+    displayTemplate = '檢視報名者列表' // 需要付款但不需要審核，顯示報名者列表
+  } else {
+    displayTemplate = '檢視報名者列表' // 不需要審核和付款，顯示報名者列表
+  }
+
+  return {
+    isHost,
+    isReviewExpired,
+    requireApproval,
+    requirePayment,
+    displayTemplate,
+  }
+})
+
+const isReviewTimeExpired = () => {
+  const nowTimestamp = new Date().getTime() // 當前時間戳
+  const deadline = activity.value?.approval_deadline
+    ? new Date(activity.value.approval_deadline).getTime()
+    : 0 // 取得審核截止時間
+
+  return nowTimestamp > deadline
+}
+
+// 用於計算團主審核人數計算
+const approvedCount = computed(() => {
+  return attendee.value.filter((item) => item.approved).length
+})
+
+const rejectCount = computed(() => {
+  return attendee.value.filter((item) => item.host_declined).length
+})
+
+const userCancellation = computed(() => {
+  return attendee.value.filter((item) => item.participant_cancelled).length
+})
+
+const refreshAttendees = async () => {
+  try {
+    const rawData = await ActivityGetApplicationsAPI(activity_id)
+    if (rawData && Array.isArray(rawData)) {
+      attendee.value = rawData.map((item) => ({
+        id: item.application_id,
+        name: item.participant_info.full_name,
+        avatar: item.participant_info.photo_url || defaultAvatar,
+        number: `@${item.participant_id}`,
+        message: item.comment || '這位參加者尚無留言',
+        date: new Date().toLocaleDateString(),
+        approved: item.status === 'approved',
+        host_declined: item.status === 'host_declined',
+        registered: item.status === 'registered',
+        participant_cancelled: item.status === 'participant_cancelled',
+        replies: '',
+      }))
+    } else {
+      attendee.value = []
+    }
+  } catch (error) {
+    console.error('無法獲取報名者資料:', error)
+    attendee.value = []
+  }
+}
+
+// 輸入文字篩選報名者
+const searchQuery = ref('')
+const filteredAttendees = computed(() => {
+  if (!searchQuery.value) {
+    return attendee.value
+  }
+  return attendee.value.filter((item) =>
+    item.name.toLowerCase().includes(searchQuery.value.toLowerCase()),
+  )
+})
+
+onMounted(async () => {
+  try {
+    // 獲取活動資料
+    const response = await ActivityGetActivitiesAPI(activity_id)
+    if (response.status === 200 && response.data) {
+      activity.value = response.data.data
+      eventTime.value = response.data.data.event_time
+    } else {
+      console.warn('活動資料獲取失敗')
+    }
+
+    // 獲取報名者資料
+    await refreshAttendees()
+
+    // 載入本地存儲的回覆資料
+    const storedReplies = JSON.parse(localStorage.getItem('attendeeReplies')) || {}
+    attendee.value.forEach((item) => {
+      if (storedReplies[item.id]) {
+        item.replies = storedReplies[item.id]
+      } else {
+        item.replies = []
+      }
+    })
+  } catch (error) {
+    console.error('初始化失敗:', error)
+  } finally {
+    isLoading.value = false
+    setTimeout(() => {
+      showContent.value = true
+    }, 500) // 加入延遲，避免畫面閃爍
+  }
+})
 
 //切換報名,截止報名功能
 const registrationStatus = ref('open')
 
 // 切換開放、截止報名的UI
 const openRegistration = () => {
-  dialog.warning({
+  dialog.success({
     title: '確認操作',
     content: '您是否確認開放報名？',
     positiveText: '確認',
@@ -73,7 +176,7 @@ const openRegistration = () => {
   })
 }
 const closeRegistration = () => {
-  dialog.warning({
+  dialog.success({
     title: '確認操作',
     content: '您是否確認截止報名？',
     positiveText: '確認',
@@ -87,17 +190,11 @@ const closeRegistration = () => {
   })
 }
 
-const searchQuery = ref('')
-const filteredAttendees = computed(() => {
-  if (!searchQuery.value) {
-    return attendee.value
-  }
-  return attendee.value.filter((item) =>
-    item.name.toLowerCase().includes(searchQuery.value.toLowerCase()),
-  )
-})
-
 const handleApproveClick = async (id) => {
+  if (isReviewTimeExpired()) {
+    message.error('審核時間已過，無法進行操作！')
+    return
+  }
   const attendeeToUpdate = attendee.value.find((item) => item.id === id)
   if (!attendeeToUpdate) {
     message.error('找不到該參加者！')
@@ -105,27 +202,31 @@ const handleApproveClick = async (id) => {
   }
 
   if (attendeeToUpdate.approved) {
-    message.warning(`${attendeeToUpdate.name} 已經被允許參加，無需再次操作！`)
+    message.error(`${attendeeToUpdate.name} 已經被允許參加，無需再次操作！`)
     return
   }
   if (approvedCount.value >= activity.value.max_participants) {
-    message.warning('該活動人數已滿，無法再允許更多用戶參加')
+    message.error('該活動人數已滿，無法再允許更多用戶參加')
     return
   }
 
   if (registrationStatus.value === 'closed') {
-    message.warning('目前報名已截止，無法操作。請返回開放報名繼續操作。')
+    message.error('目前報名已截止，無法操作。請返回開放報名繼續操作。')
     return
   }
 
-  dialog.warning({
+  dialog.success({
     title: '確認允許參加',
     content: `您確定要允許 ${attendeeToUpdate.name} 參加嗎？`,
     positiveText: '確認',
     negativeText: '取消',
     async onPositiveClick() {
       try {
-        const response = await ActivityReviewApplicationsAPI(id, 'approved')
+        const data = {
+          status: 'approved',
+          register_validated: 1,
+        }
+        const response = await ActivityReviewApplicationsAPI(id, data)
         if (response && response.status === 200) {
           message.success(`${attendeeToUpdate.name} 已被允許參加`)
           await refreshAttendees()
@@ -143,6 +244,10 @@ const handleApproveClick = async (id) => {
 }
 
 const handleDeclinedClick = async (id) => {
+  if (isReviewTimeExpired()) {
+    message.error('審核時間已過，無法進行操作！')
+    return
+  }
   const attendeeToDeclined = attendee.value.find((item) => item.id === id)
   if (!attendeeToDeclined) {
     message.error('找不到該參加者！')
@@ -150,23 +255,27 @@ const handleDeclinedClick = async (id) => {
   }
 
   if (registrationStatus.value === 'closed') {
-    message.warning('目前報名已截止，無法操作。請返回開放報名繼續操作。')
+    message.success('目前報名已截止，無法操作。請返回開放報名繼續操作。')
     return
   }
 
   if (attendeeToDeclined.host_declined) {
-    message.warning(`${attendeeToDeclined.name} 已經被拒絕參加，無需再次操作！`)
+    message.success(`${attendeeToDeclined.name} 已經被拒絕參加，無需再次操作！`)
     return
   }
 
-  dialog.warning({
+  dialog.success({
     title: '確認拒絕',
     content: `您確定要拒絕 ${attendeeToDeclined.name} 的參加申請嗎？`,
     positiveText: '確認',
     negativeText: '取消',
     async onPositiveClick() {
       try {
-        const response = await ActivityReviewApplicationsAPI(id, 'host_declined')
+        const data = {
+          status: 'host_declined',
+          register_validated: 1,
+        }
+        const response = await ActivityReviewApplicationsAPI(id, data)
         if (response && response.status === 200) {
           message.success(`${attendeeToDeclined.name} 的參加申請已被拒絕！`)
           await refreshAttendees()
@@ -184,6 +293,10 @@ const handleDeclinedClick = async (id) => {
 }
 
 const handleCancelClick = async (id) => {
+  if (isReviewTimeExpired()) {
+    message.error('審核時間已過，無法進行操作！')
+    return
+  }
   const attendeeToCancel = attendee.value.find((item) => item.id === id)
 
   if (!attendeeToCancel) {
@@ -192,29 +305,32 @@ const handleCancelClick = async (id) => {
   }
 
   if (registrationStatus.value === 'closed') {
-    message.warning('目前報名已截止，無法操作。請返回開放報名繼續操作。')
+    message.success('目前報名已截止，無法操作。請返回開放報名繼續操作。')
     return
   }
 
   if (attendeeToCancel.rejected) {
-    message.warning(`${attendeeToCancel.name} 的參加資格已被取消，無需再次操作！`)
+    message.success(`${attendeeToCancel.name} 的參加資格已被取消，無需再次操作！`)
     return
   }
 
   if (!attendeeToCancel.approved) {
-    message.warning(`${attendeeToCancel.name} 尚未被允許參加，無法取消參加資格！`)
+    message.success(`${attendeeToCancel.name} 尚未被允許參加，無法取消參加資格！`)
     return
   }
 
-  dialog.warning({
+  dialog.success({
     title: '確認取消參加',
     content: `您確定要取消 ${attendeeToCancel.name} 的參加資格嗎？`,
     positiveText: '確認',
     negativeText: '取消',
     async onPositiveClick() {
       try {
-        const response = await ActivityReviewApplicationsAPI(id, 'participant_cancelled')
-
+        const data = {
+          status: 'host_declined',
+          register_validated: 1,
+        }
+        const response = await ActivityReviewApplicationsAPI(id, data)
         if (response && response.status === 200) {
           attendeeToCancel.approved = false
           attendeeToCancel.rejected = true
@@ -233,21 +349,9 @@ const handleCancelClick = async (id) => {
   })
 }
 
-// 切換審核狀態
-
-const approvedCount = computed(() => {
-  return attendee.value?.filter((item) => item.approved).length
-})
-
-const rejectCount = computed(() => {
-  return attendee.value?.filter((item) => item.host_declined).length
-})
-
 const quickReplyVisible = ref(false)
 const selectedReplies = ref([])
-
 const currentAttendeeId = ref(null)
-
 const replyOptions = [
   '審核時間未到，請耐心等候',
   '抱歉目前額滿，候補將優先審核您',
@@ -302,291 +406,390 @@ const sendReplies = async () => {
   quickReplyVisible.value = false
 }
 </script>
-
 <template>
-  <div
-    v-if="userStore.user.uid === activity.host_info?.uid"
-    class="flex justify-center min-w-[400px] items-center min-h-screen bg-gray-200 shadow-2xl"
-  >
-    <div
-      class="m-auto p-2 rounded-xl bg-gray-50 border-gray-300 border-solid border-2 w-full max-w-[768px] sm:w-full"
-    >
-      <div id="review" class="m-5 max-w-[768px]">
-        <div class="flex my-2">
-          <div
-            @click="
-              $router.push({ name: 'activityDetail', params: { id: $route.params.activity_id } })
-            "
-            class="hover:bg-yellow-300 rounded-full mr-2 transition-all"
-          >
-            <NavArrowLeft width="32px" height="32" />
-          </div>
-
-          <div class="text-2xl font-bold text-gray-700">審核列表</div>
-        </div>
+  <template v-if="canAccessActivity.isHost">
+    <template v-if="canAccessActivity.displayTemplate === '檢視報名者列表'">
+      <div
+        class="flex justify-center min-w-[400px] items-center min-h-screen bg-gray-200 shadow-2xl"
+      >
         <div
-          class="flex items-center bg-gray-100 border-[1px] border-gray-200 rounded-xl p-3 my-4 text-sm font-semibold"
+          class="m-auto p-2 rounded-xl bg-gray-50 border-gray-300 border-solid border-2 w-full max-w-[768px] sm:w-full"
         >
-          <img src="../../../assets/Screening.png" alt="" class="w-8 mr-1" />共有{{
-            attendee?.length
-          }}
-          位報名( {{ approvedCount }}位審核通過，{{ rejectCount }} 位審核已拒絕)
-        </div>
+          <div id="review" class="m-5 max-w-[768px]">
+            <div class="flex my-2">
+              <div
+                @click="
+                  $router.push({
+                    name: 'activityDetail',
+                    params: { id: $route.params.activity_id },
+                  })
+                "
+                class="hover:bg-yellow-300 rounded-full mr-2 transition-all"
+              >
+                <NavArrowLeft width="32px" height="32" />
+              </div>
+              <div class="text-2xl font-bold text-gray-700">檢視報名者列表</div>
+            </div>
+            <div
+              class="flex items-center bg-gray-100 border-[1px] border-gray-200 rounded-xl p-3 my-4 text-sm font-semibold"
+            >
+              <img src="../../../assets/Screening.png" alt="" class="w-8 mr-1" />
+              共有 {{ attendee.length }} 位用戶報名 ({{ approvedCount }} 位用戶已經報名，{{
+                userCancellation
+              }}
+              位用戶已經取消)
+            </div>
 
-        <div
-          class="flex justify-center items-center border-solid border-[3px] p-0.5 h-10 border-gray-200 rounded-full my-5 text-center max-w-[768px]"
-        >
-          <div
-            @click="openRegistration('open')"
-            :class="{
-              'bg-yellow-400': registrationStatus === 'open',
-              'text-gray-400  hover:text-sm hover:font-semibold hover:text-gray-500':
-                registrationStatus !== 'open',
-            }"
-            class="w-1/2 p-1 text-[13px] rounded-full cursor-pointer transition-all"
-          >
-            <a href="#">開放報名</a>
-          </div>
-          <div
-            @click="closeRegistration('closed')"
-            :class="{
-              'bg-yellow-400': registrationStatus === 'closed',
-              'text-gray-400 hover:text-sm hover:font-semibold hover:text-gray-500':
-                registrationStatus !== 'closed',
-            }"
-            class="w-1/2 p-1 text-[13px] rounded-full cursor-pointer transition-all"
-          >
-            <a href="#">截止報名</a>
-          </div>
-        </div>
-
-        <div
-          class="mx-2 flex items-center bg-gray-100 text-gray-400 my-3 rounded-full transition-all duration-200"
-        >
-          <input
-            v-model="searchQuery"
-            type="text"
-            placeholder="🔍請輸入會員名稱進行搜尋"
-            class="bg-gray-100 h-10 w-full outline-none outline-[3px] focus:outline-yellow-400 p-2 rounded-full transition-all"
-          />
-        </div>
-
-        <div
-          class="flex flex-col bg-gray-100 border-[1px] border-gray-200 rounded-xl p-4 my-4 w-full text-blue-600 font-semibold"
-        >
-          <div class="flex items-center mb-1 text-[14px]">
-            <ThumbsUp width="18" height="18" />
-
-            <div class="mx-2">審核不受限</div>
-          </div>
-          <div class="text-xs font-normal">
-            你可以審核擁有此徽章的報名者，不會有人數限制。如果審核沒有此徽章的報名者，需要使用額外的酒杯來增加名額，你也可以升級VIP會員來解除限制。
-          </div>
-        </div>
-
-        <!-- 未審核通過時畫面 -->
-        <div
-          v-for="item in filteredAttendees"
-          :key="item.id"
-          class="flex flex-col text-gray-500 bg-gray-100 border-[1px] border-gray-200 rounded-xl p-2 my-2 w-full"
-        >
-          <div
-            class="flex py-3 px-1 rounded-2xl bg-gray-100 border-4 border-gray-400 transition-all duration-500"
-            :class="[
-              item.registered ? 'border-gray-500 bg-gray-100 transition-all duration-500' : '',
-              item.approved ? 'border-yellow-400 bg-yellow-100 transition-all duration-500' : '',
-              item.participant_cancelled
-                ? 'border-gray-600 bg-gray-200 transition-all duration-500'
-                : '',
-              item.host_declined ? 'border-red-700 bg-red-100 transition-all duration-500' : '',
-              ,
-            ]"
-          >
-            <div class="mx-2 w-1/12">
-              <img
-                :src="item.avatar || '/images/default-avatar.png'"
-                class="w-12 min-w-8 rounded-full"
-                alt="Avatar"
-                @error="(e) => (e.target.src = defaultAvatar)"
+            <div
+              class="mx-2 flex items-center bg-gray-100 text-gray-400 my-3 rounded-full transition-all duration-200"
+            >
+              <input
+                v-model="searchQuery"
+                type="text"
+                placeholder="🔍請輸入會員名稱進行搜尋"
+                class="bg-gray-100 h-10 w-full outline-none outline-[3px] focus:outline-yellow-400 p-2 rounded-full transition-all"
               />
             </div>
-            <div class="flex flex-col w-11/12 mx-2">
-              <div class="text-sm">{{ item.name }}</div>
-              <div class="my-1 text-xs max-sm:hidden">{{ item.number }}</div>
-              <div class="flex">
-                <div
-                  class="flex flex-row justify-center items-center text-[10px] text-red-500 border-solid border-2 border-red-500 bg-red-100 px-1 rounded-md"
-                >
-                  <FireFlame width="13" height="13" />10
-                </div>
-                <div
-                  class="flex flex-row justify-center items-center bg-green-100 text-[10px] text-green-500 border-solid border-2 border-green-500 px-1 ml-1 rounded-md"
-                >
-                  <leaf width="13" height="13" />新手
-                </div>
-              </div>
-              <div class="flex items-center mt-2 max-sm:hidden">
-                <div class="w-1 h-4 rounded-full bg-blue-600"></div>
-                <div class="ml-2 mr-1 text-xs font-semibold">審核不受限</div>
-                <ThumbsUp width="16" height="16" />
-              </div>
-            </div>
 
-            <div class="flex flex-col justify-center items-center w-52 px-4">
-              <p
-                v-if="item.registered"
-                class="flex justify-center text-xs text-gray-400 my-1 w-32 font-semibold"
-              >
-                尚未審核
-              </p>
-              <p
-                v-else-if="item.approved"
-                class="flex justify-center items-center w-32 text-xs text-green-600 my-1 font-semibold"
-              >
-                審核已通過<CheckCircleSolid width="14" height="14" />
-              </p>
-              <p
-                v-else-if="item.participant_cancelled"
-                class="flex justify-center items-center w-32 text-xs text-gray-600 my-1 font-semibold"
-              >
-                已取消用戶參加
-              </p>
-
-              <p
-                v-else-if="item.host_declined"
-                class="flex justify-center text-xs text-red-400 my-1 w-32 font-semibold"
-              >
-                團主已拒絕用戶參加<XmarkCircle width="12" height="12" />
-              </p>
-
-              <button
-                @click="handleApproveClick(item.id)"
-                v-if="!item.approved && !item.participant_cancelled && !item.host_declined"
-                :class="[
-                  'flex justify-center items-center w-32 h-8 py-2 mt-2 border-2 rounded-md text-sm transition-all duration-300',
-                  registrationStatus === 'closed' || item.approved
-                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                    : 'bg-green-500 hover:bg-green-600 text-white',
-                ]"
-              >
-                <span>{{ item.approved ? '已允許參加' : '允許參加' }}</span>
-              </button>
-
-              <button
-                @click="handleCancelClick(item.id)"
-                v-if="item.approved && !item.participant_cancelled && !item.host_declined"
-                :class="[
-                  'flex justify-center items-center w-32 h-8 py-2 mt-2 border-2 rounded-md text-sm transition-all duration-300',
-                  registrationStatus === 'closed' || item.rejected
-                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                    : 'bg-red-500 text-white border-red-600 hover:bg-red-600 hover:border-red-700',
-                ]"
-              >
-                <span>{{ item.cancelled ? '已取消參加' : '取消用戶參加' }}</span>
-              </button>
-
-              <button
-                @click="handleDeclinedClick(item.id)"
-                v-if="!item.participant_cancelled && !item.approved && !item.host_declined"
-                :class="[
-                  'flex justify-center items-center w-32 h-8 py-2 mt-2 border-2 rounded-md text-sm transition-all duration-300',
-                  registrationStatus === 'closed' || item.rejected
-                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                    : 'bg-red-500 text-white border-red-600 hover:bg-red-600 hover:border-red-700',
-                ]"
-              >
-                <span>{{ item.host_declined ? '已拒絕參加' : '拒絕用戶參加' }}</span>
-              </button>
-            </div>
-          </div>
-          <div
-            class="flex flex-col text-gray-500 my-1 mx-1 px-3 py-2 bg-gray-200 border-[1px] border-gray-200 rounded-xl"
-          >
-            <div class="text-gray-700 text-[12px]">{{ item.message }}</div>
-            <div class="flex items-center text-sm">
-              <div class="text-[10px]">{{ item.date }}</div>
-              <button
-                @click="showQuickReply(item.id)"
-                class="flex items-center ml-3 text-xs text-black hover:text-yellow-600"
-              >
-                快速回覆
-                <ArrowUpLeftSquareSolid width="14" height="14" class="mx-1" />
-              </button>
-            </div>
-          </div>
-          <div
-            v-if="item.replies.length"
-            class="flex flex-col bg-yellow-50 p-4 m-1 mt-1 rounded-xl border-[1.5px] border-yellow-600"
-          >
+            <!-- 🔹 報名者列表細節 -->
             <div
-              class="flex justify-between items-center text-xs font-semibold text-yellow-700 mb-1"
+              v-for="item in filteredAttendees"
+              :key="item.id"
+              class="flex flex-col text-gray-500 bg-gray-100 border-[1px] border-gray-200 rounded-xl p-2 my-2 w-full"
             >
-              團主回覆：
-              <n-button type="error" size="tiny" @click="deleteReply(item.id, idx)">
-                刪除
-              </n-button>
-            </div>
-            <div v-for="(reply, idx) in item.replies" :key="idx" class="text-xs text-yellow-800">
-              {{ reply }}
-            </div>
-          </div>
-        </div>
-
-        <!-- 快速回覆視窗 -->
-        <div
-          v-if="quickReplyVisible"
-          class="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex justify-center items-center z-50"
-        >
-          <div class="bg-white p-10 rounded-lg w-[460px] shadow-lg">
-            <div class="text-lg font-semibold">快速回覆內容</div>
-            <div>
-              <label
-                v-for="(option, index) in replyOptions"
-                :key="index"
-                class="flex items-center mb-2 px-3 py-1 rounded-md cursor-pointer hover:bg-yellow-100 hover:scale-105 transition-all"
+              <!-- 報名 -->
+              <div
+                v-if="item.registered"
+                class="flex py-3 px-1 rounded-2xl bg-green-50 border-4 border-green-600 transition-all duration-500"
               >
-                <input
-                  type="checkbox"
-                  v-model="selectedReplies"
-                  :value="option"
-                  class="mr-2 accent-yellow-400"
-                />
-                {{ option }}
-              </label>
-            </div>
-            <div class="flex justify-between mt-4">
-              <button
-                @click="hideQuickReply"
-                class="bg-gray-200 py-2 px-4 rounded hover:bg-gray-300 hover:scale-105 transition-all"
+                <div class="mx-2 w-10 h-10 min-h-[40px] min-w-[40px]">
+                  <img
+                    :src="item.avatar || '/images/default-avatar.png'"
+                    class="object-cover w-full h-full rounded-full"
+                    alt="Avatar"
+                    @error="(e) => (e.target.src = defaultAvatar)"
+                  />
+                </div>
+                <div class="flex flex-col w-11/12 mx-2">
+                  <div class="text-sm">{{ item.name }}</div>
+                  <div class="my-1 text-xs max-sm:hidden">{{ item.number }}</div>
+                </div>
+                <div class="flex flex-col justify-center items-center w-52 px-4">
+                  <p class="text-xs text-green-600 font-semibold">用戶已報名</p>
+                </div>
+              </div>
+              <!-- 取消 -->
+              <div
+                v-if="item.participant_cancelled"
+                class="flex py-3 px-1 rounded-2xl bg-gray-100 border-4 border-gray-400 transition-all duration-500"
               >
-                取消
-              </button>
-              <button
-                @click="sendReplies"
-                class="bg-yellow-300 py-2 px-4 rounded hover:bg-yellow-400 hover:scale-105 transition-all"
-              >
-                送出
-              </button>
+                <div class="mx-2 w-10 h-10 min-h-[40px] min-w-[40px]">
+                  <img
+                    :src="item.avatar || '/images/default-avatar.png'"
+                    class="object-cover w-full h-full rounded-full"
+                    alt="Avatar"
+                    @error="(e) => (e.target.src = defaultAvatar)"
+                  />
+                </div>
+                <div class="flex flex-col w-11/12 mx-2">
+                  <div class="text-sm">{{ item.name }}</div>
+                  <div class="my-1 text-xs max-sm:hidden">{{ item.number }}</div>
+                </div>
+                <div class="flex flex-col justify-center items-center w-52 px-4">
+                  <p class="text-xs text-gray-600 font-semibold">用戶已取消參加</p>
+                </div>
+              </div>
+              <div class="text-gray-700 text-[12px] mt-2 px-3">{{ item.message }}</div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-  </div>
+    </template>
 
-  <div v-else>
-    <div class="flex flex-col items-center justify-center min-h-screen bg-gray-100 text-gray-800">
-      <h1 class="text-8xl font-extrabold text-red-500 animate-bounce">哎呀！真糟糕！</h1>
-      <p class="mt-4 text-2xl font-semibold">很抱歉</p>
-      <p class="mt-2 text-lg text-gray-600">很抱歉，您不是該活動的團主，無法查看此頁面</p>
-      <router-link
-        to="/"
-        class="mt-6 px-6 py-3 bg-blue-500 text-white text-lg font-medium rounded-lg shadow-lg hover:bg-blue-600 transition"
+    <template v-else-if="canAccessActivity.displayTemplate === '審核列表'">
+      <!--  審核列表 -->
+      <div
+        class="flex justify-center min-w-[400px] items-center min-h-screen bg-gray-200 shadow-2xl"
       >
-        返回首頁
-      </router-link>
-    </div>
-  </div>
+        <div
+          class="m-auto p-2 rounded-xl bg-gray-50 border-gray-300 border-solid border-2 w-full max-w-[768px] sm:w-full"
+        >
+          <div id="review" class="m-5 max-w-[768px]">
+            <div class="group flex my-2">
+              <div
+                @click="
+                  $router.push({
+                    name: 'activityDetail',
+                    params: { id: $route.params.activity_id },
+                  })
+                "
+                class="hover:bg-green-600 rounded-full mr-2 transition-all duration-200"
+              >
+                <NavArrowLeft
+                  width="32px"
+                  height="32"
+                  class="hover:text-white transition-all duration-[50mm]"
+                />
+              </div>
+              <div class="text-2xl font-bold text-gray-800">審核列表</div>
+            </div>
+            <div
+              class="flex items-center bg-gray-100 border-[1px] border-gray-200 rounded-xl p-3 my-4 text-sm font-semibold"
+            >
+              <img src="../../../assets/Screening.png" alt="" class="w-8 mr-1" />
+              共有 {{ attendee.length }} 位報名 ({{ approvedCount }} 位審核通過，{{ rejectCount }}
+              位審核已拒絕)
+            </div>
+
+            <div
+              class="flex justify-center items-center border-solid border-[3px] p-0.5 h-10 border-gray-200 rounded-full my-5 text-center max-w-[768px]"
+            >
+              <div
+                @click="openRegistration('open')"
+                :class="{
+                  'bg-green-600 text-white': registrationStatus === 'open',
+                  'text-gray-400 hover:text-sm hover:font-semibold hover:text-gray-500':
+                    registrationStatus !== 'open',
+                }"
+                class="w-1/2 p-1 text-[13px] rounded-full cursor-pointer transition-all"
+              >
+                <a href="#">開放報名</a>
+              </div>
+              <div
+                @click="closeRegistration('closed')"
+                :class="{
+                  'bg-green-600 text-white': registrationStatus === 'closed',
+                  'text-gray-400 hover:text-sm hover:font-semibold hover:text-gray-500':
+                    registrationStatus !== 'closed',
+                }"
+                class="w-1/2 p-1 text-[13px] rounded-full cursor-pointer transition-all"
+              >
+                <a href="#">截止報名</a>
+              </div>
+            </div>
+
+            <div
+              class="mx-2 flex items-center bg-gray-100 text-gray-400 my-3 rounded-full transition-all duration-200"
+            >
+              <input
+                v-model="searchQuery"
+                type="text"
+                placeholder="🔍請輸入會員名稱進行搜尋"
+                class="bg-gray-100 h-10 w-full outline-none outline-[3px] focus:outline-yellow-400 p-2 rounded-full transition-all"
+              />
+            </div>
+
+            <!-- 🔹 審核報名者列表 -->
+            <div
+              v-for="item in filteredAttendees"
+              :key="item.id"
+              class="flex flex-col text-gray-500 bg-gray-100 border-[1px] border-gray-200 rounded-xl p-2 my-2 w-full"
+            >
+              <div
+                class="flex py-3 px-1 rounded-2xl bg-gray-100 border-4 border-gray-400 transition-all duration-500"
+                :class="[
+                  item.registered ? 'border-gray-500 bg-gray-100 transition-all duration-500' : '',
+                  item.approved
+                    ? 'border-yellow-400 bg-yellow-100 transition-all duration-500'
+                    : '',
+                  item.participant_cancelled
+                    ? 'border-gray-600 bg-gray-200 transition-all duration-500'
+                    : '',
+                  item.host_declined ? 'border-red-700 bg-red-100 transition-all duration-500' : '',
+                  ,
+                ]"
+              >
+                <div class="mx-2 w-1/12">
+                  <img
+                    :src="item.avatar || '/images/default-avatar.png'"
+                    class="w-full min-w-10 min-h-10 rounded-full object-cover"
+                    alt="Avatar"
+                    @error="(e) => (e.target.src = defaultAvatar)"
+                  />
+                </div>
+                <div class="flex flex-col w-11/12 mx-2">
+                  <div class="text-sm">{{ item.name }}</div>
+                  <div class="my-1 text-xs max-sm:hidden">{{ item.number }}</div>
+                  <div class="flex">
+                    <div
+                      class="flex flex-row justify-center items-center text-[10px] text-red-500 border-solid border-2 border-red-500 bg-red-100 px-1 rounded-md"
+                    >
+                      <FireFlame width="13" height="13" />10
+                    </div>
+                    <div
+                      class="flex flex-row justify-center items-center bg-green-100 text-[10px] text-green-500 border-solid border-2 border-green-500 px-1 ml-1 rounded-md"
+                    >
+                      <leaf width="13" height="13" />新手
+                    </div>
+                  </div>
+                  <div class="flex items-center mt-2 max-sm:hidden">
+                    <div class="w-1 h-4 rounded-full bg-blue-600"></div>
+                    <div class="ml-2 mr-1 text-xs font-semibold">審核不受限</div>
+                    <ThumbsUp width="16" height="16" />
+                  </div>
+                </div>
+
+                <div class="flex flex-col justify-center items-center w-52 px-4">
+                  <p
+                    v-if="item.registered"
+                    class="flex justify-center text-xs text-gray-400 my-1 w-32 font-semibold"
+                  >
+                    尚未審核
+                  </p>
+                  <p
+                    v-else-if="item.approved"
+                    class="flex justify-center items-center w-32 text-xs text-green-600 my-1 font-semibold"
+                  >
+                    審核已通過<CheckCircleSolid width="14" height="14" />
+                  </p>
+                  <p
+                    v-else-if="item.participant_cancelled"
+                    class="flex justify-center items-center w-32 text-xs text-gray-600 my-1 font-semibold"
+                  >
+                    用戶已取消參加
+                  </p>
+
+                  <p
+                    v-else-if="item.host_declined"
+                    class="flex justify-center text-xs text-red-400 my-1 w-32 font-semibold"
+                  >
+                    團主已拒絕用戶參加<XmarkCircle width="12" height="12" />
+                  </p>
+
+                  <button
+                    @click="handleApproveClick(item.id)"
+                    v-if="!item.approved && !item.participant_cancelled && !item.host_declined"
+                    :class="[
+                      'flex justify-center items-center w-32 h-8 py-2 mt-2 border-2 rounded-md text-sm transition-all duration-300',
+                      registrationStatus === 'closed' || item.approved
+                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                        : 'bg-green-500 hover:bg-green-600 text-white',
+                    ]"
+                  >
+                    <span>{{ item.approved ? '已允許參加' : '允許參加' }}</span>
+                  </button>
+
+                  <button
+                    @click="handleCancelClick(item.id)"
+                    v-if="item.approved && !item.participant_cancelled && !item.host_declined"
+                    :class="[
+                      'flex justify-center items-center w-32 h-8 py-2 mt-2 border-2 rounded-md text-sm transition-all duration-300',
+                      registrationStatus === 'closed' || item.rejected
+                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                        : 'bg-red-500 text-white border-red-600 hover:bg-red-600 hover:border-red-700',
+                    ]"
+                  >
+                    <span>{{ item.cancelled ? '已取消參加' : '取消用戶參加' }}</span>
+                  </button>
+
+                  <button
+                    @click="handleDeclinedClick(item.id)"
+                    v-if="!item.participant_cancelled && !item.approved && !item.host_declined"
+                    :class="[
+                      'flex justify-center items-center w-32 h-8 py-2 mt-2 border-2 rounded-md text-sm transition-all duration-300',
+                      registrationStatus === 'closed' || item.rejected
+                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                        : 'bg-red-500 text-white border-red-600 hover:bg-red-600 hover:border-red-700',
+                    ]"
+                  >
+                    <span>{{ item.host_declined ? '已拒絕參加' : '拒絕用戶參加' }}</span>
+                  </button>
+                </div>
+              </div>
+              <div
+                class="flex flex-col text-gray-500 my-1 mx-1 px-3 py-2 bg-gray-200 border-[1px] border-gray-200 rounded-xl"
+              >
+                <div class="text-gray-700 text-[12px]">{{ item.message }}</div>
+                <div class="flex items-center text-sm">
+                  <div class="text-[10px]">{{ item.date }}</div>
+                  <button
+                    @click="showQuickReply(item.id)"
+                    class="flex items-center ml-3 text-xs text-black hover:text-yellow-600"
+                  >
+                    快速回覆
+                    <ArrowUpLeftSquareSolid width="14" height="14" class="mx-1" />
+                  </button>
+                </div>
+              </div>
+              <div
+                v-if="item.replies.length"
+                class="flex flex-col bg-yellow-50 p-4 m-1 mt-1 rounded-xl border-[1.5px] border-yellow-600"
+              >
+                <div
+                  class="flex justify-between items-center text-xs font-semibold text-yellow-700 mb-1"
+                >
+                  團主回覆：
+                  <n-button type="error" size="tiny" @click="deleteReply(item.id, idx)">
+                    刪除
+                  </n-button>
+                </div>
+                <div
+                  v-for="(reply, idx) in item.replies"
+                  :key="idx"
+                  class="text-xs text-yellow-800"
+                >
+                  {{ reply }}
+                </div>
+              </div>
+            </div>
+
+            <!-- 快速回覆視窗 -->
+            <div
+              v-if="quickReplyVisible"
+              class="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex justify-center items-center z-50"
+            >
+              <div class="bg-white p-10 rounded-lg w-[460px] shadow-lg">
+                <div class="text-lg font-semibold">快速回覆內容</div>
+                <div>
+                  <label
+                    v-for="(option, index) in replyOptions"
+                    :key="index"
+                    class="flex items-center mb-2 px-3 py-1 rounded-md cursor-pointer hover:bg-yellow-100 hover:scale-105 transition-all"
+                  >
+                    <input
+                      type="checkbox"
+                      v-model="selectedReplies"
+                      :value="option"
+                      class="mr-2 accent-yellow-400"
+                    />
+                    {{ option }}
+                  </label>
+                </div>
+                <div class="flex justify-between mt-4">
+                  <button
+                    @click="hideQuickReply"
+                    class="bg-gray-200 py-2 px-4 rounded hover:bg-gray-300 hover:scale-105 transition-all"
+                  >
+                    取消
+                  </button>
+                  <button
+                    @click="sendReplies"
+                    class="bg-yellow-300 py-2 px-4 rounded hover:bg-yellow-400 hover:scale-105 transition-all"
+                  >
+                    送出
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </template>
+
+    <template v-else>
+      <div class="flex flex-col items-center justify-center min-h-screen bg-gray-100 text-gray-800">
+        <h1 class="text-8xl font-extrabold text-red-500 animate-bounce">哎呀！真糟糕！</h1>
+        <p class="mt-4 text-2xl font-semibold">很抱歉</p>
+        <p class="mt-2 text-lg text-gray-600">很抱歉，您不是該活動的團主，無法查看此頁面</p>
+        <router-link
+          to="/"
+          class="mt-6 px-6 py-3 bg-blue-500 text-white text-lg font-medium rounded-lg shadow-lg hover:bg-blue-600 transition"
+        >
+          返回首頁
+        </router-link>
+      </div>
+    </template>
+  </template>
 </template>
 
 <style scoped></style>
