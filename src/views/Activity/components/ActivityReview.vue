@@ -704,7 +704,7 @@ const sendReplies = async () => {
                   <div class="text-[10px]">{{ item.date }}</div>
                   <button
                     @click="showQuickReply(item.id)"
-                    class="flex items-center ml-3 text-xs text-black hover:text-yellow-600"
+                    class="flex items-center ml-3 text-xs text-black hover:text-green-600"
                   >
                     快速回覆
                     <ArrowUpLeftSquareSolid width="14" height="14" class="mx-1" />
@@ -713,21 +713,17 @@ const sendReplies = async () => {
               </div>
               <div
                 v-if="item.replies.length"
-                class="flex flex-col bg-yellow-50 p-4 m-1 mt-1 rounded-xl border-[1.5px] border-yellow-600"
+                class="flex flex-col bg-green-50 p-4 m-1 mt-1 rounded-xl border-[1.5px] border-green-600"
               >
                 <div
-                  class="flex justify-between items-center text-xs font-semibold text-yellow-700 mb-1"
+                  class="flex justify-between items-center text-xs font-semibold text-green-700 mb-1"
                 >
                   團主回覆：
                   <n-button type="error" size="tiny" @click="deleteReply(item.id, idx)">
                     刪除
                   </n-button>
                 </div>
-                <div
-                  v-for="(reply, idx) in item.replies"
-                  :key="idx"
-                  class="text-xs text-yellow-800"
-                >
+                <div v-for="(reply, idx) in item.replies" :key="idx" class="text-xs text-green-800">
                   {{ reply }}
                 </div>
               </div>
@@ -744,13 +740,13 @@ const sendReplies = async () => {
                   <label
                     v-for="(option, index) in replyOptions"
                     :key="index"
-                    class="flex items-center mb-2 px-3 py-1 rounded-md cursor-pointer hover:bg-yellow-100 hover:scale-105 transition-all"
+                    class="flex items-center mb-2 px-3 py-1 rounded-md cursor-pointer hover:bg-green-100 hover:scale-105 transition-all"
                   >
                     <input
                       type="checkbox"
                       v-model="selectedReplies"
                       :value="option"
-                      class="mr-2 accent-yellow-400"
+                      class="mr-2 accent-green-400"
                     />
                     {{ option }}
                   </label>
@@ -764,7 +760,7 @@ const sendReplies = async () => {
                   </button>
                   <button
                     @click="sendReplies"
-                    class="bg-yellow-300 py-2 px-4 rounded hover:bg-yellow-400 hover:scale-105 transition-all"
+                    class="bg-green-500 py-2 px-4 rounded hover:bg-green-700 hover:scale-105 transition-all"
                   >
                     送出
                   </button>
