@@ -17,7 +17,7 @@ const latestPosts = ref([])
 const popularPosts = ref([])
 const activieTab = ref('latest')
 const goToPostsPage = () => {
-  router.push('/post')
+  router.push('/posts')
 }
 
 const postImgUrl =

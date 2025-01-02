@@ -27,21 +27,13 @@ export const activityDeleteCommentAPI = async (comment_id) => {
   return await apiAxios.delete(`/activities/comment/${comment_id}`)
 }
 
-export const ActivityGetApplicationsAPI = async (activity_id, defaultAvatar) => {
-  const response = await apiAxios.get(`/applications/${activity_id}`)
-  return response.data.data.map((item) => ({
-    id: item.application_id,
-    name: item.participant_info.full_name,
-    avatar: item.participant_info.photo_url || defaultAvatar,
-    number: `@${item.participant_id}`,
-    message: item.comment || '這位參加者尚無留言',
-    date: new Date().toLocaleDateString(),
-    approved: item.status === 'approved',
-    host_declined: item.status === 'host_declined',
-    registered: item.status === 'registered',
-    participant_cancelled: item.status === 'participant_cancelled',
-    replies: '',
-  }))
+export const ActivityGetApplicationsAPI = async (activity_id) => {
+  try {
+    const response = await apiAxios.get(`/applications/${activity_id}`)
+    return response.data.data
+  } catch {
+    return null
+  }
 }
 
 // 用來抓host_id判斷的API
@@ -49,8 +41,8 @@ export const ActivityGetActivitiesAPI = async (activity_id) => {
   return await apiAxios.get(`/activities/${activity_id}`)
 }
 
-export const ActivityReviewApplicationsAPI = async (application_id, status) => {
-  return await apiAxios.put(`/applications/verify/${application_id}`, { status })
+export const ActivityReviewApplicationsAPI = async (application_id, data) => {
+  return await apiAxios.put(`/applications/verify/${application_id}`, data)
 }
 
 export const activityGetAllAPI = async () => {

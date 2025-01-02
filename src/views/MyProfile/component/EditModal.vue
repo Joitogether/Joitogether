@@ -187,7 +187,6 @@ const handleFileChange2 = async (fileListSec) => {
   }
 
   const file2 = fileListSec[0]?.file
-  message.error('第二張選中的檔案:', file2)
   if (!file2) {
     message.error('第二張檔案對象不存在')
     return
