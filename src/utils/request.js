@@ -12,59 +12,59 @@ const apiAxios = axios.create({
 let requestCount = 0
 let messageInstance
 
-function showLoadingOverlay() {
-  const overlay = document.getElementById('loading-overlay')
-  if (overlay) {
-    overlay.classList.add('active') // 顯示遮罩
-  }
-}
+// function showLoadingOverlay() {
+//   const overlay = document.getElementById('loading-overlay')
+//   if (overlay) {
+//     overlay.classList.add('active') // 顯示遮罩
+//   }
+// }
 
-function hideLoadingOverlay() {
-  const overlay = document.getElementById('loading-overlay')
-  if (overlay) {
-    overlay.classList.remove('active') // 隱藏遮罩
-  }
-}
+// function hideLoadingOverlay() {
+//   const overlay = document.getElementById('loading-overlay')
+//   if (overlay) {
+//     overlay.classList.remove('active') // 隱藏遮罩
+//   }
+// }
 
-apiAxios.interceptors.request.use(
-  async function (config) {
-    if (auth.currentUser) {
-      const token = await getIdToken(auth.currentUser)
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`
-      }
-    }
-    if (requestCount === 0) {
-      messageInstance = message.loading('請稍後...', { duration: 0 })
-      showLoadingOverlay()
-    }
-    requestCount++
-    return config
-  },
-  function (error) {
-    return Promise.reject(error)
-  },
-)
+// apiAxios.interceptors.request.use(
+//   async function (config) {
+//     if (auth.currentUser) {
+//       const token = await getIdToken(auth.currentUser)
+//       if (token) {
+//         config.headers.Authorization = `Bearer ${token}`
+//       }
+//     }
+//     if (requestCount === 0) {
+//       messageInstance = message.loading('請稍後...', { duration: 0 })
+//       showLoadingOverlay()
+//     }
+//     requestCount++
+//     return config
+//   },
+//   function (error) {
+//     return Promise.reject(error)
+//   },
+// )
 
-apiAxios.interceptors.response.use(
-  function (response) {
-    requestCount--
-    if (requestCount === 0 && messageInstance) {
-      hideLoadingOverlay()
-      messageInstance.destroy()
-      messageInstance = null
-    }
-    return response
-  },
-  function (error) {
-    requestCount--
-    if (requestCount === 0 && messageInstance) {
-      hideLoadingOverlay()
-      messageInstance.destroy()
-      messageInstance = null
-    }
-    return Promise.reject(error)
-  },
-)
+// apiAxios.interceptors.response.use(
+//   function (response) {
+//     requestCount--
+//     if (requestCount === 0 && messageInstance) {
+//       hideLoadingOverlay()
+//       messageInstance.destroy()
+//       messageInstance = null
+//     }
+//     return response
+//   },
+//   function (error) {
+//     requestCount--
+//     if (requestCount === 0 && messageInstance) {
+//       hideLoadingOverlay()
+//       messageInstance.destroy()
+//       messageInstance = null
+//     }
+//     return Promise.reject(error)
+//   },
+// )
 
 export { apiAxios }
