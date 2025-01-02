@@ -10,7 +10,6 @@ export const useActivityStore = defineStore('activity', () => {
   const activities = ref([])
   const loading = ref(false)
   const error = ref(null)
-  const currentCategory = ref(1)
   const totalActivities = ref(0)
 
   const filters = ref({
@@ -59,6 +58,7 @@ export const useActivityStore = defineStore('activity', () => {
       } else {
         activities.value = response.data
         totalActivities.value = response.total || 0
+        console.log('Store Total Activities:', response)
       }
     } catch (error) {
       handleError(message, undefined, error)
@@ -83,7 +83,6 @@ export const useActivityStore = defineStore('activity', () => {
     loading,
     error,
     triggerAction,
-    currentCategory,
     selectedRegions,
     regionOptions,
     filters,

@@ -89,15 +89,8 @@ export const activityGeocodeAPI = async (address) => {
 }
 
 export const activityGetAllAndSearchAPI = async (params) => {
-  try {
-    const query = new URLSearchParams(params).toString()
-    const { data } = await apiAxios.get(`/activities?${query}`)
-    return data
-  } catch (error) {
-    console.error('API Error:', error)
-    throw {
-      message: error.response?.data?.message || 'API 發生錯誤',
-      response: error.response,
-    } // 確保錯誤結構標準化
-  }
+  // 處理URL 字串查詢
+  const query = new URLSearchParams(params).toString()
+  const { data } = await apiAxios.get(`/activities?${query}`)
+  return data
 }

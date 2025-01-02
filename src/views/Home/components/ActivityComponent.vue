@@ -24,19 +24,14 @@ const {
 
 const { fetchAllActivities, triggerActivityAction } = activityStore
 
-const activityPerPage = computed(() => Number(filters.value.pageSize || 12))
-const currentPage = ref(filters.value.page || 1)
-
 const filterByRegion = (region) => {
   filters.value.region = region
   filters.value.page = 1
-  currentPage.value = 1
   fetchAllActivities()
   router.push({ path: 'home', query: { ...filters.value } })
 }
 
 const handlePageChange = (page) => {
-  currentPage.value = page
   filters.value.page = page
 
   router.push({ path: '/home', query: { ...filters.value } })
@@ -51,7 +46,6 @@ onMounted(() => {
   if (!filters.value.page) {
     filters.value.page = 1
   }
-  totalActivities.value = totalActivities.value || 0
   fetchAllActivities(route.query)
 })
 
@@ -62,7 +56,6 @@ const selectedStartDate = ref('')
 const setStartDate = (date) => {
   selectedStartDate.value = date
   filters.value.page = 1 // 切換分類時回到第1頁
-  currentPage.value = 1 // 同步頁碼
 }
 
 const categoryMap = {
@@ -79,7 +72,6 @@ const triggerCategory = (category) => {
   const mappedCategory = categoryMap[category] || ''
   filters.value.category = mappedCategory
   filters.value.page = 1 // 切換分類時回到第1頁
-  currentPage.value = 1 // 同步頁碼
   triggerActivityAction(mappedCategory)
 }
 
@@ -211,12 +203,13 @@ const scrollToActivityBlock = () => {
         </div>
         <div class="pagination-container mt-5 flex justify-center">
           <n-pagination
-            v-model:page="currentPage"
-            :page-size="activityPerPage"
-            :page-count="Math.max(1, Math.ceil(30))"
+            v-model:page="filters.page"
+            :page-size="filters.pageSize"
+            :page-count="Math.max(1, Math.ceil(filters.pageSize))"
             @update:page="handlePageChange"
           />
         </div>
+        <div>Total Activities: {{ totalActivities }}</div>
       </div>
     </div>
   </main>

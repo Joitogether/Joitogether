@@ -99,7 +99,7 @@ const ActivityDataPush = async () => {
     message.success('活動建立成功了喔!!') // 成功訊息提示
 
     const notiData = {
-      actor_id: userStore.user.uid, // 觸發行為的使用者 ID
+      actor_id: response.data.host_id, // 觸發行為的使用者 ID
       user_id: response.data.host_id, // 接收行為的使用者 ID (從 API 回傳資料取得)
       target_id: response.data.id, // 被行為影響的目標 ID (從 API 回傳資料取得)
       action: 'create', // 行為類型 (此處為 create)
