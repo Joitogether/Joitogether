@@ -97,6 +97,7 @@ const refreshAttendees = async () => {
       attendee.value = rawData.map((item) => ({
         id: item.application_id,
         name: item.participant_info.full_name,
+        activity_id: item.activity_id,
         avatar: item.participant_info.photo_url || defaultAvatar,
         number: `@${item.participant_id}`,
         message: item.comment || '這位參加者尚無留言',
