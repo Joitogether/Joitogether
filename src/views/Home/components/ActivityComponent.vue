@@ -177,7 +177,7 @@ const scrollToActivityBlock = () => {
       <div v-if="loading" class="text-center my-5">加載中...</div>
       <div v-else-if="error" class="text-center my-5 text-red-500">{{ error }}</div>
       <div v-else>
-        <div class="grid grid-cols-1 lg:grid-cols-2 lg:gap-4">
+        <div class="grid grid-cols-1 lg:grid-cols-3 lg:gap-4">
           <ActivityCard
             v-for="activity in filteredActivities"
             :key="activity.id"

@@ -160,31 +160,34 @@ watch(
 </script>
 
 <template>
-  <body class="bg-gray-50 p-10 min-w-[400px]">
+  <body class="bg-gray-100 w-full">
     <!-- 活動評價 -->
-    <div
-      class="flex flex-col w-full min-w-[650px] max-w-[1440px] m-auto p-5 bg-gray-100 rounded-2xl border-2 border-gray-200"
-    >
+    <div class="flex flex-col w-full p-5 bg-white rounded-md mx-auto md:w-3/4 lg:w-3/5">
       <div
         v-if="step == 0"
-        class="relative px-5 before:content-[''] before:absolute before:left-0 before:top-2 before:bottom-2 before:w-2 before: before:bg-blue-500"
+        class="relative flex flex-col gap-2 before:content-[''] before:absolute before:left-0 before:top-0 before:bottom-2 before:w-2 before:h-7 before: before:bg-green-600"
       >
-        <div class="text-sm xl:text-2xl md:text-xl">活動評價</div>
-        <div class="text-gray-600 text-sm font-bold xl:text-3xl md:text-xl">團主評價</div>
+        <div class="flex px-5">
+          <div class="mr-2 text-lg xl:text-2xl md:text-xl">活動評價</div>
+          <div class="text-green-600 text-lg font-bold xl:text-3xl md:text-xl">團主評價</div>
+        </div>
+        <div class="text-2xl text-gray-800 font-bold tracking-wider break-words lg:text-3xl">
+          {{ activityDetail.name }}
+        </div>
       </div>
       <div
         v-else-if="step == 1"
-        class="relative px-5 before:content-[''] before:absolute before:left-0 before:top-2 before:bottom-2 before:w-2 before: before:bg-blue-500"
+        class="relative flex px-5 before:content-[''] before:absolute before:left-0 before:top-0 before:bottom-2 before:w-2 before:h-7 before: before:bg-green-600"
       >
-        <div class="text-sm xl:text-2xl md:text-xl">活動評價</div>
-        <div class="text-gray-600 text-sm font-bold xl:text-3xl md:text-xl">追蹤活動</div>
+        <div class="mr-2 text-lg xl:text-2xl md:text-xl">活動評價</div>
+        <div class="text-green-600 text-sm font-bold xl:text-3xl md:text-xl">追蹤活動</div>
       </div>
       <div
         v-else-if="step == 2"
-        class="relative px-5 before:content-[''] before:absolute before:left-0 before:top-2 before:bottom-2 before:w-2 before: before:bg-blue-500"
+        class="relative flex px-5 before:content-[''] before:absolute before:left-0 before:top-0 before:bottom-2 before:w-2 before:h-7 before: before:bg-green-600"
       >
-        <div class="text-sm xl:text-2xl md:text-xl">活動評價</div>
-        <div class="text-gray-600 text-sm font-bold xl:text-3xl md:text-xl">完成評價</div>
+        <div class="mr-2 text-lg xl:text-2xl md:text-xl">活動評價</div>
+        <div class="text-green-600 text-sm font-bold xl:text-3xl md:text-xl">完成評價</div>
       </div>
 
       <!-- 評分進度 -->
@@ -194,7 +197,7 @@ watch(
         <div>
           <!-- 團主評價到此頁面的進度顯示-->
           <div
-            :class="{ 'text-blue-600': step == 0, 'text-gray-300': step != 0 }"
+            :class="{ 'text-green-600': step == 0, 'text-gray-300': step != 0 }"
             class="flex justify-center items-center font-bold tracking-widest"
           >
             <CheckCircleSolid v-if="step == 0" class="mr-1" />團主評價
@@ -204,7 +207,7 @@ watch(
         <div>
           <!-- 還沒到追蹤評價頁面的進度顯示-->
           <div
-            :class="{ 'text-blue-600': step == 1, 'text-gray-300': step != 1 }"
+            :class="{ 'text-green-600': step == 1, 'text-gray-300': step != 1 }"
             class="flex justify-center items-center font-bold tracking-widest"
           >
             <CheckCircleSolid v-if="step == 1" class="mr-1" />
@@ -227,13 +230,12 @@ watch(
         </div>
       </div>
       <!-- 活動區域 -->
-      <div class="flex w-full min-w-[600px]">
+      <div class="flex w-full">
         <!-- 照片 -->
-        <div class="flex w-full aspect-video xs:hidden sm:w-full md:w-full lg:flex">
-          <img
-            :src="activityDetail.img_url"
-            class="w-full h-full xs:w-full sm:w-full md:w-full object-cover"
-          />
+        <div class="flex w-full flex-col">
+          <div class="w-full h-full overflow-hidden">
+            <img :src="activityDetail.img_url" class="w-full h-full object-cover" />
+          </div>
         </div>
         <!-- 活動資訊 -->
         <div
@@ -345,17 +347,19 @@ watch(
         </div>
       </div>
       <!-- 用戶在填寫團主評價的資訊 -->
-      <div v-if="step == 0" class="mt-5">
-        <div class="xl:text-base xl:p-1">用戶：</div>
-        <div class="flex items-center mt-2">
+      <div v-if="step == 0" class="bg-gray-100 p-4 rounded-md lg:px-10 lg:py-6">
+        <!-- <div class="xl:text-base xl:p-1">用戶：</div> -->
+        <div class="flex items-center border-b-2 pb-2">
           <img
             :src="userStore.user.photo_url"
             class="w-10 aspect-square object-cover rounded-full border-2 border-white"
           />
-          <div class="mx-2">{{ userStore.user.display_name }}</div>
+          <div class="mx-2 text-base font-bold tracking-wide">
+            {{ userStore.user.display_name }}：
+          </div>
         </div>
-        <div class="flex mt-3 px-14">
-          <div class="text-base w-full">您對於本次揪團的評價為</div>
+        <div class="flex flex-col gap-2 mt-3">
+          <div class="text-base tracking-wide w-full">您對於本次揪團的評價為</div>
           <div class="heart-rating" @mouseleave="resetHover('overall')">
             <span
               v-for="index in maxHearts"
@@ -367,8 +371,8 @@ watch(
             ></span>
           </div>
         </div>
-        <div class="flex mt-3 px-14">
-          <div class="text-base w-full">團主的親切度，您願意給到幾分呢？</div>
+        <div class="flex flex-col gap-2 mt-5">
+          <div class="text-base tracking-wide w-full">團主的親切度，您願意給到幾分呢？</div>
           <div class="heart-rating" @mouseleave="resetHover('kindness')">
             <span
               v-for="index in maxHearts"
@@ -380,8 +384,8 @@ watch(
             ></span>
           </div>
         </div>
-        <div class="flex mt-3 px-14">
-          <div class="text-base w-full">團主的主辦能力，您願意給到幾分呢？</div>
+        <div class="flex flex-col gap-2 mt-5">
+          <div class="text-base tracking-wide w-full">團主的主辦能力，您願意給到幾分呢？</div>
           <div class="heart-rating" @mouseleave="resetHover('ability')">
             <span
               v-for="index in maxHearts"
@@ -393,8 +397,8 @@ watch(
             ></span>
           </div>
         </div>
-        <div class="flex mt-3 px-14">
-          <div class="text-base w-full">團主的信用度，您願意給到幾分呢？</div>
+        <div class="flex flex-col gap-2 mt-5">
+          <div class="text-base tracking-wide w-full">團主的信用度，您願意給到幾分呢？</div>
           <div class="heart-rating" @mouseleave="resetHover('credit')">
             <span
               v-for="index in maxHearts"
@@ -407,8 +411,8 @@ watch(
           </div>
         </div>
 
-        <div class="flex flex-col mt-5 xl:text-base">
-          <p>留下您想對團主說的話：</p>
+        <div class="flex flex-col mt-5">
+          <p class="text-base tracking-wide">留下您想對團主說的話：</p>
           <n-space vertical>
             <n-input
               :autosize="{ minRows: 3, maxRows: 5 }"
@@ -417,6 +421,7 @@ watch(
               v-model:value="ratingForm.comment"
               maxlength="200"
               show-count
+              class="rounded-md mt-2"
             />
           </n-space>
           <!-- <textarea
@@ -428,7 +433,12 @@ watch(
           ></textarea> -->
         </div>
         <div class="flex justify-end items-center mt-3">
-          <n-button type="info" @click="goStep1" class="px-5 tracking-widest">下一步</n-button>
+          <button
+            @click="goStep1"
+            class="bg-green-600 px-5 py-2 rounded-full text-white tracking-widest hover:bg-green-700"
+          >
+            下一步
+          </button>
         </div>
       </div>
       <!-- 追蹤團主介面 -->
