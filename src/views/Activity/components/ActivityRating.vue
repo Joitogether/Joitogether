@@ -315,32 +315,38 @@ watch(
             <div class="mt-3 text-xs font-bold text-gray-600 xl:text-base xl:p-1">
               其他用戶對團主評價
             </div>
-            <div v-if="latestHostRating" class="mt-1 p-2 bg-gray-200 rounded-xl item">
-              <div class="flex items-center justify-between">
-                <div class="flex items-center">
-                  <img
-                    :src="latestHostRating.users_ratings_user_idTousers.photo_url"
-                    class="w-6 h-6 object-cover rounded-full"
-                  />
-                  <div class="mx-2 text-xs">
-                    {{ latestHostRating.users_ratings_user_idTousers.display_name }}
-                  </div>
-                </div>
-                <div class="flex flex-col items-center">
+            <div v-if="latestHostRating.length > 0">
+              <div
+                v-for="(rating, index) in latestHostRating"
+                :key="index"
+                class="mt-1 p-2 bg-gray-200 rounded-xl item"
+              >
+                <div class="flex items-center justify-between">
                   <div class="flex items-center">
-                    <n-rate
-                      readonly
-                      v-model:value="latestHostRating.rating_heart"
-                      :default-value="5"
-                      color="#B91C1C"
-                      ><HeartSolid class="w-2"
-                    /></n-rate>
+                    <img
+                      :src="rating.users_ratings_user_idTousers.photo_url"
+                      class="w-6 h-6 object-cover rounded-full"
+                    />
+                    <div class="mx-2 text-xs">
+                      {{ rating.users_ratings_user_idTousers.display_name }}
+                    </div>
                   </div>
-                  <div class="mx-1 text-[10px]">{{ formatDate(latestHostRating.created_at) }}</div>
+                  <div class="flex flex-col items-center">
+                    <div class="flex items-center">
+                      <n-rate
+                        readonly
+                        v-model:value="rating.rating_heart"
+                        :default-value="5"
+                        color="#B91C1C"
+                        ><HeartSolid class="w-2"
+                      /></n-rate>
+                    </div>
+                    <div class="mx-1 text-[10px]">{{ formatDate(rating.created_at) }}</div>
+                  </div>
                 </div>
-              </div>
-              <div class="text-xs tracking-wider truncate mt-2 xl:text-base xl:p-1">
-                {{ latestHostRating.user_comment }}
+                <div class="text-xs tracking-wider truncate mt-2 xl:text-base xl:p-1">
+                  {{ rating.user_comment }}
+                </div>
               </div>
             </div>
             <p v-else class="mt-2 xl:text-base xl:p-1">暫無用戶評價</p>
