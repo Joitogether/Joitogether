@@ -126,7 +126,7 @@ const handleSearchClick = (e) => {
 
 const handleCartClick = () => {
   if (userStore.user.isLogin) {
-    router.push({ name: 'cart' })
+    router.push({ name: 'shpopingcart' })
   } else {
     message.warning('🚫 尚未登入，無法進入購物車喔！💡')
   }
