@@ -312,10 +312,10 @@ watch(
             <div class="mt-3 text-xs font-bold text-gray-600 xl:text-base xl:p-1">
               其他用戶對團主評價
             </div>
-            <div v-if="latestHostRating">
+            <div v-if="latestHostRating && latestHostRating.length > 0">
               <div
-                v-for="rating in latestHostRating"
-                :key="rating.users_ratings_user_idTousers.photo_url"
+                v-for="(rating, index) in latestHostRating"
+                :key="index"
                 class="mt-1 p-2 bg-gray-200 rounded-xl item"
               >
                 <div class="flex items-center justify-between">
@@ -338,13 +338,11 @@ watch(
                         ><HeartSolid class="w-2"
                       /></n-rate>
                     </div>
-                    <div class="mx-1 text-[10px]">
-                      {{ dayjs(rating.created_at).format('YYYY-MM-DD') }}
-                    </div>
+                    <div class="mx-1 text-[10px]">{{ formatDate(rating.created_at) }}</div>
                   </div>
                 </div>
                 <div class="text-xs tracking-wider truncate mt-2 xl:text-base xl:p-1">
-                  {{ rating.user_comment || '該用戶並無留下評論' }}
+                  {{ rating.user_comment }}
                 </div>
               </div>
             </div>

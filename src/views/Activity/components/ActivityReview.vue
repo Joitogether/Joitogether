@@ -112,7 +112,7 @@ const refreshAttendees = async () => {
       attendee.value = []
     }
   } catch (error) {
-    console.error('無法獲取報名者資料:', error)
+    handleError(message, undefined, error)
     attendee.value = []
   }
 }
@@ -136,7 +136,7 @@ onMounted(async () => {
       activity.value = response.data.data
       eventTime.value = response.data.data.event_time
     } else {
-      console.warn('活動資料獲取失敗')
+      handleError(message, undefined, response)
     }
 
     // 獲取報名者資料
@@ -152,7 +152,7 @@ onMounted(async () => {
       }
     })
   } catch (error) {
-    console.error('初始化失敗:', error)
+    handleError(message, undefined, error)
   } finally {
     isLoading.value = false
     setTimeout(() => {
@@ -206,7 +206,6 @@ const handleApproveClick = async (id, activity_id) => {
             message: '審核了你的報名', // 要顯示在提醒欄位的敘述
             link: `/activity/detail/${activity_id}`, // 這個提醒要導向哪個頁面
           }
-          console.log('noti', notiData)
 
           // 送出提醒
           socketStore.sendNotification(notiData)
