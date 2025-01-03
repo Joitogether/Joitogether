@@ -5,16 +5,15 @@ import { useMessage } from 'naive-ui'
 import { useUserStore } from '/src/stores/userStore.js'
 import { auth } from '@/utils/firebaseConfig.js'
 import { useRouter, RouterLink } from 'vue-router'
+import dayjs from 'dayjs'
 import 'dayjs/locale/zh-tw.js'
 import relativeTime from 'dayjs/plugin/relativeTime'
-import dayjs from 'dayjs'
 import { useNotificationStore } from '@/stores/notificationStore'
 import { storeToRefs } from 'pinia'
-import { userGetAPI } from '@/apis/userAPIs'
+import { getUserSummaryAPI } from '@/apis/userAPIs'
 import { ref, onMounted } from 'vue'
-import { getPostsAPI } from '@/apis/userAPIs'
-import { userGetFollowerAPI } from '@/apis/userAPIs'
-import { userGetActivityAPI } from '@/apis/userAPIs'
+import { handleError } from '@/utils/handleError.js'
+import avatar from '@/assets/avatar.png'
 
 const message = useMessage()
 const userStore = useUserStore()
@@ -24,88 +23,41 @@ const { notifications, unreadCount, unreadList } = storeToRefs(notificationStore
 const { updateNotifications } = notificationStore
 dayjs.locale('zh-tw')
 dayjs.extend(relativeTime)
-const user = ref(null) // 儲存使用者資料
 const loading = ref(true)
 const postNumber = ref(null)
 const followerNumber = ref(null)
 const activityNumber = ref(null)
-const userLogin = ref(false) //檢查登入
+const userLogin = ref(false)
 
-defineProps({
-  items: {
-    type: Object,
-    required: true,
-    default: () => ({
-      display_name: '名字加載中',
-      photo_url: '大頭照加載中',
-      city: '城市加載中',
-      age: '年齡加載中',
-      career: '職業加載中',
-    }),
-  },
-  type: {
-    type: String,
-    required: true,
-  },
-})
+const clearNumbers = () => {
+  followerNumber.value = null
+  activityNumber.value = null
+  postNumber.value = null
+}
 // 檢查用戶登入狀態並獲取用戶資料
-const fetchUserData = async () => {
-  try {
-    const result = await userGetAPI(userStore.user.uid)
-    if (result) {
-      user.value = result
-      loading.value = false
-      userLogin.value = true
-    }
-  } catch {
-    message.error('載入用戶資料錯誤')
-    loading.value = false
-    userLogin.value = false
+const fetUserSummary = async () => {
+  if (!userStore.user.uid) {
+    return
   }
-}
-const getPostCount = async () => {
-  try {
-    const result = await getPostsAPI(userStore.user.uid).catch(() => ({ data: [] }))
-    postNumber.value = result.data.length
-  } catch (err) {
-    console.log('抓取文章數量發生錯誤', err)
-    postNumber.value = 0
+  const res = await getUserSummaryAPI(userStore.user.uid)
+  if (res) {
+    activityNumber.value = res._count.activities
+    followerNumber.value = res._count.followers
+    postNumber.value = res._count.posts
   }
+  loading.value = false
 }
-const getFollowerCount = async () => {
-  try {
-    const result = await userGetFollowerAPI(userStore.user.uid).catch(() => ({ data: [] }))
-    followerNumber.value = result.data.length
-  } catch (err) {
-    console.log('抓取粉絲數量發生錯誤', err)
-    followerNumber.value = 0
-  }
-}
-const getActivityCount = async () => {
-  try {
-    const result = await userGetActivityAPI(userStore.user.uid)
-    console.log('活動資料：', result)
-    console.log(result.length)
 
-    activityNumber.value = result.length
-  } catch (err) {
-    console.log('抓取活動數量發生錯誤', err)
-    activityNumber.value = 0
-  }
-}
 // 註冊登入邏輯
 onMounted(() => {
   if (userStore.user.isLogin) {
-    fetchUserData()
-    getPostCount()
-    getFollowerCount()
-    getActivityCount()
+    userLogin.value = true
+    fetUserSummary()
+    userLogin.value = true
   } else {
     loading.value = false
   }
 })
-
-// 切換選單顯示
 
 // 註冊/登入按鈕跳轉
 const navigateToLogin = () => {
@@ -116,7 +68,6 @@ const navigateToLogin = () => {
 const handleLogout = async () => {
   const currentUser = auth.currentUser
   if (!currentUser) {
-    // 如果用戶未登入，顯示未登入提示
     message.warning('🚫 尚未登入，無法執行登出操作喔！💡')
     return
   }
@@ -128,24 +79,20 @@ const handleLogout = async () => {
 
     // 更新 userStore 狀態為未登入
     userStore.clearUser() // 清空使用者狀態，方法來自 userStore.js
-
+    clearNumbers()
     // 顯示成功訊息
     message.success('🎉 成功登出！期待下次見到你～ 👋')
   } catch (error) {
-    message.error('😵 登出時發生錯誤啦！請稍後再試一次吧 💔')
-    console.error('登出錯誤：', error)
+    handleError(message, '😵 登出時發生錯誤啦！請稍後再試一次吧 💔', error)
   }
 }
 
 const showPopover = ref(false)
 
 const handleNotificationRead = async (value) => {
-  // 掌握開關
   showPopover.value = value
-  // 關起來的話做檢查
   if (!value) {
     if (unreadList.value.length > 0) {
-      // 調用 API 更新未讀的通知狀態
       await updateNotifications(userStore.user.uid, unreadList.value)
     }
   }
@@ -173,7 +120,7 @@ const handleSearchClick = (e) => {
 <template>
   <div
     id="navbar"
-    class="fixed z-50 top-0 left-0 w-full h-16 bg-white py-1 px-4 flex items-center justify-between shadow"
+    class="fixed z-50 top-0 left-0 w-screen h-16 bg-white py-1 px-4 flex items-center justify-between shadow"
   >
     <div class="flex items-center">
       <div class="hidden md:block w-16 md:h-9 md:overflow-hidden">
@@ -232,6 +179,7 @@ const handleSearchClick = (e) => {
             </li>
             <li>
               <router-link
+                v-if="userLogin"
                 :to="{ name: 'activityCreate' }"
                 class="font-bold py-3 block text-base text-gray-500 hover:text-green-600 border-b border-gray-300"
               >
@@ -249,7 +197,7 @@ const handleSearchClick = (e) => {
             <li
               class="font-bold py-3 block text-base text-gray-500 hover:text-green-600 border-b border-gray-300"
             >
-              <RouterLink to="/post">•&nbsp;&nbsp;社群</RouterLink>
+              <RouterLink to="/posts">•&nbsp;&nbsp;社群</RouterLink>
             </li>
             <li>
               <a
@@ -260,9 +208,12 @@ const handleSearchClick = (e) => {
               </a>
             </li>
             <li>
-              <a href="#" class="font-bold pt-3 block text-base text-gray-500 hover:text-green-600">
+              <RouterLink
+                to="/topup"
+                class="font-bold pt-3 block text-base text-gray-500 hover:text-green-600"
+              >
                 •&nbsp;&nbsp;儲值中心
-              </a>
+              </RouterLink>
             </li>
           </ul>
         </div>
@@ -280,10 +231,14 @@ const handleSearchClick = (e) => {
             <a href="#" class="mx-3 tracking-wide hover:text-green-600"> 加入聚會</a>
           </li>
           <li class="py-1">
-            <RouterLink to="/post" class="mx-3 tracking-wide hover:text-green-600">社群</RouterLink>
+            <RouterLink to="/posts" class="mx-3 tracking-wide hover:text-green-600"
+              >社群</RouterLink
+            >
           </li>
           <li class="py-1">
-            <a href="#" class="mx-3 tracking-wide hover:text-green-600"> 購物車</a>
+            <RouterLink to="/shoppingcart" class="mx-3 tracking-wide hover:text-green-600">
+              購物車</RouterLink
+            >
           </li>
           <li class="py-1">
             <RouterLink to="/topup" class="mx-3 tracking-wide hover:text-green-600"
@@ -325,41 +280,41 @@ const handleSearchClick = (e) => {
         </template>
         <n-scrollbar style="max-height: 500px">
           <div class="flex flex-col">
-            <p class="pl-2 text-xl font-bold">通知</p>
+            <p class="py-2 mb-2 text-xl text-center font-bold border-b-2 border-gray-200">通知</p>
             <div v-if="notifications.length > 0 && userStore.user.uid">
               <div v-for="notification in notifications" :key="notification.id">
                 <router-link :to="notification.link">
                   <div
-                    :class="{ 'bg-yellow-100': !notification.is_read }"
-                    class="hover:bg-yellow-100 pl-2 overflow-hidden hover:transition-colors post-onepost-top flex py-2 rounded-md items-center cursor-pointer"
+                    :class="{ 'bg-gray-100': !notification.is_read }"
+                    class="group hover:bg-gray-200 px-3 overflow-hidden post-onepost-top flex py-2 rounded-md justify-between items-center cursor-pointer"
                   >
-                    <img
-                      class="w-14 aspect-square rounded-full"
-                      :src="notification.users_notifications_actor_idTousers.photo_url"
-                      alt=""
-                    />
-                    <div class="ml-3 relative w-full h-14">
-                      <p class="font-bold text-lg absolute top-0">
-                        {{ notification.users_notifications_actor_idTousers.display_name
-                        }}<span class="pl-1 font-normal">{{ notification.message }}</span>
-                      </p>
-                      <p class="absolute bottom-0 w-full text-md truncate">
+                    <div class="w-14 h-14 aspect-square rounded-full overflow-hidden">
+                      <img
+                        class="w-full h-full object-cover"
+                        :src="notification.users_notifications_actor_idTousers.photo_url"
+                        alt=""
+                      />
+                    </div>
+
+                    <div class="ml-3 w-3/4 h-30 flex flex-col group-hover:text-green-600">
+                      <span class="font-bold text-base">
+                        {{ notification.users_notifications_actor_idTousers.display_name }}
+                      </span>
+                      <span class="text-base">
+                        {{ notification.message }}
+                      </span>
+                      <span v-if="notification.target_type === 'activity'" class="text-base">
+                        {{ notification.target_detail.name }}
+                      </span>
+                      <span v-else-if="notification.target_type === 'post'" class="text-base">
+                        {{ notification.target_detail.post_title }}
+                      </span>
+                      <span v-else-if="notification.target_type === 'rating'" class="text-base">
+                        {{ notification.target_detail.user_comment }}
+                      </span>
+
+                      <p class="w-full text-md text-gray-400">
                         {{ dayjs(notification.created_at).fromNow() }}
-                        <span
-                          v-if="notification.target_type === 'activity'"
-                          class="pl-1 font-normal text-lg"
-                          >{{ notification.target_detail.name }}</span
-                        >
-                        <span
-                          v-else-if="notification.target_type === 'post'"
-                          class="pl-1 font-normal text-lg"
-                          >{{ notification.target_detail.post_title }}</span
-                        >
-                        <span
-                          v-else-if="notification.target_type === 'rating'"
-                          class="pl-1 font-normal text-lg"
-                          >{{ notification.target_detail.user_comment }}</span
-                        >
                       </p>
                     </div>
                   </div>
@@ -399,24 +354,23 @@ const handleSearchClick = (e) => {
         class="w-full rounded-md bg-gray-50 text-black px-6 py-10 space-y-4 shadow-md md:w-1/3 md:right-2 lg:w-1/4"
       >
         <div
-          v-if="userStore.user.isLogin"
           class="user-photo rounded-full w-40 h-40 aspect-square overflow-hidden flex justify-self-center md:w-24 md:h-24"
         >
           <img
-            :src="user.photo_url || 'default_image_path.jpg'"
+            :src="userStore.user.photo_url || avatar"
             alt="userPhoto"
             class="w-full h-full object-cover"
           />
         </div>
-        <div v-if="userStore.user.isLogin" class="user-name text-center font-bold text-xl">
-          {{ user.display_name || '暱稱' }}
+        <div class="user-name text-center font-bold text-xl">
+          {{ userStore.user.display_name || '暱稱' }}
         </div>
-        <div v-if="userStore.user.isLogin" class="user-info text-md font-bold text-center">
-          <span>{{ user.city || '所在地' }}</span>
-          <span> • {{ user.age || '年齡' }}</span>
-          <span> • {{ user.career || '職業' }}</span>
+        <div class="user-info text-md font-bold text-center">
+          <span>{{ userStore.user.city || '所在地' }}</span>
+          <span> • {{ userStore.user.age || '年齡' }}</span>
+          <span> • {{ userStore.user.career || '職業' }}</span>
         </div>
-        <div v-if="userStore.user.isLogin" class="flex justify-center">
+        <div class="flex justify-center">
           <RouterLink to="/profile">
             <button
               class="border border-gray-600 text-gray-600 py-2 px-4 rounded-full hover:border-green-600 hover:text-green-600"
@@ -426,7 +380,7 @@ const handleSearchClick = (e) => {
           </RouterLink>
         </div>
 
-        <div v-if="userStore.user.isLogin" class="user-more-info flex justify-center gap-10">
+        <div v class="user-more-info flex justify-center gap-10">
           <div class="grid text-center">
             <span>{{ activityNumber || 0 }}</span>
             <span>聚會</span>

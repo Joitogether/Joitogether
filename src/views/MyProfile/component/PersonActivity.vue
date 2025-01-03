@@ -2,58 +2,43 @@
 import { onMounted, ref } from 'vue'
 import { userGetActivityAPI } from '@/apis/userAPIs'
 import { useUserStore } from '@/stores/userStore'
-import dayjs from 'dayjs'
-
+import { handleError } from '@/utils/handleError.js'
+import { useMessage } from 'naive-ui'
+import { useRouter } from 'vue-router'
+import { formatDate } from '@/utils/useDateTime'
 const userStore = useUserStore()
+const message = useMessage()
+const router = useRouter()
+
 const loading = ref(true)
-const errorMessage = ref(null)
 const activity = ref([])
 const afterToday = ref([])
 const beforeToday = ref([])
-const formatDate = (dateString) => {
-  return dayjs(dateString).format('YYYY-MM-DD HH:mm')
-}
 
 const fetchActivityData = async () => {
   try {
     const result = await userGetActivityAPI(userStore.user.uid)
-    console.log('活動資料：', result)
 
-    if (result) {
+    if (result && result.length > 0) {
       activity.value = result
-      console.log(activity.value)
-      let allActivities = []
 
-      activity.value.forEach((item) => {
-        if (item.activities) {
-          const activityData = item.activities
-          console.log('活動:', activityData)
+      const allActivities = result.filter((item) => item.activities).map((item) => item.activities)
 
-          allActivities.push(activityData)
-        }
-      })
-      afterToday.value = allActivities.filter((item) => {
-        const itemDate = new Date(item.event_time)
-        return itemDate > new Date()
-      })
-
-      console.log('afterToday資料', afterToday.value)
-      loading.value = false
-
-      beforeToday.value = allActivities.filter((item) => {
-        const itemDate = new Date(item.event_time)
-        return itemDate < new Date()
-      })
-      console.log('beforeToday資料', beforeToday.value)
-      loading.value = false
+      afterToday.value = allActivities.filter((item) => new Date(item.event_time) > new Date())
+      beforeToday.value = allActivities.filter((item) => new Date(item.event_time) < new Date())
     } else {
-      console.log('該用戶還沒有活動')
+      activity.value = []
+      afterToday.value = []
+      beforeToday.value = []
     }
-  } catch (err) {
-    errorMessage.value = err.message || '資料加載錯誤'
+  } catch (error) {
+    handleError(message, undefined, error)
+  } finally {
     loading.value = false
-    console.error('Error:', err)
   }
+}
+const handleActivityClick = (activityId) => {
+  router.push(`/activity/detail/${activityId}`)
 }
 
 onMounted(() => {
@@ -67,9 +52,10 @@ onMounted(() => {
       <div class="content-center text-center text-xl font-bold border-b-2 pb-3">即將參加</div>
       <div v-if="afterToday.length > 0" class="pt-5 flex flex-col gap-5">
         <div
-          v-for="(future_activity, id) in afterToday"
-          :key="id"
-          class="flex bg-white p-3 h-auto rounded-md"
+          v-for="future_activity in afterToday"
+          :key="future_activity.id"
+          @click="handleActivityClick(future_activity.id)"
+          class="flex bg-white p-3 h-auto rounded-md cursor-pointer"
         >
           <div class="w-full flex flex-col gap-1 md:justify-between">
             <div class="flex flex-col gap-1">
@@ -91,16 +77,17 @@ onMounted(() => {
           </div>
         </div>
       </div>
-      <div v-else>用戶沒有即將參加的活動</div>
+      <div v-else class="mt-5 text-center text-gray-600">用戶沒有即將參加的活動</div>
     </div>
 
     <div class="bg-gray-50 px-5 py-5 rounded-md">
       <div class="content-center text-center text-xl font-bold border-b-2 pb-3">聚會紀錄</div>
       <div v-if="beforeToday.length > 0" class="pt-5 flex flex-col gap-5">
         <div
-          v-for="(pre_activity, id) in beforeToday"
-          :key="id"
-          class="flex bg-white p-3 h-auto rounded-md"
+          v-for="pre_activity in beforeToday"
+          :key="pre_activity.id"
+          @click="handleActivityClick(pre_activity.id)"
+          class="flex bg-white p-3 h-auto rounded-md cursor-pointer"
         >
           <div class="w-full flex flex-col gap-1 md:justify-between">
             <div class="flex flex-col gap-1">

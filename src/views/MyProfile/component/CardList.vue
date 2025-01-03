@@ -49,13 +49,7 @@ const emit = defineEmits(['edit', 'close'])
         <h3 class="user-name text-2xl text-center font-bold text-green-600">
           {{ props.display_name || '大名還沒填寫唷 👀' }}
         </h3>
-        <n-button
-          @click="emit('edit', 'close', user)"
-          @open-modal="openModal"
-          type="primary"
-          ghost
-          round
-          class="hidden md:block"
+        <n-button @click="emit('edit')" type="primary" ghost round class="hidden md:block"
           >編輯檔案
         </n-button>
       </div>
@@ -94,73 +88,4 @@ const emit = defineEmits(['edit', 'close'])
     </div>
   </div>
 </template>
-<style scope>
-/* .user-description::after {
-  content: '';
-  position: absolute;
-  top: -10px;
-  right: 175px;
-  border-style: solid;
-  border-width: 0 10px 15px 10px;
-  border-color: transparent transparent rgb(243 244 246) transparent;
-}
-
-@media screen and (width >= 768px) {
-  .user-description::after {
-    display: none;
-  }
-} */
-/* @media screen and (width >= 768px) {
-  .container {
-    max-width: 80%;
-  }
-
-  .card-container {
-    display: flex;
-  }
-
-  .img-container {
-    flex: 1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-
-  .card-img {
-    border-radius: 50%;
-    aspect-ratio: 1 / 1;
-    height: auto;
-  }
-
-  .card-content-container {
-    flex: 3;
-    padding: 0;
-    margin-left: 2rem;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-  }
-
-  .user-name,
-  .user-detail {
-    text-align: start;
-  }
-
-  .user-description {
-    font-size: 1rem;
-    margin-top: -0.1rem;
-  }
-}
-
-@media screen and (width >= 1024px) {
-  .container {
-    max-width: 880px;
-  }
-
-  .card-content-container {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-  }
-} */
-</style>
+<style scope></style>

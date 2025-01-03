@@ -1,9 +1,10 @@
 <script setup>
 import NewPostArea from './component/NewPostArea.vue'
 import { onMounted, reactive, ref } from 'vue'
-import { NSpace, NSelect } from 'naive-ui'
+import { NSpace, NSelect, useMessage } from 'naive-ui'
 import { getPostsByCategoryAPI } from '@/apis/postAPIs'
 import { useRouter } from 'vue-router'
+import { handleError } from '@/utils/handleError.js'
 
 import dayjs from 'dayjs'
 import 'dayjs/locale/zh-tw.js'
@@ -11,6 +12,8 @@ import relativeTime from 'dayjs/plugin/relativeTime'
 
 dayjs.locale('zh-tw')
 dayjs.extend(relativeTime)
+
+const message = useMessage()
 
 const options = [
   {
@@ -34,7 +37,6 @@ const options = [
 // 文章排序
 const selectValue = ref('newest')
 const handleFilterSelect = (value) => {
-  console.log(value)
   selectValue.value = value
 
   postList.sort((a, b) => {
@@ -66,7 +68,11 @@ const fetchPostsByCategory = async () => {
   try {
     const res = await getPostsByCategoryAPI(selectedTag.value)
 
-    const formattedPosts = res.data.map((post) => ({
+    if (!res || res.length === 0) {
+      postList.splice(0, postList.length)
+    }
+
+    const formattedPosts = res.map((post) => ({
       id: post.post_id,
       title: post.post_title,
       content: post.post_content,
@@ -82,15 +88,13 @@ const fetchPostsByCategory = async () => {
     postList.splice(0, postList.length, ...formattedPosts)
 
     handleFilterSelect(selectValue.value)
-
-    console.log(`分類 ${selectedTag.value}文章已更新：`, postList)
   } catch (error) {
-    console.error(`撈取分類 ${selectedTag.value} 文章失敗：`, error)
+    handleError(message, undefined, error)
   }
 }
 
 onMounted(async () => {
-  await fetchPostsByCategory() // 確保先撈取分類文章
+  await fetchPostsByCategory()
 })
 
 const router = useRouter()
@@ -105,7 +109,7 @@ const informPostUpdate = () => {
 </script>
 <template>
   <div class="w-full h-auto bg-gray-100">
-    <div class="postsArea w-full min-h-screen mx-auto px-4 pt-1 bg-white md:w-3/4 lg:w-1/2">
+    <div class="postsArea w-full mx-auto px-4 pt-1 bg-white md:w-3/4 lg:w-3/5 lg:lg:max-w-[1000px]">
       <NewPostArea @update="informPostUpdate" />
       <div class="w-full mb-4 md:mb-0 md:py-5">
         <div class="flex w-full md:w-full">
@@ -165,31 +169,33 @@ const informPostUpdate = () => {
       <div class="post-posts-area">
         <div v-for="post in postList" :key="post.id" class="">
           <div
-            class="flex flex-col justify-between md:flex-row p-4 cursor-pointer border-b border-gray-200 bg-gray-50 md:bg-white"
+            class="flex flex-col justify-between rounded-md md:flex-row p-4 cursor-pointer border-b border-gray-200 bg-gray-50 md:bg-white hover:bg-gray-100"
             @click="handlePostClick(post.id)"
           >
             <!-- 左邊區塊 -->
             <div class="flex flex-col md:flex-row w-full space-y-4 md:space-y-0">
-              <div class="flex flex-col w-full md:w-9/12 space-y-2 md:pr-5">
-                <div class="flex items-center justify-between space-x-3">
-                  <div class="flex flex-row items-center gap-3">
-                    <div class="w-10 h-10 rounded-full overflow-hidden">
-                      <img
-                        :src="
-                          post.avatar ||
-                          'https://i.pinimg.com/736x/20/3e/d7/203ed7d8550c2c1c145a2fb24b6fbca3.jpg'
-                        "
-                        class="w-full h-full object-cover"
-                        alt="使用者大頭貼"
-                      />
+              <div class="flex flex-col w-full md:w-9/12 space-y-2 md:pr-5 md:justify-between">
+                <div class="flex flex-col gap-2">
+                  <div class="flex items-center justify-between space-x-3">
+                    <div class="flex flex-row items-center gap-3">
+                      <div class="w-10 h-10 rounded-full overflow-hidden">
+                        <img
+                          :src="
+                            post.avatar ||
+                            'https://i.pinimg.com/736x/20/3e/d7/203ed7d8550c2c1c145a2fb24b6fbca3.jpg'
+                          "
+                          class="w-full h-full object-cover"
+                          alt="使用者大頭貼"
+                        />
+                      </div>
+                      <p class="font-bold text-sm md:text-base">{{ post.name }}</p>
                     </div>
-                    <p class="font-bold text-sm">{{ post.name }}</p>
+                    <p class="text-sm text-gray-500">{{ dayjs(post.time).fromNow() }}</p>
                   </div>
-                  <p class="text-sm text-gray-500">{{ dayjs(post.time).fromNow() }}</p>
+                  <h2 class="text-lg font-bold truncate md:text-xl">{{ post.title }}</h2>
+                  <p class="text-sm text-gray-700 line-clamp-2 md:text-base">{{ post.content }}</p>
                 </div>
-                <h2 class="text-lg font-bold truncate">{{ post.title }}</h2>
-                <p class="text-sm text-gray-700 line-clamp-2">{{ post.content }}</p>
-                <div class="flex space-x-8 text-sm text-gray-600">
+                <div class="space-x-8 text-sm text-gray-600 hidden md:flex">
                   <div>👍🏻 {{ post.likesCount }} 讚</div>
                   <div>💬 {{ post.commentsCount }} 留言</div>
                 </div>
@@ -198,9 +204,13 @@ const informPostUpdate = () => {
               <!-- 右邊區塊 -->
               <div
                 v-if="post.img"
-                class="w-full md:w-3/12 aspect-square rounded-lg overflow-hidden mt-4 md:mt-0"
+                class="w-full md:w-3/12 aspect-square rounded-md overflow-hidden mt-4 md:mt-0"
               >
                 <img :src="post.img" class="w-full h-full object-cover" alt="文章圖片" />
+              </div>
+              <div class="flex space-x-8 text-sm text-gray-600 md:hidden">
+                <div>👍🏻 {{ post.likesCount }} 讚</div>
+                <div>💬 {{ post.commentsCount }} 留言</div>
               </div>
             </div>
           </div>

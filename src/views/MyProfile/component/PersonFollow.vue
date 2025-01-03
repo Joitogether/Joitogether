@@ -8,9 +8,12 @@ import {
   userUnfollowersAPI,
 } from '../../../apis/userAPIs'
 import { useUserStore } from '@/stores/userStore'
+import { handleError } from '@/utils/handleError.js'
 
+const message = useMessage()
+const follower = ref(null)
+const following = ref(null)
 const loading = ref(true)
-const errorMessage = ref(null)
 const userStore = useUserStore()
 const followerList = ref([])
 const followingList = ref([])

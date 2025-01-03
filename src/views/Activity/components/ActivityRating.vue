@@ -6,7 +6,8 @@ import { useRoute, useRouter } from 'vue-router'
 import { ratingGetDetailAPI, ratingSubmitAPI } from '@/apis/ratingAPIs'
 import dayjs from 'dayjs'
 import { useUserStore } from '@/stores/userStore'
-
+import { handleError } from '@/utils/handleError.js'
+import { formatDate } from '@/utils/useDateTime'
 dayjs.locale('zh-tw')
 const userStore = useUserStore()
 const dialog = useDialog()
@@ -41,7 +42,6 @@ const clickTheFollowBtn = () => {
 const step = ref(0)
 
 const goStep1 = () => {
-  console.log(ratingForm)
   step.value = 1
 }
 
@@ -50,12 +50,30 @@ const backStep0 = () => {
 }
 
 const getDetailForRating = async () => {
-  const { activity_id } = route.params
-  const res = await ratingGetDetailAPI(activity_id)
-  activityDetail.value = res.activity
-  hostInfo.value = res.activity.users
-  hostRatingAverage.value = res.hostRatingAverage['_avg']
-  latestHostRating.value = res.latestHostRating
+  try {
+    const { activity_id } = route.params
+    const res = await ratingGetDetailAPI(activity_id)
+
+    if (!res || !res.activity) {
+      activityDetail.value = {}
+      hostInfo.value = {}
+      hostRatingAverage.value = {}
+      latestHostRating.value = null
+      return
+    }
+
+    activityDetail.value = res.activity
+    hostInfo.value = res.activity.users || {}
+    hostRatingAverage.value = res.hostRatingAverage['_avg'] || {}
+    latestHostRating.value = res.latestHostRating || null
+    console.log(latestHostRating.value)
+  } catch (error) {
+    activityDetail.value = {}
+    hostInfo.value = {}
+    hostRatingAverage.value = {}
+    latestHostRating.value = null
+    handleError(message, '無法加載活動資料，請稍後再試 🙏', error)
+  }
 }
 
 onMounted(async () => {
@@ -69,6 +87,7 @@ const ratingForm = reactive({
   ability: 0,
   credit: 0,
 })
+
 // 滑鼠懸停狀態
 const hoverStates = reactive({
   overall: 0,
@@ -115,12 +134,8 @@ const props = defineProps({
   },
 })
 
-// 定義 Emits
-const emit = defineEmits(['update:score'])
-
 // 當前評分的響應式狀態
-const currentScore = ref(props.score) // 初始化為 props 的 score
-const currentHover = ref(0) // 當前 hover 狀態的愛心數
+const currentScore = ref(props.score)
 
 // 方法：更新評分
 const setRating = (index, category) => {
@@ -140,53 +155,64 @@ const resetHover = (category) => {
 watch(
   () => props.score,
   (newScore) => {
-    currentScore.value = newScore // 保持與 props 的同步
+    currentScore.value = newScore
   },
 )
 </script>
 
 <template>
-  <body class="bg-gray-50 p-10 min-w-[400px]">
+  <body class="bg-gray-100 w-full">
     <!-- 活動評價 -->
-    <div
-      class="flex flex-col w-full min-w-[650px] max-w-[1440px] m-auto p-5 bg-gray-100 rounded-2xl border-2 border-gray-200"
-    >
+    <div class="flex flex-col w-full p-5 bg-white rounded-md mx-auto md:w-3/4 lg:w-3/5">
       <div
         v-if="step == 0"
-        class="relative px-5 before:content-[''] before:absolute before:left-0 before:top-2 before:bottom-2 before:w-2 before: before:bg-blue-500"
+        class="relative flex flex-col gap-2 before:content-[''] before:absolute before:left-0 before:top-0 before:bottom-2 before:w-2 before:h-7 before: before:bg-green-600"
       >
-        <div class="text-sm xl:text-2xl md:text-xl">活動評價</div>
-        <div class="text-gray-600 text-sm font-bold xl:text-3xl md:text-xl">團主評價</div>
+        <div class="flex px-5">
+          <div class="mr-2 text-lg xl:text-2xl md:text-xl">活動評價</div>
+          <div class="text-green-600 text-lg font-bold xl:text-3xl md:text-xl">團主評價</div>
+        </div>
+        <div class="text-2xl text-gray-800 font-bold tracking-wider break-words lg:text-3xl">
+          {{ activityDetail.name }}
+        </div>
       </div>
       <div
         v-else-if="step == 1"
-        class="relative px-5 before:content-[''] before:absolute before:left-0 before:top-2 before:bottom-2 before:w-2 before: before:bg-blue-500"
+        class="relative flex px-5 before:content-[''] before:absolute before:left-0 before:top-0 before:bottom-2 before:w-2 before:h-7 before: before:bg-green-600"
       >
-        <div class="text-sm xl:text-2xl md:text-xl">活動評價</div>
-        <div class="text-gray-600 text-sm font-bold xl:text-3xl md:text-xl">追蹤活動</div>
+        <div class="mr-2 text-lg xl:text-2xl md:text-xl">活動評價</div>
+        <div class="text-green-600 text-sm font-bold xl:text-3xl md:text-xl">追蹤活動</div>
       </div>
       <div
         v-else-if="step == 2"
-        class="relative px-5 before:content-[''] before:absolute before:left-0 before:top-2 before:bottom-2 before:w-2 before: before:bg-blue-500"
+        class="relative flex px-5 before:content-[''] before:absolute before:left-0 before:top-0 before:bottom-2 before:w-2 before:h-7 before: before:bg-green-600"
       >
-        <div class="text-sm xl:text-2xl md:text-xl">活動評價</div>
-        <div class="text-gray-600 text-sm font-bold xl:text-3xl md:text-xl">完成評價</div>
+        <div class="mr-2 text-lg xl:text-2xl md:text-xl">活動評價</div>
+        <div class="text-green-600 text-sm font-bold xl:text-3xl md:text-xl">完成評價</div>
       </div>
 
       <!-- 評分進度 -->
       <div
-         class="flex flex-row w-full max-w-[400px] justify-around m-auto bg-white border-2 p-1 my-3 rounded-full xl:text-base xl:py-1 md:text-md sm:text-sm"
+        class="flex flex-row w-full max-w-[400px] justify-around m-auto bg-white border-2 p-1 my-3 rounded-full xl:text-base xl:py-1 md:text-md sm:text-sm"
       >
         <div>
           <!-- 團主評價到此頁面的進度顯示-->
-          <div class="flex justify-center items-center text-blue-600 font-bold tracking-widest">
-            <CheckCircleSolid class="mr-1" />團主評價
+          <div
+            :class="{ 'text-green-600': step == 0, 'text-gray-300': step != 0 }"
+            class="flex justify-center items-center font-bold tracking-widest"
+          >
+            <CheckCircleSolid v-if="step == 0" class="mr-1" />團主評價
+            <CheckCircle v-if="step != 0" class="mr-1" />
           </div>
         </div>
         <div>
           <!-- 還沒到追蹤評價頁面的進度顯示-->
-          <div class="flex justify-center items-center text-gray-300 font-bold tracking-widest">
-            <CheckCircle class="mr-1" />追蹤活動
+          <div
+            :class="{ 'text-green-600': step == 1, 'text-gray-300': step != 1 }"
+            class="flex justify-center items-center font-bold tracking-widest"
+          >
+            <CheckCircleSolid v-if="step == 1" class="mr-1" />
+            <CheckCircle v-if="step != 1" class="mr-1" />追蹤活動
           </div>
           <!-- 到追蹤評價頁面的進度顯示-->
 
@@ -197,20 +223,20 @@ watch(
         <div>
           <!-- 還沒到最後完成頁面的進度顯示 -->
           <div class="flex justify-center items-center text-gray-300 font-bold tracking-widest">
-            <CheckCircle class="mr-1" />完成
+            <CheckCircleSolid v-if="step == 2" class="mr-1" />
+            <CheckCircle v-if="step != 2" class="mr-1" />完成
           </div>
           <!-- 到完成介面的進度顯示 -->
           <!-- <div class="flex justify-center items-center text-blue-600 font-bold tracking-widest"><CheckCircleSolid class="mr-1" />完成</div> -->
         </div>
       </div>
       <!-- 活動區域 -->
-      <div class="flex w-full min-w-[600px]">
+      <div class="flex w-full">
         <!-- 照片 -->
-        <div class="flex w-full aspect-video xs:hidden sm:w-full md:w-full lg:flex">
-          <img
-            :src="activityDetail.img_url"
-            class="w-full h-full xs:w-full sm:w-full md:w-full object-cover"
-          />
+        <div class="flex w-full flex-col">
+          <div class="w-full h-full overflow-hidden">
+            <img :src="activityDetail.img_url" class="w-full h-full object-cover" />
+          </div>
         </div>
         <!-- 活動資訊 -->
         <div
@@ -262,7 +288,7 @@ watch(
                     :class="{ filled: index <= hostRatingAverage.rating_ability }"
                   ></span>
                 </div>
-                
+
                 <div class="min-w-[45px] mx-2 text-xs xl:text-base xl:p-1">
                   {{ hostRatingAverage.rating_ability?.toFixed(1) || '0.0' }} / 5.0
                 </div>
@@ -279,8 +305,7 @@ watch(
                     :class="{ filled: index <= hostRatingAverage.rating_credit }"
                   ></span>
                 </div>
-                
-                
+
                 <div class="mx-2 text-xs xl:text-base xl:p-1">
                   {{ hostRatingAverage.rating_credit?.toFixed(1) || '0.0' }} / 5.0
                 </div>
@@ -311,11 +336,11 @@ watch(
                       ><HeartSolid class="w-2"
                     /></n-rate>
                   </div>
-                  <div class="mx-1 text-[10px]">2024/12/14</div>
+                  <div class="mx-1 text-[10px]">{{ formatDate(latestHostRating.created_at) }}</div>
                 </div>
               </div>
               <div class="text-xs tracking-wider truncate mt-2 xl:text-base xl:p-1">
-                團主真的超用心的，上次跟他去吃鷄肉飯還不用花錢，而且都介紹很强的小吃，真的很推啦!!
+                {{ latestHostRating.user_comment }}
               </div>
             </div>
             <p v-else class="mt-2 xl:text-base xl:p-1">暫無用戶評價</p>
@@ -323,17 +348,19 @@ watch(
         </div>
       </div>
       <!-- 用戶在填寫團主評價的資訊 -->
-      <div v-if="step == 0" class="mt-5">
-        <div class="xl:text-base xl:p-1">用戶：</div>
-        <div class="flex items-center mt-2">
+      <div v-if="step == 0" class="bg-gray-100 p-4 rounded-md lg:px-10 lg:py-6">
+        <!-- <div class="xl:text-base xl:p-1">用戶：</div> -->
+        <div class="flex items-center border-b-2 pb-2">
           <img
             :src="userStore.user.photo_url"
             class="w-10 aspect-square object-cover rounded-full border-2 border-white"
           />
-          <div class="mx-2">{{ userStore.user.display_name }}</div>
+          <div class="mx-2 text-base font-bold tracking-wide">
+            {{ userStore.user.display_name }}：
+          </div>
         </div>
-        <div class="flex mt-3 px-14">
-          <div class="text-base w-full">您對於本次揪團的評價為</div>
+        <div class="flex flex-col gap-2 mt-3">
+          <div class="text-base tracking-wide w-full">您對於本次揪團的評價為</div>
           <div class="heart-rating" @mouseleave="resetHover('overall')">
             <span
               v-for="index in maxHearts"
@@ -345,8 +372,8 @@ watch(
             ></span>
           </div>
         </div>
-        <div class="flex mt-3 px-14">
-          <div class="text-base w-full">團主的親切度，您願意給到幾分呢？</div>
+        <div class="flex flex-col gap-2 mt-5">
+          <div class="text-base tracking-wide w-full">團主的親切度，您願意給到幾分呢？</div>
           <div class="heart-rating" @mouseleave="resetHover('kindness')">
             <span
               v-for="index in maxHearts"
@@ -358,8 +385,8 @@ watch(
             ></span>
           </div>
         </div>
-        <div class="flex mt-3 px-14">
-          <div class="text-base w-full">團主的主辦能力，您願意給到幾分呢？</div>
+        <div class="flex flex-col gap-2 mt-5">
+          <div class="text-base tracking-wide w-full">團主的主辦能力，您願意給到幾分呢？</div>
           <div class="heart-rating" @mouseleave="resetHover('ability')">
             <span
               v-for="index in maxHearts"
@@ -371,8 +398,8 @@ watch(
             ></span>
           </div>
         </div>
-        <div class="flex mt-3 px-14">
-          <div class="text-base w-full">團主的信用度，您願意給到幾分呢？</div>
+        <div class="flex flex-col gap-2 mt-5">
+          <div class="text-base tracking-wide w-full">團主的信用度，您願意給到幾分呢？</div>
           <div class="heart-rating" @mouseleave="resetHover('credit')">
             <span
               v-for="index in maxHearts"
@@ -385,8 +412,8 @@ watch(
           </div>
         </div>
 
-        <div class="flex flex-col mt-5 xl:text-base">
-          <p>留下您想對團主說的話：</p>
+        <div class="flex flex-col mt-5">
+          <p class="text-base tracking-wide">留下您想對團主說的話：</p>
           <n-space vertical>
             <n-input
               :autosize="{ minRows: 3, maxRows: 5 }"
@@ -395,6 +422,7 @@ watch(
               v-model:value="ratingForm.comment"
               maxlength="200"
               show-count
+              class="rounded-md mt-2"
             />
           </n-space>
           <!-- <textarea
@@ -406,7 +434,12 @@ watch(
           ></textarea> -->
         </div>
         <div class="flex justify-end items-center mt-3">
-          <n-button type="info" @click="goStep1" class="px-5 tracking-widest">下一步</n-button>
+          <button
+            @click="goStep1"
+            class="bg-green-600 px-5 py-2 rounded-full text-white tracking-widest hover:bg-green-700"
+          >
+            下一步
+          </button>
         </div>
       </div>
       <!-- 追蹤團主介面 -->
@@ -487,33 +520,33 @@ watch(
   gap: 6px;
 }
 .static-heart {
-  width: 16px; /* 愛心寬度 */
-  height: 16px; /* 愛心高度 */
-  background-image: url('../../../assets/heartred.png'); /* 預設為實心愛心 */
+  width: 16px;
+  height: 16px;
+  background-image: url('https://firebasestorage.googleapis.com/v0/b/login-demo1-9d3cb.firebasestorage.app/o/activities%2Fheartnored.png?alt=media&token=fa9751f1-99dc-4a2a-a709-f6b4c7fe6f85');
   background-repeat: no-repeat;
   background-size: contain;
   cursor: default;
 }
 .static-heart.filled {
-  background-image: url('../../../assets/heartred.png'); /* 實心愛心 */
+  background-image: url('https://firebasestorage.googleapis.com/v0/b/login-demo1-9d3cb.firebasestorage.app/o/activities%2Fheartred.png?alt=media&token=01bb392b-208c-4aac-b8aa-728b27a3b71d');
 }
 
 .heart-rating {
   display: flex;
-  gap: 8px; /* 愛心間距 */
+  gap: 8px;
 }
 
 .heart {
-  width: 20px; /* 愛心寬度 */
-  height: 20px; /* 愛心高度 */
-  background-image: url('../../../assets/heartnored.png');
+  width: 20px;
+  height: 20px;
+  background-image: url('https://firebasestorage.googleapis.com/v0/b/login-demo1-9d3cb.firebasestorage.app/o/activities%2Fheartnored.png?alt=media&token=fa9751f1-99dc-4a2a-a709-f6b4c7fe6f85');
   background-repeat: no-repeat;
   background-size: contain;
   cursor: pointer;
-  transition: background-image 0.3s ease; /* 動畫效果 */
+  transition: background-image 0.3s ease;
 }
 
 .heart.filled {
-  background-image: url('../../../assets/heartred.png'); /* 填滿愛心的圖片 */
+  background-image: url('https://firebasestorage.googleapis.com/v0/b/login-demo1-9d3cb.firebasestorage.app/o/activities%2Fheartred.png?alt=media&token=01bb392b-208c-4aac-b8aa-728b27a3b71d');
 }
 </style>

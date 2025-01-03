@@ -47,54 +47,44 @@ import { ref } from 'vue'
 import { useMessage, NButton, NForm, NFormItem, NInput } from 'naive-ui'
 import { useRouter } from 'vue-router'
 import { passwordService } from './services/passwordService.js'
-// 忘記密碼邏輯
+import { handleError } from '@/utils/handleError.js'
 
 const message = useMessage()
 const router = useRouter()
 
+// 忘記密碼邏輯
 const forgotPassword = ref({
   email: '',
 })
-console.log('forgotPassword:', forgotPassword.value)
 const handleSubmit = async () => {
   const email = forgotPassword.value.email
-  console.log('信箱:', email)
 
   if (!email) {
     message.error('😅 哎呀！你忘了輸入信箱了！快輸入一下～')
-    console.log('未輸入信箱')
     return
   }
 
   const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
   if (!emailPattern.test(forgotPassword.value.email.trim())) {
     message.error('😅 哎呀！請輸入正確的信箱格式！')
-    console.log('信箱格式錯誤')
     return
   }
   try {
-    const response = await passwordService.sendPasswordResetEmail(email)
-    console.log('重設密碼連結已發送至您的信箱！', response)
+    await passwordService.sendPasswordResetEmail(email)
     message.success('🎉 好棒！我們已經將重設密碼的連結發送到您的郵箱了，請查收！')
 
     setTimeout(() => {
       router.push('/login')
     }, 3000)
   } catch (error) {
-    console.error('發生錯誤：', error)
-
     if (error.code === 'auth/user-not-found') {
       message.error('😅 哎呀！信箱尚未註冊！')
-      console.log('信箱尚未註冊')
     } else if (error.code === 'auth/invalid-email') {
       message.error('😅 哎呀！請輸入正確的信箱格式！')
-      console.log('信箱格式錯誤')
     } else if (error.code === 'auth/too-many-requests') {
       message.error('⏳ 嘿！您請求太多次了，請稍後再試！')
-      console.log('請求過多')
     } else {
-      message.error('😵 發生未知錯誤，請稍後再試一次！')
-      console.log('未知錯誤')
+      handleError(message, '😵 發生未知錯誤，請稍後再試一次！', error)
     }
   }
 }

@@ -18,11 +18,16 @@ import SignupSuccess from '@/views/Login/SignupSuccess.vue'
 import ResetPassword from '@/views/Login/ResetPassword.vue'
 import forgotPassword from '@/views/Login/ForgotPassword.vue'
 import ShoppingCart from '@/views/CashFlow/index.vue'
+import CheckoutPage from '@/views/Payment/CheckoutPage.vue'
+import CheckoutSuccess from '@/views/Payment/CheckoutSuccess.vue'
 import Layout from '@/views/Layout/index.vue'
 import { getCurrentUser } from '@/utils/firebaseConfig'
 import TopUp from '@/views/TopUp/index.vue'
-import TopupFinish from '@/views/TopUp/component/TopupFinish.vue'
-import TopupRecord from '@/views/TopUp/component/TopupRecord.vue'
+import WalletRecord from '@/views/TopUp/component/WalletRecord.vue'
+import TopupResult from '@/views/TopUp/component/TopupResult.vue'
+import TopupSuccess from '@/views/TopUp/component/TopupSuccess.vue'
+import TopupFail from '@/views/TopUp/component/TopupFail.vue'
+import NotFound from '@/views/Error/NotFound.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -46,11 +51,6 @@ const router = createRouter({
       path: '/reset-password',
       name: 'resetPassword',
       component: ResetPassword,
-    },
-    {
-      path: '/shoppingcart',
-      name: 'shpopingcart',
-      component: ShoppingCart,
     },
     {
       path: '/',
@@ -98,8 +98,8 @@ const router = createRouter({
           ],
         },
         {
-          path: 'post',
-          name: 'post',
+          path: 'posts',
+          name: 'posts',
           component: PostHomePage,
         },
         {
@@ -138,24 +138,49 @@ const router = createRouter({
           ],
         },
         {
-          path: '/topup',
+          path: '/shoppingcart',
+          name: 'shpopingcart',
+          component: ShoppingCart,
+        },
+        {
+          path: 'topup',
           name: 'topup',
           component: TopUp,
         },
         {
-          path: '/topupFinish',
-          name: 'topupFinish',
-          component: TopupFinish,
+          path: 'topup/result/:id',
+          name: 'topupResult',
+          component: TopupResult,
         },
         {
-          path: '/topupRecord',
-          name: 'topupRecord',
-          component: TopupRecord,
+          path: 'topup/success/:id',
+          name: 'topupSuccess',
+          component: TopupSuccess,
+        },
+        {
+          path: 'topup/fail/:id',
+          name: 'topupFail',
+          component: TopupFail,
+        },
+        {
+          path: '/walletRecord',
+          name: 'walletRecord',
+          component: WalletRecord,
+        },
+        {
+          path: '/checkout',
+          name: 'checkout',
+          component: CheckoutPage,
+        },
+        {
+          path: '/checkout-success/:order_id',
+          name: 'checkoutSuccess',
+          component: CheckoutSuccess,
         },
         {
           path: '/:catchAll(.*)', // 匹配所有未定義路由
-          name: 'NotFound',
-          component: () => import('@/NotFound.vue'), // 導向自訂的 404 頁面 隨時可改
+          name: 'notFound',
+          component: NotFound, // 導向自訂的 404 頁面 隨時可改
         },
       ],
     },

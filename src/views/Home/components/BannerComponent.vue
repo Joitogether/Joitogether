@@ -17,9 +17,6 @@ const carouselData = ref([
   {
     src: joigif,
   },
-  // {
-  //   src: 'https://i.pinimg.com/originals/aa/06/9f/aa069f2356b0397342892fd712f604c2.gif',
-  // },
   {
     src: joixmas,
   },
@@ -75,9 +72,9 @@ onUnmounted(() => {
 
 watch(isMobile, (newVal) => {
   if (newVal) {
-    carouselData.value[1].src = joixmasmobile // 替換成手機版圖片
+    carouselData.value[1].src = joixmasmobile
   } else {
-    carouselData.value[1].src = joixmas // 替換回桌面版圖片
+    carouselData.value[1].src = joixmas
   }
 })
 </script>
@@ -89,34 +86,31 @@ watch(isMobile, (newVal) => {
         <img
           v-for="carouselImg in carouselData"
           :key="carouselImg.src"
-          class="w-full max-h-[600px] object-cover aspect-video"
+          class="w-full h-[400px] object-cover aspect-video"
           :src="carouselImg.src"
         />
       </n-carousel>
 
       <div class="w-full h-full min-w-[300px]">
         <div class="flex flex-col h-full justify-center items-center">
-          <h1 class="text-[30px] font-bold my-[60px] sm:text-[38px] md:text-[40px] lg:text-[42px]">
-            熱門揪團類型
-          </h1>
-          <div
-            class="flex flex-wrap w-full justify-around px-[60px] md:px-[120px] lg:px-[32px] cursor-pointer"
-          >
-            <div v-for="area in areaData" :key="area.title" class="m-6">
-              <div
-                @click.prevent="handleCategoryClick(area.targetId)"
-                class="min-w-[40px] max-w-[80px] sm:max-w-[80px] md:m-[40px] md:max-w-[120px] lg:min-w-[120px] lg:max-w-[160px] hover:scale-[1.15] transition-all duration-200"
-              >
-                <img
-                  :src="area.src"
-                  alt=""
-                  class="w-full h-full aspect-square object-cover rounded-full border-[4px] border-gray-100 hover:border-[8px] hover:border-green-300 transition-all duration-300"
-                />
-                <p
-                  class="text-center text-xl font-bold mt-8 border-gray-100 hover:scale-[1.35] hover:text-green-600 transition-all duration-300"
-                >
-                  {{ area.title }}
-                </p>
+          <p class="text-3xl font-bold my-12 md:text-4xl">熱門揪團類型</p>
+          <div class="flex justify-center mb-10 lg:justify-between lg:max-w-[1150px]">
+            <div
+              class="grid w-4/5 gap-12 grid-cols-2 cursor-pointer md:w-1/2 md:grid-cols-3 md:gap-14 lg:grid-cols-6 lg:w-full"
+            >
+              <div v-for="area in areaData" :key="area.title" class="">
+                <div @click.prevent="handleCategoryClick(area.targetId)" class="w-full">
+                  <img
+                    :src="area.src"
+                    alt=""
+                    class="w-full h-full aspect-square object-cover rounded-full border-[4px] border-gray-100 hover:border-[8px] hover:border-green-300 transition-all duration-300"
+                  />
+                  <p
+                    class="text-center text-xl font-bold mt-2 border-gray-100 hover:scale-[1.35] hover:text-green-600 transition-all duration-300"
+                  >
+                    {{ area.title }}
+                  </p>
+                </div>
               </div>
             </div>
           </div>

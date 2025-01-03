@@ -1,5 +1,4 @@
 <script setup>
-// import HelloWorld from './components/HelloWorld.vue'
 import { Facebook, Instagram } from '@iconoir/vue'
 </script>
 
@@ -98,8 +97,4 @@ import { Facebook, Instagram } from '@iconoir/vue'
   </footer>
 </template>
 
-<style scoped>
-/* .scrollbar-hidden::-webkit-scrollbar {
-  display: none;
-} */
-</style>
+<style scoped></style>
