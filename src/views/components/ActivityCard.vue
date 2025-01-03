@@ -66,7 +66,7 @@ const props = defineProps({
               <span>{{ props.host }}</span>
             </div>
             <div v-if="!props.horizontal" class="lg:flex">上限人數: {{ props.participants }}</div>
-            <div v-else class="lg:hidden">上限人數: {{ props.participants }}</div>
+            <div v-else class="hidden md:block lg:hidden">上限人數: {{ props.participants }}</div>
           </div>
         </div>
       </div>

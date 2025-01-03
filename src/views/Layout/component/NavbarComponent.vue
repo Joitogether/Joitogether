@@ -13,7 +13,6 @@ import { storeToRefs } from 'pinia'
 import { getUserSummaryAPI } from '@/apis/userAPIs'
 import { ref, onMounted } from 'vue'
 import { handleError } from '@/utils/handleError.js'
-import avatar from '@/assets/avatar.png'
 
 const message = useMessage()
 const userStore = useUserStore()
@@ -290,7 +289,7 @@ const handleSearchClick = (e) => {
                   >
                     <div class="w-14 h-14 aspect-square rounded-full overflow-hidden">
                       <img
-                        class="w-full h-full object-cover"
+                        class="w-full h-full object-cover bg-gray-400"
                         :src="notification.users_notifications_actor_idTousers.photo_url"
                         alt=""
                       />
@@ -357,9 +356,16 @@ const handleSearchClick = (e) => {
           class="user-photo rounded-full w-40 h-40 aspect-square overflow-hidden flex justify-self-center md:w-24 md:h-24"
         >
           <img
-            :src="userStore.user.photo_url || avatar"
+            v-if="userStore.user.photo_url"
+            :src="userStore.user.photo_url"
             alt="userPhoto"
             class="w-full h-full object-cover"
+          />
+          <img
+            v-else
+            class="w-full h-full object-cover"
+            src="https://firebasestorage.googleapis.com/v0/b/login-demo1-9d3cb.firebasestorage.app/o/avatars%2Fcatavatar.png?alt=media&token=ccd02591-0c4f-435c-9a4a-34f219774558"
+            alt=""
           />
         </div>
         <div class="user-name text-center font-bold text-xl">

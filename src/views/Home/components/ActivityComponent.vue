@@ -159,13 +159,14 @@ const scrollToActivityBlock = () => {
       啾團活動
     </div>
     <div class="flex justify-center mt-3 w-full">
-      <div class="flex flex-wrap gap-2 justify-start w-4/5 md:justify-center md:w-3/4 lg:w-4/5">
+      <div class="flex flex-wrap gap-4 justify-start w-4/5 md:justify-center md:w-3/4 lg:w-4/5">
         <div
           v-for="category in ['', '美食', '購物', '旅遊', '運動', '教育', '其他']"
           :key="category"
+          class="cursor-pointer hover:scale-110 transition-all duration-300 hover:font-bold"
         >
           <!-- 預設顯示全部 -->
-          <div class="text-sm text-center bg-green-600 text-white rounded-full hover:bg-green-700">
+          <div class="text-sm text-center bg-green-600 text-white rounded-full hover:bg-green-500">
             <button
               class="mx-5 my-2 lg:mx-8"
               @click="selectCategory(category)"
@@ -214,7 +215,7 @@ const scrollToActivityBlock = () => {
             :hostImgUrl="activity.userImg"
             :id="activity.id"
             :horizontal="horizontal"
-            class="border-b-2 pb-3 overflow-hidden md:border-none md:bg-gray-100 md:mb-3 md:rounded-md md:px-5 md:hover:bg-gray-200 lg:mb-0"
+            class="border-b-2 pb-3 overflow-hidden md:border-none md:bg-gray-100 md:mb-3 md:rounded-md md:px-5 md:hover:bg-gray-200 md:shadow-md lg:mb-0 hover:scale-[1.05] transition-all duration-300"
           ></ActivityCard>
         </div>
       </div>
