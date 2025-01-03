@@ -11,7 +11,7 @@ import relativeTime from 'dayjs/plugin/relativeTime'
 import { useNotificationStore } from '@/stores/notificationStore'
 import { storeToRefs } from 'pinia'
 import { getUserSummaryAPI } from '@/apis/userAPIs'
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { handleError } from '@/utils/handleError.js'
 import { useActivityStore } from '@/stores/useActivityStore'
 
@@ -91,15 +91,13 @@ const handleLogout = async () => {
 }
 
 const showPopover = ref(false)
-
-const handleNotificationRead = async (value) => {
-  showPopover.value = value
-  if (!value) {
+watch(showPopover, async (value) => {
+  if (value) {
     if (unreadList.value.length > 0) {
       await updateNotifications(userStore.user.uid, unreadList.value)
     }
   }
-}
+})
 
 const handleLoadClick = async () => {
   showLoading.value = true
@@ -280,11 +278,9 @@ const handleTopUpClick = () => {
         </router-link>
       </div>
       <n-popover
-        :on-update:show="handleNotificationRead"
         placement="bottom-end"
-        :on-clickoutside="() => (showPopover = false)"
         class="w-[300px] bellNotice"
-        trigger="click"
+        trigger="manual"
         :show="showPopover"
         :style="{
           '--n-arrow-offset': '30px',
@@ -293,7 +289,12 @@ const handleTopUpClick = () => {
         }"
       >
         <template #trigger>
-          <n-badge :max="15" :value="unreadCount" class="cursor-pointer">
+          <n-badge
+            @click="showPopover = !showPopover"
+            :max="15"
+            :value="unreadCount"
+            class="cursor-pointer"
+          >
             <BellNotification class="hover:text-green-600"></BellNotification>
           </n-badge>
         </template>
