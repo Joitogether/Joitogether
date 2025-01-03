@@ -1,17 +1,18 @@
 <script setup>
 import { nextTick, onMounted, ref } from 'vue'
-import { NTabs, NTabPane } from 'naive-ui'
+import { NTabs, NTabPane, NButton } from 'naive-ui'
 import {
   userGetFollowerAPI,
   userGetFollowingAPI,
   userFollowersAddAPI,
   userUnfollowersAPI,
 } from '../../../apis/userAPIs'
-import { useUserStore } from '@/stores/userStore'
+import { useRoute } from 'vue-router'
 
-const userStore = useUserStore()
+const route = useRoute()
 const followerList = ref([])
 const followingList = ref('')
+const id = route.params.uid
 
 const toggleFollow = async (user) => {
   try {
@@ -22,7 +23,7 @@ const toggleFollow = async (user) => {
       // 添加追踪
       await userFollowersAddAPI({
         user_id: user.follower_id,
-        follower_id: userStore.user.uid,
+        follower_id: id,
       })
       user.isFollowing = true
       await fetchFollowerData()
@@ -40,8 +41,8 @@ const unFollowFans = async (user) => {
 
 const fetchFollowerData = async () => {
   const [followerResponse, followingResponse] = await Promise.all([
-    userGetFollowerAPI(userStore.user.uid),
-    userGetFollowingAPI(userStore.user.uid),
+    userGetFollowerAPI(id),
+    userGetFollowingAPI(id),
   ])
   followingList.value = followingResponse.data.map((item) => {
     const userData = item.users_followers_user_idTousers
@@ -80,7 +81,7 @@ const fansPageToggleFollow = async (user) => {
     // 添加追踪
     await userFollowersAddAPI({
       user_id: user.follower_id,
-      follower_id: userStore.user.uid,
+      follower_id: id,
     })
 
     // 更新狀態
