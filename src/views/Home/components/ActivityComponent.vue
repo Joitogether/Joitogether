@@ -1,32 +1,43 @@
 <script setup>
 import ActivityCard from '@/views/components/ActivityCard.vue'
-import { ref, onMounted, computed, watch } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { storeToRefs } from 'pinia'
 import { formatDate } from '@/utils/useDateTime'
 import { useActivityStore } from '@/stores/useActivityStore'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { NSelect } from 'naive-ui'
 
-const activityStore = useActivityStore()
-const { activities, loading, error, triggerAction, selectedRegions, regionOptions } =
-  storeToRefs(activityStore)
-
-const {
-  fetchAllActivities,
-  fetchActivitiesByCategory,
-  searchActivities,
-  triggerActivityAction,
-  fetchActivitiesByRegion,
-} = activityStore
-
 const route = useRoute()
+const router = useRouter()
 
-onMounted(() => {
-  if (route.query.q) {
-    return
-  }
+const activityStore = useActivityStore()
+const {
+  activities,
+  loading,
+  error,
+  triggerAction,
+  selectedRegions,
+  regionOptions,
+  filters,
+  totalActivities,
+} = storeToRefs(activityStore)
+
+const { fetchAllActivities, triggerActivityAction, clearFilters } = activityStore
+
+const filterByRegion = (region) => {
+  filters.value.region = region
+  filters.value.page = 1
   fetchAllActivities()
-})
+  router.push({ path: 'home', query: { ...filters.value } })
+}
+
+const handlePageChange = (page) => {
+  filters.value.page = page
+
+  router.push({ path: '/home', query: { ...filters.value } })
+
+  fetchAllActivities(filters.value)
+}
 
 // 計算今天日期的字串
 const todayString = new Date().toISOString().split('T')[0]
@@ -34,10 +45,8 @@ const selectedStartDate = ref('')
 
 const setStartDate = (date) => {
   selectedStartDate.value = date
+  filters.value.page = 1 // 切換分類時回到第1頁
 }
-
-// 篩選條件
-const selectedCategory = ref('')
 
 const categoryMap = {
   '': '',
@@ -49,15 +58,16 @@ const categoryMap = {
   其他: 'others',
 }
 
-const selectCategory = (category) => {
-  selectedCategory.value = category
-  const mappedCategory = categoryMap[category]
+const triggerCategory = (category) => {
+  const mappedCategory = categoryMap[category] || ''
+  filters.value.category = mappedCategory
+  filters.value.page = 1 // 切換分類時回到第1頁
+  triggerActivityAction(mappedCategory)
+}
 
-  if (mappedCategory === '') {
-    fetchAllActivities()
-  } else {
-    fetchActivitiesByCategory(mappedCategory)
-  }
+const isSelected = (category) => {
+  const mappedCategory = categoryMap[category] || ''
+  return triggerAction.value === mappedCategory
 }
 
 const filteredActivities = computed(() =>
@@ -79,7 +89,7 @@ const filteredActivities = computed(() =>
       return {
         id: activity.id,
         name: activity.name,
-        img_url: activity.img_url || '/src/assets/UserUpdata1.jpg',
+        img_url: activity.img_url || './src/assets/UserUpdata1.jpg',
         location: activity.location || '未知地點',
         dateTime: formatDate(activity.event_time),
         participants: activity.max_participants,
@@ -91,13 +101,9 @@ const filteredActivities = computed(() =>
 )
 
 watch(
-  () => route.query.q,
-  (keyword) => {
-    if (keyword) {
-      searchActivities(keyword)
-    } else {
-      fetchAllActivities()
-    }
+  () => route.query,
+  (newQuery) => {
+    fetchAllActivities(newQuery)
   },
   { immediate: true },
 )
@@ -107,24 +113,16 @@ watch(
   () => triggerAction.value,
   (category) => {
     if (category) {
-      selectCategory(category)
       scrollToActivityBlock()
-      triggerActivityAction(null)
+      triggerActivityAction(category)
+      router.push({ path: 'home', query: { ...filters.value } })
     }
   },
 )
 
-watch(
-  selectedRegions,
-  (regions) => {
-    if (regions.length > 0) {
-      fetchActivitiesByRegion(regions)
-    } else {
-      fetchAllActivities()
-    }
-  },
-  { immediate: true },
-)
+const pages = computed(() => {
+  return (totalActivities.value || 12) / 12
+})
 
 // 滾動到活動區塊
 const scrollToActivityBlock = () => {
@@ -132,6 +130,11 @@ const scrollToActivityBlock = () => {
   if (activitySection) {
     activitySection.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
+}
+const handleClearFilters = () => {
+  clearFilters()
+  fetchAllActivities() // 清除後重新加載活動列表
+  router.push({ path: 'home', query: { ...filters.value } })
 }
 </script>
 
@@ -149,9 +152,9 @@ const scrollToActivityBlock = () => {
           <!-- 預設顯示全部 -->
           <div class="text-sm text-center bg-green-600 text-white rounded-full hover:bg-green-700">
             <button
-              class="mx-5 my-2 lg:mx-8"
-              @click="selectCategory(category)"
-              :class="{ 'rounded-md': selectedCategory === category }"
+              class="p-1 md:p-2 w-full md:w-auto text-center"
+              @click="triggerCategory(category)"
+              :class="{ 'bg-gray-300 rounded-md': isSelected(category) }"
             >
               {{ category || '全部' }}
             </button>
@@ -163,19 +166,24 @@ const scrollToActivityBlock = () => {
     <div
       class="mt-5 flex justify-between w-4/5 mx-auto md:w-3/4 lg:justify-center lg:gap-5 lg:w-4/5"
     >
-      <n-select
-        v-model:value="selectedRegions"
-        :options="regionOptions"
-        clearable
-        placeholder="選擇地區"
-        style="width: 150px"
-      />
-      <input
-        type="date"
-        class="text-sm p-1 lg:bg-gray-100"
-        :min="todayString"
-        @change="setStartDate($event.target.value)"
-      />
+      <div class="text-xl flex items-center">
+        <n-select
+          v-model:value="selectedRegions"
+          :options="regionOptions"
+          clearable
+          placeholder="選擇地區"
+          style="width: 150px"
+          @update:value="filterByRegion"
+        />
+      </div>
+      <div class="text-xl flex items-center">
+        <span class="ml-1">
+          <input type="date" :min="todayString" @change="setStartDate($event.target.value)"
+        /></span>
+      </div>
+      <div>
+        <n-button @click="handleClearFilters">清除篩選</n-button>
+      </div>
     </div>
 
     <!-- 卡片區域 -->
@@ -197,6 +205,14 @@ const scrollToActivityBlock = () => {
             :id="activity.id"
             class="border-b-2 pb-3 overflow-hidden md:border-none md:bg-gray-100 md:mb-3 md:rounded-md md:px-5 md:hover:bg-gray-200 lg:mb-0"
           ></ActivityCard>
+        </div>
+        <div class="pagination-container mt-5 flex justify-center">
+          <n-pagination
+            v-model:page="filters.page"
+            :page-size="filters.pageSize"
+            :page-count="Math.max(1, Math.ceil(pages))"
+            @update:page="handlePageChange"
+          />
         </div>
       </div>
     </div>

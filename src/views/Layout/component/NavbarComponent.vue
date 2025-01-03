@@ -14,7 +14,11 @@ import { getUserSummaryAPI } from '@/apis/userAPIs'
 import { ref, onMounted } from 'vue'
 import { handleError } from '@/utils/handleError.js'
 import avatar from '@/assets/avatar.png'
+import { useActivityStore } from '@/stores/useActivityStore'
 
+const activityStore = useActivityStore()
+const { filters } = storeToRefs(activityStore)
+const { fetchAllActivities } = useActivityStore()
 const message = useMessage()
 const userStore = useUserStore()
 const router = useRouter()
@@ -105,15 +109,22 @@ const handleLoadClick = async () => {
 }
 const showLoading = ref(false)
 const searchKeyword = ref('')
+
 const handleSearchClick = (e) => {
   if (e.isComposing) return
-  if (searchKeyword.value === '') return
-  router.push({
-    name: 'home',
-    query: {
-      q: searchKeyword.value,
-    },
-  })
+  if (searchKeyword.value === '') {
+    filters.value.keyword = ''
+  } else {
+    filters.value.keyword = searchKeyword.value.trim()
+  }
+  filters.value = {
+    ...filters.value,
+    page: 1,
+  }
+
+  router.push({ name: 'home', query: { ...filters.value } })
+
+  fetchAllActivities(filters.value)
 }
 </script>
 

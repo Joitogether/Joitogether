@@ -45,11 +45,6 @@ export const ActivityReviewApplicationsAPI = async (application_id, data) => {
   return await apiAxios.put(`/applications/verify/${application_id}`, data)
 }
 
-export const activityGetAllAPI = async () => {
-  const { data } = await apiAxios.get(`/activities/`)
-  return data
-}
-
 export const activityUserCreateAPI = async (file, otherData) => {
   const storage = getStorage()
   let imgUrl
@@ -85,16 +80,11 @@ export const activityGeocodeAPI = async (address) => {
   return await apiAxios.post('/activities/geocode', { address })
 }
 
-export const activitySearchAPI = async (keyword) => {
-  const { data } = await apiAxios.post('/activities/search', {
-    keyword,
-  })
-  return data.data
-}
-
-export const activityCategoryAPI = async (type, data) => {
-  const response = await apiAxios.post(`/activities/category/${type}`, data)
-  return response.data
+export const activityGetAllAndSearchAPI = async (params) => {
+  // 處理URL 字串查詢
+  const query = new URLSearchParams(params).toString()
+  const { data } = await apiAxios.get(`/activities?${query}`)
+  return data
 }
 
 export const activityAddToCartAPI = async (userId, activityId) => {
