@@ -6,10 +6,6 @@ import {
   browserSessionPersistence,
 } from 'firebase/auth'
 import { useUserStore } from '@/stores/userStore.js'
-import { handleError } from '@/utils/handleError.js'
-import { useMessage } from 'naive-ui'
-
-const message = useMessage()
 
 // 登入
 const loginUser = async (email, password, rememberMe) => {
@@ -47,15 +43,14 @@ const loginUser = async (email, password, rememberMe) => {
       errorMessage = '😵 為了保護您的帳號安全，請稍後再試一次！🚫'
     } else if (error.code === 'auth/user-disabled') {
       errorMessage = '😵‍💫 這個帳號已被停用，請聯絡管理員！'
-    } else if (error.message === '😵‍💫 這個帳號還沒被驗證哦！請前往信箱進行驗證！📧') {
-      errorMessage = error.message
     } else {
-      handleError(message, undefined, error)
+      errorMessage
     }
 
     throw {
       success: false,
       message: errorMessage,
+      code: error.code,
     }
   }
 }

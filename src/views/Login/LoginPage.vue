@@ -300,15 +300,24 @@ const handleLogin = async () => {
     const loginUserResponse = await loginUser(email, password, rememberMe)
 
     if (loginUserResponse.success) {
-      message.success(`🎉 登入成功！歡迎，${loginUserResponse.user.displayName || '用戶'}！`)
-
+      message.success(`🎉 登入成功！歡迎加入 ✨`)
       // 跳轉到首頁
       router.push({ name: 'home' })
     } else {
       message.error('登入失敗，請稍後再試！😞')
     }
   } catch (error) {
-    handleError(message, '登入失敗，請稍後再試！😞', error)
+    if (error.code === 'auth/invalid-credential') {
+      message.error(error.message)
+    } else if (error.code === 'auth/invalid-email') {
+      message.error(error.message)
+    } else if (error.code === 'auth/too-many-requests') {
+      message.error(error.message)
+    } else if (error.code === 'auth/user-disabled') {
+      message.error(error.message)
+    } else {
+      handleError(message, '登入失敗，請稍後再試！😞', error)
+    }
   }
 }
 
@@ -343,7 +352,15 @@ const loginGoogle = async () => {
     // 更新 userStore 狀態
     router.push('/')
   } catch (error) {
-    handleError(message, '哎呀 😭 出了一些小問題 💔', error)
+    if (error.code === 'auth/account-exists-with-different-credential') {
+      message.error(error.message)
+    } else if (error.code === 'auth/popup-closed-by-user') {
+      message.error(error.message)
+    } else if (error.code === 'auth/network-request-failed') {
+      message.error(error.message)
+    } else {
+      handleError(message, '哎呀 😭 出了一些小問題，請稍後再試 💔', error)
+    }
   }
 }
 const loginFacebook = async () => {
@@ -571,7 +588,15 @@ const goToStep2 = async () => {
       step.value = 2
       startCooldown()
     } catch (error) {
-      handleError(message, '登入失敗，請稍後再試！😞', error)
+      if (error.code === 'auth/email-already-in-use') {
+        message.error(error.message)
+      } else if (error.code === 'auth/invalid-email') {
+        message.error(error.message)
+      } else if (error.code === 'auth/weak-password') {
+        message.error(error.message)
+      } else {
+        handleError(message, '註冊失敗，請稍後再試！😞', error)
+      }
     }
   }
 }
