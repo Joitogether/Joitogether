@@ -1,6 +1,6 @@
 <script setup>
 import ActivityCard from '@/views/components/ActivityCard.vue'
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { storeToRefs } from 'pinia'
 import { formatDate } from '@/utils/useDateTime'
 import { useActivityStore } from '@/stores/useActivityStore'
@@ -115,6 +115,30 @@ watch(
 
 const pages = computed(() => {
   return (totalActivities.value || 12) / 12
+})
+
+const horizontal = ref(false)
+const isMobile = ref(false)
+
+const updateScreenSize = () => {
+  isMobile.value = window.innerWidth < 768
+}
+
+onMounted(() => {
+  updateScreenSize()
+  window.addEventListener('resize', updateScreenSize)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', updateScreenSize)
+})
+
+watch(isMobile, (newVal) => {
+  if (newVal) {
+    horizontal.value = true
+  } else {
+    horizontal.value = false
+  }
 })
 
 // 滾動到活動區塊

@@ -13,6 +13,7 @@ import { storeToRefs } from 'pinia'
 import { getUserSummaryAPI } from '@/apis/userAPIs'
 import { ref, onMounted } from 'vue'
 import { handleError } from '@/utils/handleError.js'
+import { useActivityStore } from '@/stores/useActivityStore'
 
 const activityStore = useActivityStore()
 const { filters } = storeToRefs(activityStore)
