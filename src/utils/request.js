@@ -1,8 +1,8 @@
 import axios from 'axios'
 import { getIdToken } from 'firebase/auth'
 import { auth } from './firebaseConfig'
-import { createDiscreteApi } from 'naive-ui'
-const { message } = createDiscreteApi(['message'])
+// import { createDiscreteApi } from 'naive-ui'
+// const { message } = createDiscreteApi(['message'])
 
 const apiAxios = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
@@ -12,19 +12,19 @@ const apiAxios = axios.create({
 let requestCount = 0
 let messageInstance
 
-function showLoadingOverlay() {
-  const overlay = document.getElementById('loading-overlay')
-  if (overlay) {
-    overlay.classList.add('active') // 顯示遮罩
-  }
-}
+// function showLoadingOverlay() {
+//   const overlay = document.getElementById('loading-overlay')
+//   if (overlay) {
+//     overlay.classList.add('active') // 顯示遮罩
+//   }
+// }
 
-function hideLoadingOverlay() {
-  const overlay = document.getElementById('loading-overlay')
-  if (overlay) {
-    overlay.classList.remove('active') // 隱藏遮罩
-  }
-}
+// function hideLoadingOverlay() {
+//   const overlay = document.getElementById('loading-overlay')
+//   if (overlay) {
+//     overlay.classList.remove('active') // 隱藏遮罩
+//   }
+// }
 
 apiAxios.interceptors.request.use(
   async function (config) {
@@ -34,11 +34,11 @@ apiAxios.interceptors.request.use(
         config.headers.Authorization = `Bearer ${token}`
       }
     }
-    if (requestCount === 0) {
-      messageInstance = message.loading('請稍後...', { duration: 0 })
-      showLoadingOverlay()
-    }
-    requestCount++
+    // if (requestCount === 0) {
+    //   messageInstance = message.loading('請稍後...', { duration: 0 })
+    //   showLoadingOverlay()
+    // }
+    // requestCount++
     return config
   },
   function (error) {
@@ -50,7 +50,7 @@ apiAxios.interceptors.response.use(
   function (response) {
     requestCount--
     if (requestCount === 0 && messageInstance) {
-      hideLoadingOverlay()
+      // hideLoadingOverlay()
       messageInstance.destroy()
       messageInstance = null
     }
@@ -59,7 +59,7 @@ apiAxios.interceptors.response.use(
   function (error) {
     requestCount--
     if (requestCount === 0 && messageInstance) {
-      hideLoadingOverlay()
+      // hideLoadingOverlay()
       messageInstance.destroy()
       messageInstance = null
     }
