@@ -125,6 +125,22 @@ const handleSearchClick = (e) => {
 
   fetchAllActivities(filters.value)
 }
+
+const handleCartClick = () => {
+  if (userStore.user.isLogin) {
+    router.push({ name: 'cart' })
+  } else {
+    message.warning('🚫 尚未登入，無法進入購物車喔！💡')
+  }
+}
+
+const handleTopUpClick = () => {
+  if (userStore.user.isLogin) {
+    router.push({ name: 'topup' })
+  } else {
+    message.warning('🚫 尚未登入，無法進入儲值頁面喔！💡')
+  }
+}
 </script>
 
 <template>
@@ -196,14 +212,7 @@ const handleSearchClick = (e) => {
                 •&nbsp;&nbsp;建立活動
               </router-link>
             </li>
-            <li>
-              <a
-                href="#"
-                class="font-bold py-3 block text-base text-gray-500 hover:text-green-600 border-b border-gray-300"
-              >
-                •&nbsp;&nbsp;加入聚會
-              </a>
-            </li>
+
             <li
               class="font-bold py-3 block text-base text-gray-500 hover:text-green-600 border-b border-gray-300"
             >
@@ -211,19 +220,19 @@ const handleSearchClick = (e) => {
             </li>
             <li>
               <a
-                href="#"
+                @click="handleCartClick"
                 class="font-bold py-3 block text-base text-gray-500 hover:text-green-600 border-b border-gray-300"
               >
-                •&nbsp;&nbsp;活動中心
+                •&nbsp;&nbsp;購物車
               </a>
             </li>
             <li>
-              <RouterLink
-                to="/topup"
+              <a
+                @click="handleTopUpClick"
                 class="font-bold pt-3 block text-base text-gray-500 hover:text-green-600"
               >
                 •&nbsp;&nbsp;儲值中心
-              </RouterLink>
+              </a>
             </li>
           </ul>
         </div>
@@ -242,18 +251,18 @@ const handleSearchClick = (e) => {
           </li>
           <li class="py-1">
             <RouterLink to="/posts" class="mx-3 tracking-wide hover:text-green-600"
-              >社群</RouterLink
-            >
+              >社群
+            </RouterLink>
           </li>
           <li class="py-1">
-            <RouterLink to="/shoppingcart" class="mx-3 tracking-wide hover:text-green-600">
-              購物車</RouterLink
-            >
+            <button @click="handleCartClick" class="mx-3 tracking-wide hover:text-green-600">
+              購物車
+            </button>
           </li>
           <li class="py-1">
-            <RouterLink to="/topup" class="mx-3 tracking-wide hover:text-green-600"
-              >儲值中心</RouterLink
-            >
+            <button @click="handleTopUpClick" class="mx-3 tracking-wide hover:text-green-600">
+              儲值中心
+            </button>
           </li>
         </ul>
       </div>

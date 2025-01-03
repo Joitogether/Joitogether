@@ -116,42 +116,46 @@ const informPostUpdate = () => {
           <p
             @click="handleTagSelect('food')"
             :class="{ 'activated-tag': selectedTag === 'food' }"
-            class="text-black border-transparent text-center pb-1 md:pb-0 border-b-[2px] md:text-white md:rounded-full flex-1 cursor-pointer md:leading-0 leading-9 md:bg-green-500 md:hover:bg-green-600 text-base py-1 md:py-0 md:px-4 md:mr-3"
+            class="text-black border-transparent text-center pb-1 md:pb-0 border-b-[2px] md:text-white md:rounded-full flex-1 cursor-pointer md:leading-0 leading-9 md:bg-green-600 md:hover:bg-green-500 text-base py-1 md:py-0 md:px-4 md:mr-3 hover:scale-110 transition-all duration-300 hover:font-bold"
           >
             美食
           </p>
           <p
             @click="handleTagSelect('shopping')"
             :class="{ 'activated-tag': selectedTag === 'shopping' }"
-            class="text-black border-transparent text-center pb-1 md:pb-0 border-b-[2px] md:text-white md:rounded-full flex-1 cursor-pointer md:leading-0 leading-9 md:bg-green-500 md:hover:bg-green-600 text-base py-1 md:py-0 md:px-4 md:mr-3"
+            class="text-black border-transparent text-center pb-1 md:pb-0 border-b-[2px] md:text-white md:rounded-full flex-1 cursor-pointer md:leading-0 leading-9 md:bg-green-600 md:hover:bg-green-500 text-base py-1 md:py-0 md:px-4 md:mr-3 hover:scale-110 transition-all duration-300 hover:font-bold"
           >
             購物
           </p>
           <p
             @click="handleTagSelect('travel')"
             :class="{ 'activated-tag': selectedTag === 'travel' }"
-            class="text-black border-transparent text-center pb-1 md:pb-0 border-b-[2px] md:text-white md:rounded-full flex-1 cursor-pointer md:leading-0 leading-9 md:bg-green-500 md:hover:bg-green-600 text-base py-1 md:py-0 md:px-4 md:mr-3"
+            class="text-black border-transparent text-center pb-1 md:pb-0 border-b-[2px] md:text-white md:rounded-full flex-1 cursor-pointer md:leading-0 leading-9 md:bg-green-600 md:hover:bg-green-500 text-base py-1 md:py-0 md:px-4 md:mr-3 hover:scale-110 transition-all duration-300 hover:font-bold"
           >
             旅遊
           </p>
           <p
             @click="handleTagSelect('sports')"
             :class="{ 'activated-tag': selectedTag === 'sports' }"
-            class="text-black border-transparent text-center pb-1 md:pb-0 border-b-[2px] md:text-white md:rounded-full flex-1 cursor-pointer md:leading-0 leading-9 md:bg-green-500 md:hover:bg-green-600 text-base py-1 md:py-0 md:px-4 md:mr-3"
+            class="text-black border-transparent text-center pb-1 md:pb-0 border-b-[2px] md:text-white md:rounded-full flex-1 cursor-pointer md:leading-0 leading-9 md:bg-green-600 md:hover:bg-green-500 text-base py-1 md:py-0 md:px-4 md:mr-3 hover:scale-110 transition-all duration-300 hover:font-bold"
           >
             運動
           </p>
           <p
             @click="handleTagSelect('education')"
             :class="{ 'activated-tag': selectedTag === 'education' }"
-            class="text-black border-transparent text-center pb-1 md:pb-0 border-b-[2px] md:text-white md:rounded-full flex-1 cursor-pointer md:leading-0 leading-9 md:bg-green-500 md:hover:bg-green-600 text-base py-1 md:py-0 md:px-4 md:mr-3"
+            class="text-black border-transparent text-center pb-1 md:pb-0 border-b-[2px] md:text-white md:rounded-full flex-1 cursor-pointer md:leading-0 leading-9 md:bg-green-600 md:hover:bg-green-500 text-base py-1 md:py-0 md:px-4 md:mr-3 hover:scale-110 transition-all duration-300 hover:font-bold"
           >
             教育
           </p>
           <p
             @click="handleTagSelect('others')"
             :class="{ 'activated-tag': selectedTag === 'others' }"
-            class="text-black border-transparent text-center pb-1 md:pb-0 border-b-[2px] md:text-white md:rounded-full flex-1 cursor-pointer md:leading-0 leading-9 md:bg-green-500 md:hover:bg-green-600 text-base py-1 md:py-0 md:px-4"
+            class="text-black border-transparent text-center pb-1 md:pb-0 border-b-[2px] md:text-white md:rounded-full flex-1 cursor-pointer md:leading-0 leading-9 md:bg-green-600 md:hover:bg-green-500 text-base py-1 md:py-0 md:px-4 md:mr-3 hover:scale-110 transition-all duration-300 hover:font-bold"
+            hover:scale-110
+            transition-all
+            duration-300
+            hover:font-bold
           >
             其他
           </p>

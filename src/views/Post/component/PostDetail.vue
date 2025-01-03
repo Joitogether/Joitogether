@@ -381,6 +381,7 @@ const removeImage = () => {
   uploadedImage.value = null
 }
 onMounted(() => {
+  window.scrollTo({ top: 0 })
   fetchPostDetails()
   fetchComments()
   fetchPostLikes()
@@ -565,7 +566,7 @@ watch(
           <!-- 功能操作區 -->
           <div class="gap-4 items-center h-12 mb-4">
             <button
-              class="w-full h-full flex justify-center items-center text-white bg-green-500 rounded-full hover:bg-green-500"
+              class="w-full h-full flex justify-center items-center text-white bg-green-600 rounded-full hover:bg-green-500"
               @click="toggleLike"
               :disabled="false"
             >
@@ -598,7 +599,7 @@ watch(
                 <div class="">
                   <button
                     @click="addComment"
-                    class="mt-2 px-6 py-2 bg-green-500 text-white rounded-full hover:bg-green-600 focus:outline-none mb-3"
+                    class="mt-2 px-6 py-2 bg-green-600 text-white rounded-full hover:bg-green-500 focus:outline-none mb-3"
                   >
                     送出
                   </button>

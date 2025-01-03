@@ -158,7 +158,7 @@ const handleClearFilters = () => {
 <template>
   <main id="activity-section" class="mx-auto py-5">
     <div class="text-center text-[28px] text-gray-800 font-bold min-w-[120px] lg:text-[34px]">
-      啾團活動
+      揪團活動
     </div>
     <div class="flex justify-center mt-3 w-full">
       <div class="flex flex-wrap gap-4 justify-start w-4/5 md:justify-center md:w-3/4 lg:w-4/5">
@@ -170,9 +170,9 @@ const handleClearFilters = () => {
           <!-- 預設顯示全部 -->
           <div class="text-sm text-center bg-green-600 text-white rounded-full hover:bg-green-500">
             <button
-              class="p-1 md:p-2 w-full md:w-auto text-center"
+              class="p-1 px-7 py-2 h-10 w-full md:px-7 md:py-2 md:w-auto text-center"
               @click="triggerCategory(category)"
-              :class="{ 'bg-gray-300 rounded-md': isSelected(category) }"
+              :class="{ 'bg-green-700 rounded-full': isSelected(category) }"
             >
               {{ category || '全部' }}
             </button>
@@ -181,31 +181,39 @@ const handleClearFilters = () => {
       </div>
     </div>
     <!-- 篩選器 -->
-    <div
-      class="mt-5 flex justify-between w-4/5 mx-auto md:w-3/4 lg:justify-center lg:gap-5 lg:w-4/5"
-    >
-      <div class="text-xl flex items-center">
-        <n-select
-          v-model:value="selectedRegions"
-          :options="regionOptions"
-          clearable
-          placeholder="選擇地區"
-          style="width: 150px"
-          @update:value="filterByRegion"
-        />
-      </div>
-      <div class="text-xl flex items-center">
-        <span class="ml-1">
-          <input type="date" :min="todayString" @change="setStartDate($event.target.value)"
-        /></span>
-      </div>
-      <div>
-        <n-button @click="handleClearFilters">清除篩選</n-button>
-      </div>
-    </div>
 
     <!-- 卡片區域 -->
     <div class="mt-5 mb-7 w-4/5 mx-auto md:w-3/4 lg:w-4/5">
+      <div
+        class="my-5 flex flex-col md:flex-row md:items-center md:justify-between w-full lg:justify-center lg:gap-5"
+      >
+        <div class="flex gap-3">
+          <div class="text-xl flex items-center">
+            <n-select
+              v-model:value="selectedRegions"
+              :options="regionOptions"
+              clearable
+              placeholder="選擇地區"
+              style="width: 150px"
+              @update:value="filterByRegion"
+            />
+          </div>
+          <div class="text-xl flex items-center">
+            <span class="p-1">
+              <input
+                class="cursor-pointer bg-white border border-gray-200 text-sm p-[5px] text-gray-400 rounded-sm hover:border-green-600"
+                type="date"
+                :min="todayString"
+                style="outline: none"
+                @change="setStartDate($event.target.value)"
+              />
+            </span>
+          </div>
+        </div>
+        <div>
+          <n-button @click="handleClearFilters">清除篩選</n-button>
+        </div>
+      </div>
       <div v-if="loading" class="text-center my-5">加載中...</div>
       <div v-else-if="error" class="text-center my-5 text-red-500">{{ error }}</div>
       <div v-else>
