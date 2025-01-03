@@ -98,19 +98,20 @@ const ActivityDataPush = async () => {
     const response = await activityUserCreateAPI(selectedFile.value || null, activityData)
     message.success('活動建立成功了喔!!') // 成功訊息提示
 
-    const notiData = {
-      actor_id: response.data.host_id, // 觸發行為的使用者 ID
-      user_id: response.data.host_id, // 接收行為的使用者 ID (從 API 回傳資料取得)
-      target_id: response.data.id, // 被行為影響的目標 ID (從 API 回傳資料取得)
-      action: 'create', // 行為類型 (此處為 create)
-      target_type: 'activity', // 行為對象類型
-      message: `已成功建立活動：${response.data.name}`, // 通知訊息
-      link: `/activity/detail/${response.data.id}`, // 導向活動詳情頁面的連結
+    if (response && response.data.status === 201) {
+      const notiData = {
+        actor_id: response.data.host_id, // 觸發行為的使用者 ID
+        user_id: response.data.host_id, // 接收行為的使用者 ID (從 API 回傳資料取得)
+        target_id: response.data.id, // 被行為影響的目標 ID (從 API 回傳資料取得)
+        action: 'create', // 行為類型 (此處為 create)
+        target_type: 'activity', // 行為對象類型
+        message: `已成功建立活動：${response.data.name}`, // 通知訊息
+        link: `/activity/detail/${response.data.id}`, // 導向活動詳情頁面的連結
+      }
+
+      // 送出提醒通知
+      socketStore.sendNotification(notiData)
     }
-
-    // 送出提醒通知
-    socketStore.sendNotification(notiData)
-
     router.replace('/')
   } catch (error) {
     handleError(message, undefined, error)

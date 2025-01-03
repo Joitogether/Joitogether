@@ -52,7 +52,7 @@ export const useActivityStore = defineStore('activity', () => {
     try {
       const response = await activityGetAllAndSearchAPI(filters.value)
       if (!response || response.data.length === 0) {
-        activities.value = []
+        activities.value = {}
         totalActivities.value = 0
         handleError(message, '目前無相關活動資料', { error: '無活動資料' })
       } else {
