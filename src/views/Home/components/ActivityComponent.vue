@@ -73,17 +73,10 @@ const isSelected = (category) => {
 const filteredActivities = computed(() =>
   activities.value
     .filter((activity) => {
+      if (!selectedStartDate.value) return true
       const eventDate = new Date(activity.event_time)
-      const today = new Date()
-      today.setHours(0, 0, 0, 0)
-
-      if (eventDate < today) return false
-
-      if (selectedStartDate.value) {
-        const filterDate = new Date(selectedStartDate.value)
-        return eventDate >= filterDate
-      }
-      return true
+      const filterDate = new Date(selectedStartDate.value)
+      return eventDate >= filterDate
     })
     .map((activity) => {
       return {
@@ -97,7 +90,7 @@ const filteredActivities = computed(() =>
         userImg: activity.users.photo_url,
       }
     })
-    .sort((a, b) => new Date(b.id) - new Date(a.id)),
+    .sort((a, b) => a.event_time - b.event_time),
 )
 
 watch(
@@ -144,13 +137,14 @@ const handleClearFilters = () => {
       啾團活動
     </div>
     <div class="flex justify-center mt-3 w-full">
-      <div class="flex flex-wrap gap-2 justify-start w-4/5 md:justify-center md:w-3/4 lg:w-4/5">
+      <div class="flex flex-wrap gap-4 justify-start w-4/5 md:justify-center md:w-3/4 lg:w-4/5">
         <div
           v-for="category in ['', '美食', '購物', '旅遊', '運動', '教育', '其他']"
           :key="category"
+          class="cursor-pointer hover:scale-110 transition-all duration-300 hover:font-bold"
         >
           <!-- 預設顯示全部 -->
-          <div class="text-sm text-center bg-green-600 text-white rounded-full hover:bg-green-700">
+          <div class="text-sm text-center bg-green-600 text-white rounded-full hover:bg-green-500">
             <button
               class="p-1 md:p-2 w-full md:w-auto text-center"
               @click="triggerCategory(category)"
@@ -191,7 +185,7 @@ const handleClearFilters = () => {
       <div v-if="loading" class="text-center my-5">加載中...</div>
       <div v-else-if="error" class="text-center my-5 text-red-500">{{ error }}</div>
       <div v-else>
-        <div class="grid grid-cols-1 lg:grid-cols-3 lg:gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 md:gap-4 lg:grid-cols-3">
           <ActivityCard
             v-for="activity in filteredActivities"
             :key="activity.id"
@@ -203,7 +197,8 @@ const handleClearFilters = () => {
             :host="activity.host"
             :hostImgUrl="activity.userImg"
             :id="activity.id"
-            class="border-b-2 pb-3 overflow-hidden md:border-none md:bg-gray-100 md:mb-3 md:rounded-md md:px-5 md:hover:bg-gray-200 lg:mb-0"
+            :horizontal="horizontal"
+            class="border-b-2 pb-3 overflow-hidden md:border-none md:bg-gray-100 md:mb-3 md:rounded-md md:px-5 md:hover:bg-gray-200 md:shadow-md lg:mb-0 hover:scale-[1.05] transition-all duration-300"
           ></ActivityCard>
         </div>
         <div class="pagination-container mt-5 flex justify-center">

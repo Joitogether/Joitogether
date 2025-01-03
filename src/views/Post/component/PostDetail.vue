@@ -265,7 +265,8 @@ const toggleLike = async () => {
 }
 
 const goPostPage = () => {
-  router.push('/posts')
+  // router.push('/posts')
+  router.back()
 }
 // 切換編輯文章彈窗顯示與隱藏
 const toggleMenu = () => {

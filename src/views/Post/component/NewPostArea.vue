@@ -36,6 +36,14 @@ const postCategories = [
   { label: '其他', value: 'others' },
 ]
 
+const handleNewPost = () => {
+  if (!userStore.user.isLogin) {
+    message.error('登入後就可以發廢文囉！')
+  } else {
+    showModal.value = true
+  }
+}
+
 // 新增文章
 const handleSubmit = async () => {
   if (!userStore.user.isLogin) {
@@ -209,8 +217,12 @@ watch(showModal, (newValue) => {
       <div class="mb-0 text-lg font-xl ml-5">
         (｡•̀ᴗ-)✧ {{ userStore.user.display_name || '訪客' }}
       </div>
-      <n-button @click="showModal = true" class="w-100 m-4 rounded-full">
-        📝 記錄一刻，分享所有 🐾
+      <n-button
+        :disabled="!userStore.user.isLogin"
+        @click="handleNewPost"
+        class="w-100 m-4 rounded-full"
+      >
+        {{ userStore.user.isLogin ? '📝 記錄一刻，分享所有 🐾' : '登入就可以發廢文囉💃' }}
       </n-button>
     </div>
   </div>

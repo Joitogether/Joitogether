@@ -178,13 +178,20 @@ const router = createRouter({
           component: CheckoutSuccess,
         },
         {
-          path: '/:catchAll(.*)', // 匹配所有未定義路由
+          path: '/:catchAll(.*)',
           name: 'notFound',
-          component: NotFound, // 導向自訂的 404 頁面 隨時可改
+          component: NotFound,
         },
       ],
     },
   ],
+  scrollBehavior(to, from, savedPosition) {
+    if (savedPosition) {
+      return savedPosition
+    } else {
+      return { top: 0 }
+    }
+  },
 })
 
 router.beforeEach(async (to, from, next) => {
