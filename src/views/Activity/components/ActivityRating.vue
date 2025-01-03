@@ -66,7 +66,6 @@ const getDetailForRating = async () => {
     hostInfo.value = res.activity.users || {}
     hostRatingAverage.value = res.hostRatingAverage['_avg'] || {}
     latestHostRating.value = res.latestHostRating || null
-    console.log(latestHostRating.value)
   } catch (error) {
     activityDetail.value = {}
     hostInfo.value = {}
@@ -315,7 +314,7 @@ watch(
             <div class="mt-3 text-xs font-bold text-gray-600 xl:text-base xl:p-1">
               其他用戶對團主評價
             </div>
-            <div v-if="latestHostRating.length > 0">
+            <div v-if="latestHostRating && latestHostRating.length > 0">
               <div
                 v-for="(rating, index) in latestHostRating"
                 :key="index"
