@@ -94,6 +94,14 @@ export const userGetFollowingAPI = async (uid) => {
   }
 }
 
+export const userFollowersAddAPI = async (data) => {
+  return await apiAxios.post('/users/follow', data)
+}
+
+export const userUnfollowersAPI = async (id) => {
+  return await apiAxios.post(`/users/unfollow/${id}`)
+}
+
 export const userGetActivityAPI = async (uid) => {
   try {
     const response = await apiAxios.get(`/users/applications/${uid}`)
