@@ -97,8 +97,7 @@ const ActivityDataPush = async () => {
   try {
     const response = await activityUserCreateAPI(selectedFile.value || null, activityData)
     message.success('活動建立成功了喔!!') // 成功訊息提示
-
-    if (response && response.data.status === 201) {
+    if (response?.data?.id) {
       const notiData = {
         actor_id: response.data.host_id, // 觸發行為的使用者 ID
         user_id: response.data.host_id, // 接收行為的使用者 ID (從 API 回傳資料取得)
