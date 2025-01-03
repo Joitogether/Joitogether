@@ -1,6 +1,6 @@
 <script setup>
 import ActivityCard from '@/views/components/ActivityCard.vue'
-import { ref, onMounted, computed, watch } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { storeToRefs } from 'pinia'
 import { formatDate } from '@/utils/useDateTime'
 import { useActivityStore } from '@/stores/useActivityStore'
@@ -22,7 +22,7 @@ const {
   totalActivities,
 } = storeToRefs(activityStore)
 
-const { fetchAllActivities, triggerActivityAction } = activityStore
+const { fetchAllActivities, triggerActivityAction, clearFilters } = activityStore
 
 const filterByRegion = (region) => {
   filters.value.region = region
@@ -38,16 +38,6 @@ const handlePageChange = (page) => {
 
   fetchAllActivities(filters.value)
 }
-
-onMounted(() => {
-  if (!filters.value.pageSize) {
-    filters.value.pageSize = 12
-  }
-  if (!filters.value.page) {
-    filters.value.page = 1
-  }
-  fetchAllActivities(route.query)
-})
 
 // 計算今天日期的字串
 const todayString = new Date().toISOString().split('T')[0]
@@ -130,12 +120,21 @@ watch(
   },
 )
 
+const pages = computed(() => {
+  return (totalActivities.value || 12) / 12
+})
+
 // 滾動到活動區塊
 const scrollToActivityBlock = () => {
   const activitySection = document.getElementById('activity-section')
   if (activitySection) {
     activitySection.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
+}
+const handleClearFilters = () => {
+  clearFilters()
+  fetchAllActivities() // 清除後重新加載活動列表
+  router.push({ path: 'home', query: { ...filters.value } })
 }
 </script>
 
@@ -180,6 +179,9 @@ const scrollToActivityBlock = () => {
           <input type="date" :min="todayString" @change="setStartDate($event.target.value)"
         /></span>
       </div>
+      <div>
+        <n-button @click="handleClearFilters">清除篩選</n-button>
+      </div>
     </div>
 
     <!-- 卡片區域 -->
@@ -205,11 +207,10 @@ const scrollToActivityBlock = () => {
           <n-pagination
             v-model:page="filters.page"
             :page-size="filters.pageSize"
-            :page-count="Math.max(1, Math.ceil(filters.pageSize))"
+            :page-count="Math.max(1, Math.ceil(pages))"
             @update:page="handlePageChange"
           />
         </div>
-        <div>Total Activities: {{ totalActivities }}</div>
       </div>
     </div>
   </main>

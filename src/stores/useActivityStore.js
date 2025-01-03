@@ -51,14 +51,13 @@ export const useActivityStore = defineStore('activity', () => {
     activities.value = []
     try {
       const response = await activityGetAllAndSearchAPI(filters.value)
-      if (!response || !response.data || response.data.length === 0) {
+      if (!response || response.data.length === 0) {
         activities.value = []
         totalActivities.value = 0
         handleError(message, '目前無相關活動資料', { error: '無活動資料' })
       } else {
-        activities.value = response.data
-        totalActivities.value = response.total || 0
-        console.log('Store Total Activities:', response)
+        activities.value = response.data.activities
+        totalActivities.value = response.data.total || 0
       }
     } catch (error) {
       handleError(message, undefined, error)
@@ -78,6 +77,20 @@ export const useActivityStore = defineStore('activity', () => {
     fetchAllActivities()
   }
 
+  const clearFilters = () => {
+    filters.value = {
+      page: 1,
+      pageSize: 12,
+      keyword: '',
+      category: '',
+      region: '',
+    }
+    selectedRegions.value = ''
+    triggerAction.value = null
+    activities.value = []
+    totalActivities.value = 0
+  }
+
   return {
     activities,
     loading,
@@ -86,7 +99,9 @@ export const useActivityStore = defineStore('activity', () => {
     selectedRegions,
     regionOptions,
     filters,
+    totalActivities,
     fetchAllActivities,
     triggerActivityAction,
+    clearFilters,
   }
 })
