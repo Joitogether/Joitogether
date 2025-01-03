@@ -37,6 +37,7 @@
   },
   "dependencies": {
     "@iconoir/vue": "^7.10.0",
+    "@lottiefiles/dotlottie-vue": "^0.5.3",
     "axios": "^1.7.7",
     "dayjs": "^1.11.13",
     "firebase": "^11.0.2",
