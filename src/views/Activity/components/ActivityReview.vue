@@ -161,39 +161,6 @@ onMounted(async () => {
   }
 })
 
-//切換報名,截止報名功能
-const registrationStatus = ref('open')
-
-// 切換開放、截止報名的UI
-const openRegistration = () => {
-  dialog.success({
-    title: '確認操作',
-    content: '您是否確認開放報名？',
-    positiveText: '確認',
-    negativeText: '取消',
-    onPositiveClick: () => {
-      registrationStatus.value = 'open'
-    },
-    onNegativeClick: () => {
-      message.info('您已取消開放報名的操作')
-    },
-  })
-}
-const closeRegistration = () => {
-  dialog.success({
-    title: '確認操作',
-    content: '您是否確認截止報名？',
-    positiveText: '確認',
-    negativeText: '取消',
-    onPositiveClick: () => {
-      registrationStatus.value = 'closed'
-    },
-    onNegativeClick: () => {
-      message.info('您已取消截止報名的操作')
-    },
-  })
-}
-
 const handleApproveClick = async (id, activity_id) => {
   if (isReviewTimeExpired()) {
     message.error('審核時間已過，無法進行操作！')
@@ -211,11 +178,6 @@ const handleApproveClick = async (id, activity_id) => {
   }
   if (approvedCount.value >= activity.value.max_participants) {
     message.error('該活動人數已滿，無法再允許更多用戶參加')
-    return
-  }
-
-  if (registrationStatus.value === 'closed') {
-    message.error('目前報名已截止，無法操作。請返回開放報名繼續操作。')
     return
   }
 
@@ -275,13 +237,8 @@ const handleDeclinedClick = async (id, activity_id) => {
     return
   }
 
-  if (registrationStatus.value === 'closed') {
-    message.success('目前報名已截止，無法操作。請返回開放報名繼續操作。')
-    return
-  }
-
   if (attendeeToDeclined.host_declined) {
-    message.success(`${attendeeToDeclined.name} 已經被拒絕參加，無需再次操作！`)
+    message.error(`${attendeeToDeclined.name} 已經被拒絕參加，無需再次操作！`)
     return
   }
 
@@ -336,11 +293,6 @@ const handleCancelClick = async (id, activity_id) => {
 
   if (!attendeeToCancel) {
     message.error('找不到該參加者！')
-    return
-  }
-
-  if (registrationStatus.value === 'closed') {
-    message.success('目前報名已截止，無法操作。請返回開放報名繼續操作。')
     return
   }
 
@@ -442,7 +394,18 @@ const sendReplies = async () => {
   const attendeeToReply = attendee.value.find((item) => item.id === currentAttendeeId.value)
   if (attendeeToReply) {
     attendeeToReply.replies = [...selectedReplies.value]
+    const notiData = {
+      actor_id: userStore.user.uid, // 誰觸發了這個行為
+      user_id: attendeeToReply.number, // 這個行為對誰觸發
+      target_id: attendeeToReply.id, // 被行為的受詞id
+      action: 'review', // 行為 (目前僅有'create','register','like','comment','review', 'rate')
+      target_type: 'activity', // 行為類型 (目前僅有'activity','post','rating')
+      message: '回覆了你的報名', // 要顯示在提醒欄位的敘述
+      link: `/activity/detail/${activity_id}`, // 這個提醒要導向哪個頁面
+    }
 
+    // 送出提醒
+    socketStore.sendNotification(notiData)
     // 保存到 localStorage，key 為參加者 ID
     const storedReplies = JSON.parse(localStorage.getItem('attendeeReplies')) || {}
     storedReplies[currentAttendeeId.value] = attendeeToReply.replies
@@ -591,40 +554,13 @@ const sendReplies = async () => {
             </div>
 
             <div
-              class="flex justify-center items-center border-solid border-[3px] p-0.5 h-10 border-gray-200 rounded-full my-5 text-center max-w-[768px]"
-            >
-              <div
-                @click="openRegistration('open')"
-                :class="{
-                  'bg-green-600 text-white': registrationStatus === 'open',
-                  'text-gray-400 hover:text-sm hover:font-semibold hover:text-gray-500':
-                    registrationStatus !== 'open',
-                }"
-                class="w-1/2 p-1 text-[13px] rounded-full cursor-pointer transition-all"
-              >
-                <a href="#">開放報名</a>
-              </div>
-              <div
-                @click="closeRegistration('closed')"
-                :class="{
-                  'bg-green-600 text-white': registrationStatus === 'closed',
-                  'text-gray-400 hover:text-sm hover:font-semibold hover:text-gray-500':
-                    registrationStatus !== 'closed',
-                }"
-                class="w-1/2 p-1 text-[13px] rounded-full cursor-pointer transition-all"
-              >
-                <a href="#">截止報名</a>
-              </div>
-            </div>
-
-            <div
               class="mx-2 flex items-center bg-gray-100 text-gray-400 my-3 rounded-full transition-all duration-200"
             >
               <input
                 v-model="searchQuery"
                 type="text"
                 placeholder="🔍請輸入會員名稱進行搜尋"
-                class="bg-gray-100 h-10 w-full outline-none outline-[3px] focus:outline-yellow-400 p-2 rounded-full transition-all"
+                class="bg-gray-100 h-10 w-full outline-none outline-[3px] focus:outline-green-400 p-2 rounded-full transition-all"
               />
             </div>
 
@@ -709,10 +645,7 @@ const sendReplies = async () => {
                     @click="handleApproveClick(item.id, item.activity_id)"
                     v-if="!item.approved && !item.participant_cancelled && !item.host_declined"
                     :class="[
-                      'flex justify-center items-center w-32 h-8 py-2 mt-2 border-2 rounded-md text-sm transition-all duration-300',
-                      registrationStatus === 'closed' || item.approved
-                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                        : 'bg-green-500 hover:bg-green-600 text-white',
+                      'flex justify-center items-center w-32 h-8 py-2 mt-2 border-2 rounded-md text-sm transition-all duration-300 bg-green-500 hover:bg-green-600 text-white',
                     ]"
                   >
                     <span>{{ item.approved ? '已允許參加' : '允許參加' }}</span>
@@ -722,10 +655,7 @@ const sendReplies = async () => {
                     @click="handleCancelClick(item.id, item.activity_id)"
                     v-if="item.approved && !item.participant_cancelled && !item.host_declined"
                     :class="[
-                      'flex justify-center items-center w-32 h-8 py-2 mt-2 border-2 rounded-md text-sm transition-all duration-300',
-                      registrationStatus === 'closed' || item.rejected
-                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                        : 'bg-red-500 text-white border-red-600 hover:bg-red-600 hover:border-red-700',
+                      'flex justify-center items-center w-32 h-8 py-2 mt-2 border-2 rounded-md text-sm transition-all duration-300 bg-red-500 text-white border-red-600 hover:bg-red-600 hover:border-red-700',
                     ]"
                   >
                     <span>{{ item.cancelled ? '已取消參加' : '取消用戶參加' }}</span>
@@ -735,10 +665,7 @@ const sendReplies = async () => {
                     @click="handleDeclinedClick(item.id, item.activity_id)"
                     v-if="!item.participant_cancelled && !item.approved && !item.host_declined"
                     :class="[
-                      'flex justify-center items-center w-32 h-8 py-2 mt-2 border-2 rounded-md text-sm transition-all duration-300',
-                      registrationStatus === 'closed' || item.rejected
-                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                        : 'bg-red-500 text-white border-red-600 hover:bg-red-600 hover:border-red-700',
+                      'flex justify-center items-center w-32 h-8 py-2 mt-2 border-2 rounded-md text-sm transition-all duration-300 bg-red-500 text-white border-red-600 hover:bg-red-600 hover:border-red-700',
                     ]"
                   >
                     <span>{{ item.host_declined ? '已拒絕參加' : '拒絕用戶參加' }}</span>
@@ -753,10 +680,15 @@ const sendReplies = async () => {
                   <div class="text-[10px]">{{ item.date }}</div>
                   <button
                     @click="showQuickReply(item.id)"
-                    class="flex items-center ml-3 text-xs text-black hover:text-green-600"
+                    class="flex items-center ml-3 text-xs text-black hover:text-green-600 duration-0"
                   >
                     快速回覆
-                    <ArrowUpLeftSquareSolid width="14" height="14" class="mx-1" />
+                    <ArrowUpLeftSquareSolid
+                      width="14"
+                      height="14"
+                      class="mx-1"
+                      style="transition-duration: 0s"
+                    />
                   </button>
                 </div>
               </div>
