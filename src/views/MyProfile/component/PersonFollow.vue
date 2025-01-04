@@ -14,11 +14,11 @@ import { handleError } from '@/utils/handleError.js'
 const message = useMessage()
 const userStore = useUserStore()
 const route = useRoute()
-const owenerFollowerList = ref('')
-const owenerFollowingList = ref('')
+const owenerFollowerList = ref([])
+const owenerFollowingList = ref([])
 const id = route.params.uid
 const guestFollowing = ref(null)
-const guestFollowingList = ref('')
+const guestFollowingList = ref([])
 const activeTab = ref('chapt1')
 
 const unFollowFans = async (user) => {
@@ -199,8 +199,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div v-if="errorMessage">{{ errorMessage }}</div>
-  <div v-else class="min-h-screen">
+  <div class="min-h-screen">
     <n-tabs type="segment" animated v-model:value="activeTab">
       <n-tab-pane name="chap1" tab="關注中">
         <div v-if="owenerFollowingList.length > 0">
