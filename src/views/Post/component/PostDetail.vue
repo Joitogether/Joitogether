@@ -205,7 +205,7 @@ const toggleDelete = async () => {
     message.success('文章刪除成功')
 
     setTimeout(() => {
-      router.push('/post')
+      router.push('/posts')
     }, 1000)
   } catch (error) {
     handleError(message, undefined, error)

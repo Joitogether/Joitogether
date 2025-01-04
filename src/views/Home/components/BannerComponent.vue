@@ -1,9 +1,7 @@
 <script setup>
 import { NCarousel } from 'naive-ui'
 import { ref, onMounted, onUnmounted, watch } from 'vue'
-import joixmas from '@/assets/JoiXmas.jpg'
-import joixmasmobile from '@/assets/JoiXmasMobile.jpg'
-import joigif from '@/assets/joitogether.gif'
+
 import { useActivityStore } from '@/stores/useActivityStore'
 import { storeToRefs } from 'pinia'
 
@@ -17,10 +15,10 @@ const triggerCategory = (category) => {
 
 const carouselData = ref([
   {
-    src: joigif,
+    src: 'https://firebasestorage.googleapis.com/v0/b/login-demo1-9d3cb.firebasestorage.app/o/banner%2Fjoitogether.gif?alt=media&token=7e8664e1-cd3c-4db7-9289-c313aa62706d',
   },
   {
-    src: joixmas,
+    src: 'https://firebasestorage.googleapis.com/v0/b/login-demo1-9d3cb.firebasestorage.app/o/banner%2FJoiXmas.jpg?alt=media&token=0fffd1eb-95f8-4a04-8ad2-958aaf8886df',
   },
 ])
 
@@ -74,9 +72,15 @@ onUnmounted(() => {
 
 watch(isMobile, (newVal) => {
   if (newVal) {
-    carouselData.value[1].src = joixmasmobile
+    ;(carouselData.value[0].src =
+      'https://firebasestorage.googleapis.com/v0/b/login-demo1-9d3cb.firebasestorage.app/o/banner%2FgifMobile.gif?alt=media&token=8c56674d-2305-48f2-be00-69ac9134813f'),
+      (carouselData.value[1].src =
+        'https://firebasestorage.googleapis.com/v0/b/login-demo1-9d3cb.firebasestorage.app/o/banner%2FJoiXmasMobile.jpg?alt=media&token=69ff233b-b739-47e1-a6cb-eac8329dbc82')
   } else {
-    carouselData.value[1].src = joixmas
+    carouselData.value[0].src =
+      'https://firebasestorage.googleapis.com/v0/b/login-demo1-9d3cb.firebasestorage.app/o/banner%2Fjoitogether.gif?alt=media&token=7e8664e1-cd3c-4db7-9289-c313aa62706d'
+    carouselData.value[1].src =
+      'https://firebasestorage.googleapis.com/v0/b/login-demo1-9d3cb.firebasestorage.app/o/banner%2FJoiXmas.jpg?alt=media&token=0fffd1eb-95f8-4a04-8ad2-958aaf8886df'
   }
 })
 </script>

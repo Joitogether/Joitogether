@@ -668,37 +668,35 @@ const handleCardClick = () => {
                 >
                   <div class="flex w-full gap-3 md:gap-4">
                     <div
-                      class="w-14 h-14 aspect-square flex-shrink-0 rounded-full overflow-hidden md:w-20 md:h-20"
+                      class="w-14 h-14 aspect-square flex-shrink-0 rounded-full overflow-hidden md:w-14 md:h-14"
                     >
                       <img class="w-full h-full object-cover" :src="comment.photo_url" alt="" />
                     </div>
                     <div class="flex flex-col w-4/5 h-full md:w-10/12">
-                      <div class="flex flex-col justify-between">
-                        <div>
-                          <div class="flex justify-between items-center w-full">
-                            <p class="font-semibold text-sm">{{ comment.display_name }}</p>
-                            <n-dropdown
-                              :disabled="comment.uid !== userStore.user.uid"
-                              :on-select="(key) => handleDropSelect(key, comment.comment_id)"
-                              :options="options"
-                              placement="bottom"
-                              trigger="hover"
-                            >
-                              <n-button class="" text>
-                                <n-icon size="20">
-                                  <MoreVert></MoreVert>
-                                </n-icon>
-                              </n-button>
-                            </n-dropdown>
-                          </div>
-                          <p class="text-sm whitespace-pre-wrap tracking-wide">
-                            {{ comment.user_comment }}
-                          </p>
+                      <div>
+                        <div class="flex justify-between items-center w-full">
+                          <p class="font-semibold text-sm">{{ comment.display_name }}</p>
+                          <n-dropdown
+                            :disabled="comment.uid !== userStore.user.uid"
+                            :on-select="(key) => handleDropSelect(key, comment.comment_id)"
+                            :options="options"
+                            placement="bottom"
+                            trigger="hover"
+                          >
+                            <n-button class="" text>
+                              <n-icon size="20">
+                                <MoreVert></MoreVert>
+                              </n-icon>
+                            </n-button>
+                          </n-dropdown>
                         </div>
-                        <p class="text-sm text-gray-400">
-                          {{ dayjs(comment.created_at).fromNow() }}
+                        <p class="text-sm whitespace-pre-wrap tracking-wide">
+                          {{ comment.user_comment }}
                         </p>
                       </div>
+                      <p class="text-sm text-gray-400">
+                        {{ dayjs(comment.created_at).fromNow() }}
+                      </p>
                     </div>
                   </div>
                 </div>

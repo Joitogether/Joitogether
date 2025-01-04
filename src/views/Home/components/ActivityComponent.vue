@@ -206,6 +206,7 @@ const handleClearFilters = () => {
                 :min="todayString"
                 style="outline: none"
                 @change="setStartDate($event.target.value)"
+                placeholder="活動日期"
               />
             </span>
           </div>
