@@ -44,7 +44,7 @@ const openModal = () => {
 
 const fetchFollowingData = async () => {
   const response = await userGetFollowingAPI(userStore.user.uid)
-  const found = response.data.find((list) => list.user_id == props.id)
+  const found = response.find((list) => list.user_id == props.id)
   if (found) {
     meFollowing.value = found
     return meFollowing.value.isFollowing

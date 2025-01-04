@@ -1,6 +1,6 @@
 <script setup>
 import { nextTick, onMounted, ref } from 'vue'
-import { NTabs, NTabPane, NButton } from 'naive-ui'
+import { NTabs, NTabPane, NButton, useMessage } from 'naive-ui'
 import {
   userGetFollowerAPI,
   userGetFollowingAPI,
@@ -9,7 +9,9 @@ import {
 } from '../../../apis/userAPIs'
 import { useRoute } from 'vue-router'
 import { useUserStore } from '@/stores/userStore'
+import { handleError } from '@/utils/handleError.js'
 
+const message = useMessage()
 const userStore = useUserStore()
 const route = useRoute()
 const owenerFollowerList = ref('')
@@ -19,13 +21,108 @@ const guestFollowing = ref(null)
 const guestFollowingList = ref('')
 const activeTab = ref('chapt1')
 
+const unFollowFans = async (user) => {
+  try {
+    await userUnfollowersAPI(user.id)
+    user.isFollowing = false
+    await fetchFollowerData()
+  } catch (error) {
+    handleError(message, undefined, error)
+  }
+}
+// 當前頁面的使用者追蹤資料＋登入中的使用者追蹤資料
+const fetchFollowerData = async () => {
+  try {
+    const [owenerFollowerResponse, owenerFollowingResponse, guestFollowingResponse] =
+      await Promise.all([
+        userGetFollowerAPI(id),
+        userGetFollowingAPI(id),
+        userGetFollowingAPI(userStore.user.uid),
+      ])
+
+    if (owenerFollowingResponse.length > 0) {
+      owenerFollowingList.value = owenerFollowingResponse.map((item) => {
+        const userData = item.users_followers_user_idTousers
+
+        return {
+          id: item.id,
+          user_id: item.user_id,
+          display_name: userData.display_name,
+          favorite_sentence: userData.favorite_sentence,
+          photo_url: userData.photo_url,
+          isFollowing: item.isFollowing,
+        }
+      })
+    }
+
+    if (owenerFollowerResponse.length > 0) {
+      // 此頁面的人的粉絲
+      const followerSet = new Set(owenerFollowingResponse.map((item) => item.user_id))
+
+      // 將粉絲資料轉換為所需格式並處理 isFollowing 和 guestFollowing
+      owenerFollowerList.value = owenerFollowerResponse.map((item) => {
+        const followerData = item.users_followers_follower_idTousers
+
+        return {
+          id: item.id,
+          display_name: followerData.display_name,
+          favorite_sentence: followerData.favorite_sentence,
+          photo_url: followerData.photo_url,
+          follower_id: item.follower_id,
+          isFollowing: followerSet.has(item.follower_id),
+          guestFollowing: false,
+        }
+      })
+    }
+
+    if (guestFollowingResponse.length > 0) {
+      // 來到此頁面的使用者的追蹤名單
+      guestFollowingList.value = guestFollowingResponse
+      const guestFollowerSet = new Set(owenerFollowerList.value.map((item) => item.follower_id))
+      const guestFollowingSet = new Set(owenerFollowingList.value.map((item) => item.user_id))
+
+      const commonFollowerInFansPage = new Set(
+        guestFollowingList.value
+          .filter((item) => guestFollowerSet.has(item.user_id))
+          .map((item) => item.user_id),
+      )
+      const commonFollowerInFollowingPage = new Set(
+        guestFollowingList.value
+          .filter((item) => guestFollowingSet.has(item.user_id))
+          .map((item) => item.user_id),
+      )
+
+      // 若存在於 followerSet 中，則新增 guestFollowing 欄位
+      owenerFollowerList.value.forEach((follower) => {
+        if (commonFollowerInFansPage.has(follower.follower_id)) {
+          follower.guestFollowing = true
+        } else {
+          follower.guestFollowing = false
+        }
+      })
+      guestFollowing.value = guestFollowingList.value.filter((item) =>
+        commonFollowerInFansPage.has(item.user_id),
+      )
+
+      owenerFollowingList.value.forEach((following) => {
+        if (commonFollowerInFollowingPage.has(following.user_id)) {
+          following.guestFollowing = true
+        } else {
+          following.guestFollowing = false
+        }
+      })
+    }
+  } catch (error) {
+    handleError(message, undefined, error)
+  }
+}
+// 本人看到自己頁面的關注中區域按鈕
 const toggleFollow = async (user) => {
   try {
     if (user.isFollowing) {
       await userUnfollowersAPI(user.id)
       await fetchFollowerData()
     } else {
-      // 新增追蹤
       await userFollowersAddAPI({
         user_id: user.follower_id,
         follower_id: id,
@@ -34,98 +131,11 @@ const toggleFollow = async (user) => {
       await fetchFollowerData()
     }
   } catch (error) {
-    console.error('操作失敗', error)
+    handleError(message, undefined, error)
   }
 }
 
-const unFollowFans = async (user) => {
-  await userUnfollowersAPI(user.id)
-  user.isFollowing = false
-  await fetchFollowerData()
-}
-// 當前頁面的使用者追蹤資料＋登入中的使用者資料
-const fetchFollowerData = async () => {
-  const [owenerFollowerResponse, owenerFollowingResponse, guestFollowingResponse] =
-    await Promise.all([
-      userGetFollowerAPI(id),
-      userGetFollowingAPI(id),
-      userGetFollowingAPI(userStore.user.uid),
-    ])
-  if (owenerFollowingResponse) {
-    owenerFollowingList.value = owenerFollowingResponse.data.map((item) => {
-      const userData = item.users_followers_user_idTousers
-
-      return {
-        id: item.id,
-        user_id: item.user_id,
-        display_name: userData.display_name,
-        favorite_sentence: userData.favorite_sentence,
-        photo_url: userData.photo_url,
-        isFollowing: item.isFollowing,
-      }
-    })
-  }
-
-  if (owenerFollowerResponse) {
-    // 此頁面的人的粉絲
-    const followerSet = new Set(owenerFollowingResponse.data.map((item) => item.user_id))
-
-    // 將粉絲資料轉換為所需格式並處理 isFollowing 和 guestFollowing
-    owenerFollowerList.value = owenerFollowerResponse.data.map((item) => {
-      const followerData = item.users_followers_follower_idTousers
-
-      return {
-        id: item.id,
-        display_name: followerData.display_name,
-        favorite_sentence: followerData.favorite_sentence,
-        photo_url: followerData.photo_url,
-        follower_id: item.follower_id,
-        isFollowing: followerSet.has(item.follower_id),
-        guestFollowing: false,
-      }
-    })
-  }
-
-  if (guestFollowingResponse) {
-    // 來到此頁面的使用者的追蹤名單
-    guestFollowingList.value = guestFollowingResponse.data
-    const guestFollowerSet = new Set(owenerFollowerList.value.map((item) => item.follower_id))
-    const guestFollowingSet = new Set(owenerFollowingList.value.map((item) => item.user_id))
-
-    const commonFollowerInFansPage = new Set(
-      guestFollowingList.value
-        .filter((item) => guestFollowerSet.has(item.user_id))
-        .map((item) => item.user_id),
-    )
-    const commonFollowerInFollowingPage = new Set(
-      guestFollowingList.value
-        .filter((item) => guestFollowingSet.has(item.user_id))
-        .map((item) => item.user_id),
-    )
-
-    // 若存在於 followerSet 中，則新增 guestFollowing 欄位
-    owenerFollowerList.value.forEach((follower) => {
-      if (commonFollowerInFansPage.has(follower.follower_id)) {
-        follower.guestFollowing = true
-      } else {
-        follower.guestFollowing = false
-      }
-    })
-    guestFollowing.value = guestFollowingList.value.filter((item) =>
-      commonFollowerInFansPage.has(item.user_id),
-    )
-
-    owenerFollowingList.value.forEach((following) => {
-      if (commonFollowerInFollowingPage.has(following.user_id)) {
-        following.guestFollowing = true
-      } else {
-        following.guestFollowing = false
-      }
-    })
-  }
-}
-
-//本人看到自己頁面的按鈕
+//本人看到自己頁面的粉絲區域按鈕
 const fansPageToggleFollow = async (user) => {
   if (user.isFollowing) {
     const findResult = owenerFollowingList.value.find(
