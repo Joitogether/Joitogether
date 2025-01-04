@@ -74,7 +74,17 @@ const emit = defineEmits(['edit', 'close'])
   <div class="py-8 px-8 border border-gray-300 rounded-md md:flex md:justify-between md:gap-5">
     <div class="md:w-1/3 md:flex md:items-center">
       <div class="img-container w-40 h-40 rounded-full overflow-hidden mx-auto mb-3">
-        <img class="card-img w-full h-full object-cover" :src="props.photo_url" alt="personImg" />
+        <img
+          v-if="props.photo_url"
+          class="card-img w-full h-full object-cover"
+          :src="props.photo_url"
+          alt="personImg"
+        />
+        <img
+          v-else
+          src="https://firebasestorage.googleapis.com/v0/b/login-demo1-9d3cb.firebasestorage.app/o/avatars%2Fcatavatar.png?alt=media&token=ccd02591-0c4f-435c-9a4a-34f219774558"
+          alt="default avatar"
+        />
       </div>
     </div>
     <div class="card-content-container flex flex-col gap-2 md:w-2/3 md:flex md:items-start">
