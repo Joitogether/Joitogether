@@ -5,6 +5,7 @@ import { createPostAPI } from '@/apis/postAPIs'
 import { useMessage, NButton, NModal } from 'naive-ui'
 import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage'
 import { handleError } from '@/utils/handleError.js'
+import { useSocketStore } from '@/stores/socketStore.js'
 
 // 版面欄位
 const showModal = ref(false)
@@ -26,6 +27,7 @@ const newPostTitle = ref('')
 const newPostContent = ref('')
 const newPostCategory = ref(null)
 const imageUrl = ref(null)
+const socketStore = useSocketStore()
 
 const postCategories = [
   { label: '美食', value: 'food' },
@@ -35,6 +37,14 @@ const postCategories = [
   { label: '教育', value: 'education' },
   { label: '其他', value: 'others' },
 ]
+
+const handleNewPost = () => {
+  if (!userStore.user.isLogin) {
+    message.error('登入後就可以發廢文囉！')
+  } else {
+    showModal.value = true
+  }
+}
 
 // 新增文章
 const handleSubmit = async () => {
@@ -69,10 +79,25 @@ const handleSubmit = async () => {
     post_img: imageUrl.value || '',
   }
   try {
-    await createPostAPI(postData)
+    const response = await createPostAPI(postData)
+    const postId = response.data.post_id
+
     message.success('文章新增成功')
     emit('update')
     showModal.value = true
+
+    const notiData = {
+      actor_id: userStore.user.uid,
+      user_id: postData.uid,
+      target_id: postId,
+      action: 'create',
+      target_type: 'post',
+      message: '發表了新文章',
+      link: `/post/${postId}`,
+    }
+
+    socketStore.sendNotification(notiData) // 送出提醒
+
     setTimeout(() => {
       showModal.value = false
       newPostTitle.value = ''
@@ -209,8 +234,12 @@ watch(showModal, (newValue) => {
       <div class="mb-0 text-lg font-xl ml-5">
         (｡•̀ᴗ-)✧ {{ userStore.user.display_name || '訪客' }}
       </div>
-      <n-button @click="showModal = true" class="w-100 m-4 rounded-full">
-        📝 記錄一刻，分享所有 🐾
+      <n-button
+        :disabled="!userStore.user.isLogin"
+        @click="handleNewPost"
+        class="w-100 m-4 rounded-full"
+      >
+        {{ userStore.user.isLogin ? '📝 記錄一刻，分享所有 🐾' : '登入就可以發廢文囉💃' }}
       </n-button>
     </div>
   </div>

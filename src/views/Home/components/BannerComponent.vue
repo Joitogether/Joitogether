@@ -1,24 +1,24 @@
 <script setup>
 import { NCarousel } from 'naive-ui'
 import { ref, onMounted, onUnmounted, watch } from 'vue'
-import joixmas from '@/assets/JoiXmas.jpg'
-import joixmasmobile from '@/assets/JoiXmasMobile.jpg'
-import joigif from '@/assets/joitogether.gif'
+
 import { useActivityStore } from '@/stores/useActivityStore'
+import { storeToRefs } from 'pinia'
 
 const activityStore = useActivityStore()
+const { triggerAction } = storeToRefs(activityStore)
 const { triggerActivityAction } = activityStore
 
-const handleCategoryClick = (category) => {
+const triggerCategory = (category) => {
   triggerActivityAction(category)
 }
 
 const carouselData = ref([
   {
-    src: joigif,
+    src: 'https://firebasestorage.googleapis.com/v0/b/login-demo1-9d3cb.firebasestorage.app/o/banner%2Fjoitogether.gif?alt=media&token=7e8664e1-cd3c-4db7-9289-c313aa62706d',
   },
   {
-    src: joixmas,
+    src: 'https://firebasestorage.googleapis.com/v0/b/login-demo1-9d3cb.firebasestorage.app/o/banner%2FJoiXmas.jpg?alt=media&token=0fffd1eb-95f8-4a04-8ad2-958aaf8886df',
   },
 ])
 
@@ -26,32 +26,32 @@ const areaData = [
   {
     title: '美食',
     src: 'https://i.pinimg.com/originals/c3/61/70/c3617019ad42a99b25365c51060fec2f.gif',
-    targetId: '美食',
+    targetId: 'food',
   },
   {
     title: '購物',
     src: 'https://i.pinimg.com/originals/ff/fc/5a/fffc5a92c68455f331036891970b1fb9.gif',
-    targetId: '購物',
+    targetId: 'shopping',
   },
   {
     title: '旅遊',
     src: 'https://i.pinimg.com/originals/49/77/3b/49773b089b09c93a7885699500633691.gif',
-    targetId: '旅遊',
+    targetId: 'travel',
   },
   {
     title: '運動',
     src: 'https://i.pinimg.com/originals/bf/3e/73/bf3e73c60355c69103555b2083d1822d.gif',
-    targetId: '運動',
+    targetId: 'sports',
   },
   {
     title: '教育',
     src: 'https://i.pinimg.com/originals/f0/4f/4e/f04f4e57612f6d0426e725dadb334e42.gif',
-    targetId: '教育',
+    targetId: 'education',
   },
   {
     title: '其他',
     src: 'https://i.pinimg.com/originals/5a/b5/9a/5ab59a91d9c8d3cc19be0cff707a1f60.gif',
-    targetId: '其他',
+    targetId: 'others',
   },
 ]
 
@@ -72,9 +72,15 @@ onUnmounted(() => {
 
 watch(isMobile, (newVal) => {
   if (newVal) {
-    carouselData.value[1].src = joixmasmobile
+    ;(carouselData.value[0].src =
+      'https://firebasestorage.googleapis.com/v0/b/login-demo1-9d3cb.firebasestorage.app/o/banner%2FgifMobile.gif?alt=media&token=8c56674d-2305-48f2-be00-69ac9134813f'),
+      (carouselData.value[1].src =
+        'https://firebasestorage.googleapis.com/v0/b/login-demo1-9d3cb.firebasestorage.app/o/banner%2FJoiXmasMobile.jpg?alt=media&token=69ff233b-b739-47e1-a6cb-eac8329dbc82')
   } else {
-    carouselData.value[1].src = joixmas
+    carouselData.value[0].src =
+      'https://firebasestorage.googleapis.com/v0/b/login-demo1-9d3cb.firebasestorage.app/o/banner%2Fjoitogether.gif?alt=media&token=7e8664e1-cd3c-4db7-9289-c313aa62706d'
+    carouselData.value[1].src =
+      'https://firebasestorage.googleapis.com/v0/b/login-demo1-9d3cb.firebasestorage.app/o/banner%2FJoiXmas.jpg?alt=media&token=0fffd1eb-95f8-4a04-8ad2-958aaf8886df'
   }
 })
 </script>
@@ -99,7 +105,11 @@ watch(isMobile, (newVal) => {
               class="grid w-4/5 gap-12 grid-cols-2 cursor-pointer md:w-1/2 md:grid-cols-3 md:gap-14 lg:grid-cols-6 lg:w-full"
             >
               <div v-for="area in areaData" :key="area.title" class="">
-                <div @click.prevent="handleCategoryClick(area.targetId)" class="w-full">
+                <div
+                  @click.prevent="triggerCategory(area.targetId)"
+                  class="w-full"
+                  :class="{ active: triggerAction === category }"
+                >
                   <img
                     :src="area.src"
                     alt=""

@@ -101,8 +101,8 @@ onMounted(() => {
 </script>
 
 <template>
-  <div id="webcrumbs">
-    <div class="m-auto w-[1000px] bg-white shadow rounded-lg p-6 text-neutral-950">
+  <div id="webcrumbs" class="bg-gray-100">
+    <div class="m-auto w-full bg-white shadow rounded-lg p-6">
       <!-- Header -->
       <header class="text-center text-2xl font-bold mb-6">購物車</header>
 
@@ -125,17 +125,17 @@ onMounted(() => {
           class="border-solid flex items-start gap-4"
         >
           <input type="checkbox" v-model="item.Selected" class="mt-4" />
-          <div class="flex items-stretch gap-4 flex-1">
-            <div class="w-[200px] h-[200px] bg-neutral-200 rounded-md">
+          <div class="flex gap-1 bg-gray-200 w-full px-2">
+            <div class="w-14 h-14 bg-neutral-200 rounded-md overflow-hidden flex-shrink-0">
               <img :src="item.image" alt="商品圖片" class="w-full h-full object-cover" />
             </div>
-            <div class="flex-1 space-y-4">
-              <div class="w-full bg-slate-50 rounded-md px-3 py-2">{{ item.name }}</div>
-              <div class="w-full rounded-md px-3 py-2">{{ item.location }}</div>
-              <div class="w-full rounded-md px-3 py-2">{{ item.time }}</div>
-              <div class="w-full rounded-md px-3 py-2 font-bold text-red-500">
-                NT$ {{ item.price }}
+            <div class="flex-1">
+              <div class="w-full bg-slate-50 rounded-sm font-bold truncate">
+                {{ item.name }}
               </div>
+              <div class="w-full rounded-md truncate">{{ item.location }}</div>
+              <div class="w-full rounded-md">{{ item.time }}</div>
+              <div class="w-full rounded-md font-bold text-red-500">NT$ {{ item.price }}</div>
             </div>
           </div>
         </div>

@@ -33,29 +33,40 @@ const props = defineProps({
           id: props.id || 0,
         },
       }"
-      :class="{ ['flex']: props.horizontal }"
     >
-      <div class="flex gap-2 w-full md:justify-start md:gap-4">
-        <div class="w-24 rounded-md aspect-square overflow-hidden flex-shrink-0">
+      <div
+        class="gap-2 w-full overflow-hidden md:justify-start md:gap-4"
+        :class="{ ['flex']: props.horizontal }"
+      >
+        <div
+          class="w-24 h-24 rounded-md overflow-hidden flex-shrink-0"
+          :class="{ 'w-full h-64': !props.horizontal }"
+        >
           <img class="w-full h-full object-cover" :src="props.actImgUrl" alt="圖片不見了ＱＱ" />
         </div>
         <div
-          :class="{ 'horizontal-layout-container': props.horizontal }"
           class="flex flex-col w-3/4 justify-between md:w-4/5 lg:w-2/3"
+          :class="{ 'md:w-full lg:w-full': !props.horizontal }"
         >
-          <div class="flex flex-col">
-            <div class="text-base font-semibold truncate">{{ props.title }}</div>
+          <div class="flex flex-col" :class="{ 'mt-2 gap-1 w-full': !props.horizontal }">
+            <div class="text-base font-semibold truncate" :class="{ 'text-lg': !props.horizontal }">
+              {{ props.title }}
+            </div>
             <div class="text-sm truncate">{{ props.location }}</div>
             <div class="text-sm text-gray-500 truncate">時間:{{ props.dateTime }}</div>
           </div>
-          <div class="flex items-center justify-between text-sm">
+          <div
+            class="flex items-center justify-between text-sm"
+            :class="{ 'mt-2': !props.horizontal }"
+          >
             <div class="flex items-center">
               <div class="w-6 h-6 overflow-hidden rounded-full mr-1">
                 <img class="w-full h-full object-cover" :src="props.hostImgUrl" alt="團主頭像" />
               </div>
               <span>{{ props.host }}</span>
             </div>
-            <div class="flex items-center lg:hidden">活動人數上限: {{ props.participants }}</div>
+            <div v-if="!props.horizontal" class="lg:flex">上限人數: {{ props.participants }}</div>
+            <div v-else class="hidden md:block lg:hidden">上限人數: {{ props.participants }}</div>
           </div>
         </div>
       </div>

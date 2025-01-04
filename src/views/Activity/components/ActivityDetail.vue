@@ -129,48 +129,47 @@ const validateRegister = async () => {
   return true
 }
 const registerActivity = async () => {
-  if (!userStore.user.uid) {
+  try {
+    if (!userStore.user.uid) {
+      toggleRegisterModal()
+      return message.error('您尚未登入，請先登入才能繼續此操作')
+    }
+    const status = await validateRegister()
+    if (!status) {
+      return toggleRegisterModal()
+    }
+    const data = {
+      participant_id: userStore.user.uid,
+      comment: registerComment.value,
+      register_validated: !activity.value.require_approval ? 1 : 0,
+    }
+    // const messageReactive = message.info('報名中...', { duration: 0 })
+    await activityRegisterAPI(activityId, data)
+
+    await getActivityDetail()
+
+    //報名成功
+    message.success('報名成功！')
+    const notiData = {
+      actor_id: userStore.user.uid,
+      user_id: activity.value.host_id,
+      target_id: activity.value.id,
+      action: 'register',
+      target_type: 'activity',
+      message: '報名了你的活動',
+      link: `/activity/detail/${activity.value.id}`,
+    }
+    // 送通知
+    socketStore.sendNotification(notiData)
     toggleRegisterModal()
-    return message.error('您尚未登入，請先登入才能繼續此操作')
-  }
-  const status = await validateRegister()
-  if (!status) {
-    return toggleRegisterModal()
-  }
-  const data = {
-    participant_id: userStore.user.uid,
-    comment: registerComment.value,
-    register_validated: !activity.value.require_approval ? 1 : 0,
-  }
-  // const messageReactive = message.info('報名中...', { duration: 0 })
-  const res = await activityRegisterAPI(activityId, data)
-  // messageReactive.destroy()
-  if (res.status !== 201) {
-    if (res.message === '報名上限已達') {
+  } catch (error) {
+    if (error.response?.data?.message == '報名上限已達') {
       message.error('報名已達上限')
     } else {
-      message.error('報名失敗，請稍後再試')
+      message.error('報名發生錯誤，請稍後再試')
     }
     toggleRegisterModal()
-    return
   }
-
-  await getActivityDetail()
-
-  //報名成功
-  message.success('報名成功！')
-  const notiData = {
-    actor_id: userStore.user.uid,
-    user_id: activity.value.host_id,
-    target_id: activity.value.id,
-    action: 'register',
-    target_type: 'activity',
-    message: '報名了你的活動',
-    link: `/activity/detail/${activity.value.id}`,
-  }
-  // 送通知
-  socketStore.sendNotification(notiData)
-  toggleRegisterModal()
 }
 
 // 根據活動判斷當前使用者是否為主辦者
@@ -190,6 +189,13 @@ const isRegistered = computed(() => {
     (participant) =>
       participant.participant_id === userStore.user.uid &&
       (participant.status === 'registered' || participant.status == 'approved'),
+  )
+})
+
+const isValidated = computed(() => {
+  return activity.value.applications?.some(
+    (participant) =>
+      participant.participant_id === userStore.user.uid && participant.register_validated,
   )
 })
 
@@ -372,7 +378,9 @@ const handleCardClick = () => {
           <router-link :to="{ name: 'home' }">
             <NavArrowLeft stroke-width="2" class="w-6 h-6"></NavArrowLeft>
           </router-link>
-          <div class="flex items-center absolute left-1/2 transform -translate-x-1/2 gap-2">
+          <div
+            class="flex items-center absolute left-1/2 transform -translate-x-1/2 gap-2 lg:hidden"
+          >
             <div class="w-10 aspect-square rounded-full overflow-hidden">
               <img class="w-full h-full object-cover" :src="host.photo_url" alt="" />
             </div>
@@ -380,7 +388,13 @@ const handleCardClick = () => {
           </div>
         </div>
         <div class="lg:flex lg:gap-3">
-          <div class="bg-white p-5 lg:w-3/5 lg:rounded-md">
+          <div class="bg-white px-5 pb-5 pt-3 lg:w-3/5 lg:rounded-md">
+            <div class="hidden lg:flex items-center gap-2 border-b-2 pb-2">
+              <div class="w-10 aspect-square rounded-full overflow-hidden">
+                <img class="w-full h-full object-cover" :src="host.photo_url" alt="" />
+              </div>
+              <p class="font-bold text-lg">{{ host.display_name }}</p>
+            </div>
             <div class="overflow-hidden rounded-md">
               <img class="w-full h-full object-cover" :src="activity.img_url" alt="" />
             </div>
@@ -472,17 +486,12 @@ const handleCardClick = () => {
                     round
                     type="primary"
                     @click="toggleConfirmModal"
-                    >取消報名</NButton
+                    >取消報名{{ isValidated ? ' / 您已具備參加資格' : '' }}</NButton
                   >
                 </div>
               </div>
               <div v-else>
-                <NButton
-                  v-if="!isRegistered"
-                  disabled
-                  class="w-full mt-3 font-bold text-lg py-5"
-                  round
-                  type="primary"
+                <NButton disabled class="w-full mt-3 font-bold text-lg py-5" round type="primary"
                   >該活動已遭團主取消</NButton
                 >
               </div>
@@ -660,30 +669,32 @@ const handleCardClick = () => {
                 >
                   <div class="flex w-full gap-3 md:gap-4">
                     <div
-                      class="w-14 h-14 aspect-square rounded-full overflow-hidden md:w-20 md:h-20"
+                      class="w-14 h-14 aspect-square flex-shrink-0 rounded-full overflow-hidden md:w-14 md:h-14"
                     >
                       <img class="w-full h-full object-cover" :src="comment.photo_url" alt="" />
                     </div>
-                    <div class="flex flex-col w-4/5 md:w-10/12">
-                      <div class="flex justify-between items-center w-full">
-                        <p class="font-semibold text-sm">{{ comment.display_name }}</p>
-                        <n-dropdown
-                          :disabled="comment.uid !== userStore.user.uid"
-                          :on-select="(key) => handleDropSelect(key, comment.comment_id)"
-                          :options="options"
-                          placement="bottom"
-                          trigger="hover"
-                        >
-                          <n-button class="" text>
-                            <n-icon size="20">
-                              <MoreVert></MoreVert>
-                            </n-icon>
-                          </n-button>
-                        </n-dropdown>
+                    <div class="flex flex-col w-4/5 h-full md:w-10/12">
+                      <div>
+                        <div class="flex justify-between items-center w-full">
+                          <p class="font-semibold text-sm">{{ comment.display_name }}</p>
+                          <n-dropdown
+                            :disabled="comment.uid !== userStore.user.uid"
+                            :on-select="(key) => handleDropSelect(key, comment.comment_id)"
+                            :options="options"
+                            placement="bottom"
+                            trigger="hover"
+                          >
+                            <n-button class="" text>
+                              <n-icon size="20">
+                                <MoreVert></MoreVert>
+                              </n-icon>
+                            </n-button>
+                          </n-dropdown>
+                        </div>
+                        <p class="text-sm whitespace-pre-wrap tracking-wide">
+                          {{ comment.user_comment }}
+                        </p>
                       </div>
-                      <p class="text-sm whitespace-pre-wrap tracking-wide">
-                        {{ comment.user_comment }}
-                      </p>
                       <p class="text-sm text-gray-400">
                         {{ dayjs(comment.created_at).fromNow() }}
                       </p>
@@ -710,7 +721,7 @@ const handleCardClick = () => {
               :hostImgUrl="item.users.photo_url"
               :participants="item.max_participants"
               @click="handleCardClick(item)"
-              class="w-full border-b-2 pb-3 overflow-hidden md:border-none md:bg-gray-100 md:mb-3 md:rounded-md md:px-5 md:hover:bg-gray-200 lg:px-4"
+              class="w-full border-b-2 pb-3 overflow-hidden md:border-none md:bg-gray-100 md:mb-3 md:rounded-md md:px-5 md:hover:bg-gray-200 lg:px-4 hover:scale-[1.05] transition-all duration-300"
             ></ActivityCard>
           </div>
         </div>

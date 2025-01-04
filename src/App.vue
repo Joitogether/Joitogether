@@ -1,7 +1,24 @@
 <script setup>
+import { ref, onMounted } from 'vue'
 import { NConfigProvider, NDialogProvider, NMessageProvider } from 'naive-ui'
 import { getCurrentUser } from './utils/firebaseConfig'
-import { onMounted } from 'vue'
+import catLoading from './views/Home/components/catLoading.vue'
+import { useRouter } from 'vue-router'
+
+const loadingRef = ref(null)
+const router = useRouter()
+
+// 監聽路由變化
+router.beforeEach((to, from, next) => {
+  loadingRef.value?.show()
+  next()
+})
+
+router.afterEach(() => {
+  setTimeout(() => {
+    loadingRef.value?.hide()
+  }, 500) // 適當延遲確保頁面已加載完成
+})
 
 onMounted(async () => {
   await getCurrentUser()
@@ -13,6 +30,7 @@ onMounted(async () => {
     <n-dialog-provider>
       <n-message-provider>
         <div id="loading-overlay"></div>
+        <catLoading ref="loadingRef" />
         <router-view />
       </n-message-provider>
     </n-dialog-provider>

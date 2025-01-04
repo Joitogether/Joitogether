@@ -11,10 +11,8 @@ const oneRecord = ref(null)
 
 const getOneTopupStatus = async () => {
   const id = route.params.id
-  console.log('result page id', id)
 
   const response = await getTopupRecordAPI(userStore.user.uid)
-  console.log('result page', response)
 
   if (response) {
     oneRecord.value = response.find((record) => record.id == id)

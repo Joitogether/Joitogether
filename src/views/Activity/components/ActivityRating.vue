@@ -66,7 +66,6 @@ const getDetailForRating = async () => {
     hostInfo.value = res.activity.users || {}
     hostRatingAverage.value = res.hostRatingAverage['_avg'] || {}
     latestHostRating.value = res.latestHostRating || null
-    console.log(latestHostRating.value)
   } catch (error) {
     activityDetail.value = {}
     hostInfo.value = {}
@@ -161,34 +160,31 @@ watch(
 </script>
 
 <template>
-  <body class="bg-gray-100 w-full">
+  <body class="bg-gray-50 p-10 min-w-[400px]">
     <!-- 活動評價 -->
-    <div class="flex flex-col w-full p-5 bg-white rounded-md mx-auto md:w-3/4 lg:w-3/5">
+    <div
+      class="flex flex-col w-full min-w-[650px] max-w-[1440px] m-auto p-5 bg-gray-100 rounded-2xl border-2 border-gray-200"
+    >
       <div
         v-if="step == 0"
-        class="relative flex flex-col gap-2 before:content-[''] before:absolute before:left-0 before:top-0 before:bottom-2 before:w-2 before:h-7 before: before:bg-green-600"
+        class="relative px-5 before:content-[''] before:absolute before:left-0 before:top-2 before:bottom-2 before:w-2 before: before:bg-blue-500"
       >
-        <div class="flex px-5">
-          <div class="mr-2 text-lg xl:text-2xl md:text-xl">活動評價</div>
-          <div class="text-green-600 text-lg font-bold xl:text-3xl md:text-xl">團主評價</div>
-        </div>
-        <div class="text-2xl text-gray-800 font-bold tracking-wider break-words lg:text-3xl">
-          {{ activityDetail.name }}
-        </div>
+        <div class="text-sm xl:text-2xl md:text-xl">活動評價</div>
+        <div class="text-gray-600 text-sm font-bold xl:text-3xl md:text-xl">團主評價</div>
       </div>
       <div
         v-else-if="step == 1"
-        class="relative flex px-5 before:content-[''] before:absolute before:left-0 before:top-0 before:bottom-2 before:w-2 before:h-7 before: before:bg-green-600"
+        class="relative px-5 before:content-[''] before:absolute before:left-0 before:top-2 before:bottom-2 before:w-2 before: before:bg-blue-500"
       >
-        <div class="mr-2 text-lg xl:text-2xl md:text-xl">活動評價</div>
-        <div class="text-green-600 text-sm font-bold xl:text-3xl md:text-xl">追蹤活動</div>
+        <div class="text-sm xl:text-2xl md:text-xl">活動評價</div>
+        <div class="text-gray-600 text-sm font-bold xl:text-3xl md:text-xl">追蹤活動</div>
       </div>
       <div
         v-else-if="step == 2"
-        class="relative flex px-5 before:content-[''] before:absolute before:left-0 before:top-0 before:bottom-2 before:w-2 before:h-7 before: before:bg-green-600"
+        class="relative px-5 before:content-[''] before:absolute before:left-0 before:top-2 before:bottom-2 before:w-2 before: before:bg-blue-500"
       >
-        <div class="mr-2 text-lg xl:text-2xl md:text-xl">活動評價</div>
-        <div class="text-green-600 text-sm font-bold xl:text-3xl md:text-xl">完成評價</div>
+        <div class="text-sm xl:text-2xl md:text-xl">活動評價</div>
+        <div class="text-gray-600 text-sm font-bold xl:text-3xl md:text-xl">完成評價</div>
       </div>
 
       <!-- 評分進度 -->
@@ -198,7 +194,7 @@ watch(
         <div>
           <!-- 團主評價到此頁面的進度顯示-->
           <div
-            :class="{ 'text-green-600': step == 0, 'text-gray-300': step != 0 }"
+            :class="{ 'text-blue-600': step == 0, 'text-gray-300': step != 0 }"
             class="flex justify-center items-center font-bold tracking-widest"
           >
             <CheckCircleSolid v-if="step == 0" class="mr-1" />團主評價
@@ -208,7 +204,7 @@ watch(
         <div>
           <!-- 還沒到追蹤評價頁面的進度顯示-->
           <div
-            :class="{ 'text-green-600': step == 1, 'text-gray-300': step != 1 }"
+            :class="{ 'text-blue-600': step == 1, 'text-gray-300': step != 1 }"
             class="flex justify-center items-center font-bold tracking-widest"
           >
             <CheckCircleSolid v-if="step == 1" class="mr-1" />
@@ -231,12 +227,13 @@ watch(
         </div>
       </div>
       <!-- 活動區域 -->
-      <div class="flex w-full">
+      <div class="flex w-full min-w-[600px]">
         <!-- 照片 -->
-        <div class="flex w-full flex-col">
-          <div class="w-full h-full overflow-hidden">
-            <img :src="activityDetail.img_url" class="w-full h-full object-cover" />
-          </div>
+        <div class="flex w-full aspect-video xs:hidden sm:w-full md:w-full lg:flex">
+          <img
+            :src="activityDetail.img_url"
+            class="w-full h-full xs:w-full sm:w-full md:w-full object-cover"
+          />
         </div>
         <!-- 活動資訊 -->
         <div
@@ -315,52 +312,57 @@ watch(
             <div class="mt-3 text-xs font-bold text-gray-600 xl:text-base xl:p-1">
               其他用戶對團主評價
             </div>
-            <div v-if="latestHostRating" class="mt-1 p-2 bg-gray-200 rounded-xl item">
-              <div class="flex items-center justify-between">
-                <div class="flex items-center">
-                  <img
-                    :src="latestHostRating.users_ratings_user_idTousers.photo_url"
-                    class="w-6 h-6 object-cover rounded-full"
-                  />
-                  <div class="mx-2 text-xs">
-                    {{ latestHostRating.users_ratings_user_idTousers.display_name }}
-                  </div>
-                </div>
-                <div class="flex flex-col items-center">
+            <div v-if="latestHostRating && latestHostRating.length > 0">
+              <div
+                v-for="(rating, index) in latestHostRating"
+                :key="index"
+                class="mt-1 p-2 bg-gray-200 rounded-xl item"
+              >
+                <div class="flex items-center justify-between">
                   <div class="flex items-center">
-                    <n-rate
-                      readonly
-                      v-model:value="latestHostRating.rating_heart"
-                      :default-value="5"
-                      color="#B91C1C"
-                      ><HeartSolid class="w-2"
-                    /></n-rate>
+                    <img
+                      :src="rating.users_ratings_user_idTousers.photo_url"
+                      class="w-6 h-6 object-cover rounded-full"
+                    />
+                    <div class="mx-2 text-xs">
+                      {{ rating.users_ratings_user_idTousers.display_name }}
+                    </div>
                   </div>
-                  <div class="mx-1 text-[10px]">{{ formatDate(latestHostRating.created_at) }}</div>
+                  <div class="flex flex-col items-center">
+                    <div class="flex items-center">
+                      <n-rate
+                        readonly
+                        v-model:value="rating.rating_heart"
+                        :default-value="5"
+                        color="#B91C1C"
+                        ><HeartSolid class="w-2"
+                      /></n-rate>
+                    </div>
+                    <div class="mx-1 text-[10px]">{{ formatDate(rating.created_at) }}</div>
+                  </div>
                 </div>
-              </div>
-              <div class="text-xs tracking-wider truncate mt-2 xl:text-base xl:p-1">
-                {{ latestHostRating.user_comment }}
+                <div class="text-xs tracking-wider truncate mt-2 xl:text-base xl:p-1">
+                  {{ rating.user_comment }}
+                </div>
               </div>
             </div>
+
             <p v-else class="mt-2 xl:text-base xl:p-1">暫無用戶評價</p>
           </div>
         </div>
       </div>
       <!-- 用戶在填寫團主評價的資訊 -->
-      <div v-if="step == 0" class="bg-gray-100 p-4 rounded-md lg:px-10 lg:py-6">
-        <!-- <div class="xl:text-base xl:p-1">用戶：</div> -->
-        <div class="flex items-center border-b-2 pb-2">
+      <div v-if="step == 0" class="mt-5">
+        <div class="xl:text-base xl:p-1">用戶：</div>
+        <div class="flex items-center mt-2">
           <img
             :src="userStore.user.photo_url"
             class="w-10 aspect-square object-cover rounded-full border-2 border-white"
           />
-          <div class="mx-2 text-base font-bold tracking-wide">
-            {{ userStore.user.display_name }}：
-          </div>
+          <div class="mx-2">{{ userStore.user.display_name }}</div>
         </div>
-        <div class="flex flex-col gap-2 mt-3">
-          <div class="text-base tracking-wide w-full">您對於本次揪團的評價為</div>
+        <div class="flex mt-3 px-14">
+          <div class="text-base w-full">您對於本次揪團的評價為</div>
           <div class="heart-rating" @mouseleave="resetHover('overall')">
             <span
               v-for="index in maxHearts"
@@ -372,8 +374,8 @@ watch(
             ></span>
           </div>
         </div>
-        <div class="flex flex-col gap-2 mt-5">
-          <div class="text-base tracking-wide w-full">團主的親切度，您願意給到幾分呢？</div>
+        <div class="flex mt-3 px-14">
+          <div class="text-base w-full">團主的親切度，您願意給到幾分呢？</div>
           <div class="heart-rating" @mouseleave="resetHover('kindness')">
             <span
               v-for="index in maxHearts"
@@ -385,8 +387,8 @@ watch(
             ></span>
           </div>
         </div>
-        <div class="flex flex-col gap-2 mt-5">
-          <div class="text-base tracking-wide w-full">團主的主辦能力，您願意給到幾分呢？</div>
+        <div class="flex mt-3 px-14">
+          <div class="text-base w-full">團主的主辦能力，您願意給到幾分呢？</div>
           <div class="heart-rating" @mouseleave="resetHover('ability')">
             <span
               v-for="index in maxHearts"
@@ -398,8 +400,8 @@ watch(
             ></span>
           </div>
         </div>
-        <div class="flex flex-col gap-2 mt-5">
-          <div class="text-base tracking-wide w-full">團主的信用度，您願意給到幾分呢？</div>
+        <div class="flex mt-3 px-14">
+          <div class="text-base w-full">團主的信用度，您願意給到幾分呢？</div>
           <div class="heart-rating" @mouseleave="resetHover('credit')">
             <span
               v-for="index in maxHearts"
@@ -412,8 +414,8 @@ watch(
           </div>
         </div>
 
-        <div class="flex flex-col mt-5">
-          <p class="text-base tracking-wide">留下您想對團主說的話：</p>
+        <div class="flex flex-col mt-5 xl:text-base">
+          <p>留下您想對團主說的話：</p>
           <n-space vertical>
             <n-input
               :autosize="{ minRows: 3, maxRows: 5 }"
@@ -422,7 +424,6 @@ watch(
               v-model:value="ratingForm.comment"
               maxlength="200"
               show-count
-              class="rounded-md mt-2"
             />
           </n-space>
           <!-- <textarea
@@ -434,12 +435,7 @@ watch(
           ></textarea> -->
         </div>
         <div class="flex justify-end items-center mt-3">
-          <button
-            @click="goStep1"
-            class="bg-green-600 px-5 py-2 rounded-full text-white tracking-widest hover:bg-green-700"
-          >
-            下一步
-          </button>
+          <n-button type="info" @click="goStep1" class="px-5 tracking-widest">下一步</n-button>
         </div>
       </div>
       <!-- 追蹤團主介面 -->
@@ -522,13 +518,13 @@ watch(
 .static-heart {
   width: 16px;
   height: 16px;
-  background-image: url('https://firebasestorage.googleapis.com/v0/b/login-demo1-9d3cb.firebasestorage.app/o/activities%2Fheartnored.png?alt=media&token=fa9751f1-99dc-4a2a-a709-f6b4c7fe6f85');
+  background-image: url('../../../assets/heartred.png');
   background-repeat: no-repeat;
   background-size: contain;
   cursor: default;
 }
 .static-heart.filled {
-  background-image: url('https://firebasestorage.googleapis.com/v0/b/login-demo1-9d3cb.firebasestorage.app/o/activities%2Fheartred.png?alt=media&token=01bb392b-208c-4aac-b8aa-728b27a3b71d');
+  background-image: url('../../../assets/heartred.png');
 }
 
 .heart-rating {
@@ -539,7 +535,7 @@ watch(
 .heart {
   width: 20px;
   height: 20px;
-  background-image: url('https://firebasestorage.googleapis.com/v0/b/login-demo1-9d3cb.firebasestorage.app/o/activities%2Fheartnored.png?alt=media&token=fa9751f1-99dc-4a2a-a709-f6b4c7fe6f85');
+  background-image: url('../../../assets/heartnored.png');
   background-repeat: no-repeat;
   background-size: contain;
   cursor: pointer;
@@ -547,6 +543,6 @@ watch(
 }
 
 .heart.filled {
-  background-image: url('https://firebasestorage.googleapis.com/v0/b/login-demo1-9d3cb.firebasestorage.app/o/activities%2Fheartred.png?alt=media&token=01bb392b-208c-4aac-b8aa-728b27a3b71d');
+  background-image: url('../../../assets/heartred.png');
 }
 </style>

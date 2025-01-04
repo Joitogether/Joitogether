@@ -11,10 +11,13 @@ import relativeTime from 'dayjs/plugin/relativeTime'
 import { useNotificationStore } from '@/stores/notificationStore'
 import { storeToRefs } from 'pinia'
 import { getUserSummaryAPI } from '@/apis/userAPIs'
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { handleError } from '@/utils/handleError.js'
-import avatar from '@/assets/avatar.png'
+import { useActivityStore } from '@/stores/useActivityStore'
 
+const activityStore = useActivityStore()
+const { filters } = storeToRefs(activityStore)
+const { fetchAllActivities } = useActivityStore()
 const message = useMessage()
 const userStore = useUserStore()
 const router = useRouter()
@@ -78,7 +81,7 @@ const handleLogout = async () => {
     await auth.signOut()
 
     // 更新 userStore 狀態為未登入
-    userStore.clearUser() // 清空使用者狀態，方法來自 userStore.js
+    userStore.clearUser()
     clearNumbers()
     // 顯示成功訊息
     message.success('🎉 成功登出！期待下次見到你～ 👋')
@@ -88,15 +91,13 @@ const handleLogout = async () => {
 }
 
 const showPopover = ref(false)
-
-const handleNotificationRead = async (value) => {
-  showPopover.value = value
-  if (!value) {
+watch(showPopover, async (value) => {
+  if (value) {
     if (unreadList.value.length > 0) {
       await updateNotifications(userStore.user.uid, unreadList.value)
     }
   }
-}
+})
 
 const handleLoadClick = async () => {
   showLoading.value = true
@@ -105,15 +106,38 @@ const handleLoadClick = async () => {
 }
 const showLoading = ref(false)
 const searchKeyword = ref('')
+
 const handleSearchClick = (e) => {
   if (e.isComposing) return
-  if (searchKeyword.value === '') return
-  router.push({
-    name: 'home',
-    query: {
-      q: searchKeyword.value,
-    },
-  })
+  if (searchKeyword.value === '') {
+    filters.value.keyword = ''
+  } else {
+    filters.value.keyword = searchKeyword.value.trim()
+  }
+  filters.value = {
+    ...filters.value,
+    page: 1,
+  }
+
+  router.push({ name: 'home', query: { ...filters.value } })
+
+  fetchAllActivities(filters.value)
+}
+
+const handleCartClick = () => {
+  if (userStore.user.isLogin) {
+    router.push({ name: 'shpopingcart' })
+  } else {
+    message.warning('🚫 尚未登入，無法進入購物車喔！💡')
+  }
+}
+
+const handleTopUpClick = () => {
+  if (userStore.user.isLogin) {
+    router.push({ name: 'topup' })
+  } else {
+    message.warning('🚫 尚未登入，無法進入儲值頁面喔！💡')
+  }
 }
 </script>
 
@@ -186,14 +210,7 @@ const handleSearchClick = (e) => {
                 •&nbsp;&nbsp;建立活動
               </router-link>
             </li>
-            <li>
-              <a
-                href="#"
-                class="font-bold py-3 block text-base text-gray-500 hover:text-green-600 border-b border-gray-300"
-              >
-                •&nbsp;&nbsp;加入聚會
-              </a>
-            </li>
+
             <li
               class="font-bold py-3 block text-base text-gray-500 hover:text-green-600 border-b border-gray-300"
             >
@@ -201,19 +218,19 @@ const handleSearchClick = (e) => {
             </li>
             <li>
               <a
-                href="#"
-                class="font-bold py-3 block text-base text-gray-500 hover:text-green-600 border-b border-gray-300"
+                @click="handleCartClick"
+                class="cursor-pointer font-bold py-3 block text-base text-gray-500 hover:text-green-600 border-b border-gray-300"
               >
-                •&nbsp;&nbsp;活動中心
+                •&nbsp;&nbsp;購物車
               </a>
             </li>
             <li>
-              <RouterLink
-                to="/topup"
-                class="font-bold pt-3 block text-base text-gray-500 hover:text-green-600"
+              <a
+                @click="handleTopUpClick"
+                class="cursor-pointer font-bold pt-3 block text-base text-gray-500 hover:text-green-600"
               >
                 •&nbsp;&nbsp;儲值中心
-              </RouterLink>
+              </a>
             </li>
           </ul>
         </div>
@@ -232,24 +249,24 @@ const handleSearchClick = (e) => {
           </li>
           <li class="py-1">
             <RouterLink to="/posts" class="mx-3 tracking-wide hover:text-green-600"
-              >社群</RouterLink
-            >
+              >社群
+            </RouterLink>
           </li>
           <li class="py-1">
-            <RouterLink to="/shoppingcart" class="mx-3 tracking-wide hover:text-green-600">
-              購物車</RouterLink
-            >
+            <button @click="handleCartClick" class="mx-3 tracking-wide hover:text-green-600">
+              購物車
+            </button>
           </li>
           <li class="py-1">
-            <RouterLink to="/topup" class="mx-3 tracking-wide hover:text-green-600"
-              >儲值中心</RouterLink
-            >
+            <button @click="handleTopUpClick" class="mx-3 tracking-wide hover:text-green-600">
+              儲值中心
+            </button>
           </li>
         </ul>
       </div>
     </div>
 
-    <!-- 登入/註冊 -->
+    <!-- 通知 -->
     <div class="flex items-center gap-4">
       <div class="hidden md:flex items-center" v-if="userLogin">
         <router-link :to="{ name: 'activityCreate' }">
@@ -261,11 +278,9 @@ const handleSearchClick = (e) => {
         </router-link>
       </div>
       <n-popover
-        :on-update:show="handleNotificationRead"
         placement="bottom-end"
-        :on-clickoutside="() => (showPopover = false)"
         class="w-[300px] bellNotice"
-        trigger="click"
+        trigger="manual"
         :show="showPopover"
         :style="{
           '--n-arrow-offset': '30px',
@@ -274,7 +289,12 @@ const handleSearchClick = (e) => {
         }"
       >
         <template #trigger>
-          <n-badge :max="15" :value="unreadCount" class="cursor-pointer">
+          <n-badge
+            @click="showPopover = !showPopover"
+            :max="15"
+            :value="unreadCount"
+            class="cursor-pointer"
+          >
             <BellNotification class="hover:text-green-600"></BellNotification>
           </n-badge>
         </template>
@@ -290,7 +310,7 @@ const handleSearchClick = (e) => {
                   >
                     <div class="w-14 h-14 aspect-square rounded-full overflow-hidden">
                       <img
-                        class="w-full h-full object-cover"
+                        class="w-full h-full object-cover bg-gray-400"
                         :src="notification.users_notifications_actor_idTousers.photo_url"
                         alt=""
                       />
@@ -337,7 +357,6 @@ const handleSearchClick = (e) => {
           </div>
         </n-scrollbar>
       </n-popover>
-      <!-- <div class="hidden md:flex min-w-20 items-center">登入/註冊</div> -->
 
       <input type="checkbox" id="login-toggle" />
       <label
@@ -354,12 +373,19 @@ const handleSearchClick = (e) => {
         class="w-full rounded-md bg-gray-50 text-black px-6 py-10 space-y-4 shadow-md md:w-1/3 md:right-2 lg:w-1/4"
       >
         <div
-          class="user-photo rounded-full w-40 h-40 aspect-square overflow-hidden flex justify-self-center md:w-24 md:h-24"
+          class="user-photo rounded-full mx-auto w-40 h-40 aspect-square overflow-hidden flex md:w-24 md:h-24"
         >
           <img
-            :src="userStore.user.photo_url || avatar"
+            v-if="userStore.user.photo_url"
+            :src="userStore.user.photo_url"
             alt="userPhoto"
             class="w-full h-full object-cover"
+          />
+          <img
+            v-else
+            class="w-full h-full object-cover"
+            src="https://firebasestorage.googleapis.com/v0/b/login-demo1-9d3cb.firebasestorage.app/o/avatars%2Fcatavatar.png?alt=media&token=ccd02591-0c4f-435c-9a4a-34f219774558"
+            alt=""
           />
         </div>
         <div class="user-name text-center font-bold text-xl">

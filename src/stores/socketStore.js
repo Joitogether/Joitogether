@@ -45,7 +45,7 @@ export const useSocketStore = defineStore('socket', () => {
   // 發送通知的方法
   function sendNotification(data) {
     try {
-      if (data.user_id === userStore.user.uid) {
+      if (data.user_id === userStore.user.uid && data.action != 'create') {
         return
       }
       if (socket.value && isConnected.value) {
