@@ -94,6 +94,7 @@ const emit = defineEmits(['edit', 'close'])
         <n-button
           v-else
           :type="meFollowing.isFollowing ? 'default' : 'info'"
+          class="hidden md:block"
           @click="
             () => {
               toggleFollow(meFollowing)
@@ -135,6 +136,18 @@ const emit = defineEmits(['edit', 'close'])
         round
         class="md:hidden"
         >編輯檔案
+      </n-button>
+      <n-button
+        v-else
+        :type="meFollowing.isFollowing ? 'default' : 'info'"
+        class="md:hidden"
+        @click="
+          () => {
+            toggleFollow(meFollowing)
+          }
+        "
+      >
+        {{ meFollowing.isFollowing ? '追蹤中' : '追蹤' }}
       </n-button>
     </div>
   </div>
