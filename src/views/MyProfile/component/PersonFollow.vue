@@ -240,7 +240,7 @@ onMounted(() => {
         <div v-else class="text-center text-gray-500">還沒有關注中的人喔！</div>
       </n-tab-pane>
       <n-tab-pane name="chap2" tab="粉絲">
-        <div v-if="owenerFollowerList">
+        <div v-if="owenerFollowerList.length > 0">
           <div
             v-for="follower in owenerFollowerList"
             :key="follower.id"
