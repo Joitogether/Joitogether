@@ -129,48 +129,47 @@ const validateRegister = async () => {
   return true
 }
 const registerActivity = async () => {
-  if (!userStore.user.uid) {
+  try {
+    if (!userStore.user.uid) {
+      toggleRegisterModal()
+      return message.error('您尚未登入，請先登入才能繼續此操作')
+    }
+    const status = await validateRegister()
+    if (!status) {
+      return toggleRegisterModal()
+    }
+    const data = {
+      participant_id: userStore.user.uid,
+      comment: registerComment.value,
+      register_validated: !activity.value.require_approval ? 1 : 0,
+    }
+    // const messageReactive = message.info('報名中...', { duration: 0 })
+    await activityRegisterAPI(activityId, data)
+
+    await getActivityDetail()
+
+    //報名成功
+    message.success('報名成功！')
+    const notiData = {
+      actor_id: userStore.user.uid,
+      user_id: activity.value.host_id,
+      target_id: activity.value.id,
+      action: 'register',
+      target_type: 'activity',
+      message: '報名了你的活動',
+      link: `/activity/detail/${activity.value.id}`,
+    }
+    // 送通知
+    socketStore.sendNotification(notiData)
     toggleRegisterModal()
-    return message.error('您尚未登入，請先登入才能繼續此操作')
-  }
-  const status = await validateRegister()
-  if (!status) {
-    return toggleRegisterModal()
-  }
-  const data = {
-    participant_id: userStore.user.uid,
-    comment: registerComment.value,
-    register_validated: !activity.value.require_approval ? 1 : 0,
-  }
-  // const messageReactive = message.info('報名中...', { duration: 0 })
-  const res = await activityRegisterAPI(activityId, data)
-  // messageReactive.destroy()
-  if (res.status !== 201) {
-    if (res.message === '報名上限已達') {
+  } catch (error) {
+    if (error.response?.data?.message == '報名上限已達') {
       message.error('報名已達上限')
     } else {
-      message.error('報名失敗，請稍後再試')
+      message.error('報名發生錯誤，請稍後再試')
     }
     toggleRegisterModal()
-    return
   }
-
-  await getActivityDetail()
-
-  //報名成功
-  message.success('報名成功！')
-  const notiData = {
-    actor_id: userStore.user.uid,
-    user_id: activity.value.host_id,
-    target_id: activity.value.id,
-    action: 'register',
-    target_type: 'activity',
-    message: '報名了你的活動',
-    link: `/activity/detail/${activity.value.id}`,
-  }
-  // 送通知
-  socketStore.sendNotification(notiData)
-  toggleRegisterModal()
 }
 
 // 根據活動判斷當前使用者是否為主辦者
