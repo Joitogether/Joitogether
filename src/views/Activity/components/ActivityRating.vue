@@ -7,7 +7,7 @@ import { ratingGetDetailAPI, ratingSubmitAPI } from '@/apis/ratingAPIs'
 import dayjs from 'dayjs'
 import { useUserStore } from '@/stores/userStore'
 import { handleError } from '@/utils/handleError.js'
-
+import { formatDate } from '@/utils/useDateTime'
 dayjs.locale('zh-tw')
 const userStore = useUserStore()
 const dialog = useDialog()
