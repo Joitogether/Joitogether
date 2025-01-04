@@ -395,8 +395,8 @@ const sendReplies = async () => {
     attendeeToReply.replies = [...selectedReplies.value]
     const notiData = {
       actor_id: userStore.user.uid, // 誰觸發了這個行為
-      user_id: attendeeToReply.number, // 這個行為對誰觸發
-      target_id: attendeeToReply.id, // 被行為的受詞id
+      user_id: attendeeToReply.id, // 這個行為對誰觸發
+      target_id: activity_id, // 被行為的受詞id
       action: 'review', // 行為 (目前僅有'create','register','like','comment','review', 'rate')
       target_type: 'activity', // 行為類型 (目前僅有'activity','post','rating')
       message: '回覆了你的報名', // 要顯示在提醒欄位的敘述
