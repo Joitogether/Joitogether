@@ -192,6 +192,13 @@ const isRegistered = computed(() => {
   )
 })
 
+const isValidated = computed(() => {
+  return activity.value.applications?.some(
+    (participant) =>
+      participant.participant_id === userStore.user.uid && participant.register_validated,
+  )
+})
+
 const showCancelRegisterModal = ref(false)
 const toggleConfirmModal = () => {
   showCancelRegisterModal.value = !showCancelRegisterModal.value
@@ -479,17 +486,12 @@ const handleCardClick = () => {
                     round
                     type="primary"
                     @click="toggleConfirmModal"
-                    >取消報名</NButton
+                    >取消報名{{ isValidated ? ' / 您已具備參加資格' : '' }}</NButton
                   >
                 </div>
               </div>
               <div v-else>
-                <NButton
-                  v-if="!isRegistered"
-                  disabled
-                  class="w-full mt-3 font-bold text-lg py-5"
-                  round
-                  type="primary"
+                <NButton disabled class="w-full mt-3 font-bold text-lg py-5" round type="primary"
                   >該活動已遭團主取消</NButton
                 >
               </div>
