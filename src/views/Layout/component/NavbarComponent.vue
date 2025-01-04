@@ -219,7 +219,7 @@ const handleTopUpClick = () => {
             <li>
               <a
                 @click="handleCartClick"
-                class="font-bold py-3 block text-base text-gray-500 hover:text-green-600 border-b border-gray-300"
+                class="cursor-pointer font-bold py-3 block text-base text-gray-500 hover:text-green-600 border-b border-gray-300"
               >
                 •&nbsp;&nbsp;購物車
               </a>
@@ -227,7 +227,7 @@ const handleTopUpClick = () => {
             <li>
               <a
                 @click="handleTopUpClick"
-                class="font-bold pt-3 block text-base text-gray-500 hover:text-green-600"
+                class="cursor-pointer font-bold pt-3 block text-base text-gray-500 hover:text-green-600"
               >
                 •&nbsp;&nbsp;儲值中心
               </a>
@@ -266,7 +266,7 @@ const handleTopUpClick = () => {
       </div>
     </div>
 
-    <!-- 登入/註冊 -->
+    <!-- 通知 -->
     <div class="flex items-center gap-4">
       <div class="hidden md:flex items-center" v-if="userLogin">
         <router-link :to="{ name: 'activityCreate' }">
@@ -357,7 +357,6 @@ const handleTopUpClick = () => {
           </div>
         </n-scrollbar>
       </n-popover>
-      <!-- <div class="hidden md:flex min-w-20 items-center">登入/註冊</div> -->
 
       <input type="checkbox" id="login-toggle" />
       <label
@@ -374,7 +373,7 @@ const handleTopUpClick = () => {
         class="w-full rounded-md bg-gray-50 text-black px-6 py-10 space-y-4 shadow-md md:w-1/3 md:right-2 lg:w-1/4"
       >
         <div
-          class="user-photo rounded-full w-40 h-40 aspect-square overflow-hidden flex justify-self-center md:w-24 md:h-24"
+          class="user-photo rounded-full mx-auto w-40 h-40 aspect-square overflow-hidden flex md:w-24 md:h-24"
         >
           <img
             v-if="userStore.user.photo_url"

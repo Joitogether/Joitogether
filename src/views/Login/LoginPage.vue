@@ -47,13 +47,13 @@
             @click="loginGoogle"
             >Google</n-button
           >
-          <n-button
+          <!-- <n-button
             class="w-full mt-3 font-bold text-lg py-5"
             round
             type="primary"
             @click="loginFacebook"
             >Facebook</n-button
-          >
+          > -->
         </div>
         <div class="flex items-center mb-7 mt-8">
           <div class="flex-grow border-t border-gray-300"></div>
@@ -169,7 +169,12 @@
               negative-text="不同意"
               @positive-click="onAgreePrivacy"
               @negative-click="onDisagreePrivacy"
-            />
+            >
+              <div
+                v-html="PrivacyPolicyContent"
+                class="max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-200 scrollbar-track-gray-200"
+              ></div>
+            </n-modal>
             <n-checkbox v-model:checked="isCheckedTerms" @update:checked="onCheckboxChangeTerms">
               我已閱讀並同意服務條款
             </n-checkbox>
@@ -183,7 +188,12 @@
               negative-text="不同意"
               @positive-click="onAgreeTerms"
               @negative-click="onDisagreeTerms"
-            />
+            >
+              <div
+                v-html="TermsServiceContent"
+                class="max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-200 scrollbar-track-gray-200"
+              ></div>
+            </n-modal>
           </div>
           <div class="flex items-center mb-7 mt-8">
             <div class="flex-grow border-t border-gray-300"></div>
@@ -272,13 +282,19 @@ import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { storage } from '../../utils/firebaseConfig.js'
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage'
-import { loginWithGoogle, loginWithFacebook } from './services/authService.js'
+import { loginWithGoogle } from './services/authService.js'
 import registerUser from './services/registerService.js'
 import { validateFormFields } from './utils/formValidation.js'
 import loginUser from './services/loginService.js'
 import { useUserStore } from '/src/stores/userStore.js'
 import { getAuth, sendEmailVerification } from 'firebase/auth'
 import { handleError } from '../../utils/handleError.js'
+import { convertMarkdown } from '@/utils/useMarkdown.js'
+import PrivacyPolicy from './content/PrivacyPolicy.md?raw'
+import TermsService from './content/TermsService.md?raw'
+
+const PrivacyPolicyContent = convertMarkdown(PrivacyPolicy)
+const TermsServiceContent = convertMarkdown(TermsService)
 
 // 初始化區域
 const message = useMessage()
@@ -363,21 +379,21 @@ const loginGoogle = async () => {
     }
   }
 }
-const loginFacebook = async () => {
-  try {
-    const user = await loginWithFacebook()
-    setTimeout(() => {
-      message.success(
-        `🎉 歡迎，${userStore.user.display_name || user.email}！Facebook 登入成功，太棒了！🎉`,
-      )
-    }, 1000)
-    // 更新 userStore 狀態
+// const loginFacebook = async () => {
+//   try {
+//     const user = await loginWithFacebook()
+//     setTimeout(() => {
+//       message.success(
+//         `🎉 歡迎，${userStore.user.display_name || user.email}！Facebook 登入成功，太棒了！🎉`,
+//       )
+//     }, 1000)
+//     // 更新 userStore 狀態
 
-    router.push('/')
-  } catch (error) {
-    handleError(message, '哎呀 😭 出了一些小問題 💔', error)
-  }
-}
+//     router.push('/')
+//   } catch (error) {
+//     handleError(message, '哎呀 😭 出了一些小問題 💔', error)
+//   }
+// }
 
 // 大頭貼的邏輯
 const handleFileChange = async (fileList) => {

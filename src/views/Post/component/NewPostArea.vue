@@ -5,6 +5,7 @@ import { createPostAPI } from '@/apis/postAPIs'
 import { useMessage, NButton, NModal } from 'naive-ui'
 import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage'
 import { handleError } from '@/utils/handleError.js'
+import { useSocketStore } from '@/stores/socketStore.js'
 
 // 版面欄位
 const showModal = ref(false)
@@ -26,6 +27,7 @@ const newPostTitle = ref('')
 const newPostContent = ref('')
 const newPostCategory = ref(null)
 const imageUrl = ref(null)
+const socketStore = useSocketStore()
 
 const postCategories = [
   { label: '美食', value: 'food' },
@@ -77,10 +79,25 @@ const handleSubmit = async () => {
     post_img: imageUrl.value || '',
   }
   try {
-    await createPostAPI(postData)
+    const response = await createPostAPI(postData)
+    const postId = response.data.post_id
+
     message.success('文章新增成功')
     emit('update')
     showModal.value = true
+
+    const notiData = {
+      actor_id: userStore.user.uid,
+      user_id: postData.uid,
+      target_id: postId,
+      action: 'create',
+      target_type: 'post',
+      message: '發表了新文章',
+      link: `/post/${postId}`,
+    }
+
+    socketStore.sendNotification(notiData) // 送出提醒
+
     setTimeout(() => {
       showModal.value = false
       newPostTitle.value = ''
