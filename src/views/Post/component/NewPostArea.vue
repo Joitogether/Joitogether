@@ -96,8 +96,6 @@ const handleSubmit = async () => {
       link: `/post/${postId}`,
     }
 
-    console.log(notiData)
-
     socketStore.sendNotification(notiData) // 送出提醒
 
     setTimeout(() => {

@@ -73,7 +73,6 @@ const categoryMap = {
 const fetchPostDetails = async () => {
   try {
     const post = await getPostByIdAPI(postId)
-    console.log('正在回傳文章', post)
 
     if (!post.data || (Array.isArray(post.data) && post.data.length === 0)) {
       return router.push({
