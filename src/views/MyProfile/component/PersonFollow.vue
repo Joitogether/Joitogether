@@ -219,7 +219,7 @@ onMounted(() => {
                 {{ following.isFollowing ? '追蹤中' : '追蹤' }}
               </n-button>
               <n-button
-                v-else
+                v-else-if="following.user_id !== userStore.user.uid"
                 :type="following.guestFollowing ? 'default' : 'info'"
                 @click="guestsToggleFollow(following)"
               >
@@ -266,7 +266,7 @@ onMounted(() => {
                 {{ follower.isFollowing ? '追蹤中' : '追蹤' }}
               </n-button>
               <n-button
-                v-else
+                v-else-if="follower.follower_id !== userStore.user.uid"
                 :type="follower.guestFollowing ? 'default' : 'info'"
                 @click="guestsToggleFollow(follower)"
               >
