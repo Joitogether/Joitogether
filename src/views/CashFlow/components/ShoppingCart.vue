@@ -102,7 +102,7 @@ onMounted(() => {
 
 <template>
   <div id="webcrumbs" class="bg-gray-100">
-    <div class="m-auto w-full bg-white shadow rounded-lg p-6">
+    <div class="w-full bg-white rounded-lg shadow p-3 mx-auto h-screen md:w-3/4 lg:w-3/5">
       <!-- Header -->
       <header class="text-center text-2xl font-bold mb-6">購物車</header>
 
@@ -116,39 +116,47 @@ onMounted(() => {
           刪除
         </button>
       </div>
-
       <!-- 購物車內容 -->
-      <section class="space-y-6">
-        <div
-          v-for="(item, idx) in cartItems"
-          :key="idx"
-          class="border-solid flex items-start gap-4"
-        >
-          <input type="checkbox" v-model="item.Selected" class="mt-4" />
-          <div class="flex gap-1 bg-gray-200 w-full px-2">
-            <div class="w-14 h-14 bg-neutral-200 rounded-md overflow-hidden flex-shrink-0">
-              <img :src="item.image" alt="商品圖片" class="w-full h-full object-cover" />
-            </div>
-            <div class="flex-1">
-              <div class="w-full bg-slate-50 rounded-sm font-bold truncate">
-                {{ item.name }}
+      <div class="bg-gray-100 p-2 rounded-lg">
+        <div v-for="(item, idx) in cartItems" :key="idx" class="flex gap-3">
+          <input type="checkbox" v-model="item.Selected" class="" />
+          <div class="flex flex-col gap-2 w-full">
+            <div class="flex gap-2">
+              <div class="w-16 h-16 rounded-md overflow-hidden flex-shrink-0 md:w-24 md:h-24">
+                <img :src="item.image" alt="商品圖片" class="w-full h-full object-cover" />
               </div>
-              <div class="w-full rounded-md truncate">{{ item.location }}</div>
-              <div class="w-full rounded-md">{{ item.time }}</div>
-              <div class="w-full rounded-md font-bold text-red-500">NT$ {{ item.price }}</div>
+              <div class="w-full flex flex-col justify-between">
+                <div class="">
+                  <p class="font-bold text-base tracking-wide line-clamp-1 md:text-lg">
+                    {{ item.name }}
+                  </p>
+                  <p class="line-clamp-2 tracking-wide">{{ item.location }}</p>
+                </div>
+                <div class="flex justify-between items-center">
+                  <p class="hidden md:block tracking-wider text-gray-500">{{ item.time }}</p>
+                  <p class="hidden md:block font-bold text-red-500">NT$ {{ item.price }}</p>
+                </div>
+              </div>
+            </div>
+            <div class="flex justify-between items-center md:hidden">
+              <p class="tracking-wider text-gray-500">{{ item.time }}</p>
+              <p class="font-bold text-red-500">NT$ {{ item.price }}</p>
             </div>
           </div>
         </div>
-      </section>
+      </div>
 
       <!-- Footer 總計 -->
-      <footer class="mt-12 border-t border-neutral-300 pt-6">
-        <div class="flex justify-between pb-4">
+      <footer class="mt-12 border-t border-neutral-300 pt-4">
+        <div class="flex justify-between items-center pb-4">
           <span class="font-title">總計有 {{ totalItems }} 項揪團活動</span>
           <div class="text-lg font-bold">NT$ {{ totalPrice }}</div>
         </div>
         <div>
-          <button @click="goToCheckout" class="w-full bg-sky-500 text-white rounded-md py-3">
+          <button
+            @click="goToCheckout"
+            class="w-full bg-green-600 text-white rounded-full py-3 hover:bg-green-500"
+          >
             前往結帳
           </button>
         </div>
