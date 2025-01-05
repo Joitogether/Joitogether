@@ -3,7 +3,9 @@ import { NButton } from 'naive-ui'
 import { onMounted, ref } from 'vue'
 import { useUserStore } from '@/stores/userStore'
 import { userFollowersAddAPI, userGetFollowingAPI, userUnfollowersAPI } from '@/apis/userAPIs'
+import { useSocketStore } from '@/stores/socketStore'
 
+const socketStore = useSocketStore()
 const userStore = useUserStore()
 const meFollowing = ref({ isFollowing: false })
 const props = defineProps({
@@ -61,6 +63,18 @@ const toggleFollow = async (following) => {
       user_id: props.id,
       follower_id: userStore.user.uid,
     })
+    const notiData = {
+      actor_id: userStore.user.uid,
+      user_id: props.id,
+      target_id: 0,
+      action: 'follow',
+      target_type: 'user',
+      message: '追蹤了你',
+      link: `/profile/${userStore.user.uid}`,
+    }
+
+    socketStore.sendNotification(notiData)
+
     following.isFollowing = true
     fetchFollowingData()
   }

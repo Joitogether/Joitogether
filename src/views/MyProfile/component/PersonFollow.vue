@@ -10,7 +10,9 @@ import {
 import { useRoute, useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/userStore'
 import { handleError } from '@/utils/handleError.js'
+import { useSocketStore } from '@/stores/socketStore'
 
+const socketStore = useSocketStore()
 const message = useMessage()
 const userStore = useUserStore()
 const router = useRouter()
@@ -123,13 +125,6 @@ const toggleFollow = async (user) => {
     if (user.isFollowing) {
       await userUnfollowersAPI(user.id)
       await fetchFollowerData()
-    } else {
-      await userFollowersAddAPI({
-        user_id: user.follower_id,
-        follower_id: id,
-      })
-      user.isFollowing = true
-      await fetchFollowerData()
     }
   } catch (error) {
     handleError(message, undefined, error)
@@ -151,6 +146,17 @@ const fansPageToggleFollow = async (user) => {
       follower_id: id,
     })
     user.isFollowing = true
+    const notiData = {
+      actor_id: userStore.user.uid,
+      user_id: user.follower_id,
+      target_id: 0,
+      action: 'follow',
+      target_type: 'user',
+      message: '追蹤了你',
+      link: `/profile/${userStore.user.uid}`,
+    }
+
+    socketStore.sendNotification(notiData)
   }
   await fetchFollowerData()
 }
@@ -171,6 +177,18 @@ const guestsToggleFollow = async (follower) => {
         follower_id: userStore.user.uid,
       })
       follower.guestFollowing = true
+
+      const notiData = {
+        actor_id: userStore.user.uid,
+        user_id: follower.user_id,
+        target_id: 0,
+        action: 'follow',
+        target_type: 'user',
+        message: '追蹤了你',
+        link: `/profile/${userStore.user.uid}`,
+      }
+
+      socketStore.sendNotification(notiData)
     }
   }
 
@@ -188,6 +206,18 @@ const guestsToggleFollow = async (follower) => {
         follower_id: userStore.user.uid,
       })
       follower.guestFollowing = true
+
+      const notiData = {
+        actor_id: userStore.user.uid,
+        user_id: follower.follower_id,
+        target_id: 0,
+        action: 'follow',
+        target_type: 'user',
+        message: '追蹤了你',
+        link: `/profile/${userStore.user.uid}`,
+      }
+
+      socketStore.sendNotification(notiData)
     }
   }
   fetchFollowerData()
