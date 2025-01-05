@@ -15,10 +15,11 @@ import {
 import { ArrowLeftCircleSolid, ArrowRightCircleSolid } from '@iconoir/vue'
 import { ref, watch, onMounted } from 'vue'
 import { userPutAPI, userGetAPI } from '@/apis/userAPIs'
-import { useUserStore } from '@/stores/userStore'
 import { storage } from '@/utils/firebaseConfig'
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage'
+import { useRoute } from 'vue-router'
 
+const route = useRoute()
 const showModal = ref(false)
 const user = ref({
   photo_url: '',
@@ -36,7 +37,6 @@ const user = ref({
   tags: '',
   favorite_sentence: '',
 })
-const userStore = useUserStore()
 const errorMessage = ref(null)
 const loading = ref(true)
 const tagsArray = ref([])
@@ -87,8 +87,9 @@ const zodiacOptions = [
 ]
 
 const fetchUserData = async () => {
+  const id = route.params.uid
   try {
-    const result = await userGetAPI(userStore.user.uid)
+    const result = await userGetAPI(id)
 
     if (!result.display_name) {
       return
@@ -228,9 +229,7 @@ watch(tagsArray, (newTags) => {
 })
 
 onMounted(() => {
-  if (userStore.user.isLogin) {
-    fetchUserData()
-  }
+  fetchUserData()
 })
 
 const next = () => {
@@ -251,7 +250,7 @@ const prev = () => {
 
 const handleSave = () => {
   user.value.tags = tagsArray.value.join(',')
-  userPutAPI(userStore.user.uid, user.value)
+  userPutAPI(route.params.uid, user.value)
     .then(() => {
       showModal.value = false
       emit('save')
