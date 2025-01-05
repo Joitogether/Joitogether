@@ -96,53 +96,80 @@ const goCheckoutPage = () => {
 }
 
 onMounted(() => {
+  window.scrollTo({ top: 0 })
   fetchCartItems()
 })
 </script>
 
 <template>
   <div id="webcrumbs" class="bg-gray-100">
-    <div class="w-full bg-white rounded-lg shadow p-3 mx-auto h-screen md:w-3/4 lg:w-3/5">
+    <div class="w-full bg-white py-5 rounded-lg shadow px-4 mx-auto h-screen md:w-3/4 lg:w-3/5">
       <!-- Header -->
       <header class="text-center text-2xl font-bold mb-6">購物車</header>
 
       <!-- 全選和刪除按鈕 -->
       <div class="flex items-center justify-between mb-4">
         <div>
-          <input type="checkbox" v-model="selectAll" @change="toggleSelectAll" class="mr-2" />
-          <span class="font-title">全選</span>
+          <input
+            type="checkbox"
+            id="selectAll"
+            v-model="selectAll"
+            @change="toggleSelectAll"
+            class="hidden"
+          />
+          <label for="selectAll">
+            <span
+              class="px-4 py-2 border cursor-pointer border-neutral-300 rounded-md hover:bg-gray-200"
+            >
+              全選
+            </span>
+          </label>
         </div>
-        <button @click="removeSelected" class="px-4 py-2 border border-neutral-300 rounded-md">
+        <button
+          @click="removeSelected"
+          class="px-4 py-2 border border-neutral-300 rounded-md hover:bg-gray-200"
+        >
           刪除
         </button>
       </div>
       <!-- 購物車內容 -->
-      <div class="bg-gray-100 p-2 rounded-lg">
-        <div v-for="(item, idx) in cartItems" :key="idx" class="flex gap-3">
-          <input type="checkbox" v-model="item.Selected" class="" />
-          <div class="flex flex-col gap-2 w-full">
-            <div class="flex gap-2">
-              <div class="w-16 h-16 rounded-md overflow-hidden flex-shrink-0 md:w-24 md:h-24">
-                <img :src="item.image" alt="商品圖片" class="w-full h-full object-cover" />
+      <div class="">
+        <div
+          v-for="(item, idx) in cartItems"
+          :key="idx"
+          class="flex gap-3 bg-gray-100 rounded-md p-2 mb-3 hover:bg-gray-200"
+        >
+          <input
+            type="checkbox"
+            :id="`checkbox-${idx}`"
+            v-model="item.Selected"
+            class="cursor-pointer"
+          />
+          <label :for="`checkbox-${idx}`" class="w-full cursor-pointer">
+            <div class="flex flex-col gap-2 w-full">
+              <div class="flex gap-2">
+                <div class="w-16 h-16 rounded-md overflow-hidden flex-shrink-0 md:w-24 md:h-24">
+                  <img :src="item.image" alt="商品圖片" class="w-full h-full object-cover" />
+                </div>
+                <div class="w-full flex flex-col justify-between">
+                  <div class="">
+                    <p class="font-bold text-base tracking-wide line-clamp-1 md:text-lg">
+                      {{ item.name }}
+                    </p>
+                    <p class="line-clamp-2 tracking-wide">{{ item.location }}</p>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <p class="hidden md:block tracking-wider text-gray-500">{{ item.time }}</p>
+                    <p class="hidden md:block font-bold text-red-500">NT$ {{ item.price }}</p>
+                  </div>
+                </div>
               </div>
-              <div class="w-full flex flex-col justify-between">
-                <div class="">
-                  <p class="font-bold text-base tracking-wide line-clamp-1 md:text-lg">
-                    {{ item.name }}
-                  </p>
-                  <p class="line-clamp-2 tracking-wide">{{ item.location }}</p>
-                </div>
-                <div class="flex justify-between items-center">
-                  <p class="hidden md:block tracking-wider text-gray-500">{{ item.time }}</p>
-                  <p class="hidden md:block font-bold text-red-500">NT$ {{ item.price }}</p>
-                </div>
+              <div class="flex justify-between items-center md:hidden">
+                <p class="tracking-wider text-gray-500">{{ item.time }}</p>
+                <p class="font-bold text-red-500">NT$ {{ item.price }}</p>
               </div>
             </div>
-            <div class="flex justify-between items-center md:hidden">
-              <p class="tracking-wider text-gray-500">{{ item.time }}</p>
-              <p class="font-bold text-red-500">NT$ {{ item.price }}</p>
-            </div>
-          </div>
+          </label>
         </div>
       </div>
 

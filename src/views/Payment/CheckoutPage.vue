@@ -135,66 +135,58 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="w-full min-h-screen bg-gray-200 flex flex-col gap-4 py-14 px-4 md:px-10 lg:px-40">
-    <div class="flex flex-col gap-4">
-      <p class="text-center text-neutral-800 text-2xl">購物車明細</p>
-      <div class="space-y-4">
+  <div class="w-full bg-gray-100 flex flex-col gap-4">
+    <div
+      class="flex flex-col gap-4 px-4 py-5 bg-white shadow rounded-md w-full min-h-screen mx-auto md:w-3/4 lg:w-3/5"
+    >
+      <p class="text-center text-gray-700 text-2xl font-bold">購物車明細</p>
+      <div class="">
         <div
           v-for="(item, index) in cartItems"
           :key="index"
-          class="flex flex-col justify-between px-4 py-4 bg-gray-100 rounded-md md:px-10"
+          class="flex flex-col justify-between gap-4 rounded-md md:p-2"
         >
-          <div class="flex flex-row gap-3 md:gap-5">
-            <div class="w-28 h-28 bg-gray-300 rounded-md shrink-0 overflow-hidden">
-              <img :src="item.photo" alt="活動圖片" />
+          <div class="flex flex-row gap-2 bg-gray-100 rounded-md mb-3 p-2 md:gap-5 md:mb-0">
+            <div class="w-16 h-16 bg-gray-300 rounded-md shrink-0 overflow-hidden">
+              <img :src="item.photo" class="w-full h-full object-cover" alt="活動圖片" />
             </div>
-            <div class="w-2/3 md:w-full flex flex-col justify-between">
+            <div class="w-3/4 md:w-full flex flex-col justify-between">
               <div class="">
-                <h3 class="text-neutral-950">{{ item.title }}</h3>
-                <!-- <p class="text-sm text-neutral-800">活動付款內容</p> -->
+                <p class="text-gray-700 text-base font-semibold line-clamp-2 tracking-wide">
+                  {{ item.title }}
+                </p>
               </div>
-
-              <span class="text-neutral-950 font-semibold">NT$ {{ item.price }}</span>
+              <span class="text-red-500 font-bold">NT$ {{ item.price }}</span>
             </div>
           </div>
         </div>
       </div>
 
       <div class="flex flex-col gap-4">
-        <p class="text-center text-neutral-800 text-2xl">訂單明細</p>
-        <div class="space-y-4 bg-gray-100 rounded-md px-4 py-4 md:px-10">
-          <!-- <div>
-            <label for="discount-code" class="block text-sm text-neutral-800">折扣碼</label>
-            <input
-              type="text"
-              id="discount-code"
-              placeholder="輸入欄位"
-              class="mt-1 block w-full bg-white border border-gray-300 rounded-md px-3 py-2"
-            />
-          </div> -->
+        <p class="text-center text-gray-700 text-2xl font-bold">訂單明細</p>
+        <div class="space-y-4 bg-gray-100 rounded-md px-4 py-4 md:m-2">
           <div>
             <div class="flex justify-between text-sm py-1">
               <span>小計</span>
               <span>$ {{ subtotal }}</span>
             </div>
-
-            <!-- <div class="flex justify-between text-sm py-1">
-              <span>已使用折扣碼</span> <span>-$15</span>
-            </div> -->
-
             <div class="flex justify-between text-sm font-semibold py-1">
-              <span>總計</span> <span>$ {{ total }}</span>
+              <span>總計</span>
+              <span>$ {{ total }}</span>
             </div>
           </div>
           <div>
             <div class="flex justify-between text-sm py-1">
-              <span>儲值金餘額</span> <span>$ {{ balance }}</span>
+              <span>儲值金餘額</span>
+              <span>$ {{ balance }}</span>
             </div>
             <div v-if="!isBalanceEnough" class="flex justify-between text-sm font-semibold py-1">
-              <span>餘額不足</span> <span>$ - {{ total - balance }}</span>
+              <span>餘額不足</span>
+              <span>$ - {{ total - balance }}</span>
             </div>
             <div v-if="isBalanceEnough" class="flex justify-between text-sm font-semibold py-1">
-              <span>扣除後剩餘儲值金</span> <span>${{ balance - total }}</span>
+              <span>扣除後剩餘儲值金</span>
+              <span>$ {{ balance - total }}</span>
             </div>
           </div>
         </div>
@@ -202,24 +194,27 @@ onMounted(async () => {
 
       <div
         v-if="!isBalanceEnough"
-        class="rounded-lg text-center text-sm text-red-500 bg-red-100 py-2 px-4"
+        class="rounded-md text-center text-sm text-red-500 bg-red-100 py-2 px-4 md:m-2"
       >
         餘額不足請前往儲值!
       </div>
-      <div class="flex justify-between items-center gap-4">
-        <button @click="backToCart" class="flex-1 text-sm text-white bg-gray-500 rounded-md py-2">
+      <div class="flex justify-between items-center gap-4 md:m-2">
+        <button
+          @click="backToCart"
+          class="flex-1 text-sm text-white bg-green-600 rounded-full py-2 hover:bg-green-500"
+        >
           上一步
         </button>
         <button
           @click="goTopUp"
           v-if="!isBalanceEnough"
-          class="flex-1 text-sm text-white bg-red-500 rounded-md py-2"
+          class="flex-1 text-sm text-white bg-red-400 rounded-full py-2 hover:bg-red-300"
         >
           前往儲值頁
         </button>
         <button
           @click="showModal = true"
-          class="flex-1 text-sm text-white bg-gray-500 rounded-md py-2"
+          class="flex-1 text-sm text-white bg-green-600 rounded-full py-2 hover:bg-green-500"
         >
           結帳
         </button>
