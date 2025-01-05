@@ -123,6 +123,7 @@ const fetchComments = async () => {
     commentCount.value = comments.length || 0
 
     const formattedComments = comments.map((comment) => ({
+      uid: comment.uid,
       id: comment.comment_id,
       content: comment.comment_content,
       time: comment.created_at,
@@ -480,7 +481,10 @@ watch(
       <div class="">
         <!-- 發文者的資訊區 -->
         <div class="flex flex-row items-center mt-4 mb-4">
-          <div class="w-16 h-16 rounded-full overflow-hidden mr-4">
+          <div
+            class="w-16 h-16 rounded-full overflow-hidden mr-4 cursor-pointer"
+            @click="router.push({ name: 'personInfo', params: { uid: postDetails.authorUid } })"
+          >
             <img
               class="w-full h-full object-cover"
               alt=""
@@ -614,7 +618,8 @@ watch(
                 class="flex items-start space-x-3 border-b pb-4 mt-6 relative"
               >
                 <div
-                  class="w-14 h-14 rounded-full overflow-hidden flex items-center justify-center flex-shrink-0"
+                  class="w-14 h-14 rounded-full overflow-hidden flex items-center justify-center flex-shrink-0 cursor-pointer"
+                  @click="router.push({ name: 'personInfo', params: { uid: comment.uid } })"
                 >
                   <img
                     alt="User Avatar"

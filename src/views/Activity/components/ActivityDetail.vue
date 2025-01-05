@@ -381,7 +381,10 @@ const handleCardClick = () => {
           <div
             class="flex items-center absolute left-1/2 transform -translate-x-1/2 gap-2 lg:hidden"
           >
-            <div class="w-10 aspect-square rounded-full overflow-hidden">
+            <div
+              class="w-10 aspect-square rounded-full overflow-hidden cursor-pointer"
+              @click="router.push({ name: 'personInfo', params: { uid: host.uid } })"
+            >
               <img class="w-full h-full object-cover" :src="host.photo_url" alt="" />
             </div>
             <p class="font-bold text-lg">{{ host.display_name }}</p>
@@ -390,7 +393,10 @@ const handleCardClick = () => {
         <div class="lg:flex lg:gap-3">
           <div class="bg-white px-5 pb-5 pt-3 lg:w-3/5 lg:rounded-md">
             <div class="hidden lg:flex items-center gap-2 border-b-2 pb-2">
-              <div class="w-10 aspect-square rounded-full overflow-hidden">
+              <div
+                class="w-10 aspect-square rounded-full overflow-hidden cursor-pointer"
+                @click="router.push({ name: 'personInfo', params: { uid: host.uid } })"
+              >
                 <img class="w-full h-full object-cover" :src="host.photo_url" alt="" />
               </div>
               <p class="font-bold text-lg">{{ host.display_name }}</p>
@@ -669,7 +675,8 @@ const handleCardClick = () => {
                 >
                   <div class="flex w-full gap-3 md:gap-4">
                     <div
-                      class="w-14 h-14 aspect-square flex-shrink-0 rounded-full overflow-hidden md:w-14 md:h-14"
+                      class="w-14 h-14 aspect-square flex-shrink-0 rounded-full overflow-hidden md:w-14 md:h-14 cursor-pointer"
+                      @click="router.push({ name: 'personInfo', params: { uid: comment.uid } })"
                     >
                       <img class="w-full h-full object-cover" :src="comment.photo_url" alt="" />
                     </div>

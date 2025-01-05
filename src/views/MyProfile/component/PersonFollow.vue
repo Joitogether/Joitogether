@@ -1,5 +1,5 @@
 <script setup>
-import { nextTick, onMounted, ref } from 'vue'
+import { nextTick, onMounted, ref, watch } from 'vue'
 import { NTabs, NTabPane, NButton, useMessage } from 'naive-ui'
 import {
   userGetFollowerAPI,
@@ -7,12 +7,13 @@ import {
   userFollowersAddAPI,
   userUnfollowersAPI,
 } from '../../../apis/userAPIs'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/userStore'
 import { handleError } from '@/utils/handleError.js'
 
 const message = useMessage()
 const userStore = useUserStore()
+const router = useRouter()
 const route = useRoute()
 const owenerFollowerList = ref([])
 const owenerFollowingList = ref([])
@@ -191,7 +192,12 @@ const guestsToggleFollow = async (follower) => {
   }
   fetchFollowerData()
 }
-
+watch(
+  () => route.params.uid,
+  () => {
+    fetchFollowerData()
+  },
+)
 onMounted(() => {
   fetchFollowerData()
   activeTab.value = 'chap1'
@@ -210,7 +216,8 @@ onMounted(() => {
           >
             <div class="flex ml-5 items-center">
               <div
-                class="me-5 w-20 h-20 max-w-[44px] max-h-[44px] rounded-full overflow-hidden flex-shrink-0"
+                class="me-5 w-20 h-20 max-w-[44px] max-h-[44px] rounded-full overflow-hidden flex-shrink-0 cursor-pointer"
+                @click="router.push({ name: 'personInfo', params: { uid: following.user_id } })"
               >
                 <img :src="following.photo_url" class="w-full h-full object-cover" />
               </div>
@@ -257,7 +264,8 @@ onMounted(() => {
                 </n-button>
               </div>
               <div
-                class="me-5 w-20 h-20 max-w-[44px] max-h-[44px] rounded-full overflow-hidden flex-shrink-0"
+                class="me-5 w-20 h-20 max-w-[44px] max-h-[44px] rounded-full overflow-hidden flex-shrink-0 cursor-pointer"
+                @click="router.push({ name: 'personInfo', params: { uid: follower.follower_id } })"
               >
                 <img :src="follower.photo_url" class="w-full h-full object-cover" />
               </div>
