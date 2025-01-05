@@ -103,7 +103,7 @@ const emit = defineEmits(['edit', 'close'])
         </n-button>
         <n-button
           v-else
-          :type="meFollowing.isFollowing ? 'default' : 'info'"
+          :type="meFollowing.isFollowing ? 'default' : 'success'"
           class="hidden md:block"
           @click="
             () => {

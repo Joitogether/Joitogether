@@ -229,14 +229,14 @@ onMounted(() => {
             <div class="flex mr-5 items-center">
               <n-button
                 v-if="userStore.user.uid == id"
-                :type="following.isFollowing ? 'default' : 'info'"
+                :type="following.isFollowing ? 'default' : 'success'"
                 @click="toggleFollow(following)"
               >
                 {{ following.isFollowing ? '追蹤中' : '追蹤' }}
               </n-button>
               <n-button
                 v-else-if="following.user_id !== userStore.user.uid"
-                :type="following.guestFollowing ? 'default' : 'info'"
+                :type="following.guestFollowing ? 'default' : 'success'"
                 @click="guestsToggleFollow(following)"
               >
                 {{ following.guestFollowing ? '追蹤中' : '追蹤' }}
@@ -257,7 +257,7 @@ onMounted(() => {
               <div class="flex mr-5 items-center">
                 <n-button
                   v-if="userStore.user.uid == id"
-                  :type="follower.isFollowing ? 'default' : 'info'"
+                  :type="follower.isFollowing ? 'default' : 'success'"
                   @click="unFollowFans(follower)"
                 >
                   X
@@ -277,14 +277,14 @@ onMounted(() => {
             <div class="flex mr-5 items-center">
               <n-button
                 v-if="userStore.user.uid == id"
-                :type="follower.isFollowing ? 'default' : 'info'"
+                :type="follower.isFollowing ? 'default' : 'success'"
                 @click="fansPageToggleFollow(follower)"
               >
                 {{ follower.isFollowing ? '追蹤中' : '追蹤' }}
               </n-button>
               <n-button
                 v-else-if="follower.follower_id !== userStore.user.uid"
-                :type="follower.guestFollowing ? 'default' : 'info'"
+                :type="follower.guestFollowing ? 'default' : 'success'"
                 @click="guestsToggleFollow(follower)"
               >
                 {{ follower.guestFollowing ? '追蹤中' : '追蹤' }}
