@@ -53,6 +53,11 @@ export const userGetActivityAPI = async (uid) => {
   return data.data
 }
 
+export const userGetActivityHostAPI = async (uid) => {
+  const { data } = await apiAxios.get(`/users/activities/${uid}`)
+  return data.data
+}
+
 export const userPutAPI = async (uid, data) => {
   return await apiAxios.put(`/users/update/${uid}`, data)
 }

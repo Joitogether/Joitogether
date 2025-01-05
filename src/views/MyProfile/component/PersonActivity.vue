@@ -1,33 +1,68 @@
 <script setup>
-import { onMounted, ref } from 'vue'
-import { userGetActivityAPI } from '@/apis/userAPIs'
-import { useUserStore } from '@/stores/userStore'
+import { onMounted, reactive, ref, watch } from 'vue'
+import { userGetActivityAPI, userGetActivityHostAPI } from '@/apis/userAPIs'
 import { handleError } from '@/utils/handleError.js'
-import { useMessage } from 'naive-ui'
+import { useMessage, NSelect } from 'naive-ui'
 import { useRouter } from 'vue-router'
 import { formatDate } from '@/utils/useDateTime'
+import { useRoute } from 'vue-router'
+import { useUserStore } from '@/stores/userStore'
+
 const userStore = useUserStore()
 const message = useMessage()
 const router = useRouter()
-
+const route = useRoute()
 const loading = ref(true)
-const activity = ref([])
 const afterToday = ref([])
 const beforeToday = ref([])
+const selectedValue = ref('activitiesRecords')
+const hostList = ref([])
+const allValidatedActivities = ref([])
+const validatedActivity = ref([])
+const allUnconfirmedActivities = ref([])
 
-const fetchActivityData = async () => {
+const options = reactive([
+  { label: '即將參加、聚會紀錄', value: 'activitiesRecords' },
+  { label: '主辦紀錄', value: 'hostExperience' },
+  { label: '本人限定', value: 'owenerOnly', disabled: true },
+  { label: '審核中', value: 'notYetComfirm' },
+])
+
+const fetchAllUserHostActivities = async () => {
+  const result = await userGetActivityHostAPI(route.params.uid)
+  hostList.value = result.filter((item) => item.status !== 'cancelled')
+}
+
+const fetchActivityRecordsData = async () => {
   try {
-    const result = await userGetActivityAPI(userStore.user.uid)
+    const id = route.params.uid
 
+    const result = await userGetActivityAPI(id)
     if (result && result.length > 0) {
-      activity.value = result
+      //已有參加資格的活動
+      validatedActivity.value = result.filter(
+        (item) => item.register_validated == 1 && item.activities.status !== 'cancelled',
+      )
+      // 審核中的活動
+      allUnconfirmedActivities.value = result.filter(
+        (item) =>
+          item.status === 'registered' &&
+          item.register_validated === 0 &&
+          new Date(item.activities.event_time) > new Date(),
+      )
 
-      const allActivities = result.filter((item) => item.activities).map((item) => item.activities)
-
-      afterToday.value = allActivities.filter((item) => new Date(item.event_time) > new Date())
-      beforeToday.value = allActivities.filter((item) => new Date(item.event_time) < new Date())
+      if (validatedActivity.value.length > 0) {
+        allValidatedActivities.value = validatedActivity.value
+          .filter((item) => !!item.activities)
+          .map((item) => item.activities)
+        afterToday.value = allValidatedActivities.value.filter(
+          (item) => new Date(item.event_time) > new Date(),
+        )
+        beforeToday.value = allValidatedActivities.value.filter(
+          (item) => new Date(item.event_time) < new Date(),
+        )
+      }
     } else {
-      activity.value = []
       afterToday.value = []
       beforeToday.value = []
     }
@@ -41,14 +76,28 @@ const handleActivityClick = (activityId) => {
   router.push(`/activity/detail/${activityId}`)
 }
 
+watch(
+  () => route.params.uid,
+  () => {
+    Promise.all([fetchActivityRecordsData(), fetchAllUserHostActivities()])
+  },
+)
 onMounted(() => {
-  fetchActivityData()
+  Promise.all([fetchActivityRecordsData(), fetchAllUserHostActivities()])
 })
 </script>
 
 <template>
   <div class="flex flex-col gap-5">
-    <div class="bg-gray-50 px-5 py-5 rounded-md">
+    <div class="text-xl flex items-center justify-end">
+      <n-select
+        v-model:value="selectedValue"
+        :options="options"
+        placeholder="選擇分類"
+        style="width: 200px; margin-right: 16px"
+      />
+    </div>
+    <div v-if="selectedValue == 'activitiesRecords'" class="bg-gray-50 px-5 py-5 rounded-md">
       <div class="content-center text-center text-xl font-bold border-b-2 pb-3">即將參加</div>
       <div v-if="afterToday.length > 0" class="pt-5 flex flex-col gap-5">
         <div
@@ -80,7 +129,7 @@ onMounted(() => {
       <div v-else class="mt-5 text-center text-gray-600">用戶沒有即將參加的活動</div>
     </div>
 
-    <div class="bg-gray-50 px-5 py-5 rounded-md">
+    <div v-if="selectedValue == 'activitiesRecords'" class="bg-gray-50 px-5 py-5 rounded-md">
       <div class="content-center text-center text-xl font-bold border-b-2 pb-3">聚會紀錄</div>
       <div v-if="beforeToday.length > 0" class="pt-5 flex flex-col gap-5">
         <div
@@ -108,6 +157,69 @@ onMounted(() => {
         </div>
       </div>
       <div v-else class="mt-5 text-center text-gray-600">用戶沒有過去的活動</div>
+    </div>
+    <div v-if="selectedValue == 'hostExperience'" class="bg-gray-50 px-5 py-5 rounded-md">
+      <div class="content-center text-center text-xl font-bold border-b-2 pb-3">主辦紀錄</div>
+      <div v-if="hostList" class="pt-5 flex flex-col gap-5">
+        <div
+          v-for="list in hostList"
+          :key="list.id"
+          @click="handleActivityClick(list.id)"
+          class="flex bg-white p-3 h-auto rounded-md cursor-pointer"
+        >
+          <div class="w-full flex flex-col gap-1 md:justify-between">
+            <div class="flex flex-col gap-1">
+              <p class="text-xl font-bold tracking-wide">{{ list.name }}</p>
+              <div class="text-lg tracking-wide">{{ list.location }}</div>
+            </div>
+            <div class="text-sm text-gray-400">{{ formatDate(list.event_time) }}</div>
+          </div>
+          <div
+            class="hidden md:block w-1/3 aspect-square overflow-hidden rounded-md bg-gray-200 items-center justify-center"
+          >
+            <img :src="list.img_url" alt="past-party-photo" class="w-full h-full object-cover" />
+          </div>
+        </div>
+      </div>
+      <div v-else class="mt-5 text-center text-gray-600">用戶還沒有主辦紀錄</div>
+    </div>
+    <div v-if="selectedValue == 'notYetComfirm'" class="bg-gray-50 px-5 py-5 rounded-md">
+      <div class="content-center text-center text-xl font-bold border-b-2 pb-3">審核中的活動</div>
+      <div v-if="userStore.user.uid == route.params.uid">
+        <div v-if="allUnconfirmedActivities.lenth > 0" class="pt-5 flex flex-col gap-5">
+          <div
+            v-for="unconfirmedActivity in allUnconfirmedActivities"
+            :key="unconfirmedActivity.activities.id"
+            @click="handleActivityClick(unconfirmedActivity.activities.id)"
+            class="flex bg-white p-3 h-auto rounded-md cursor-pointer"
+          >
+            <div class="w-full flex flex-col gap-1 md:justify-between">
+              <div class="flex flex-col gap-1">
+                <p class="text-xl font-bold tracking-wide">
+                  {{ unconfirmedActivity.activities.name }}
+                </p>
+                <div class="text-lg tracking-wide">
+                  {{ unconfirmedActivity.activities.location }}
+                </div>
+              </div>
+              <div class="text-sm text-gray-400">
+                {{ formatDate(unconfirmedActivity.activities.event_time) }}
+              </div>
+            </div>
+            <div
+              class="hidden md:block w-1/3 aspect-square overflow-hidden rounded-md bg-gray-200 items-center justify-center"
+            >
+              <img
+                :src="unconfirmedActivity.activities.img_url"
+                alt="past-party-photo"
+                class="w-full h-full object-cover"
+              />
+            </div>
+          </div>
+        </div>
+        <div v-else class="mt-5 text-center text-gray-600">您沒有審核中的活動</div>
+      </div>
+      <div v-else class="mt-5 text-center text-gray-600">私人頁面，已上鎖🔐</div>
     </div>
   </div>
 </template>
