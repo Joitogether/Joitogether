@@ -71,7 +71,7 @@ const router = createRouter({
           redirect: { name: 'personInfo' },
           children: [
             {
-              path: 'personInfo',
+              path: 'personInfo/:uid',
               name: 'personInfo',
               component: PersonInfo,
             },

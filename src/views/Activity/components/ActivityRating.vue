@@ -8,21 +8,18 @@ import dayjs from 'dayjs'
 import { useUserStore } from '@/stores/userStore'
 import { handleError } from '@/utils/handleError.js'
 import { formatDate } from '@/utils/useDateTime'
+import { userFollowersAddAPI, userGetFollowingAPI } from '@/apis/userAPIs'
 dayjs.locale('zh-tw')
 const userStore = useUserStore()
 const dialog = useDialog()
 const message = useMessage()
-const clickBtn = ref(false)
 const route = useRoute()
 const router = useRouter()
 const activityDetail = ref({})
 const hostInfo = ref({})
 const hostRatingAverage = ref({})
 const latestHostRating = ref()
-const FollowSuccess = () => {
-  clickBtn.value = true
-  message.success('您已成功追蹤團主啦~')
-}
+const checkFollowing = ref([])
 
 const clickTheFollowBtn = () => {
   dialog.info({
@@ -37,6 +34,25 @@ const clickTheFollowBtn = () => {
       message.info('已取消操作')
     },
   })
+}
+const FollowSuccess = async () => {
+  await userFollowersAddAPI({
+    user_id: hostInfo.value.uid,
+    follower_id: userStore.user.uid,
+  })
+  checkFollowing.value = { isFollowing: true }
+  message.success('您已成功追蹤團主啦~')
+}
+const fetchFollowingData = async () => {
+  const response = await userGetFollowingAPI(userStore.user.uid)
+  if (response.length > 0) {
+    const matchingItem = response.find((item) => item.user_id == hostInfo.value.uid)
+    checkFollowing.value = matchingItem
+      ? { isFollowing: true, ...matchingItem }
+      : { isFollowing: false }
+  } else {
+    checkFollowing.value = { isFollowing: false }
+  }
 }
 
 const step = ref(0)
@@ -77,6 +93,7 @@ const getDetailForRating = async () => {
 
 onMounted(async () => {
   await getDetailForRating()
+  await fetchFollowingData()
 })
 
 const ratingForm = reactive({
@@ -457,17 +474,12 @@ watch(
         </div> -->
         <div class="flex items-center mt-3">
           <div class="text-base w-full">如果這次活動滿意，您想追蹤此團主嗎？</div>
-          <!-- 還沒追蹤時的顯示 -->
-          <n-button @click="clickTheFollowBtn" strong secondary type="tertiary">追蹤</n-button>
-          <!-- 已經追蹤的顯示 -->
-          <n-button type="info">已追蹤</n-button>
-        </div>
-        <div class="flex items-center mt-3">
-          <div class="text-base w-full">您想要追蹤類似的活動嗎？</div>
-          <!-- 還沒追蹤時的顯示 -->
-          <n-button @click="clickTheFollowBtn" strong secondary type="tertiary">追蹤</n-button>
-          <!-- 已經追蹤的顯示 -->
-          <n-button type="info">已追蹤</n-button>
+          <n-button
+            :type="checkFollowing.isFollowing ? 'tertiary' : 'info'"
+            @click="clickTheFollowBtn(checkFollowing)"
+          >
+            {{ checkFollowing.isFollowing ? '已追蹤' : '追蹤' }}
+          </n-button>
         </div>
 
         <div class="flex justify-end items-center mt-10">

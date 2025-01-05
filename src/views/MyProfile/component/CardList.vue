@@ -1,8 +1,15 @@
 <script setup>
 import { NButton } from 'naive-ui'
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
+import { useUserStore } from '@/stores/userStore'
+import { userFollowersAddAPI, userGetFollowingAPI, userUnfollowersAPI } from '@/apis/userAPIs'
 
+const userStore = useUserStore()
+const meFollowing = ref({ isFollowing: false })
 const props = defineProps({
+  id: {
+    type: String,
+  },
   display_name: {
     type: String,
   },
@@ -35,13 +42,49 @@ const openModal = () => {
   emit('edit', user.value)
 }
 
+const fetchFollowingData = async () => {
+  const response = await userGetFollowingAPI(userStore.user.uid)
+  const found = response.find((list) => list.user_id == props.id)
+  if (found) {
+    meFollowing.value = found
+    return meFollowing.value.isFollowing
+  }
+  return false
+}
+const toggleFollow = async (following) => {
+  if (following.isFollowing) {
+    await userUnfollowersAPI(following.id)
+    following.isFollowing = false
+    fetchFollowingData()
+  } else {
+    await userFollowersAddAPI({
+      user_id: props.id,
+      follower_id: userStore.user.uid,
+    })
+    following.isFollowing = true
+    fetchFollowingData()
+  }
+}
+onMounted(async () => {
+  await fetchFollowingData()
+})
 const emit = defineEmits(['edit', 'close'])
 </script>
 <template>
   <div class="py-8 px-8 border border-gray-300 rounded-md md:flex md:justify-between md:gap-5">
     <div class="md:w-1/3 md:flex md:items-center">
       <div class="img-container w-40 h-40 rounded-full overflow-hidden mx-auto mb-3">
-        <img class="card-img w-full h-full object-cover" :src="props.photo_url" alt="personImg" />
+        <img
+          v-if="props.photo_url"
+          class="card-img w-full h-full object-cover"
+          :src="props.photo_url"
+          alt="personImg"
+        />
+        <img
+          v-else
+          src="https://firebasestorage.googleapis.com/v0/b/login-demo1-9d3cb.firebasestorage.app/o/avatars%2Fcatavatar.png?alt=media&token=ccd02591-0c4f-435c-9a4a-34f219774558"
+          alt="default avatar"
+        />
       </div>
     </div>
     <div class="card-content-container flex flex-col gap-2 md:w-2/3 md:flex md:items-start">
@@ -49,8 +92,26 @@ const emit = defineEmits(['edit', 'close'])
         <h3 class="user-name text-2xl text-center font-bold text-green-600">
           {{ props.display_name || '大名還沒填寫唷 👀' }}
         </h3>
-        <n-button @click="emit('edit')" type="primary" ghost round class="hidden md:block"
+        <n-button
+          v-if="userStore.user.uid == props.id"
+          @click="emit('edit')"
+          type="primary"
+          ghost
+          round
+          class="hidden md:block"
           >編輯檔案
+        </n-button>
+        <n-button
+          v-else
+          :type="meFollowing.isFollowing ? 'default' : 'info'"
+          class="hidden md:block"
+          @click="
+            () => {
+              toggleFollow(meFollowing)
+            }
+          "
+        >
+          {{ meFollowing.isFollowing ? '追蹤中' : '追蹤' }}
         </n-button>
       </div>
 
@@ -77,6 +138,7 @@ const emit = defineEmits(['edit', 'close'])
         >
       </div>
       <n-button
+        v-if="userStore.user.uid == props.id"
         @click="emit('edit', 'close', user)"
         @open-modal="openModal"
         type="primary"
@@ -84,6 +146,18 @@ const emit = defineEmits(['edit', 'close'])
         round
         class="md:hidden"
         >編輯檔案
+      </n-button>
+      <n-button
+        v-else
+        :type="meFollowing.isFollowing ? 'default' : 'info'"
+        class="md:hidden"
+        @click="
+          () => {
+            toggleFollow(meFollowing)
+          }
+        "
+      >
+        {{ meFollowing.isFollowing ? '追蹤中' : '追蹤' }}
       </n-button>
     </div>
   </div>

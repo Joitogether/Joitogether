@@ -32,12 +32,20 @@ export const userGetAPI = async (uid) => {
 
 export const userGetFollowerAPI = async (uid) => {
   const { data } = await apiAxios.get(`/users/userFollowers/${uid}`)
-  return data
+  return data.data
 }
 
 export const userGetFollowingAPI = async (uid) => {
   const { data } = await apiAxios.get(`/users/following/${uid}`)
-  return data
+  return data.data
+}
+
+export const userFollowersAddAPI = async (data) => {
+  return await apiAxios.post('/users/follow', data)
+}
+
+export const userUnfollowersAPI = async (id) => {
+  return await apiAxios.post(`/users/unfollow/${id}`)
 }
 
 export const userGetActivityAPI = async (uid) => {
