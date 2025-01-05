@@ -1,5 +1,5 @@
 <script setup>
-import { nextTick, onMounted, ref } from 'vue'
+import { nextTick, onMounted, ref, watch } from 'vue'
 import { NTabs, NTabPane, NButton, useMessage } from 'naive-ui'
 import {
   userGetFollowerAPI,
@@ -7,12 +7,13 @@ import {
   userFollowersAddAPI,
   userUnfollowersAPI,
 } from '../../../apis/userAPIs'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/userStore'
 import { handleError } from '@/utils/handleError.js'
 
 const message = useMessage()
 const userStore = useUserStore()
+const router = useRouter()
 const route = useRoute()
 const owenerFollowerList = ref([])
 const owenerFollowingList = ref([])
@@ -191,7 +192,12 @@ const guestsToggleFollow = async (follower) => {
   }
   fetchFollowerData()
 }
-
+watch(
+  () => route.params.uid,
+  () => {
+    fetchFollowerData()
+  },
+)
 onMounted(() => {
   fetchFollowerData()
   activeTab.value = 'chap1'
@@ -210,7 +216,8 @@ onMounted(() => {
           >
             <div class="flex ml-5 items-center">
               <div
-                class="me-5 w-20 h-20 max-w-[44px] max-h-[44px] rounded-full overflow-hidden flex-shrink-0"
+                class="me-5 w-20 h-20 max-w-[44px] max-h-[44px] rounded-full overflow-hidden flex-shrink-0 cursor-pointer"
+                @click="router.push({ name: 'personInfo', params: { uid: following.user_id } })"
               >
                 <img :src="following.photo_url" class="w-full h-full object-cover" />
               </div>
@@ -222,14 +229,14 @@ onMounted(() => {
             <div class="flex mr-5 items-center">
               <n-button
                 v-if="userStore.user.uid == id"
-                :type="following.isFollowing ? 'default' : 'info'"
+                :type="following.isFollowing ? 'default' : 'success'"
                 @click="toggleFollow(following)"
               >
                 {{ following.isFollowing ? '追蹤中' : '追蹤' }}
               </n-button>
               <n-button
                 v-else-if="following.user_id !== userStore.user.uid"
-                :type="following.guestFollowing ? 'default' : 'info'"
+                :type="following.guestFollowing ? 'default' : 'success'"
                 @click="guestsToggleFollow(following)"
               >
                 {{ following.guestFollowing ? '追蹤中' : '追蹤' }}
@@ -250,14 +257,15 @@ onMounted(() => {
               <div class="flex mr-5 items-center">
                 <n-button
                   v-if="userStore.user.uid == id"
-                  :type="follower.isFollowing ? 'default' : 'info'"
+                  :type="follower.isFollowing ? 'default' : 'success'"
                   @click="unFollowFans(follower)"
                 >
                   X
                 </n-button>
               </div>
               <div
-                class="me-5 w-20 h-20 max-w-[44px] max-h-[44px] rounded-full overflow-hidden flex-shrink-0"
+                class="me-5 w-20 h-20 max-w-[44px] max-h-[44px] rounded-full overflow-hidden flex-shrink-0 cursor-pointer"
+                @click="router.push({ name: 'personInfo', params: { uid: follower.follower_id } })"
               >
                 <img :src="follower.photo_url" class="w-full h-full object-cover" />
               </div>
@@ -269,14 +277,14 @@ onMounted(() => {
             <div class="flex mr-5 items-center">
               <n-button
                 v-if="userStore.user.uid == id"
-                :type="follower.isFollowing ? 'default' : 'info'"
+                :type="follower.isFollowing ? 'default' : 'success'"
                 @click="fansPageToggleFollow(follower)"
               >
                 {{ follower.isFollowing ? '追蹤中' : '追蹤' }}
               </n-button>
               <n-button
                 v-else-if="follower.follower_id !== userStore.user.uid"
-                :type="follower.guestFollowing ? 'default' : 'info'"
+                :type="follower.guestFollowing ? 'default' : 'success'"
                 @click="guestsToggleFollow(follower)"
               >
                 {{ follower.guestFollowing ? '追蹤中' : '追蹤' }}

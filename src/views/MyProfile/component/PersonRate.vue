@@ -1,18 +1,14 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import { HeartSolid, PeopleTag, Group, HandCard } from '@iconoir/vue'
 import { NProgress, NRate, useMessage } from 'naive-ui'
-import { useUserStore } from '@/stores/userStore'
 import { getRatingsAPI } from '@/apis/userAPIs'
 import { handleError } from '@/utils/handleError.js'
-import dayjs from 'dayjs'
+import { useRoute } from 'vue-router'
+import { formatDate } from '@/utils/useDateTime'
 
-function formatDate(date) {
-  return dayjs(date).format('YYYY-MM-DD HH:mm')
-}
-
+const route = useRoute()
 const message = useMessage()
-const userStore = useUserStore()
 const loading = ref(true)
 const userRatings = ref([])
 const averageRating = ref(0)
@@ -20,7 +16,8 @@ const ratingDistribution = ref([0, 0, 0, 0, 0])
 
 const fetchUserRatings = async () => {
   try {
-    const result = await getRatingsAPI(userStore.user.uid)
+    const id = route.params.uid
+    const result = await getRatingsAPI(id)
 
     if (!result || result.length === 0) {
       loading.value = false
@@ -56,7 +53,12 @@ const fetchUserRatings = async () => {
     loading.value = false
   }
 }
-
+watch(
+  () => route.params.uid,
+  () => {
+    fetchUserRatings()
+  },
+)
 const kindnessAverageRating = computed(() => {
   if (userRatings.value.length > 0) {
     const total = userRatings.value.reduce((sum, rating) => sum + rating.rating_kindness, 0)
@@ -198,7 +200,15 @@ onMounted(() => {
           >
             <div class="flex gap-2 justify-between items-center">
               <div class="flex items-center gap-2">
-                <div class="w-12 h-12 overflow-hidden rounded-full">
+                <div
+                  class="w-12 h-12 overflow-hidden rounded-full cursor-pointer"
+                  @click="
+                    $router.push({
+                      name: 'personInfo',
+                      params: { uid: ratings.user_id },
+                    })
+                  "
+                >
                   <img
                     :src="ratings.users_ratings_user_idTousers.photo_url"
                     class="w-full h-full object-cover"

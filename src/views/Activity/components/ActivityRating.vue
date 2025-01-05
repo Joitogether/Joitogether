@@ -22,7 +22,7 @@ const latestHostRating = ref()
 const checkFollowing = ref([])
 
 const clickTheFollowBtn = () => {
-  dialog.info({
+  dialog.success({
     title: '確認追蹤',
     content: '您確定要追蹤團主嗎',
     negativeText: '取消',
@@ -31,7 +31,7 @@ const clickTheFollowBtn = () => {
       FollowSuccess()
     },
     onNegativeClick: () => {
-      message.info('已取消操作')
+      message.success('已取消操作')
     },
   })
 }
@@ -184,21 +184,21 @@ watch(
     >
       <div
         v-if="step == 0"
-        class="relative px-5 before:content-[''] before:absolute before:left-0 before:top-2 before:bottom-2 before:w-2 before: before:bg-blue-500"
+        class="relative px-5 before:content-[''] before:absolute before:left-0 before:top-2 before:bottom-2 before:w-2 before: before:bg-green-500"
       >
         <div class="text-sm xl:text-2xl md:text-xl">活動評價</div>
         <div class="text-gray-600 text-sm font-bold xl:text-3xl md:text-xl">團主評價</div>
       </div>
       <div
         v-else-if="step == 1"
-        class="relative px-5 before:content-[''] before:absolute before:left-0 before:top-2 before:bottom-2 before:w-2 before: before:bg-blue-500"
+        class="relative px-5 before:content-[''] before:absolute before:left-0 before:top-2 before:bottom-2 before:w-2 before: before:bg-green-500"
       >
         <div class="text-sm xl:text-2xl md:text-xl">活動評價</div>
         <div class="text-gray-600 text-sm font-bold xl:text-3xl md:text-xl">追蹤活動</div>
       </div>
       <div
         v-else-if="step == 2"
-        class="relative px-5 before:content-[''] before:absolute before:left-0 before:top-2 before:bottom-2 before:w-2 before: before:bg-blue-500"
+        class="relative px-5 before:content-[''] before:absolute before:left-0 before:top-2 before:bottom-2 before:w-2 before: before:bg-green-500"
       >
         <div class="text-sm xl:text-2xl md:text-xl">活動評價</div>
         <div class="text-gray-600 text-sm font-bold xl:text-3xl md:text-xl">完成評價</div>
@@ -211,7 +211,7 @@ watch(
         <div>
           <!-- 團主評價到此頁面的進度顯示-->
           <div
-            :class="{ 'text-blue-600': step == 0, 'text-gray-300': step != 0 }"
+            :class="{ 'text-green-600': step == 0, 'text-gray-300': step != 0 }"
             class="flex justify-center items-center font-bold tracking-widest"
           >
             <CheckCircleSolid v-if="step == 0" class="mr-1" />團主評價
@@ -221,7 +221,7 @@ watch(
         <div>
           <!-- 還沒到追蹤評價頁面的進度顯示-->
           <div
-            :class="{ 'text-blue-600': step == 1, 'text-gray-300': step != 1 }"
+            :class="{ 'text-green-600': step == 1, 'text-gray-300': step != 1 }"
             class="flex justify-center items-center font-bold tracking-widest"
           >
             <CheckCircleSolid v-if="step == 1" class="mr-1" />
@@ -229,18 +229,21 @@ watch(
           </div>
           <!-- 到追蹤評價頁面的進度顯示-->
 
-          <!-- <div class="flex justify-center items-center text-blue-600 font-bold tracking-widest">
+          <!-- <div class="flex justify-center items-center text-green-600 font-bold tracking-widest">
             <CheckCircleSolid class="mr-1" />追蹤活動
           </div> -->
         </div>
         <div>
           <!-- 還沒到最後完成頁面的進度顯示 -->
-          <div class="flex justify-center items-center text-gray-300 font-bold tracking-widest">
+          <div
+            :class="{ 'text-green-600': step == 2, 'text-gray-300': step != 2 }"
+            class="flex justify-center items-center font-bold tracking-widest"
+          >
             <CheckCircleSolid v-if="step == 2" class="mr-1" />
             <CheckCircle v-if="step != 2" class="mr-1" />完成
           </div>
           <!-- 到完成介面的進度顯示 -->
-          <!-- <div class="flex justify-center items-center text-blue-600 font-bold tracking-widest"><CheckCircleSolid class="mr-1" />完成</div> -->
+          <!-- <div class="flex justify-center items-center text-green-600 font-bold tracking-widest"><CheckCircleSolid class="mr-1" />完成</div> -->
         </div>
       </div>
       <!-- 活動區域 -->
@@ -452,7 +455,7 @@ watch(
           ></textarea> -->
         </div>
         <div class="flex justify-end items-center mt-3">
-          <n-button type="info" @click="goStep1" class="px-5 tracking-widest">下一步</n-button>
+          <n-button type="success" @click="goStep1" class="px-5 tracking-widest">下一步</n-button>
         </div>
       </div>
       <!-- 追蹤團主介面 -->
@@ -475,7 +478,7 @@ watch(
         <div class="flex items-center mt-3">
           <div class="text-base w-full">如果這次活動滿意，您想追蹤此團主嗎？</div>
           <n-button
-            :type="checkFollowing.isFollowing ? 'tertiary' : 'info'"
+            :type="checkFollowing.isFollowing ? 'tertiary' : 'success'"
             @click="clickTheFollowBtn(checkFollowing)"
           >
             {{ checkFollowing.isFollowing ? '已追蹤' : '追蹤' }}
@@ -483,10 +486,10 @@ watch(
         </div>
 
         <div class="flex justify-end items-center mt-10">
-          <n-button type="info" @click="backStep0" class="px-5 mx-6 tracking-widest"
+          <n-button type="success" @click="backStep0" class="px-5 mx-6 tracking-widest"
             >上一步</n-button
           >
-          <n-button type="info" @click="showSubmitModal = true" class="px-5 tracking-widest"
+          <n-button type="success" @click="showSubmitModal = true" class="px-5 tracking-widest"
             >送出評價</n-button
           >
         </div>
@@ -514,9 +517,9 @@ watch(
           </n-result>
         </div>
         <div class="flex items-center w-2/3 h-20 justify-evenly">
-          <n-button @click="router.push({ name: 'home' })" type="info">返回首頁</n-button>
-          <n-button @click="router.push({ name: 'profile' })" type="info">前往個人頁</n-button>
-          <n-button type="info">前往任務中心</n-button>
+          <n-button @click="router.push({ name: 'home' })" type="success">返回首頁</n-button>
+          <n-button @click="router.push({ name: 'profile' })" type="success">前往個人頁</n-button>
+          <n-button type="success">前往任務中心</n-button>
         </div>
       </div>
     </div>

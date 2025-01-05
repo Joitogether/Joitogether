@@ -397,13 +397,17 @@ const handleTopUpClick = () => {
           <span> • {{ userStore.user.career || '職業' }}</span>
         </div>
         <div class="flex justify-center">
-          <RouterLink to="/profile">
-            <button
-              class="border border-gray-600 text-gray-600 py-2 px-4 rounded-full hover:border-green-600 hover:text-green-600"
-            >
-              查看個人頁面
-            </button>
-          </RouterLink>
+          <button
+            class="border border-gray-600 text-gray-600 py-2 px-4 rounded-full hover:border-green-600 hover:text-green-600"
+            @click="
+              router.push({
+                name: 'personInfo',
+                params: { uid: userStore.user.uid },
+              })
+            "
+          >
+            查看個人頁面
+          </button>
         </div>
 
         <div v class="user-more-info flex justify-center gap-10">

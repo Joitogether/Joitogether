@@ -61,6 +61,7 @@ onMounted(() => {
         <td>{{ formatDate(record.created_at) }}</td>
         <td v-if="record.action == 'deposit'">儲值金</td>
         <td v-if="record.action == 'spend'">揪團活動</td>
+        <td v-if="record.action == 'refund'">退款</td>
         <td v-if="record.action == 'deposit'">
           <div class="flex justify-between">
             <plus class="text-green-500" />
@@ -70,6 +71,12 @@ onMounted(() => {
         <td v-if="record.action == 'spend'">
           <div class="flex justify-between">
             <minus class="text-red-500" />
+            {{ record.amount }}
+          </div>
+        </td>
+        <td v-if="record.action == 'refund'">
+          <div class="flex justify-between">
+            <plus class="text-green-500" />
             {{ record.amount }}
           </div>
         </td>

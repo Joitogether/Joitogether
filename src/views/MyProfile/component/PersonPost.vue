@@ -1,17 +1,17 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { getPostsAPI } from '@/apis/userAPIs'
-import { useUserStore } from '@/stores/userStore'
 import { getPostLikesAPI } from '@/apis/postLikeAPIs'
 import { getPostCommentsAPI } from '@/apis/postCommentAPIs'
 import { handleError } from '@/utils/handleError.js'
 import { useMessage } from 'naive-ui'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
+import { useRoute } from 'vue-router'
 
+const route = useRoute()
 const message = useMessage()
-const userStore = useUserStore()
 const loading = ref(true)
 const userPostList = ref([])
 const router = useRouter()
@@ -24,13 +24,8 @@ function timeSince(date) {
 
 const fetchUserPosts = async () => {
   try {
-    if (!userStore.user?.uid) {
-      message.error('未登入')
-      userPostList.value = []
-      return
-    }
-
-    const result = await getPostsAPI(userStore.user.uid)
+    const id = route.params.uid
+    const result = await getPostsAPI(id)
 
     if (!result?.data?.length) {
       userPostList.value = []
@@ -73,6 +68,12 @@ const fetchUserPosts = async () => {
 const handlePostClick = (postId) => {
   router.push(`/post/${postId}`)
 }
+watch(
+  () => route.params.uid,
+  () => {
+    fetchUserPosts()
+  },
+)
 
 onMounted(() => {
   fetchUserPosts()
