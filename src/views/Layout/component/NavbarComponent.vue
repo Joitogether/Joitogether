@@ -178,6 +178,15 @@ const handleTopUpClick = () => {
     message.warning('🚫 尚未登入，無法進入儲值頁面喔！💡')
   }
 }
+
+const handleLoginMenuClick = () => {
+  if (userStore.user.isLogin) {
+    router.push({ name: 'personInfo', params: { uid: userStore.user.uid } })
+    isLoginMenuOpen.value = false
+  } else {
+    message.warning('🚫 尚未登入，無法進入個人頁面喔！💡')
+  }
+}
 </script>
 
 <template>
@@ -446,13 +455,7 @@ const handleTopUpClick = () => {
         <div class="flex justify-center">
           <button
             class="border border-gray-600 text-gray-600 py-2 px-4 rounded-full hover:border-green-600 hover:text-green-600"
-            @click="
-              (isLoginMenuOpen = false),
-                router.push({
-                  name: 'personInfo',
-                  params: { uid: userStore.user.uid },
-                })
-            "
+            @click="handleLoginMenuClick"
           >
             查看個人頁面
           </button>
