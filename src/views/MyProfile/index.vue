@@ -49,6 +49,7 @@ const handleSave = async () => {
   await fetchUserData()
 }
 onMounted(async () => {
+  window.scrollTo({ top: 0 })
   await fetchUserData()
 })
 
