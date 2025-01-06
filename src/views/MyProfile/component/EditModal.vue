@@ -108,7 +108,12 @@ const fetchUserData = async () => {
     loading.value = false
   }
 }
-
+watch(
+  () => route.params.uid,
+  () => {
+    fetchUserData()
+  },
+)
 const handleAvatarChange = async (fileListAva) => {
   if (fileListAva.length === 0) {
     message.error('沒有大頭照檔案被選中')
