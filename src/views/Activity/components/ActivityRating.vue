@@ -1,7 +1,7 @@
 <script setup>
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useMessage, useDialog, NRate, NSpace, NInput, NModal } from 'naive-ui'
-import { CheckCircle, CheckCircleSolid, HeartSolid } from '@iconoir/vue'
+import { CheckCircle, CheckCircleSolid, HeartSolid, PeopleTag, Group, HandCard } from '@iconoir/vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ratingGetDetailAPI, ratingSubmitAPI } from '@/apis/ratingAPIs'
 import dayjs from 'dayjs'
@@ -10,7 +10,7 @@ import { handleError } from '@/utils/handleError.js'
 import { formatDate } from '@/utils/useDateTime'
 import { userFollowersAddAPI, userGetFollowingAPI } from '@/apis/userAPIs'
 import { useSocketStore } from '@/stores/socketStore'
-import { PeopleTag } from '@iconoir/vue'
+
 dayjs.locale('zh-tw')
 
 const socketStore = useSocketStore()
@@ -318,7 +318,7 @@ watch(
                 <div
                   class="flex justify-between bg-gray-100 rounded-md p-3 md:flex-col md:w-1/3 md:gap-1"
                 >
-                  <div>
+                  <div class="flex items-center gap-1">
                     <PeopleTag />
                     <p>親切度</p>
                   </div>
@@ -342,7 +342,11 @@ watch(
                 <div
                   class="flex justify-between bg-gray-100 rounded-md p-3 md:flex-col md:w-1/3 md:gap-1"
                 >
-                  <p>主辦能力</p>
+                  <div class="flex items-center gap-1">
+                    <Group />
+                    <p>主辦能力</p>
+                  </div>
+
                   <div class="flex items-center justify-between">
                     <div class="static-heart-rating readonly">
                       <span
@@ -361,7 +365,11 @@ watch(
                 <div
                   class="flex justify-between bg-gray-100 rounded-md p-3 md:flex-col md:w-1/3 md:gap-1"
                 >
-                  <p>信用度</p>
+                  <div class="flex items-center gap-1">
+                    <HandCard />
+                    <p>信用度</p>
+                  </div>
+
                   <div class="flex items-center justify-between">
                     <div class="static-heart-rating readonly">
                       <span
@@ -415,7 +423,7 @@ watch(
                           :default-value="5"
                           color="#B91C1C"
                         >
-                          <HeartSolid class="w-2 md:w-3" />
+                          <HeartSolid class="w-3" />
                         </n-rate>
                       </div>
                     </div>
@@ -432,7 +440,7 @@ watch(
       </div>
 
       <!-- 用戶在填寫團主評價的資訊 -->
-      <div v-if="step == 0" class="bg-gray-100 rounded-md mt-6 p-4">
+      <div v-if="step == 0" class="bg-gray-100 rounded-md mt-6 px-4 py-6">
         <div class="flex flex-col items-center gap-2 border-b-2 border-white pb-3">
           <div class="w-20 h-20 mx-auto overflow-hidden flex-shrink-0 rounded-full">
             <img :src="userStore.user.photo_url" class="w-full h-full object-cover" />
@@ -524,25 +532,27 @@ watch(
         </div>
       </div>
       <!-- 追蹤團主介面 -->
-      <div v-else-if="step == 1" class="mt-5">
-        <div class="xl:text-base xl:p-1">團主：</div>
-        <div class="flex items-center mt-2">
-          <img
-            :src="hostInfo.photo_url"
-            class="w-10 object-cover aspect-square rounded-full border-2 border-white"
-          />
-          <div class="mx-2">{{ hostInfo.display_name }}</div>
+      <div v-else-if="step == 1" class="bg-gray-100 rounded-md mt-6 px-4 py-6">
+        <div class="flex flex-col items-center gap-2">
+          <div class="mx-2 text-lg font-bold tracking-wide text-gray-700">團主</div>
+          <div class="w-20 h-20 mx-auto overflow-hidden flex-shrink-0 rounded-full">
+            <img :src="hostInfo.photo_url" class="w-full h-full object-cover" />
+          </div>
+          <div class="mx-2 text-lg font-bold tracking-wide text-gray-700">
+            {{ hostInfo.display_name }}
+          </div>
         </div>
-
         <!-- <div class="flex items-center mt-3">
           <div class="text-base w-full">您對於本次揪團的評價為</div>
           <n-rate color="#B91C1C">
             <HeartSolid class="w-5 h-5" />
           </n-rate>
         </div> -->
-        <div class="flex items-center mt-3">
-          <div class="text-base w-full">如果這次活動滿意，您想追蹤此團主嗎？</div>
+        <div class="flex flex-col items-center gap-2 mt-4">
+          <div class="text-base text-center">如果這次活動滿意，您想追蹤此團主嗎？</div>
           <n-button
+            strong
+            secondary
             :type="checkFollowing.isFollowing ? 'tertiary' : 'success'"
             @click="clickTheFollowBtn(checkFollowing)"
           >
@@ -550,11 +560,15 @@ watch(
           </n-button>
         </div>
 
-        <div class="flex justify-end items-center mt-10">
-          <n-button type="success" @click="backStep0" class="px-5 mx-6 tracking-widest"
+        <div class="flex justify-center items-center mt-8 gap-5">
+          <n-button round type="success" @click="backStep0" class="w-1/3 tracking-widest"
             >上一步</n-button
           >
-          <n-button type="success" @click="showSubmitModal = true" class="px-5 tracking-widest"
+          <n-button
+            round
+            type="success"
+            @click="showSubmitModal = true"
+            class="w-1/3 tracking-widest"
             >送出評價</n-button
           >
         </div>
@@ -571,23 +585,45 @@ watch(
         </n-modal>
       </div>
       <!-- 完成的介面 -->
-      <div v-else-if="step == 2" class="flex flex-col justify-center items-center">
+      <div v-else-if="step == 2" class="bg-gray-100 rounded-md mt-6 px-4 pb-6">
         <div class="flex flex-col items-center">
-          <n-result
-            status="success"
-            title="您已經完成評價啦！！"
-            description="積分將匯入您的帳戶中！"
-            class="font-bold text-gray-400"
-          >
-          </n-result>
+          <div class="flex justify-center my-6">
+            <svg
+              width="100px"
+              height="100px"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <circle cx="12" cy="12" r="10" stroke="#18A058" stroke-width="1.5" />
+              <path
+                d="M8.5 12.5L10.5 14.5L15.5 9.5"
+                stroke="#18A058"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </div>
+          <div class="text-center">
+            <p>您已經完成評價啦✨</p>
+          </div>
         </div>
-        <div class="flex items-center w-2/3 h-20 justify-evenly">
-          <n-button @click="router.push({ name: 'home' })" type="info">返回首頁</n-button>
+        <div class="flex justify-center items-center mt-8 gap-5">
           <n-button
-            @click="router.push({ name: 'personInfo', params: { uid: userStore.user.uid } })"
-            type="info"
-            >前往個人頁</n-button
+            round
+            @click="router.push({ name: 'home' })"
+            type="primary"
+            class="w-1/3 tracking-widest"
+            >返回首頁</n-button
           >
+          <n-button
+            round
+            class="w-1/3 tracking-widest px-2"
+            @click="router.push({ name: 'personInfo', params: { uid: userStore.user.uid } })"
+            type="primary"
+            >前往個人頁
+          </n-button>
         </div>
       </div>
     </div>
