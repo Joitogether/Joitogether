@@ -687,7 +687,6 @@ const previewActivity = () => {
                 </div>
                 <div class="flex flex-col">
                   <p class="font-bold text-lg">{{ user.display_name }}</p>
-                  <p class="">{{ user.city }} • {{ user.age }} • {{ user.career }}</p>
                 </div>
               </div>
 
