@@ -36,6 +36,7 @@ const loginMenuRef = ref(null)
 const toggleUserRef = ref(null)
 const popoverRef = ref(null)
 const triggerRef = ref(null)
+const loadMore = ref(null)
 
 const handleClickOutside = (event) => {
   if (
@@ -51,12 +52,15 @@ const handleClickOutside = (event) => {
 const handleNotiClickOutside = (event) => {
   const popoverEl = popoverRef.value?.$el
   const triggerEl = triggerRef.value?.$el
+  const loadMoreEl = loadMore.value?.$el
 
   if (
     popoverEl &&
     !popoverEl.contains(event.target) &&
     triggerEl &&
-    !triggerEl.contains(event.target)
+    !triggerEl.contains(event.target) &&
+    loadMoreEl &&
+    !loadMoreEl.contains(event.target)
   ) {
     showPopover.value = false
   }
@@ -176,6 +180,15 @@ const handleTopUpClick = () => {
     router.push({ name: 'topup' })
   } else {
     message.warning('🚫 尚未登入，無法進入儲值頁面喔！💡')
+  }
+}
+
+const handleLoginMenuClick = () => {
+  if (userStore.user.isLogin) {
+    router.push({ name: 'personInfo', params: { uid: userStore.user.uid } })
+    isLoginMenuOpen.value = false
+  } else {
+    message.warning('🚫 尚未登入，無法進入個人頁面喔！💡')
   }
 }
 </script>
@@ -391,7 +404,10 @@ const handleTopUpClick = () => {
             <div v-else-if="userStore.user.uid && notifications.length === 0">暫無通知</div>
             <div v-else>登入以查看通知</div>
             <n-spin v-if="!notificationStore.hideLoadBtn" :show="showLoading">
-              <n-button @click="handleLoadClick" class="w-full h-12 mt-2 text-lg font-bold"
+              <n-button
+                @click="handleLoadClick"
+                class="w-full h-12 mt-2 text-lg font-bold"
+                ref="loadMore"
                 >加載更多</n-button
               >
             </n-spin>
@@ -448,13 +464,7 @@ const handleTopUpClick = () => {
         <div class="flex justify-center">
           <button
             class="border border-gray-600 text-gray-600 py-2 px-4 rounded-full hover:border-green-600 hover:text-green-600"
-            @click="
-              (isLoginMenuOpen = false),
-                router.push({
-                  name: 'personInfo',
-                  params: { uid: userStore.user.uid },
-                })
-            "
+            @click="handleLoginMenuClick"
           >
             查看個人頁面
           </button>
