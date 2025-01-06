@@ -36,6 +36,7 @@ const loginMenuRef = ref(null)
 const toggleUserRef = ref(null)
 const popoverRef = ref(null)
 const triggerRef = ref(null)
+const loadMore = ref(null)
 
 const handleClickOutside = (event) => {
   if (
@@ -51,12 +52,15 @@ const handleClickOutside = (event) => {
 const handleNotiClickOutside = (event) => {
   const popoverEl = popoverRef.value?.$el
   const triggerEl = triggerRef.value?.$el
+  const loadMoreEl = loadMore.value?.$el
 
   if (
     popoverEl &&
     !popoverEl.contains(event.target) &&
     triggerEl &&
-    !triggerEl.contains(event.target)
+    !triggerEl.contains(event.target) &&
+    loadMoreEl &&
+    !loadMoreEl.contains(event.target)
   ) {
     showPopover.value = false
   }
@@ -398,7 +402,10 @@ const handleLoginMenuClick = () => {
             <div v-else-if="userStore.user.uid && notifications.length === 0">暫無通知</div>
             <div v-else>登入以查看通知</div>
             <n-spin v-if="!notificationStore.hideLoadBtn" :show="showLoading">
-              <n-button @click="handleLoadClick" class="w-full h-12 mt-2 text-lg font-bold"
+              <n-button
+                @click="handleLoadClick"
+                class="w-full h-12 mt-2 text-lg font-bold"
+                ref="loadMore"
                 >加載更多</n-button
               >
             </n-spin>
