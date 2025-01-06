@@ -11,7 +11,7 @@ import relativeTime from 'dayjs/plugin/relativeTime'
 import { useNotificationStore } from '@/stores/notificationStore'
 import { storeToRefs } from 'pinia'
 import { getUserSummaryAPI } from '@/apis/userAPIs'
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, watch, onUnmounted } from 'vue'
 import { handleError } from '@/utils/handleError.js'
 import { useActivityStore } from '@/stores/useActivityStore'
 
@@ -34,8 +34,9 @@ const userLogin = ref(false)
 const isLoginMenuOpen = ref(false)
 const loginMenuRef = ref(null)
 const toggleUserRef = ref(null)
+const popoverRef = ref(null)
+const triggerRef = ref(null)
 
-// 點擊其他地方時關閉 menu
 const handleClickOutside = (event) => {
   if (
     loginMenuRef.value &&
@@ -47,14 +48,23 @@ const handleClickOutside = (event) => {
   }
 }
 
-// 監聽 isLoginMenuOpen 狀態變化
-watch(isLoginMenuOpen, (newVal) => {
-  if (newVal) {
-    document.addEventListener('click', handleClickOutside)
-  } else {
-    document.removeEventListener('click', handleClickOutside)
+const handleNotiClickOutside = (event) => {
+  const popoverEl = popoverRef.value?.$el
+  const triggerEl = triggerRef.value?.$el
+
+  if (
+    popoverEl &&
+    !popoverEl.contains(event.target) &&
+    triggerEl &&
+    !triggerEl.contains(event.target)
+  ) {
+    showPopover.value = false
   }
-})
+}
+
+const handleNotificationClick = () => {
+  showPopover.value = false
+}
 
 const clearNumbers = () => {
   followerNumber.value = null
@@ -81,11 +91,16 @@ onMounted(() => {
     userLogin.value = true
     fetUserSummary()
     userLogin.value = true
+    document.addEventListener('click', handleNotiClickOutside)
+    document.addEventListener('click', handleClickOutside)
   } else {
     loading.value = false
   }
 })
-
+onUnmounted(() => {
+  document.removeEventListener('click', handleNotiClickOutside)
+  document.removeEventListener('click', handleClickOutside)
+})
 // 註冊/登入按鈕跳轉
 const navigateToLogin = () => {
   router.push({ name: 'login' })
@@ -302,6 +317,7 @@ const handleTopUpClick = () => {
         </router-link>
       </div>
       <n-popover
+        ref="popoverRef"
         placement="bottom-end"
         class="w-[300px] bellNotice"
         trigger="manual"
@@ -314,6 +330,7 @@ const handleTopUpClick = () => {
       >
         <template #trigger>
           <n-badge
+            ref="triggerRef"
             @click="showPopover = !showPopover"
             :max="15"
             :value="unreadCount"
@@ -326,7 +343,11 @@ const handleTopUpClick = () => {
           <div class="flex flex-col">
             <p class="py-2 mb-2 text-xl text-center font-bold border-b-2 border-gray-200">通知</p>
             <div v-if="notifications.length > 0 && userStore.user.uid">
-              <div v-for="notification in notifications" :key="notification.id">
+              <div
+                v-for="notification in notifications"
+                :key="notification.id"
+                @click="handleNotificationClick()"
+              >
                 <router-link :to="notification.link">
                   <div
                     :class="{ 'bg-gray-100': !notification.is_read }"
