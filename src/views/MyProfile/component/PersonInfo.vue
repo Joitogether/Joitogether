@@ -25,8 +25,8 @@ const props = defineProps({
 </script>
 <template>
   <div v-if="props" class="personInfo pt-2 pb-5 rounded-md">
-    <div class="flex flex-col gap-4 mb-5 md:flex-row md:justify-between md:gap-4 md:max-h-48">
-      <div class="rounded-md overflow-hidden md:w-1/2">
+    <div class="flex flex-col gap-4 mb-5 md:flex-row md:justify-between md:gap-4 md:max-h-96">
+      <div class="rounded-md overflow-hidden md:w-1/2 md:h-96">
         <img
           :src="
             props.life_photo_1 ||
@@ -36,7 +36,7 @@ const props = defineProps({
           class="w-full h-full object-cover"
         />
       </div>
-      <div class="rounded-md overflow-hidden md:w-1/2">
+      <div class="rounded-md overflow-hidden md:w-1/2 md:h-96">
         <img
           :src="
             props.life_photo_2 ||

@@ -311,7 +311,7 @@ watch(
 )
 </script>
 <template>
-  <div class="btn-container flex gap-2 mt-8 mb-8">
+  <div class="flex gap-2 mt-4">
     <n-modal :show="showModal" @mask-click="closeModal">
       <n-card style="width: 600px" :bordered="false" size="huge" role="dialog" aria-modal="true">
         <p class="text-2xl font-bold text-center mb-4 text-gray-600">編輯檔案</p>

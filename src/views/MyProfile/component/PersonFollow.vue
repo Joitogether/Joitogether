@@ -245,15 +245,15 @@ onMounted(() => {
             :key="following.user_id"
             class="followerArea my-5 flex justify-between"
           >
-            <div class="flex ml-5 items-center">
+            <div class="flex ml-3 items-center">
               <div
-                class="me-5 w-20 h-20 max-w-[44px] max-h-[44px] rounded-full overflow-hidden flex-shrink-0 cursor-pointer"
+                class="me-3 w-20 h-20 max-w-[44px] max-h-[44px] rounded-full overflow-hidden flex-shrink-0 cursor-pointer"
                 @click="router.push({ name: 'personInfo', params: { uid: following.user_id } })"
               >
                 <img :src="following.photo_url" class="w-full h-full object-cover" />
               </div>
               <div>
-                <div>{{ following.display_name }}</div>
+                <div class="font-bold">{{ following.display_name }}</div>
                 <div>{{ following.favorite_sentence }}</div>
               </div>
             </div>
@@ -284,9 +284,11 @@ onMounted(() => {
             :key="follower.id"
             class="followerArea my-5 flex justify-between"
           >
-            <div class="flex ml-5 items-center">
-              <div class="flex mr-5 items-center">
+            <div class="flex ml-3 items-center">
+              <div class="flex mr-3 items-center">
                 <n-button
+                  circle
+                  class="w-6 h-6 text-gray-400"
                   v-if="userStore.user.uid == id"
                   :type="follower.isFollowing ? 'default' : 'success'"
                   @click="unFollowFans(follower)"
@@ -295,17 +297,17 @@ onMounted(() => {
                 </n-button>
               </div>
               <div
-                class="me-5 w-20 h-20 max-w-[44px] max-h-[44px] rounded-full overflow-hidden flex-shrink-0 cursor-pointer"
+                class="mr-3 w-20 h-20 max-w-[44px] max-h-[44px] rounded-full overflow-hidden flex-shrink-0 cursor-pointer"
                 @click="router.push({ name: 'personInfo', params: { uid: follower.follower_id } })"
               >
                 <img :src="follower.photo_url" class="w-full h-full object-cover" />
               </div>
               <div>
-                <div>{{ follower.display_name }}</div>
+                <div class="font-bold">{{ follower.display_name }}</div>
                 <div>{{ follower.favorite_sentence }}</div>
               </div>
             </div>
-            <div class="flex mr-5 items-center">
+            <div class="flex mr-3 items-center">
               <n-button
                 v-if="userStore.user.uid == id"
                 :type="follower.isFollowing ? 'default' : 'success'"
