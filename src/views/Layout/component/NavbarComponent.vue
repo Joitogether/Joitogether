@@ -31,7 +31,7 @@ const postNumber = ref(null)
 const followerNumber = ref(null)
 const activityNumber = ref(null)
 const userLogin = ref(false)
-
+const isLoginMenuOpen = ref(false)
 const clearNumbers = () => {
   followerNumber.value = null
   activityNumber.value = null
@@ -358,7 +358,7 @@ const handleTopUpClick = () => {
         </n-scrollbar>
       </n-popover>
 
-      <input type="checkbox" id="login-toggle" />
+      <input type="checkbox" id="login-toggle" v-model="isLoginMenuOpen" />
       <label
         for="login-toggle"
         class="inline-flex items-center justify-center text-sm text-gray-500 cursor-pointer"
@@ -400,10 +400,11 @@ const handleTopUpClick = () => {
           <button
             class="border border-gray-600 text-gray-600 py-2 px-4 rounded-full hover:border-green-600 hover:text-green-600"
             @click="
-              router.push({
-                name: 'personInfo',
-                params: { uid: userStore.user.uid },
-              })
+              (isLoginMenuOpen = false),
+                router.push({
+                  name: 'personInfo',
+                  params: { uid: userStore.user.uid },
+                })
             "
           >
             查看個人頁面
