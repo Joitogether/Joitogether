@@ -224,22 +224,22 @@ watch(
         v-if="step == 0"
         class="relative flex items-center pl-5 before:content-[''] before:absolute before:left-0 before:top-0 before:bottom-2 before:w-2 before:h-full before:bg-green-600"
       >
-        <p class="text-base">活動評價</p>
-        <p class="text-gray-600 text-base font-bold">團主評價</p>
+        <p class="text-base md:text-lg">活動評價</p>
+        <p class="text-gray-600 text-base font-bold md:text-lg">團主評價</p>
       </div>
       <div
         v-else-if="step == 1"
-        class="relative px-5 before:content-[''] before:absolute before:left-0 before:top-2 before:bottom-2 before:w-2 before: before:bg-green-600"
+        class="relative flex items-center pl-5 before:content-[''] before:absolute before:left-0 before:top-0 before:bottom-2 before:w-2 before:h-full before:bg-green-600"
       >
-        <div class="text-sm xl:text-2xl md:text-xl">活動評價</div>
-        <div class="text-gray-600 text-sm font-bold xl:text-3xl md:text-xl">追蹤活動</div>
+        <div class="text-base md:text-lg">活動評價</div>
+        <div class="text-gray-600 text-base font-bold md:text-lg">追蹤活動</div>
       </div>
       <div
         v-else-if="step == 2"
-        class="relative px-5 before:content-[''] before:absolute before:left-0 before:top-2 before:bottom-2 before:w-2 before: before:bg-green-600"
+        class="relative flex items-center pl-5 before:content-[''] before:absolute before:left-0 before:top-0 before:bottom-2 before:w-2 before:h-full before:bg-green-600"
       >
-        <div class="text-sm xl:text-2xl md:text-xl">活動評價</div>
-        <div class="text-gray-600 text-sm font-bold xl:text-3xl md:text-xl">完成評價</div>
+        <div class="text-base md:text-lg">活動評價</div>
+        <div class="text-gray-600 text-base font-bold md:text-lg">完成評價</div>
       </div>
 
       <!-- 評分進度 -->
@@ -296,18 +296,19 @@ watch(
         </div>
         <!-- 活動資訊 -->
         <div class="flex flex-col">
-          <p class="text-xl text-green-600 font-bold tracking-wide line-clamp-2">
+          <p class="text-xl text-green-600 font-bold tracking-wide line-clamp-2 md:text-2xl">
             {{ activityDetail.name }}
           </p>
-          <div class="flex">
+          <div class="flex text-base">
             <p class="">團主：</p>
             <p class="">{{ hostInfo.display_name }}</p>
           </div>
 
-          <div class="flex text-base"></div>
-          <div class="flex">
-            <p class="">活動日期：</p>
-            <p class="">{{ dayjs(activityDetail.event_time).format('YYYY-MM-DD ') }}</p>
+          <div class="flex text-base">
+            <div class="flex">
+              <p class="">活動日期：</p>
+              <p class="">{{ dayjs(activityDetail.event_time).format('YYYY-MM-DD ') }}</p>
+            </div>
           </div>
           <div
             class="flex flex-col gap-4 w-full mt-2 p-3 rounded-md border-2 border-gray-100 md:flex-col"
@@ -606,7 +607,7 @@ watch(
             </svg>
           </div>
           <div class="text-center">
-            <p>您已經完成評價啦✨</p>
+            <p class="text-xl font-bold">您已經完成評價啦✨</p>
           </div>
         </div>
         <div class="flex justify-center items-center mt-8 gap-5">

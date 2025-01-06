@@ -9,7 +9,7 @@
         />
       </div>
       <div v-if="login" class="login-box">
-        <h2 class="font-black text-6xl" style="color: #18a058">登入</h2>
+        <h2 class="font-black" style="color: #18a058">登入</h2>
         <n-form ref="loginFormRef" :label-width="80" :model="loginForm" :rules="loginRules">
           <n-form-item path="email">
             <n-input v-model:value="loginForm.email" placeholder="輸入信箱" />
@@ -34,17 +34,13 @@
             登入
           </n-button>
         </div>
-        <div class="flex items-center mb-6 mt-6">
+        <div class="flex items-center mb-5 mt-8">
           <div class="flex-grow border-t border-gray-300"></div>
           <span class="mx-4 text-gray-600">第三方平台登入</span>
           <div class="flex-grow border-t border-gray-300"></div>
         </div>
         <div class="flex justify-center flex-col gap-3 items-center">
-          <n-button
-            class="w-full mt-3 font-bold text-lg py-5"
-            round
-            type="primary"
-            @click="loginGoogle"
+          <n-button class="w-full font-bold text-lg py-5" round type="primary" @click="loginGoogle"
             >Google</n-button
           >
           <!-- <n-button
@@ -55,7 +51,7 @@
             >Facebook</n-button
           > -->
         </div>
-        <div class="flex items-center mb-7 mt-8">
+        <div class="flex items-center mb-5 mt-8">
           <div class="flex-grow border-t border-gray-300"></div>
           <span class="mx-4 text-gray-600">或是</span>
           <div class="flex-grow border-t border-gray-300"></div>
@@ -63,17 +59,24 @@
         <div class="flex justify-center flex-col gap-3 items-center">
           <n-button
             @click="toggleLoginSignup"
-            class="w-full mt-3 font-bold text-lg py-5"
+            class="w-full font-bold text-lg py-5"
             round
             type="primary"
           >
             註冊一個帳號吧
           </n-button>
         </div>
+        <div class="flex items-center mt-8">
+          <div class="flex-grow border-t border-gray-300"></div>
+          <n-button quaternary type="primary" class="mx-4 text-gray-600">
+            <router-link :to="{ name: 'home' }">返回首頁</router-link>
+          </n-button>
+          <div class="flex-grow border-t border-gray-300"></div>
+        </div>
       </div>
       <div v-else class="signup-box">
         <div v-if="step === 1">
-          <h2 class="font-black text-6xl" style="color: #18a058">註冊</h2>
+          <h2 class="font-black" style="color: #18a058">註冊</h2>
           <!-- 大頭貼 -->
           <div class="flex flex-col items-center space-y-4 mb-5">
             <div class="relative w-36 h-36">
