@@ -435,9 +435,9 @@ const sendReplies = async () => {
                     params: { id: $route.params.activity_id },
                   })
                 "
-                class="hover:bg-yellow-300 rounded-full mr-2 transition-all"
+                class="hover:bg-green-600 hover:text-white rounded-full mr-2 transition-all duration-75 cursor-pointer"
               >
-                <NavArrowLeft width="32px" height="32" />
+                <NavArrowLeft width="32px" height="32" class="transition-all duration-0" />
               </div>
               <div class="text-2xl font-bold text-gray-700">檢視報名者列表</div>
             </div>
@@ -458,7 +458,7 @@ const sendReplies = async () => {
                 v-model="searchQuery"
                 type="text"
                 placeholder="🔍請輸入會員名稱進行搜尋"
-                class="bg-gray-100 h-10 w-full outline-none outline-[3px] focus:outline-yellow-400 p-2 rounded-full transition-all"
+                class="bg-gray-100 h-10 w-full outline-none outline-[3px] focus:outline-green-400 p-2 rounded-full transition-all"
               />
             </div>
 
@@ -534,13 +534,9 @@ const sendReplies = async () => {
                     params: { id: $route.params.activity_id },
                   })
                 "
-                class="hover:bg-green-600 rounded-full mr-2 transition-all duration-200"
+                class="hover:bg-green-600 hover:text-white rounded-full mr-2 transition-all duration-75 cursor-pointer"
               >
-                <NavArrowLeft
-                  width="32px"
-                  height="32"
-                  class="hover:text-white transition-all duration-[50mm]"
-                />
+                <NavArrowLeft width="32px" height="32" class="transition-all duration-0" />
               </div>
               <div class="text-2xl font-bold text-gray-800">審核列表</div>
             </div>
