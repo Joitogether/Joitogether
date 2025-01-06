@@ -32,6 +32,30 @@ const followerNumber = ref(null)
 const activityNumber = ref(null)
 const userLogin = ref(false)
 const isLoginMenuOpen = ref(false)
+const loginMenuRef = ref(null)
+const toggleUserRef = ref(null)
+
+// 點擊其他地方時關閉 menu
+const handleClickOutside = (event) => {
+  if (
+    loginMenuRef.value &&
+    !loginMenuRef.value.contains(event.target) &&
+    toggleUserRef.value &&
+    !toggleUserRef.value.contains(event.target)
+  ) {
+    isLoginMenuOpen.value = false
+  }
+}
+
+// 監聽 isLoginMenuOpen 狀態變化
+watch(isLoginMenuOpen, (newVal) => {
+  if (newVal) {
+    document.addEventListener('click', handleClickOutside)
+  } else {
+    document.removeEventListener('click', handleClickOutside)
+  }
+})
+
 const clearNumbers = () => {
   followerNumber.value = null
   activityNumber.value = null
@@ -361,6 +385,7 @@ const handleTopUpClick = () => {
       <input type="checkbox" id="login-toggle" v-model="isLoginMenuOpen" />
       <label
         for="login-toggle"
+        ref="toggleUserRef"
         class="inline-flex items-center justify-center text-sm text-gray-500 cursor-pointer"
       >
         <User class="w-7 h-7 hover:text-green-600" />
@@ -370,6 +395,7 @@ const handleTopUpClick = () => {
       <div
         v-else
         id="login-menu"
+        ref="loginMenuRef"
         class="w-full rounded-md bg-gray-50 text-black px-6 py-10 space-y-4 shadow-md md:w-1/3 md:right-2 lg:w-1/4"
       >
         <div
