@@ -20,6 +20,7 @@ const {
   regionOptions,
   filters,
   totalActivities,
+  selectedStartDate,
 } = storeToRefs(activityStore)
 
 const { fetchAllActivities, triggerActivityAction, clearFilters } = activityStore
@@ -41,7 +42,6 @@ const handlePageChange = (page) => {
 
 // 計算今天日期的字串
 const todayString = new Date().toISOString().split('T')[0]
-const selectedStartDate = ref('')
 
 const setStartDate = (date) => {
   selectedStartDate.value = date
@@ -208,6 +208,7 @@ const handleClearFilters = () => {
                 style="outline: none"
                 @change="setStartDate($event.target.value)"
                 placeholder="活動日期"
+                v-model="selectedStartDate"
               />
             </span>
           </div>
