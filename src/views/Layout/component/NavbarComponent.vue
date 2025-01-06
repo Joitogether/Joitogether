@@ -319,7 +319,9 @@ const handleTopUpClick = () => {
             :value="unreadCount"
             class="cursor-pointer"
           >
-            <BellNotification class="hover:text-green-600"></BellNotification>
+            <BellNotification
+              class="text-gray-600 hover:text-green-600 transition-all duration-200"
+            ></BellNotification>
           </n-badge>
         </template>
         <n-scrollbar style="max-height: 500px">
@@ -388,7 +390,7 @@ const handleTopUpClick = () => {
         ref="toggleUserRef"
         class="inline-flex items-center justify-center text-sm text-gray-500 cursor-pointer"
       >
-        <User class="w-7 h-7 hover:text-green-600" />
+        <User class="w-7 h-7 text-gray-500 hover:text-green-600" />
       </label>
       <div v-if="loading"></div>
 
