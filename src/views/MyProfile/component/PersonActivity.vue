@@ -192,7 +192,7 @@ onMounted(() => {
     </div>
     <div v-if="selectedValue == 'hostExperience'" class="bg-gray-50 px-5 py-5 rounded-md">
       <div class="content-center text-center text-xl font-bold border-b-2 pb-3">主辦紀錄</div>
-      <div v-if="hostList" class="pt-5 flex flex-col gap-5">
+      <div v-if="hostList.length > 0" class="pt-5 flex flex-col gap-5">
         <div
           v-for="list in hostPaginatedItems"
           :key="list.id"
