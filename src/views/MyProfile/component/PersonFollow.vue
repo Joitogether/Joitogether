@@ -19,7 +19,7 @@ const router = useRouter()
 const route = useRoute()
 const owenerFollowerList = ref([])
 const owenerFollowingList = ref([])
-const id = route.params.uid
+let id = route.params.uid
 const guestFollowing = ref(null)
 const guestFollowingList = ref([])
 const activeTab = ref('chapt1')
@@ -225,6 +225,7 @@ const guestsToggleFollow = async (follower) => {
 watch(
   () => route.params.uid,
   () => {
+    id = route.params.uid
     fetchFollowerData()
   },
 )
