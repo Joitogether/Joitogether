@@ -82,7 +82,9 @@ const filteredActivities = computed(() =>
       return {
         id: activity.id,
         name: activity.name,
-        img_url: activity.img_url || './src/assets/UserUpdata1.jpg',
+        img_url:
+          activity.img_url ||
+          'https://firebasestorage.googleapis.com/v0/b/login-demo1-9d3cb.firebasestorage.app/o/activities%2F1736165191190_default%20eventpicture.jpg?alt=media&token=21212afe-db96-49ee-873d-a3b604ac5c0a',
         location: activity.location || '未知地點',
         dateTime: formatDate(activity.event_time),
         participants: activity.max_participants,
