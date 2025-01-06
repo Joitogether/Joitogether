@@ -196,6 +196,7 @@ const handleClearFilters = () => {
               placeholder="選擇地區"
               style="width: 150px"
               @update:value="filterByRegion"
+              @clear="handleClearFilters"
             />
           </div>
           <div class="text-xl flex items-center">
