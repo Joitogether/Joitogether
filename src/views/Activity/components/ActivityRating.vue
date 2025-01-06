@@ -29,7 +29,6 @@ const isParticipant = computed(() => {
   })
 })
 
-
 const clickTheFollowBtn = () => {
   dialog.success({
     title: '確認追蹤',
@@ -216,28 +215,26 @@ watch(
 </script>
 
 <template>
-  <body class="bg-gray-50 p-10 min-w-[400px]">
+  <body class="bg-gray-100">
     <!-- 活動評價 -->
-    <div
-      class="flex flex-col w-full min-w-[650px] max-w-[1440px] m-auto p-5 bg-gray-100 rounded-2xl border-2 border-gray-200"
-    >
+    <div class="flex flex-col w-full mx-auto p-5 bg-white md:w-3/4 lg:w-3/5">
       <div
         v-if="step == 0"
-        class="relative px-5 before:content-[''] before:absolute before:left-0 before:top-2 before:bottom-2 before:w-2 before: before:bg-green-500"
+        class="relative flex items-center pl-5 before:content-[''] before:absolute before:left-0 before:top-0 before:bottom-2 before:w-2 before:h-full before:bg-green-600"
       >
-        <div class="text-sm xl:text-2xl md:text-xl">活動評價</div>
-        <div class="text-gray-600 text-sm font-bold xl:text-3xl md:text-xl">團主評價</div>
+        <p class="text-base">活動評價</p>
+        <p class="text-gray-600 text-base font-bold">團主評價</p>
       </div>
       <div
         v-else-if="step == 1"
-        class="relative px-5 before:content-[''] before:absolute before:left-0 before:top-2 before:bottom-2 before:w-2 before: before:bg-green-500"
+        class="relative px-5 before:content-[''] before:absolute before:left-0 before:top-2 before:bottom-2 before:w-2 before: before:bg-green-600"
       >
         <div class="text-sm xl:text-2xl md:text-xl">活動評價</div>
         <div class="text-gray-600 text-sm font-bold xl:text-3xl md:text-xl">追蹤活動</div>
       </div>
       <div
         v-else-if="step == 2"
-        class="relative px-5 before:content-[''] before:absolute before:left-0 before:top-2 before:bottom-2 before:w-2 before: before:bg-green-500"
+        class="relative px-5 before:content-[''] before:absolute before:left-0 before:top-2 before:bottom-2 before:w-2 before: before:bg-green-600"
       >
         <div class="text-sm xl:text-2xl md:text-xl">活動評價</div>
         <div class="text-gray-600 text-sm font-bold xl:text-3xl md:text-xl">完成評價</div>
@@ -286,7 +283,7 @@ watch(
         </div>
       </div>
       <!-- 活動區域 -->
-      <div class="flex w-full min-w-[600px]">
+      <div class="flex w-full">
         <!-- 照片 -->
         <div class="flex w-full aspect-video xs:hidden sm:w-full md:w-full lg:flex">
           <img
@@ -420,7 +417,7 @@ watch(
           />
           <div class="mx-2">{{ userStore.user.display_name }}</div>
         </div>
-        <div class="flex mt-3 px-14">
+        <div class="flex mt-3">
           <div class="text-base w-full">您對於本次揪團的評價為</div>
           <div class="heart-rating" @mouseleave="resetHover('overall')">
             <span
@@ -433,7 +430,7 @@ watch(
             ></span>
           </div>
         </div>
-        <div class="flex mt-3 px-14">
+        <div class="flex mt-3">
           <div class="text-base w-full">團主的親切度，您願意給到幾分呢？</div>
           <div class="heart-rating" @mouseleave="resetHover('kindness')">
             <span
@@ -446,7 +443,7 @@ watch(
             ></span>
           </div>
         </div>
-        <div class="flex mt-3 px-14">
+        <div class="flex mt-3">
           <div class="text-base w-full">團主的主辦能力，您願意給到幾分呢？</div>
           <div class="heart-rating" @mouseleave="resetHover('ability')">
             <span
@@ -459,7 +456,7 @@ watch(
             ></span>
           </div>
         </div>
-        <div class="flex mt-3 px-14">
+        <div class="flex mt-3">
           <div class="text-base w-full">團主的信用度，您願意給到幾分呢？</div>
           <div class="heart-rating" @mouseleave="resetHover('credit')">
             <span

@@ -72,10 +72,10 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="bg-gray-100 min-h-screen flex justify-center items-center px-4">
-    <div class="bg-white rounded-lg shadow-md mt-6 mb-6 p-6 w-full max-w-4xl sm:w-[90%]">
+  <div class="bg-gray-100">
+    <div class="bg-white min-h-screen rounded-md shadow p-6 mx-auto w-full md:w-3/4 lg:w-3/5">
       <div class="text-center">
-        <h1 class="text-3xl font-bold text-green-600 mb-6">付款成功 🎉</h1>
+        <h1 class="text-2xl font-bold mb-6 text-gray-700">付款成功 🎉</h1>
       </div>
 
       <div class="flex justify-center my-6">
@@ -97,48 +97,58 @@ onMounted(async () => {
         </svg>
       </div>
 
-      <div class="text-center space-y-4">
-        <p class="text-2xl font-semibold text-gray-700">已成功報名活動 ✅</p>
-        <p class="text-lg text-gray-600">🎉 感謝您的購買，期待您玩得開心！✨</p>
-        <p class="text-lg text-gray-600">📋 訂單編號：# {{ orderId }}</p>
+      <div class="">
+        <div class="text-center flex flex-col gap-2">
+          <p class="text-2xl font-semibold text-gray-700">已成功報名活動 ✅</p>
+          <p class="text-base text-gray-600">🎉 感謝您的購買，期待您玩得開心！✨</p>
+          <p class="text-base text-gray-600">訂單編號：#{{ orderId }}</p>
+        </div>
 
         <div class="border-t border-gray-300 my-6"></div>
         <div class="text-lg text-gray-600 space-y-3">
-          <div v-for="(item, index) in orderDetails" :key="index">
-            <div class="space-y-2">
-              <div>
-                <span>📦 商品名稱：</span><span>{{ item.name }}</span>
+          <div v-for="(item, index) in orderDetails" :key="index" class="flex flex-col gap-3">
+            <div
+              class="bg-gray-100 rounded-md text-start text-base tracking-wide p-3 flex flex-col gap-1"
+            >
+              <div class="">
+                <span class="font-bold">📦 商品名稱：</span>
+                <span>{{ item.name }}</span>
               </div>
-              <div>
-                <span>🔢 購買數量：</span><span>{{ item.quantity }}</span>
-              </div>
-              <div>
-                <span>💰 單價：</span><span>${{ item.price }}</span>
+              <div class="flex justify-between">
+                <div>
+                  <span class="font-bold">🔢 購買數量：</span>
+                  <span>{{ item.quantity }}</span>
+                </div>
+                <div>
+                  <!-- <span>💰 商品單價：</span> -->
+                  <span class="font-bold text-red-500">${{ item.price }}</span>
+                </div>
               </div>
             </div>
             <div v-if="index < orderDetails.length - 1" class="border-t border-gray-300 my-4"></div>
           </div>
         </div>
-
         <div class="border-t border-gray-300 my-6"></div>
-
-        <div class="text-xl text-gray-600 font-medium mb-6">
-          <span>📊 總價：</span><span>${{ totalPrice }}</span>
-        </div>
-
-        <div class="font-bold text-xl pt-5">
-          <span>🏦 儲值金餘額：</span> <span>${{ balance }}</span>
+        <div class="text-start px-3">
+          <div class="text-base text-gray-600 font-medium">
+            <span>總計：</span>
+            <span class="font-bold text-red-500">${{ totalPrice }}</span>
+          </div>
+          <div class="text-base text-gray-600 font-medium mb-6">
+            <span>儲值金餘額：</span>
+            <span class="text-red-500 font-bold">${{ balance }}</span>
+          </div>
         </div>
       </div>
-
-      <div class="flex justify-center mt-8">
+      <div class="flex justify-center">
         <n-button
           @click="goHome"
-          class="font-bold text-lg py-5 px-12 rounded-full shadow-lg"
+          class="font-bold text-lg py-5 px-12 rounded-full"
           round
           type="primary"
-          >回到首頁</n-button
         >
+          回到首頁
+        </n-button>
       </div>
     </div>
   </div>

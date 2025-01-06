@@ -32,6 +32,7 @@ const editPostTitle = ref('')
 const editPostContent = ref('')
 const editPostImg = ref('')
 const socketStore = useSocketStore()
+
 // 留言打進後端的資料
 const newComment = ref('')
 const message = useMessage()
@@ -79,18 +80,6 @@ const fetchPostDetails = async () => {
         path: '/notFound',
       })
     }
-
-    // if (!post.data || Object.keys(post.data).length === 0) {
-    //   postDetails.category = '未分類'
-    //   postDetails.title = '查無此文章'
-    //   postDetails.content = '很抱歉，我們無法找到這篇文章的內容'
-    //   postDetails.time = ''
-    //   postDetails.img = null
-    //   postDetails.name = '未知用戶'
-    //   postDetails.avatar = null
-    //   postDetails.isPostAuthor = false
-    //   return
-    // }
 
     const user = post.data
 

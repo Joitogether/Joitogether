@@ -161,6 +161,7 @@
             </n-checkbox>
             <n-modal
               v-model:show="showModalPrivacy"
+              :mask-closable="false"
               preset="dialog"
               title="隱私權政策"
               :closable="false"
@@ -180,6 +181,7 @@
             </n-checkbox>
             <n-modal
               v-model:show="showModalTerms"
+              :mask-closable="false"
               preset="dialog"
               title="服務條款"
               :closable="false"
