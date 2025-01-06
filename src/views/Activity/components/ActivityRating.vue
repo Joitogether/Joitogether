@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, reactive, ref, watch } from 'vue'
+import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useMessage, useDialog, NRate, NSpace, NInput, NModal } from 'naive-ui'
 import { CheckCircle, CheckCircleSolid, HeartSolid } from '@iconoir/vue'
 import { useRoute, useRouter } from 'vue-router'
@@ -9,7 +9,9 @@ import { useUserStore } from '@/stores/userStore'
 import { handleError } from '@/utils/handleError.js'
 import { formatDate } from '@/utils/useDateTime'
 import { userFollowersAddAPI, userGetFollowingAPI } from '@/apis/userAPIs'
+import { useSocketStore } from '@/stores/socketStore'
 dayjs.locale('zh-tw')
+const socketStore = useSocketStore()
 const userStore = useUserStore()
 const dialog = useDialog()
 const message = useMessage()
@@ -20,6 +22,13 @@ const hostInfo = ref({})
 const hostRatingAverage = ref({})
 const latestHostRating = ref()
 const checkFollowing = ref([])
+const applications = ref([])
+const isParticipant = computed(() => {
+  return applications.value.some((application) => {
+    return application.participant_id == userStore.user.uid && application.register_validated
+  })
+})
+
 
 const clickTheFollowBtn = () => {
   dialog.success({
@@ -82,11 +91,17 @@ const getDetailForRating = async () => {
     hostInfo.value = res.activity.users || {}
     hostRatingAverage.value = res.hostRatingAverage['_avg'] || {}
     latestHostRating.value = res.latestHostRating || null
+    applications.value = res.applications || []
+
+    if (!isParticipant.value) {
+      message.warning('您並未參與此活動，故無法進行評輪')
+    }
   } catch (error) {
     activityDetail.value = {}
     hostInfo.value = {}
     hostRatingAverage.value = {}
     latestHostRating.value = null
+    applications.value = []
     handleError(message, '無法加載活動資料，請稍後再試 🙏', error)
   }
 }
@@ -113,27 +128,44 @@ const hoverStates = reactive({
 })
 
 const submitRating = async () => {
-  const data = {
-    host_id: activityDetail.value.host_id,
-    user_id: userStore.user.uid,
-    user_comment: ratingForm.comment,
-    rating_heart: ratingForm.overall,
-    rating_kindness: ratingForm.kindness,
-    rating_credit: ratingForm.credit,
-    rating_ability: ratingForm.ability,
-    activity_id: parseInt(route.params.activity_id),
+  if (!isParticipant.value) {
+    return message.warning('您並未參與此活動，故無法進行評輪')
   }
-  const res = await ratingSubmitAPI(data)
-  if (res.messsage == '資料唯一性衝突') {
-    message.error('你已評價過，無法重複評價')
-  }
-  if (res.status != 201) {
+  try {
+    const data = {
+      host_id: activityDetail.value.host_id,
+      user_id: userStore.user.uid,
+      user_comment: ratingForm.comment,
+      rating_heart: ratingForm.overall,
+      rating_kindness: ratingForm.kindness,
+      rating_credit: ratingForm.credit,
+      rating_ability: ratingForm.ability,
+      activity_id: parseInt(route.params.activity_id),
+    }
+    const res = await ratingSubmitAPI(data)
     showSubmitModal.value = false
-    return message.error('評價失敗')
+    message.success('評價成功！')
+
+    const notiData = {
+      actor_id: userStore.user.uid,
+      user_id: activityDetail.value.host_id,
+      target_id: res.data.rating_id,
+      action: 'rate',
+      target_type: 'rating',
+      message: '留下了活動的評價',
+      link: `/profile/${activityDetail.value.host_id}`,
+    }
+    // 送出提醒
+    socketStore.sendNotification(notiData)
+
+    step.value = 2
+  } catch (error) {
+    if (error.response?.data.message == '資料唯一性衝突') {
+      message.error('你已評價過，無法重複評價')
+    } else {
+      message.error('評價失敗')
+    }
   }
-  showSubmitModal.value = false
-  message.success('評價成功！')
-  step.value = 2
 }
 const showSubmitModal = ref(false)
 
@@ -172,6 +204,13 @@ watch(
   () => props.score,
   (newScore) => {
     currentScore.value = newScore
+  },
+)
+
+watch(
+  () => route.params.activity_id,
+  () => {
+    getDetailForRating()
   },
 )
 </script>
@@ -517,9 +556,12 @@ watch(
           </n-result>
         </div>
         <div class="flex items-center w-2/3 h-20 justify-evenly">
-          <n-button @click="router.push({ name: 'home' })" type="success">返回首頁</n-button>
-          <n-button @click="router.push({ name: 'profile' })" type="success">前往個人頁</n-button>
-          <n-button type="success">前往任務中心</n-button>
+          <n-button @click="router.push({ name: 'home' })" type="info">返回首頁</n-button>
+          <n-button
+            @click="router.push({ name: 'personInfo', params: { uid: userStore.user.uid } })"
+            type="info"
+            >前往個人頁</n-button
+          >
         </div>
       </div>
     </div>
