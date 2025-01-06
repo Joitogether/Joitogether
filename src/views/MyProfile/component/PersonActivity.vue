@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, reactive, ref, watch } from 'vue'
+import { onMounted, reactive, ref, watch, computed } from 'vue'
 import { userGetActivityAPI, userGetActivityHostAPI } from '@/apis/userAPIs'
 import { handleError } from '@/utils/handleError.js'
 import { useMessage, NSelect } from 'naive-ui'
@@ -20,6 +20,9 @@ const hostList = ref([])
 const allValidatedActivities = ref([])
 const validatedActivity = ref([])
 const allUnconfirmedActivities = ref([])
+const beforeTodayCurrentPage = ref(1)
+const hostCurrentPage = ref(1)
+const limit = ref(5)
 
 const options = reactive([
   { label: '即將參加、聚會紀錄', value: 'activitiesRecords' },
@@ -72,6 +75,27 @@ const fetchActivityRecordsData = async () => {
     loading.value = false
   }
 }
+const beforeTodayTotalPages = computed(() => Math.ceil(beforeToday.value.length / limit.value))
+const beforeTodayPaginatedItems = computed(() => {
+  if (!beforeToday.value) {
+    return
+  } else {
+    const start = (beforeTodayCurrentPage.value - 1) * limit.value
+    const end = start + limit.value
+    return beforeToday.value.slice(start, end)
+  }
+})
+
+const hostTotalPages = computed(() => Math.ceil(hostList.value.length / limit.value))
+const hostPaginatedItems = computed(() => {
+  if (!hostList.value) {
+    return
+  } else {
+    const start = (hostCurrentPage.value - 1) * limit.value
+    const end = start + limit.value
+    return hostList.value.slice(start, end)
+  }
+})
 const handleActivityClick = (activityId) => {
   router.push(`/activity/detail/${activityId}`)
 }
@@ -133,7 +157,7 @@ onMounted(() => {
       <div class="content-center text-center text-xl font-bold border-b-2 pb-3">聚會紀錄</div>
       <div v-if="beforeToday.length > 0" class="pt-5 flex flex-col gap-5">
         <div
-          v-for="pre_activity in beforeToday"
+          v-for="pre_activity in beforeTodayPaginatedItems"
           :key="pre_activity.id"
           @click="handleActivityClick(pre_activity.id)"
           class="flex bg-white p-3 h-auto rounded-md cursor-pointer"
@@ -155,6 +179,14 @@ onMounted(() => {
             />
           </div>
         </div>
+        <div class="flex justify-center">
+          <n-pagination
+            v-model:page="beforeTodayCurrentPage"
+            :page-count="beforeTodayTotalPages"
+            :page-size="itemsPerPage"
+            @update:page-size="updateItemsPerPage"
+          />
+        </div>
       </div>
       <div v-else class="mt-5 text-center text-gray-600">用戶沒有過去的活動</div>
     </div>
@@ -162,7 +194,7 @@ onMounted(() => {
       <div class="content-center text-center text-xl font-bold border-b-2 pb-3">主辦紀錄</div>
       <div v-if="hostList" class="pt-5 flex flex-col gap-5">
         <div
-          v-for="list in hostList"
+          v-for="list in hostPaginatedItems"
           :key="list.id"
           @click="handleActivityClick(list.id)"
           class="flex bg-white p-3 h-auto rounded-md cursor-pointer"
@@ -179,6 +211,14 @@ onMounted(() => {
           >
             <img :src="list.img_url" alt="past-party-photo" class="w-full h-full object-cover" />
           </div>
+        </div>
+        <div class="flex justify-center">
+          <n-pagination
+            v-model:page="hostCurrentPage"
+            :page-count="hostTotalPages"
+            :page-size="itemsPerPage"
+            @update:page-size="updateItemsPerPage"
+          />
         </div>
       </div>
       <div v-else class="mt-5 text-center text-gray-600">用戶還沒有主辦紀錄</div>
