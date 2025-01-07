@@ -19,7 +19,7 @@ const requireLogin = () => {
       <div class="flex flex-col lg:flex-row lg:gap-10">
         <div class="flex flex-col items-center gap-3 lg:flex-row lg:gap-5">
           <p class="text-xl font-semibold text-gray-500">Joitogether</p>
-          <div class="text-gray-500 gap-3 text-center">
+          <div class="text-gray-500 gap-3 text-center md:text-start">
             <div class="grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-6 lg:gap-5">
               <RouterLink v-if="!userStore.user.isLogin" to="/login" class="">註冊會員</RouterLink>
               <RouterLink @click="requireLogin" to="/activity/create" class="">建立活動</RouterLink>
