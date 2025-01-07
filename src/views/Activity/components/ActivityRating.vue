@@ -96,6 +96,20 @@ const getDetailForRating = async () => {
 
     if (!isParticipant.value) {
       message.warning('您並未參與此活動，故無法進行評輪')
+      setTimeout(() => {
+        router.push(`/`)
+      }, 1000)
+    } else {
+      if (applications.value) {
+        const found = latestHostRating.value.find((rate) => rate.user_id == userStore.user.uid)
+
+        if (found) {
+          message.warning('您已經評價過囉！')
+          setTimeout(() => {
+            router.push(`/`)
+          }, 1000)
+        }
+      }
     }
   } catch (error) {
     activityDetail.value = {}
