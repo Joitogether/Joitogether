@@ -73,6 +73,7 @@ const seeRecord = () => {
 }
 
 onMounted(() => {
+  window.scrollTo({ top: 0 })
   fetchWalletBalance()
 })
 </script>

@@ -349,6 +349,7 @@ const formattedDeadLine = computed(() =>
 )
 
 onMounted(() => {
+  window.scrollTo({ top: 0 })
   timeRange.value.minTime = minTime
   timeRange.value.maxTime = maxTime
 })
