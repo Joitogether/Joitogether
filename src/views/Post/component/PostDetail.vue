@@ -495,7 +495,7 @@ watch(
         <div class="items-center">
           <div
             v-if="!isEditing"
-            class="mb-6 text-base text-gray-600 whitespace-pre-wrap tracking-wide"
+            class="mb-6 text-base text-gray-600 whitespace-pre-wrap tracking-wide break-words word-break: break-all"
           >
             {{ postDetails.content }}
           </div>
@@ -621,7 +621,9 @@ watch(
                 </div>
                 <div>
                   <p class="font-semibold text-gray-800 text-sm">{{ comment.name }}</p>
-                  <p class="text-gray-600 text-sm whitespace-pre-wrap tracking-wide">
+                  <p
+                    class="text-gray-600 text-sm whitespace-pre-wrap tracking-wide break-words word-break: break-all"
+                  >
                     {{ comment.content }}
                   </p>
                   <p class="text-gray-400 text-sm">{{ dayjs(comment.time).fromNow() }}</p>

@@ -227,12 +227,11 @@ const handleLoginMenuClick = () => {
         </RouterLink>
       </div>
       <div class="hidden lg:flex flex-row items-center gap-2 mx-3">
-        <label for="search" class="cursor-pointer hover:text-green-600">找聚會</label>
+        <RouterLink to="/" class="cursor-pointer hover:text-green-600">找聚會</RouterLink>
         <div class="flex items-center gap-2">
           <input
             v-model="searchKeyword"
             type="text"
-            id="search"
             class="h-8 bg-gray-100 rounded-full p-3 focus:outline-green-600"
             placeholder="運動、美食、唱歌..."
             @keydown.enter="handleSearchClick"

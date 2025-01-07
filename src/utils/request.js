@@ -29,7 +29,6 @@ function hideLoadingOverlay() {
 
 apiAxios.interceptors.request.use(
   async function (config) {
-    console.log(config)
     if (auth.currentUser) {
       const token = await getIdToken(auth.currentUser)
       if (token) {

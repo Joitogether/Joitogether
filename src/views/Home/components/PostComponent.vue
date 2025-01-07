@@ -190,11 +190,11 @@ const formatDate = (isoString) => {
 
           <div class="flex gap-2 w-full py-2 flex-nowrap items-center">
             <!-- 內文區塊 -->
-            <div class="flex-1 w-full tracking-wide lg:min-h-28">
+            <div class="flex-1 w-full tracking-wide lg:min-h-28 overflow-hidden">
               <div class="text-xs text-gray-400 sm:text-xs md:text-sm lg:text-sm">
                 {{ formatDate(item.created_at) }}
               </div>
-              <div class="line-clamp-2 my-1 text-base font-bold md:text-lg lg:text-xl">
+              <div class="truncate line-clamp-2 my-1 text-base font-bold md:text-lg lg:text-xl">
                 {{ item.post_title }}
               </div>
               <div
@@ -205,12 +205,12 @@ const formatDate = (isoString) => {
             </div>
 
             <!-- 圖片區塊 -->
-            <div class="w-24 h-24 aspect-square">
+            <div class="w-24 h-24 flex-shrink-0">
               <img
                 v-if="item.post_img"
                 :src="item.post_img"
                 alt="文章照片"
-                class="object-cover aspect-square rounded-xl w-full h-full shadow"
+                class="object-cover rounded-xl w-full h-full shadow"
                 @error="onPostImageError"
                 loading="lazy"
               />

@@ -103,7 +103,7 @@ onMounted(() => {
 
 <template>
   <div id="webcrumbs" class="bg-gray-100">
-    <div class="w-full bg-white py-5 rounded-lg shadow px-4 mx-auto h-screen md:w-3/4 lg:w-3/5">
+    <div class="w-full bg-white py-5 rounded-lg shadow px-4 mx-auto min-h-screen md:w-3/4 lg:w-3/5">
       <!-- Header -->
       <header class="text-center text-2xl font-bold mb-6">購物車</header>
 

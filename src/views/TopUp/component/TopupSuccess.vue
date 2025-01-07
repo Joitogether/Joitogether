@@ -32,7 +32,7 @@ onMounted(() => {
 </script>
 <template>
   <div class="bg-gray-100">
-    <div class="bg-white shadow rounded-md mx-auto w-full p-6 h-screen md:w-3/4 lg:w-3/5">
+    <div class="bg-white shadow rounded-md mx-auto w-full p-6 min-h-screen md:w-3/4 lg:w-3/5">
       <div class="flex justify-center my-6">
         <svg
           width="100px"
