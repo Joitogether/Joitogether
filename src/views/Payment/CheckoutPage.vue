@@ -118,7 +118,7 @@ const handleCheckout = async () => {
         action: 'register',
         target_type: 'activity',
         message: '報名了你的活動',
-        link: `/activity/detail/${orderData.activity_id}`,
+        link: `/activity/detail/${activityId}`,
       }
 
       try {
