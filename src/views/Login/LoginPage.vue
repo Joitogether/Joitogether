@@ -242,8 +242,17 @@
           <p class="text-center leading-loose text-gray-600">
             為了確保您的帳戶安全<br />我們已向
             {{ formValue.email }}
-            發送了一封驗證信<br />請打開您的信箱<br />並點擊信中的驗證連結以完成註冊流程
+            發送了一封驗證信
+            <br />
+            請打開您的信箱
+            <br />
+            並點擊信中的驗證連結以完成註冊流程
           </p>
+          <div
+            class="rounded-md text-center text-sm text-red-500 bg-red-100 py-2 px-4 my-3 leading-loose"
+          >
+            記得要使用同裝置驗證<br />不然會驗證失敗呦～(｡•́‿•̀｡)
+          </div>
           <div class="flex justify-center gap-3 items-center">
             <n-button
               @click="goToStep1"
