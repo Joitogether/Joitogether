@@ -1,5 +1,5 @@
 <template>
-  <div class="flex justify-center h-screen bg-gray-100">
+  <div class="flex justify-center min-h-screen bg-gray-100">
     <div class="mt-10 flex flex-col items-center gap-5">
       <p class="text-xl font-bold text-gray-600">找不到頁面 — 404</p>
       <div class="w-60 h-60 overflow-hidden rounded-full">

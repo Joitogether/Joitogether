@@ -76,7 +76,7 @@ const goback = () => {
 </script>
 <template>
   <div class="bg-gray-100">
-    <div class="bg-white rounded-md mx-auto w-full h-screen md:w-3/4 lg:w-3/5">
+    <div class="bg-white rounded-md mx-auto w-full min-h-screen md:w-3/4 lg:w-3/5">
       <div class="flex items-center p-4 h-14 bg-gray-100 w-full relative">
         <div
           class="absolute left-0 cursor-pointer h-full w-12 flex items-center hover:text-gray-500"
