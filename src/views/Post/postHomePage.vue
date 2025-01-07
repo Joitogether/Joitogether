@@ -236,7 +236,6 @@ const informPostUpdate = () => {
     color: black;
     font-weight: bold;
     border-bottom: 2px solid rgb(44, 135, 77);
-    transition: border-color 0.15s ease-in-out;
   }
 }
 @media screen and (width >= 768px) {
@@ -244,7 +243,6 @@ const informPostUpdate = () => {
     color: white;
     border-bottom: none;
     background-color: rgb(44, 135, 77);
-    transition: border-color 0.15s ease-in-out;
   }
 }
 </style>
