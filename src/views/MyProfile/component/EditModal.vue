@@ -369,10 +369,15 @@ watch(
           </div>
 
           <div class="mt-5 w-full">
-            職業：<n-input v-model:value="user.career" placeholder="什麼領域的呢？" />
+            職業：<n-input
+              maxlength="45"
+              v-model:value="user.career"
+              placeholder="什麼領域的呢？"
+            />
           </div>
           <div class="mt-5 w-full">
             座右銘：<n-input
+              maxlength="45"
               v-model:value="user.favorite_sentence"
               placeholder="例如：我要發大財"
             />
@@ -448,7 +453,12 @@ watch(
             <n-space vertical>
               <div class="mt-4 w-full">
                 自我介紹：
-                <n-input placeholder="介紹一下你自己吧" v-model:value="user.self_introduction" />
+                <n-input
+                  maxlength="45"
+                  show-count
+                  placeholder="介紹一下你自己吧"
+                  v-model:value="user.self_introduction"
+                />
               </div>
               <div class="mt-3 w-full">
                 星座：
@@ -458,11 +468,19 @@ watch(
               </div>
               <div class="mt-3 w-full">
                 嗜好：
-                <n-input placeholder="放假喜歡做什麼呢？" v-model:value="user.hobby" />
+                <n-input
+                  maxlength="45"
+                  placeholder="放假喜歡做什麼呢？"
+                  v-model:value="user.hobby"
+                />
               </div>
               <div class="mt-3 w-full">
                 專長：
-                <n-input placeholder="很會睡也可以是專長（？" v-model:value="user.expertise" />
+                <n-input
+                  maxlength="45"
+                  placeholder="很會睡也可以是專長（？"
+                  v-model:value="user.expertise"
+                />
               </div>
               <div class="mt-3 w-full">
                 感興趣的活動：<n-input
