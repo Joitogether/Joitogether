@@ -48,15 +48,18 @@ const balance = ref(0)
 const fetchWalletBalance = async () => {
   try {
     const response = await PaymentAPIs.getWalletBalanceAPI(userStore.user.uid)
-    if (!response) {
+
+    if (!response || !response.balance || isNaN(Number(response.balance))) {
       balance.value = 0
-      return
+      return balance.value
     }
 
-    balance.value = response.balance
+    balance.value = Number(response.balance)
     return balance.value
   } catch (error) {
     handleError(message, undefined, error)
+    balance.value = 0
+    return balance.value
   }
 }
 
@@ -100,8 +103,10 @@ const handleCheckout = async () => {
 
     for (const item of orderItems) {
       const hostId = item?.activities?.host_id
+      const activityId = item?.activity_id
 
-      if (!hostId) {
+      console.log(hostId, activityId)
+      if (!hostId || !activityId) {
         continue
       }
 
@@ -109,7 +114,7 @@ const handleCheckout = async () => {
       const notiData = {
         actor_id: userStore.user.uid,
         user_id: hostId,
-        target_id: orderData.activity_id,
+        target_id: activityId,
         action: 'register',
         target_type: 'activity',
         message: '報名了你的活動',
