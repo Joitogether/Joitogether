@@ -21,6 +21,8 @@ const getOneTopupStatus = async () => {
     } else {
       router.push(`/topup/fail/${id}`)
     }
+  } else {
+    router.push(`/topup/fail/${id}`)
   }
 }
 
