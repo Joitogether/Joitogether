@@ -21,6 +21,8 @@ export const useActivityStore = defineStore('activity', () => {
     region: '',
   })
 
+  const pageSelect = ref(1)
+
   const triggerAction = ref(null)
   const selectedRegions = ref('')
   const regionOptions = ref([
@@ -91,6 +93,7 @@ export const useActivityStore = defineStore('activity', () => {
     triggerAction.value = null
     activities.value = []
     totalActivities.value = 0
+    pageSelect.value = 1
   }
 
   return {
@@ -101,6 +104,7 @@ export const useActivityStore = defineStore('activity', () => {
     selectedRegions,
     regionOptions,
     filters,
+    pageSelect,
     totalActivities,
     selectedStartDate,
     fetchAllActivities,

@@ -1,7 +1,13 @@
 <template>
   <div class="login-wrapper">
     <div class="block shadow-md">
-      <div class="event-image bg-green-100"></div>
+      <div class="event-image overflow-hidden hidden md:block bg-green-100">
+        <img
+          class="w-full h-full object-cover hidden md:block"
+          src="https://i.pinimg.com/736x/a9/42/a3/a942a3a2af483b2afc63c73e300f898b.jpg"
+          alt=""
+        />
+      </div>
       <div class="login-box">
         <h2 class="font-black text-6xl" style="color: #18a058">忘記密碼</h2>
         <p class="text-center leading-loose text-gray-600">
