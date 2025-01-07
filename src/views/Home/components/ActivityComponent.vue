@@ -19,6 +19,7 @@ const {
   selectedRegions,
   regionOptions,
   filters,
+  pageSelect,
   totalActivities,
   selectedStartDate,
 } = storeToRefs(activityStore)
@@ -34,7 +35,7 @@ const filterByRegion = (region) => {
 
 const handlePageChange = (page) => {
   filters.value.page = page
-
+  pageSelect.value = page
   router.push({ path: '/home', query: { ...filters.value } })
 
   fetchAllActivities(filters.value)
@@ -240,7 +241,7 @@ const handleClearFilters = () => {
         </div>
         <div class="pagination-container mt-5 flex justify-center">
           <n-pagination
-            v-model:page="filters.page"
+            v-model:page="pageSelect"
             :page-size="filters.pageSize"
             :page-count="Math.max(1, Math.ceil(pages))"
             @update:page="handlePageChange"
