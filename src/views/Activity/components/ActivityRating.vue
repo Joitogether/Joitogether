@@ -98,7 +98,7 @@ const getDetailForRating = async () => {
       message.warning('您並未參與此活動，故無法進行評輪')
       setTimeout(() => {
         router.push(`/`)
-      }, 1000)
+      }, 1500)
     } else {
       if (applications.value) {
         const found = latestHostRating.value.find((rate) => rate.user_id == userStore.user.uid)
@@ -107,7 +107,7 @@ const getDetailForRating = async () => {
           message.warning('您已經評價過囉！')
           setTimeout(() => {
             router.push(`/`)
-          }, 1000)
+          }, 1500)
         }
       }
     }
