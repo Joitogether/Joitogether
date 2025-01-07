@@ -105,7 +105,6 @@ const handleCheckout = async () => {
       const hostId = item?.activities?.host_id
       const activityId = item?.activity_id
 
-      console.log(hostId, activityId)
       if (!hostId || !activityId) {
         continue
       }

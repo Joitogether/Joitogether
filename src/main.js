@@ -19,7 +19,7 @@ app.use(Naive)
 
 app.config.errorHandler = (err) => {
   // 統一處理沒有抓到的錯誤
-  console.log(err)
+  console.error(err)
   message.error('發生未知錯誤，請稍後再試')
 }
 

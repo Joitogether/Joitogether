@@ -6,7 +6,7 @@ import { auth } from './firebaseConfig'
 
 const apiAxios = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
-  timeout: 5000,
+  timeout: 10000,
 })
 
 const byPassPaths = ['/posts/likes', '/posts/like', '/posts/comments', '/posts/comment']
