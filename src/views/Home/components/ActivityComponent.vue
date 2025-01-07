@@ -99,7 +99,9 @@ const filteredActivities = computed(() =>
 watch(
   () => route.query,
   (newQuery) => {
-    fetchAllActivities(newQuery)
+    if (Object.keys(newQuery).length > 0) {
+      fetchAllActivities(newQuery)
+    }
   },
   { immediate: true },
 )
@@ -130,6 +132,10 @@ const updateScreenSize = () => {
 onMounted(() => {
   updateScreenSize()
   window.addEventListener('resize', updateScreenSize)
+
+  clearFilters()
+  fetchAllActivities()
+  router.push({ path: 'home' })
 })
 
 onUnmounted(() => {
