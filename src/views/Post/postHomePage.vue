@@ -210,7 +210,7 @@ const informPostUpdate = () => {
                 v-if="post.img"
                 class="w-full md:w-3/12 aspect-square rounded-md overflow-hidden mt-4 md:mt-0"
               >
-                <img :src="post.img" class="w-full h-full object-cover" alt="文章圖片" />
+                <img v-lazy="post.img" class="w-full h-full object-cover" alt="文章圖片" />
               </div>
               <div class="flex space-x-8 text-sm text-gray-600 md:hidden">
                 <div>👍🏻 {{ post.likesCount }} 讚</div>
