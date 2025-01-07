@@ -47,10 +47,13 @@ const handleMenuClickOutside = (event) => {
     menuRef.value &&
     !menuRef.value.contains(event.target) &&
     toggleMenuRef.value &&
-    !toggleMenuRef.value.contains(event.target) &&
-    searchRef.value &&
-    !searchRef.value.contains(event.target)
+    !toggleMenuRef.value.contains(event.target)
   ) {
+    isMenuOpen.value = false
+  }
+}
+const handleMenuClick = (event) => {
+  if (searchRef.value && !searchRef.value.contains(event.target)) {
     isMenuOpen.value = false
   }
 }
@@ -86,12 +89,6 @@ const handleNotificationClick = () => {
   showPopover.value = false
 }
 
-const handleMenuClick = (event) => {
-  if (searchRef.value && !searchRef.value.contains(event.target)) {
-    isMenuOpen.value = false
-  }
-  isMenuOpen.value = true
-}
 const clearNumbers = () => {
   followerNumber.value = null
   activityNumber.value = null
@@ -185,9 +182,9 @@ const handleSearchClick = (e) => {
     ...filters.value,
     page: 1,
   }
+  router.push({ name: 'home', query: { ...filters.value } })
   searchKeyword.value = ''
   isMenuOpen.value = false
-  router.push({ name: 'home', query: { ...filters.value } })
 
   fetchAllActivities(filters.value)
 }
@@ -231,7 +228,7 @@ const handleLoginMenuClick = () => {
       </div>
       <div class="hidden lg:flex flex-row items-center gap-2 mx-3">
         <label for="search" class="cursor-pointer hover:text-green-600">找聚會</label>
-        <div class="flex items-center gap-2" ref="searchRef">
+        <div class="flex items-center gap-2">
           <input
             v-model="searchKeyword"
             type="text"
@@ -262,6 +259,7 @@ const handleLoginMenuClick = () => {
           <ul @click="handleMenuClick">
             <li class="flex gap-3">
               <input
+                ref="searchRef"
                 @keydown.enter="handleSearchClick"
                 v-model="searchKeyword"
                 type="text"
