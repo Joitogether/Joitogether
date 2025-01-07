@@ -5,6 +5,7 @@ import { useUserStore } from '@/stores/userStore.js'
 import { useMessage } from 'naive-ui'
 import * as PaymentAPIs from '../../apis/paymentAPIs.js'
 import { handleError } from '../../utils/handleError.js'
+import { useSocketStore } from '@/stores/socketStore.js'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -65,7 +66,9 @@ const isBalanceEnough = computed(() => {
 })
 
 // 結帳流程
+const socketStore = useSocketStore()
 const showModal = ref(false)
+
 const handleCheckout = async () => {
   try {
     // 檢查餘額
@@ -92,6 +95,33 @@ const handleCheckout = async () => {
     const response = await PaymentAPIs.processOrder(orderData)
     goCheckoutSuccess(response.data.order.order_id)
     message.success('訂單完成，報名成功！🚀 快準備迎接精彩的活動吧！')
+
+    const orderItems = response?.data?.order?.order_items
+
+    for (const item of orderItems) {
+      const hostId = item?.activities?.host_id
+
+      if (!hostId) {
+        continue
+      }
+
+      // 通知功能
+      const notiData = {
+        actor_id: userStore.user.uid,
+        user_id: hostId,
+        target_id: orderData.activity_id,
+        action: 'register',
+        target_type: 'activity',
+        message: '報名了你的活動',
+        link: `/activity/detail/${orderData.activity_id}`,
+      }
+
+      try {
+        socketStore.sendNotification(notiData)
+      } catch {
+        return null
+      }
+    }
   } catch (error) {
     handleError(message, '結帳失敗，請稍後再試 🙇‍♂️', error)
   }
