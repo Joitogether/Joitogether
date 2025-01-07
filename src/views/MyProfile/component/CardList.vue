@@ -169,8 +169,11 @@ const emit = defineEmits(['edit', 'close'])
         >編輯檔案
       </n-button>
       <n-button
+        strong
+        secondary
+        round
         v-else
-        :type="meFollowing.isFollowing ? 'default' : 'info'"
+        :type="meFollowing.isFollowing ? 'default' : 'primary'"
         class="md:hidden"
         @click="
           () => {
