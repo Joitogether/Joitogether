@@ -74,10 +74,15 @@ const isSelected = (category) => {
 const filteredActivities = computed(() =>
   activities.value
     .filter((activity) => {
-      if (!selectedStartDate.value) return true
       const eventDate = new Date(activity.event_time)
-      const filterDate = new Date(selectedStartDate.value)
-      return eventDate >= filterDate
+      const today = new Date()
+      if (eventDate < today) return false
+
+      if (selectedStartDate.value) {
+        const filterDate = new Date(selectedStartDate.value)
+        return eventDate >= filterDate
+      }
+      return true
     })
     .map((activity) => {
       return {
