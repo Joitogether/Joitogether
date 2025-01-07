@@ -16,13 +16,13 @@ const getOneTopupStatus = async () => {
 
   if (response) {
     oneRecord.value = response.find((record) => record.id == id)
-    if (oneRecord.value.payment_status == 'SUCCESS') {
-      router.push(`/topup/success/${id}`)
-    } else {
+    if (oneRecord.value.payment_status == 'PENDING') {
+      router.push(`/topup/fail/${id}`)
+    } else if (oneRecord.value.payment_status == 'FAIL') {
       router.push(`/topup/fail/${id}`)
     }
   } else {
-    router.push(`/topup/fail/${id}`)
+    router.push(`/topup/success/${id}`)
   }
 }
 
