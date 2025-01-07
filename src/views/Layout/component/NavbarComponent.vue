@@ -37,8 +37,24 @@ const toggleUserRef = ref(null)
 const popoverRef = ref(null)
 const triggerRef = ref(null)
 const loadMore = ref(null)
+const toggleMenuRef = ref(null)
+const menuRef = ref(null)
+const isMenuOpen = ref(false)
+const searchRef = ref(null)
 
-const handleClickOutside = (event) => {
+const handleMenuClickOutside = (event) => {
+  if (
+    menuRef.value &&
+    !menuRef.value.contains(event.target) &&
+    toggleMenuRef.value &&
+    !toggleMenuRef.value.contains(event.target) &&
+    searchRef.value &&
+    !searchRef.value.contains(event.target)
+  ) {
+    isMenuOpen.value = false
+  }
+}
+const handleUserMenuClickOutside = (event) => {
   if (
     loginMenuRef.value &&
     !loginMenuRef.value.contains(event.target) &&
@@ -70,6 +86,12 @@ const handleNotificationClick = () => {
   showPopover.value = false
 }
 
+const handleMenuClick = (event) => {
+  if (searchRef.value && !searchRef.value.contains(event.target)) {
+    isMenuOpen.value = false
+  }
+  isMenuOpen.value = true
+}
 const clearNumbers = () => {
   followerNumber.value = null
   activityNumber.value = null
@@ -96,14 +118,16 @@ onMounted(() => {
     fetUserSummary()
     userLogin.value = true
     document.addEventListener('click', handleNotiClickOutside)
-    document.addEventListener('click', handleClickOutside)
+    document.addEventListener('click', handleUserMenuClickOutside)
+    document.addEventListener('click', handleMenuClickOutside)
   } else {
     loading.value = false
   }
 })
 onUnmounted(() => {
   document.removeEventListener('click', handleNotiClickOutside)
-  document.removeEventListener('click', handleClickOutside)
+  document.removeEventListener('click', handleUserMenuClickOutside)
+  document.removeEventListener('click', handleMenuClickOutside)
 })
 // 註冊/登入按鈕跳轉
 const navigateToLogin = () => {
@@ -161,7 +185,8 @@ const handleSearchClick = (e) => {
     ...filters.value,
     page: 1,
   }
-
+  searchKeyword.value = ''
+  isMenuOpen.value = false
   router.push({ name: 'home', query: { ...filters.value } })
 
   fetchAllActivities(filters.value)
@@ -206,7 +231,7 @@ const handleLoginMenuClick = () => {
       </div>
       <div class="hidden lg:flex flex-row items-center gap-2 mx-3">
         <label for="search" class="cursor-pointer hover:text-green-600">找聚會</label>
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-2" ref="searchRef">
           <input
             v-model="searchKeyword"
             type="text"
@@ -228,13 +253,13 @@ const handleLoginMenuClick = () => {
       </div>
 
       <div class="md:hidden">
-        <input type="checkbox" id="menu-toggle" class="hidden" />
-        <label for="menu-toggle" class="text-gray-500 cursor-pointer">
+        <input type="checkbox" id="menu-toggle" class="hidden" v-model="isMenuOpen" />
+        <label ref="toggleMenuRef" for="menu-toggle" class="text-gray-500 cursor-pointer">
           <Menu class="hover:text-green-600 w-8 h-8" />
         </label>
         <!--選單內容-->
-        <div id="menu" class="w-full bg-gray-50 text-black p-6 space-y-4 rounded-md">
-          <ul>
+        <div ref="menuRef" id="menu" class="w-full bg-gray-50 text-black p-6 space-y-4 rounded-md">
+          <ul @click="handleMenuClick">
             <li class="flex gap-3">
               <input
                 @keydown.enter="handleSearchClick"
