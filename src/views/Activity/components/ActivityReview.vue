@@ -89,6 +89,9 @@ const rejectCount = computed(() => {
 const userCancellation = computed(() => {
   return attendee.value.filter((item) => item.participant_cancelled).length
 })
+const userRegistered = computed(() => {
+  return attendee.value.filter((item) => item.registered).length
+})
 
 const refreshAttendees = async () => {
   try {
@@ -445,7 +448,7 @@ const sendReplies = async () => {
               class="flex items-center bg-gray-100 border-[1px] border-gray-200 rounded-xl p-3 my-4 text-sm font-semibold"
             >
               <img src="../../../assets/Screening.png" alt="" class="w-8 mr-1" />
-              共有 {{ attendee.length }} 位用戶報名 ({{ approvedCount }} 位用戶已經報名，{{
+              共有 {{ attendee.length }} 位用戶報名 ({{ userRegistered }} 位用戶已經報名，{{
                 userCancellation
               }}
               位用戶已經取消)
