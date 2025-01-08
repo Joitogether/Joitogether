@@ -15,7 +15,7 @@ export const useSocketStore = defineStore('socket', () => {
       socket.value.disconnect()
     }
     // 建立連線
-    socket.value = io('http://localhost:3030', {
+    socket.value = io(import.meta.env.VITE_API_BASE_URL, {
       withCredentials: true,
       query: {
         userId: userId,
@@ -26,28 +26,33 @@ export const useSocketStore = defineStore('socket', () => {
     // 連線成功事件
     socket.value.on('connect', () => {
       isConnected.value = true
-      console.log('Socket 已連上')
     })
 
     // 斷線事件
     socket.value.on('disconnect', () => {
       isConnected.value = false
-      console.log('Socket 連線失敗')
     })
 
     // 接收通知事件
     socket.value.on('newNotification', (notification) => {
+      if (notification.actor_id == notification.user_id) {
+        return
+      }
       addNotification(notification)
     })
   }
 
   // 發送通知的方法
   function sendNotification(data) {
-    if (data.user_id === userStore.user.uid) {
-      return
-    }
-    if (socket.value && isConnected.value) {
-      socket.value.emit('sendNotification', data)
+    try {
+      if (data.user_id === userStore.user.uid && data.action != 'create') {
+        return
+      }
+      if (socket.value && isConnected.value) {
+        socket.value.emit('sendNotification', data)
+      }
+    } catch (err) {
+      return err
     }
   }
 

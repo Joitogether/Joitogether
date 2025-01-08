@@ -1,5 +1,5 @@
 <script async setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { ProfileCircle, BrightStar, Heart, Post, Group } from '@iconoir/vue'
 import CardList from './component/CardList.vue'
 import EditModal from './component/EditModal.vue'
@@ -8,42 +8,53 @@ import PersonRate from './component/PersonRate.vue'
 import PersonFollow from './component/PersonFollow.vue'
 import PersonPost from './component/PersonPost.vue'
 import PersonActivity from './component/PersonActivity.vue'
-
 import { userGetAPI } from '@/apis/userAPIs'
-import { useUserStore } from '@/stores/userStore'
+import { handleError } from '@/utils/handleError.js'
+import { useMessage } from 'naive-ui'
+import { useRoute } from 'vue-router'
 
-const userStore = useUserStore()
+const message = useMessage()
 const user = ref({})
 const loading = ref(true)
-const errorMessage = ref(null)
+const isEditModalOpen = ref(false)
+const route = useRoute()
 
 const fetchUserData = async () => {
   try {
-    const result = await userGetAPI(userStore.user.uid)
+    const id = route.params.uid
+    const result = await userGetAPI(id)
+    if (result.length === 0) {
+      user.value = {}
+      return
+    }
     if (result) {
       user.value = result
 
       loading.value = false
       return user.value
     }
-  } catch (err) {
-    errorMessage.value = err.message || '資料加載錯誤'
+  } catch (error) {
+    handleError(message, undefined, error)
+  } finally {
     loading.value = false
   }
 }
-
+watch(
+  () => route.params.uid,
+  () => {
+    fetchUserData()
+  },
+)
 const handleSave = async () => {
   await fetchUserData()
-  isEditModalOpen.value = false
 }
 onMounted(async () => {
   await fetchUserData()
 })
 
-const isEditModalOpen = ref(false)
 // 開啟編輯視窗
 const openEditModal = () => {
-  isEditModalOpen.value = true // 顯示編輯視窗
+  isEditModalOpen.value = true
 }
 
 // 關閉編輯視窗
@@ -54,8 +65,9 @@ const currentPage = ref('PersonInfo')
 </script>
 
 <template>
-  <div class="container mx-auto">
+  <div class="container mx-auto p-4">
     <CardList
+      :id="route.params.uid"
       :display_name="user.display_name"
       :age="user.age"
       :career="user.career"
@@ -65,8 +77,8 @@ const currentPage = ref('PersonInfo')
       :photo_url="user.photo_url"
       @edit="openEditModal"
     />
-    <EditModal v-if="isEditModalOpen" @close="closeEditModal" @save="handleSave" />
-    <div class="flex justify-between px-10 py-5">
+    <EditModal @save="handleSave" :user="user" @close="closeEditModal" :show="isEditModalOpen" />
+    <div class="flex justify-between px-4 py-5 md:px-8">
       <button
         @click="currentPage = 'PersonInfo'"
         :class="{ 'text-green-600': currentPage === 'PersonInfo' }"

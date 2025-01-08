@@ -1,7 +1,13 @@
 <template>
   <div class="login-wrapper">
     <div class="block shadow-md">
-      <div class="event-image bg-green-100"></div>
+      <div class="event-image bg-green-100">
+        <img
+          class="w-full h-full object-cover hidden md:block"
+          src="https://i.pinimg.com/736x/84/a3/ed/84a3edac31b96b7d73af3172a3b1991d.jpg"
+          alt=""
+        />
+      </div>
       <div v-if="login" class="login-box">
         <h2 class="font-black text-6xl" style="color: #18a058">登入</h2>
         <n-form ref="loginFormRef" :label-width="80" :model="loginForm" :rules="loginRules">
@@ -41,13 +47,13 @@
             @click="loginGoogle"
             >Google</n-button
           >
-          <n-button
+          <!-- <n-button
             class="w-full mt-3 font-bold text-lg py-5"
             round
             type="primary"
             @click="loginFacebook"
             >Facebook</n-button
-          >
+          > -->
         </div>
         <div class="flex items-center mb-7 mt-8">
           <div class="flex-grow border-t border-gray-300"></div>
@@ -163,7 +169,12 @@
               negative-text="不同意"
               @positive-click="onAgreePrivacy"
               @negative-click="onDisagreePrivacy"
-            />
+            >
+              <div
+                v-html="PrivacyPolicyContent"
+                class="max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-200 scrollbar-track-gray-200"
+              ></div>
+            </n-modal>
             <n-checkbox v-model:checked="isCheckedTerms" @update:checked="onCheckboxChangeTerms">
               我已閱讀並同意服務條款
             </n-checkbox>
@@ -177,7 +188,12 @@
               negative-text="不同意"
               @positive-click="onAgreeTerms"
               @negative-click="onDisagreeTerms"
-            />
+            >
+              <div
+                v-html="TermsServiceContent"
+                class="max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-200 scrollbar-track-gray-200"
+              ></div>
+            </n-modal>
           </div>
           <div class="flex items-center mb-7 mt-8">
             <div class="flex-grow border-t border-gray-300"></div>
@@ -266,63 +282,57 @@ import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { storage } from '../../utils/firebaseConfig.js'
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage'
-import { loginWithGoogle, loginWithFacebook } from './services/authService.js'
+import { loginWithGoogle } from './services/authService.js'
 import registerUser from './services/registerService.js'
 import { validateFormFields } from './utils/formValidation.js'
 import loginUser from './services/loginService.js'
 import { useUserStore } from '/src/stores/userStore.js'
 import { getAuth, sendEmailVerification } from 'firebase/auth'
+import { handleError } from '../../utils/handleError.js'
+import { convertMarkdown } from '@/utils/useMarkdown.js'
+import PrivacyPolicy from './content/PrivacyPolicy.md?raw'
+import TermsService from './content/TermsService.md?raw'
+
+const PrivacyPolicyContent = convertMarkdown(PrivacyPolicy)
+const TermsServiceContent = convertMarkdown(TermsService)
 
 // 初始化區域
 const message = useMessage()
 const router = useRouter()
 const userStore = useUserStore()
-// const isLogin = computed(() => userStore.user.isLogin)
-// const displayName = computed(() => userStore.user.displayName)
 const isRememberMe = ref(false)
 
-// 登入功能
 const handleLogin = async () => {
   const email = loginForm.value.email
   const password = loginForm.value.password
   const rememberMe = isRememberMe.value
 
-  // 處理用戶未輸入資訊
   if (!email || !password) {
     message.error('咦？你忘了輸入信箱和密碼嗎？快填一下吧～不然可要吃閉門羹啦！😜')
     return
   }
 
   try {
-    // 用戶登入成功
     const loginUserResponse = await loginUser(email, password, rememberMe)
-    if (loginUserResponse.success) {
-      message.success(loginUserResponse.message)
-      console.log('用戶登入成功：', loginUserResponse.user)
-      router.push({ name: 'home' })
-    }
-  } catch (error) {
-    console.error('完整錯誤物件：', error)
 
-    if (error.message) {
-      message.error(error.message)
+    if (loginUserResponse.success) {
+      message.success(`🎉 登入成功！歡迎加入 ✨`)
+      // 跳轉到首頁
+      router.push({ name: 'home' })
     } else {
       message.error('登入失敗，請稍後再試！😞')
     }
-
-    // 傳遞用戶資料
-    try {
-      const result = await loginUser(
-        loginForm.value.email,
-        model.value.password,
-        isRememberMe.value,
-        formValue.value.username, // 確保傳遞 username
-      )
-      if (result.success) {
-        message.success(result.message)
-      }
-    } catch (error) {
+  } catch (error) {
+    if (error.code === 'auth/invalid-credential') {
       message.error(error.message)
+    } else if (error.code === 'auth/invalid-email') {
+      message.error(error.message)
+    } else if (error.code === 'auth/too-many-requests') {
+      message.error(error.message)
+    } else if (error.code === 'auth/user-disabled') {
+      message.error(error.message)
+    } else {
+      handleError(message, '登入失敗，請稍後再試！😞', error)
     }
   }
 }
@@ -349,46 +359,41 @@ const loginRules = {
 }
 
 // 第三方登入
-
 const loginGoogle = async () => {
   try {
     await loginWithGoogle()
-    console.log('Google 登入成功！')
     setTimeout(() => {
       message.success(`🎉 歡迎，${userStore.user.display_name}！登入成功，太棒了！🎉`)
     }, 1000)
     // 更新 userStore 狀態
     router.push('/')
   } catch (error) {
-    if (error.message.includes('display_name')) {
-      console.warn('靜默處理 display_name 錯誤')
+    if (error.code === 'auth/account-exists-with-different-credential') {
+      message.error(error.message)
+    } else if (error.code === 'auth/popup-closed-by-user') {
+      message.error(error.message)
+    } else if (error.code === 'auth/network-request-failed') {
+      message.error(error.message)
     } else {
-      // 其他錯誤顯示彈窗
-      message.error(`😭 哎呀！${error.message} 💔`)
+      handleError(message, '哎呀 😭 出了一些小問題，請稍後再試 💔', error)
     }
   }
 }
-const loginFacebook = async () => {
-  try {
-    const user = await loginWithFacebook()
-    console.log('Facebook 登入成功！')
-    setTimeout(() => {
-      message.success(
-        `🎉 歡迎，${userStore.user.display_name || user.email}！Facebook 登入成功，太棒了！🎉`,
-      )
-    }, 1000)
-    // 更新 userStore 狀態
+// const loginFacebook = async () => {
+//   try {
+//     const user = await loginWithFacebook()
+//     setTimeout(() => {
+//       message.success(
+//         `🎉 歡迎，${userStore.user.display_name || user.email}！Facebook 登入成功，太棒了！🎉`,
+//       )
+//     }, 1000)
+//     // 更新 userStore 狀態
 
-    router.push('/')
-  } catch (error) {
-    if (error.message.includes('display_name')) {
-      console.warn('靜默處理 display_name 錯誤')
-    } else {
-      // 其他錯誤顯示彈窗
-      message.error(`😭 哎呀！${error.message} 💔`)
-    }
-  }
-}
+//     router.push('/')
+//   } catch (error) {
+//     handleError(message, '哎呀 😭 出了一些小問題 💔', error)
+//   }
+// }
 
 // 大頭貼的邏輯
 const handleFileChange = async (fileList) => {
@@ -428,11 +433,9 @@ const handleFileChange = async (fileList) => {
     // 更新圖片 URL 到用戶的表單數據
     formValue.value.avatar = downloadURL
 
-    console.log('📸 圖片上傳成功，URL:', downloadURL)
-    message.success('🎉 圖片上傳成功啦！太棒了呢～ ✨')
+    message.success('📸  圖片上傳成功啦！太棒了呢～ ✨')
   } catch (error) {
-    console.error('⚠️ 圖片上傳失敗:', error)
-    message.error(`😭 哎呀！圖片上傳失敗了～ 請稍後再試看看吧 💔`)
+    handleError(message, '😭 哎呀！圖片上傳失敗了～ 請稍後再試看看吧 💔', error)
   }
 }
 
@@ -587,7 +590,7 @@ const goToStep2 = async () => {
     }
     try {
       // 註冊功能
-      const userResponse = await registerUser({
+      await registerUser({
         email: formValue.value.email,
         password: model.value.password,
         fullName: formValue.value.user.fullname,
@@ -595,20 +598,21 @@ const goToStep2 = async () => {
         phoneNumber: formValue.value.phone,
         photoURL: formValue.value.avatar,
       })
-      console.log('註冊 API 回傳結果：', userResponse)
 
-      message.success(userResponse.message)
-      console.log('用戶註冊成功！', userResponse.user)
-      // console.log('切換到 Step 2 前的 step 值：', step.value)
       message.success(`🎉 註冊成功！歡迎加入，${formValue.value.user.username} ✨`)
-      // console.log('切換到 Step 2 後的 step 值：', step.value)
 
-      // 切換到 Step 2
       step.value = 2
       startCooldown()
     } catch (error) {
-      console.log(error)
-      message.error(error.message || '登入失敗，請稍後再試！😞')
+      if (error.code === 'auth/email-already-in-use') {
+        message.error(error.message)
+      } else if (error.code === 'auth/invalid-email') {
+        message.error(error.message)
+      } else if (error.code === 'auth/weak-password') {
+        message.error(error.message)
+      } else {
+        handleError(message, '註冊失敗，請稍後再試！😞', error)
+      }
     }
   }
 }
@@ -642,13 +646,10 @@ const resendVerificationEmail = async () => {
     }
     // 發送驗證信件
     await sendEmailVerification(user, actionCodeSettings)
-    console.log('驗證信已發送 📧')
     message.success('驗證信已重新發送 📧')
 
     startCooldown()
   } catch (error) {
-    console.error('發送驗證信失敗：', error)
-
     if (error.code === 'auth/too-many-requests') {
       message.error('請稍等一下，您發送驗證信的次數過多，請稍後再試。')
     } else {

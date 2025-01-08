@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, reactive, ref, computed } from 'vue'
+import { onMounted, reactive, ref, computed, watch } from 'vue'
 import { NavArrowLeft, MoreVert } from '@iconoir/vue'
 import { useRoute, useRouter } from 'vue-router'
 import { getPostByIdAPI, updatePostAPI, deletePostAPI } from '@/apis/postAPIs'
@@ -15,6 +15,8 @@ import { useMessage, NButton } from 'naive-ui'
 import dayjs from 'dayjs'
 import 'dayjs/locale/zh-tw.js'
 import relativeTime from 'dayjs/plugin/relativeTime'
+import { handleError } from '@/utils/handleError.js'
+import { useSocketStore } from '@/stores/socketStore'
 
 dayjs.locale('zh-tw')
 dayjs.extend(relativeTime)
@@ -29,12 +31,10 @@ const isEditing = ref(false)
 const editPostTitle = ref('')
 const editPostContent = ref('')
 const editPostImg = ref('')
-
+const socketStore = useSocketStore()
 // 留言打進後端的資料
 const newComment = ref('')
 const message = useMessage()
-
-console.log('來這裡看看:', userStore)
 
 const likesCount = computed(() => {
   return likesList.value.length || 0
@@ -47,8 +47,7 @@ const likeId = computed(() => {
 const hasLiked = computed(() => {
   return likesList.value.some((like) => like.uid === userStore.user.uid)
 })
-const postId = Number(route.params.post_id) // 轉換為數字
-console.log('postId:', postId)
+let postId = Number(route.params.post_id) // 轉換為數字
 
 const postDetails = reactive({
   category: '',
@@ -58,6 +57,7 @@ const postDetails = reactive({
   img: '',
   name: '',
   avatar: '',
+  authorUid: '',
 })
 
 const categoryMap = {
@@ -73,7 +73,24 @@ const categoryMap = {
 const fetchPostDetails = async () => {
   try {
     const post = await getPostByIdAPI(postId)
-    console.log(`API回傳的文章：`, post)
+
+    if (!post.data || (Array.isArray(post.data) && post.data.length === 0)) {
+      return router.push({
+        path: '/notFound',
+      })
+    }
+
+    // if (!post.data || Object.keys(post.data).length === 0) {
+    //   postDetails.category = '未分類'
+    //   postDetails.title = '查無此文章'
+    //   postDetails.content = '很抱歉，我們無法找到這篇文章的內容'
+    //   postDetails.time = ''
+    //   postDetails.img = null
+    //   postDetails.name = '未知用戶'
+    //   postDetails.avatar = null
+    //   postDetails.isPostAuthor = false
+    //   return
+    // }
 
     const user = post.data
 
@@ -85,8 +102,9 @@ const fetchPostDetails = async () => {
     postDetails.name = user.users.display_name
     postDetails.avatar = user.users.photo_url
     postDetails.isPostAuthor = user.uid === userStore.user.uid
+    postDetails.authorUid = user.uid
   } catch (error) {
-    console.error(`獲取 ${postId}文章資料失敗`, error.response?.data || error.message)
+    handleError(message, undefined, error)
   }
 }
 
@@ -96,11 +114,16 @@ const fetchComments = async () => {
     const res = await getPostCommentsAPI(postId)
     const comments = res.data
 
-    console.log(`API回傳的留言：`, comments)
+    if (!comments || comments.length === 0) {
+      commentList.value = []
+      commentCount.value = 0
+      return
+    }
 
     commentCount.value = comments.length || 0
 
     const formattedComments = comments.map((comment) => ({
+      uid: comment.uid,
       id: comment.comment_id,
       content: comment.comment_content,
       time: comment.created_at,
@@ -111,11 +134,8 @@ const fetchComments = async () => {
     }))
 
     commentList.value = formattedComments
-
-    console.log(`文章 ${postId} 的留言已更新：`, commentList.value)
-    console.log(`文章 ${postId} 的留言數量：`, commentCount.value)
   } catch (error) {
-    console.error(`取得使用者資料失敗`, error)
+    handleError(message, undefined, error)
   }
 }
 
@@ -134,19 +154,29 @@ const addComment = async () => {
     post_id: postId,
     uid: userStore.user.uid,
     comment_content: newComment.value,
-    // created_at: dayjs().format('YYYY-MM-DD HH:mm:ss'),
     comment_status: 'active',
   }
 
   try {
     await createPostCommentAPI(postId, commentData)
+
+    const notiData = {
+      actor_id: userStore.user.uid,
+      user_id: postDetails.authorUid,
+      target_id: postId,
+      action: 'comment',
+      target_type: 'post',
+      message: '留言了你的文章',
+      link: `/post/${postId}`,
+    }
+    socketStore.sendNotification(notiData)
+
     message.success('留言新增成功')
-    console.log('傳送', commentData)
     newComment.value = ''
     fetchComments()
     return commentData
   } catch (error) {
-    console.log(error)
+    handleError(message, undefined, error)
   }
 }
 // 刪除留言
@@ -164,7 +194,7 @@ const deleteComment = async (commentId) => {
       }
     }
   } catch (error) {
-    console.log(error)
+    handleError(message, undefined, error)
   }
 }
 
@@ -175,10 +205,10 @@ const toggleDelete = async () => {
     message.success('文章刪除成功')
 
     setTimeout(() => {
-      router.push('/post')
+      router.push('/posts')
     }, 1000)
   } catch (error) {
-    console.log(error)
+    handleError(message, undefined, error)
     if (error.message) {
       message.error(error.message)
     } else {
@@ -190,14 +220,12 @@ const toggleDelete = async () => {
 const fetchPostLikes = async () => {
   try {
     const res = await getPostLikesAPI(postId)
-    if (res === null) {
+    if (!res || res.data.length === 0) {
       likesList.value = []
     }
     likesList.value = res.data
-    console.log(likesList.value)
-    console.log(`取得文章 ${postId} 的按讚數成功`, likesList.value)
   } catch (error) {
-    console.error(`${postId}沒有任何按讚紀錄`, error)
+    handleError(message, undefined, error)
   }
 }
 
@@ -217,17 +245,28 @@ const toggleLike = async () => {
       await deleteLikeAPI(likeId.value, 'unlike')
     } else {
       await addLikeAPI(postId, userStore.user.uid, 'liked')
+
+      const notiData = {
+        actor_id: userStore.user.uid,
+        user_id: postDetails.authorUid,
+        target_id: postId,
+        action: 'like',
+        target_type: 'post',
+        message: '按讚了你的文章',
+        link: `/post/${postId}`,
+      }
+      socketStore.sendNotification(notiData)
     }
     fetchPostLikes()
     return likeData
   } catch (error) {
-    console.log('按讚失敗', error)
-    message.error('按讚失敗')
+    handleError(message, '按讚失敗', error)
   }
 }
 
 const goPostPage = () => {
-  router.push('/post')
+  // router.push('/posts')
+  router.back()
 }
 // 切換編輯文章彈窗顯示與隱藏
 const toggleMenu = () => {
@@ -243,7 +282,6 @@ const saveEdit = async () => {
 
   try {
     const originalPost = await getPostByIdAPI(postId)
-    console.log(`API回傳的文章：`, originalPost)
 
     await updatePostAPI(postId, {
       uid: userStore.user.uid,
@@ -264,7 +302,7 @@ const saveEdit = async () => {
 
     fetchPostDetails()
   } catch (error) {
-    console.log(error)
+    handleError(message, undefined, error)
   }
 }
 
@@ -299,14 +337,14 @@ const uploadFile = async (file) => {
   try {
     const storage = getStorage()
     const fileRef = storageRef(storage, `postImages/${file.name}`)
-    const result = await uploadBytes(fileRef, file) // 上傳檔案
-    const downloadURL = await getDownloadURL(result.ref) // 獲取下載連結
-    console.log('上傳成功，下載連結:', downloadURL)
+    const result = await uploadBytes(fileRef, file)
+    const downloadURL = await getDownloadURL(result.ref)
+
     editPostImg.value = downloadURL
-    return downloadURL // 傳回下載連結
+
+    return downloadURL
   } catch (error) {
-    console.error('圖片上傳失敗')
-    throw error
+    handleError(message, '圖片上傳失敗，請檢查檔案格式或網路連線', error)
   }
 }
 
@@ -333,8 +371,7 @@ const handleImageUpload = async (event) => {
     try {
       await uploadFile(file)
     } catch (error) {
-      console.error('圖片上傳失敗:', error)
-      message.error('圖片上傳失敗，請檢查檔案格式或網路連線')
+      handleError(message, '圖片上傳失敗，請檢查檔案格式或網路連線', error)
     }
   }
 }
@@ -344,17 +381,26 @@ const removeImage = () => {
   uploadedImage.value = null
 }
 onMounted(() => {
-  console.log('正在加載文章', postId)
-
+  window.scrollTo({ top: 0 })
   fetchPostDetails()
   fetchComments()
   fetchPostLikes()
 })
+
+watch(
+  () => route.params.post_id,
+  () => {
+    postId = Number(route.params.post_id)
+    fetchPostDetails()
+    fetchComments()
+    fetchPostLikes()
+  },
+)
 </script>
 
 <template>
   <div class="bg-gray-100 w-full p-4">
-    <div class="flex items-center relative w-full md:w-3/4 lg:w-1/2 mx-auto">
+    <div class="flex items-center relative w-full md:w-3/4 lg:w-1/2 mx-auto lg:max-w-[1000px]">
       <NavArrowLeft
         stroke-width="2"
         class="w-6 h-6 cursor-pointer"
@@ -369,6 +415,32 @@ onMounted(() => {
         @click="toggleMenu"
       ></MoreVert>
 
+      <template v-if="postDetails.isPostAuthor">
+        <div
+          v-if="isEditing"
+          class="flex space-x-2 absolute right-1 top-1/2 transform -translate-y-1/2"
+        >
+          <button
+            @click="saveEdit"
+            class="bg-green-600 text-white px-3 py-1 rounded-full hover:bg-green-700"
+          >
+            儲存
+          </button>
+          <button
+            @click="toggleEdit"
+            class="bg-gray-500 text-white px-3 py-1 rounded-full hover:bg-gray-600"
+          >
+            取消
+          </button>
+        </div>
+
+        <MoreVert
+          v-else
+          class="w-7 h-7 cursor-pointer absolute right-1 top-1/2 transform -translate-y-1/2"
+          @click="toggleMenu"
+        ></MoreVert>
+      </template>
+
       <!-- 彈窗內容 -->
       <transition name="fade-slide">
         <div
@@ -376,15 +448,8 @@ onMounted(() => {
           class="absolute right-2 top-12 bg-white shadow-md rounded-md p-2 z-10 w-40"
         >
           <ul>
-            <li
-              v-if="isEditing"
-              @click="saveEdit"
-              class="cursor-pointer hover:bg-gray-200 p-2 rounded-md"
-            >
-              儲存文章
-            </li>
             <li @click="toggleEdit" class="cursor-pointer hover:bg-gray-200 p-2 rounded-md">
-              {{ isEditing ? '取消編輯' : '編輯文章' }}
+              編輯文章
             </li>
             <li
               v-if="!isEditing"
@@ -401,7 +466,9 @@ onMounted(() => {
   <div class="bg-gray-100">
     <div class="p-6 md:mx-auto md:w-3/4 lg:w-1/2 bg-white">
       <div class="">
-        <p v-if="!isEditing" class="text-xl font-bold">{{ postDetails.title }}</p>
+        <p v-if="!isEditing" class="text-2xl font-bold text-gray-700 tracking-wide">
+          {{ postDetails.title }}
+        </p>
         <textarea
           v-else
           v-model="editPostTitle"
@@ -414,7 +481,10 @@ onMounted(() => {
       <div class="">
         <!-- 發文者的資訊區 -->
         <div class="flex flex-row items-center mt-4 mb-4">
-          <div class="w-16 h-16 rounded-full overflow-hidden mr-4">
+          <div
+            class="w-16 h-16 rounded-full overflow-hidden mr-4 cursor-pointer"
+            @click="router.push({ name: 'personInfo', params: { uid: postDetails.authorUid } })"
+          >
             <img
               class="w-full h-full object-cover"
               alt=""
@@ -434,7 +504,12 @@ onMounted(() => {
         </div>
         <!-- 文章資訊區 -->
         <div class="items-center">
-          <div v-if="!isEditing" class="mb-6 text-base">{{ postDetails.content }}</div>
+          <div
+            v-if="!isEditing"
+            class="mb-6 text-base text-gray-600 whitespace-pre-wrap tracking-wide"
+          >
+            {{ postDetails.content }}
+          </div>
           <textarea
             v-else
             v-model="editPostContent"
@@ -494,7 +569,7 @@ onMounted(() => {
           <!-- 功能操作區 -->
           <div class="gap-4 items-center h-12 mb-4">
             <button
-              class="w-full h-full flex justify-center items-center text-white bg-green-500 rounded-full hover:bg-green-500"
+              class="w-full h-full flex justify-center items-center text-white bg-green-600 rounded-full hover:bg-green-500"
               @click="toggleLike"
               :disabled="false"
             >
@@ -503,7 +578,7 @@ onMounted(() => {
           </div>
 
           <!-- 留言區 -->
-          <div class="p-3 bg-gray-100 rounded-md shadow-sm">
+          <div class="p-3 min-h-screen bg-gray-100 rounded-md shadow-sm">
             <!-- 新增留言 -->
             <div class="flex justify-between space-x-3 border-b border-gray-200">
               <div class="w-14 h-14 rounded-full overflow-hidden flex-shrink-0">
@@ -527,7 +602,7 @@ onMounted(() => {
                 <div class="">
                   <button
                     @click="addComment"
-                    class="mt-2 px-6 py-2 bg-green-500 text-white rounded-full hover:bg-green-600 focus:outline-none mb-3"
+                    class="mt-2 px-6 py-2 bg-green-600 text-white rounded-full hover:bg-green-500 focus:outline-none mb-3"
                   >
                     送出
                   </button>
@@ -543,7 +618,8 @@ onMounted(() => {
                 class="flex items-start space-x-3 border-b pb-4 mt-6 relative"
               >
                 <div
-                  class="w-14 h-14 rounded-full overflow-hidden flex items-center justify-center"
+                  class="w-14 h-14 rounded-full overflow-hidden flex items-center justify-center flex-shrink-0 cursor-pointer"
+                  @click="router.push({ name: 'personInfo', params: { uid: comment.uid } })"
                 >
                   <img
                     alt="User Avatar"
@@ -556,7 +632,9 @@ onMounted(() => {
                 </div>
                 <div>
                   <p class="font-semibold text-gray-800 text-sm">{{ comment.name }}</p>
-                  <p class="text-gray-600 text-base">{{ comment.content }}</p>
+                  <p class="text-gray-600 text-sm whitespace-pre-wrap tracking-wide">
+                    {{ comment.content }}
+                  </p>
                   <p class="text-gray-400 text-sm">{{ dayjs(comment.time).fromNow() }}</p>
                 </div>
                 <n-button

@@ -18,17 +18,20 @@ import SignupSuccess from '@/views/Login/SignupSuccess.vue'
 import ResetPassword from '@/views/Login/ResetPassword.vue'
 import forgotPassword from '@/views/Login/ForgotPassword.vue'
 import ShoppingCart from '@/views/CashFlow/index.vue'
+import CheckoutPage from '@/views/Payment/CheckoutPage.vue'
+import CheckoutSuccess from '@/views/Payment/CheckoutSuccess.vue'
 import Layout from '@/views/Layout/index.vue'
 import { getCurrentUser } from '@/utils/firebaseConfig'
+import TopUp from '@/views/TopUp/index.vue'
+import WalletRecord from '@/views/TopUp/component/WalletRecord.vue'
+import TopupResult from '@/views/TopUp/component/TopupResult.vue'
+import TopupSuccess from '@/views/TopUp/component/TopupSuccess.vue'
+import TopupFail from '@/views/TopUp/component/TopupFail.vue'
+import NotFound from '@/views/Error/NotFound.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
-    {
-      path: '/',
-      name: 'home',
-      component: Home,
-    },
     {
       path: '/login',
       name: 'login',
@@ -50,29 +53,25 @@ const router = createRouter({
       component: ResetPassword,
     },
     {
-      path: '/shoppingcart',
-      name: 'shpopingcart',
-      component: ShoppingCart,
-    },
-    {
       path: '/',
       name: 'layout',
       component: Layout,
       redirect: { name: 'home' },
       children: [
         {
-          path: '/home',
+          path: 'home',
           name: 'home',
           component: Home,
         },
         {
-          path: '/profile',
+          path: 'profile',
           name: 'profile',
           component: Profile,
+          meta: { requiresAuth: true },
           redirect: { name: 'personInfo' },
           children: [
             {
-              path: 'personInfo',
+              path: ':uid',
               name: 'personInfo',
               component: PersonInfo,
             },
@@ -99,19 +98,20 @@ const router = createRouter({
           ],
         },
         {
-          path: '/post',
-          name: 'post',
+          path: 'posts',
+          name: 'posts',
           component: PostHomePage,
         },
         {
-          path: '/post/:post_id',
+          path: 'post/:post_id',
           name: 'PostDetail',
           component: PostDetail,
         },
         {
-          path: '/activity',
+          path: 'activity',
           name: 'activity',
           component: Activity,
+          redirect: { name: 'home' },
           children: [
             {
               path: 'detail/:id',
@@ -121,6 +121,7 @@ const router = createRouter({
             {
               path: 'create',
               name: 'activityCreate',
+              meta: { requiresAuth: true },
               component: ActivityCreate,
             },
             {
@@ -131,9 +132,55 @@ const router = createRouter({
             {
               path: 'rating/:activity_id',
               name: 'activityRating',
+              meta: { requiresAuth: true },
               component: ActivityRating,
             },
           ],
+        },
+        {
+          path: '/shoppingcart',
+          name: 'shpopingcart',
+          component: ShoppingCart,
+        },
+        {
+          path: 'topup',
+          name: 'topup',
+          component: TopUp,
+        },
+        {
+          path: 'topup/result/:id',
+          name: 'topupResult',
+          component: TopupResult,
+        },
+        {
+          path: 'topup/success/:id',
+          name: 'topupSuccess',
+          component: TopupSuccess,
+        },
+        {
+          path: 'topup/fail/:id',
+          name: 'topupFail',
+          component: TopupFail,
+        },
+        {
+          path: '/walletRecord',
+          name: 'walletRecord',
+          component: WalletRecord,
+        },
+        {
+          path: '/checkout',
+          name: 'checkout',
+          component: CheckoutPage,
+        },
+        {
+          path: '/checkout-success/:order_id',
+          name: 'checkoutSuccess',
+          component: CheckoutSuccess,
+        },
+        {
+          path: '/:catchAll(.*)',
+          name: 'notFound',
+          component: NotFound,
         },
       ],
     },
@@ -141,9 +188,13 @@ const router = createRouter({
 })
 
 router.beforeEach(async (to, from, next) => {
-  await getCurrentUser()
-  console.log('router觸發了')
-  next()
+  const user = await getCurrentUser()
+  const requiresAuth = to.matched.some((record) => record.meta.requiresAuth)
+  if (requiresAuth && !user) {
+    next({ name: 'login' })
+  } else {
+    next()
+  }
 })
 
 export default router

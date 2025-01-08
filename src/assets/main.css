@@ -1,7 +1,21 @@
 @import './base.css';
 
-@import './carousel.css';
-
 #app {
   width: 100vw;
+}
+
+/* 按鈕hover效果 */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    @apply transition-colors duration-200 ease-in-out;
+  }
+}
+@layer utilities {
+  a:not(.no-hover-style):hover {
+    @apply text-green-600;
+  }
 }

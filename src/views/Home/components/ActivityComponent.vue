@@ -1,226 +1,248 @@
 <script setup>
 import ActivityCard from '@/views/components/ActivityCard.vue'
-import { activityGetAllAPI, activityGetUsersAPI } from '@/apis/activityAPi.js'
-import { ref, onMounted, computed, onUnmounted, nextTick } from 'vue'
-import { formatToISOWithTimezone } from '@/stores/useDateTime'
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
+import { storeToRefs } from 'pinia'
+import { formatDate } from '@/utils/useDateTime'
+import { useActivityStore } from '@/stores/useActivityStore'
+import { useRoute, useRouter } from 'vue-router'
+import { NSelect } from 'naive-ui'
 
-const allActivities = ref([]) // 存放所有活動資料（未篩選）
-const userMap = ref({})
+const route = useRoute()
+const router = useRouter()
+
+const activityStore = useActivityStore()
+const {
+  activities,
+  loading,
+  error,
+  triggerAction,
+  selectedRegions,
+  regionOptions,
+  filters,
+  totalActivities,
+} = storeToRefs(activityStore)
+
+const { fetchAllActivities, triggerActivityAction, clearFilters } = activityStore
+
+const filterByRegion = (region) => {
+  filters.value.region = region
+  filters.value.page = 1
+  fetchAllActivities()
+  router.push({ path: 'home', query: { ...filters.value } })
+}
+
+const handlePageChange = (page) => {
+  filters.value.page = page
+
+  router.push({ path: '/home', query: { ...filters.value } })
+
+  fetchAllActivities(filters.value)
+}
 
 // 計算今天日期的字串
-const today = new Date()
-const yyyy = today.getFullYear()
-const mm = String(today.getMonth() + 1).padStart(2, '0')
-const dd = String(today.getDate()).padStart(2, '0')
-const todayString = `${yyyy}-${mm}-${dd}`
+const todayString = new Date().toISOString().split('T')[0]
+const selectedStartDate = ref('')
 
-// 篩選條件
-const selectedCategory = ref('') // 預設顯示全部
-const selectedStartDate = ref('') // 使用者選擇的開始篩選日期
-
-// 定義篩選函式
-const selectCategory = (category) => {
-  selectedCategory.value = category
+const setStartDate = (date) => {
+  selectedStartDate.value = date
+  filters.value.page = 1 // 切換分類時回到第1頁
 }
 
-const setStartDate = (dateStr) => {
-  selectedStartDate.value = dateStr
+const categoryMap = {
+  '': '',
+  美食: 'food',
+  購物: 'shopping',
+  旅遊: 'travel',
+  運動: 'sports',
+  教育: 'education',
+  其他: 'others',
 }
 
-// 使用 computed 來動態取得符合條件的 items
-const filteredItems = computed(() => {
-  const today = new Date()
-  const startFilterDate = selectedStartDate.value ? new Date(selectedStartDate.value) : today
+const triggerCategory = (category) => {
+  const mappedCategory = categoryMap[category] || ''
+  filters.value.category = mappedCategory
+  filters.value.page = 1 // 切換分類時回到第1頁
+  triggerActivityAction(mappedCategory)
+}
 
-  return allActivities.value
+const isSelected = (category) => {
+  const mappedCategory = categoryMap[category] || ''
+  return triggerAction.value === mappedCategory
+}
+
+const filteredActivities = computed(() =>
+  activities.value
     .filter((activity) => {
+      if (!selectedStartDate.value) return true
       const eventDate = new Date(activity.event_time)
-      if (eventDate < today) return false
-      if (eventDate < startFilterDate) return false
-      if (selectedCategory.value && activity.category !== selectedCategory.value) return false
-      return true
+      const filterDate = new Date(selectedStartDate.value)
+      return eventDate >= filterDate
     })
-    .sort((a, b) => new Date(a.event_time) - new Date(b.event_time))
-    .map((activity) => ({
-      id: activity.id,
-      name: activity.name,
-      img_url: activity.img_url || '/src/assets/UserUpdata1.jpg',
-      location: activity.location || '未知地點',
-      dateTime: formatToISOWithTimezone(activity.event_time),
-      user: userMap.value[activity.host_id] || '未知用戶',
-      participants: activity.max_participants || 0,
-    }))
+    .map((activity) => {
+      return {
+        id: activity.id,
+        name: activity.name,
+        img_url: activity.img_url || './src/assets/UserUpdata1.jpg',
+        location: activity.location || '未知地點',
+        dateTime: formatDate(activity.event_time),
+        participants: activity.max_participants,
+        host: activity.users?.display_name || '未知用戶',
+        userImg: activity.users.photo_url,
+      }
+    })
+    .sort((a, b) => a.event_time - b.event_time),
+)
+
+watch(
+  () => route.query,
+  (newQuery) => {
+    fetchAllActivities(newQuery)
+  },
+  { immediate: true },
+)
+
+// 監聽 triggerAction，執行相應邏輯
+watch(
+  () => triggerAction.value,
+  (category) => {
+    if (category) {
+      scrollToActivityBlock()
+      triggerActivityAction(category)
+      router.push({ path: 'home', query: { ...filters.value } })
+    }
+  },
+)
+
+const pages = computed(() => {
+  return (totalActivities.value || 12) / 12
 })
 
-const currentPage = ref(1) // 當前頁碼
-const isLoading = ref(false) // 正在加載中
-const hasMore = ref(true) // 是否還有更多資料
-const observer = ref(null) // IntersectionObserver 實例
+const horizontal = ref(false)
+const isMobile = ref(false)
 
-const fetchActivitiesAndUsers = async () => {
-  if (isLoading.value || !hasMore.value) return
-
-  isLoading.value = true
-  try {
-    const [activities, users] = await Promise.all([
-      activityGetAllAPI({ page: currentPage.value, limit: 10 }), // 分頁參數
-      activityGetUsersAPI(),
-    ])
-
-    // 處理使用者資料
-    if (users.status === 200 && Array.isArray(users.data)) {
-      userMap.value = Object.fromEntries(users.data.map((user) => [user.uid, user.display_name]))
-    }
-
-    // 處理活動資料
-    if (activities.status === 200 && Array.isArray(activities.data)) {
-      activities.data.forEach((activity) => {
-        const exists = allActivities.value.some((item) => item.id === activity.id)
-        if (!exists) {
-          allActivities.value.push(activity)
-        }
-      })
-
-      if (activities.data.length < 10) hasMore.value = false // 最後一頁
-      currentPage.value++ // 下一頁
-    } else {
-      hasMore.value = false
-    }
-  } catch (err) {
-    console.error('取得活動資料失敗:', err)
-  } finally {
-    isLoading.value = false
-  }
+const updateScreenSize = () => {
+  isMobile.value = window.innerWidth < 768
 }
 
-onMounted(async () => {
-  await fetchActivitiesAndUsers()
-
-  nextTick(() => {
-    const loadMoreTrigger = document.querySelector('#load-more')
-    if (loadMoreTrigger) {
-      observer.value = new IntersectionObserver((entries) => {
-        if (entries[0].isIntersecting && !isLoading.value && hasMore.value) {
-          setTimeout(() => {
-            fetchActivitiesAndUsers()
-          }, 300) // 加入 300ms 延遲，避免過於頻繁觸發
-        }
-      })
-      observer.value.observe(loadMoreTrigger)
-    }
-  })
+onMounted(() => {
+  updateScreenSize()
+  window.addEventListener('resize', updateScreenSize)
 })
 
 onUnmounted(() => {
-  if (observer.value) observer.value.disconnect()
+  window.removeEventListener('resize', updateScreenSize)
 })
+
+watch(isMobile, (newVal) => {
+  if (newVal) {
+    horizontal.value = true
+  } else {
+    horizontal.value = false
+  }
+})
+
+// 滾動到活動區塊
+const scrollToActivityBlock = () => {
+  const activitySection = document.getElementById('activity-section')
+  if (activitySection) {
+    activitySection.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+}
+const handleClearFilters = () => {
+  clearFilters()
+  fetchAllActivities() // 清除後重新加載活動列表
+  router.push({ path: 'home', query: { ...filters.value } })
+}
 </script>
 
 <template>
-  <main class="block max-w-7xl m-auto">
-    <div class="text-3xl pt-40 font-bold leading-10">啾團活動</div>
-    <div class="inline-flex w-full pb-7 pt-7">
-      <div class="flex flex-wrap gap-3 justify-start">
-        <!-- 預設顯示全部 -->
-        <div class="mr-7 py-3 pl-3 text-sm">
-          <button
-            class="p-1 md:p-2 w-full md:w-auto text-center"
-            @click="selectCategory('')"
-            :class="{ 'bg-gray-300 rounded-md': selectedCategory === '' }"
-          >
-            全部
-          </button>
-        </div>
-        <div class="mr-7 py-3 pl-3 text-sm">
-          <button
-            class="p-1 md:p-2 w-full md:w-auto text-center"
-            @click="selectCategory('food')"
-            :class="{ 'bg-gray-300 rounded-md': selectedCategory === 'food' }"
-          >
-            美食
-          </button>
-        </div>
-        <div class="mr-7 py-3 pl-3 text-sm">
-          <button
-            class="p-1 md:p-2 w-full md:w-auto text-center"
-            @click="selectCategory('shopping')"
-            :class="{ 'bg-gray-300 rounded-md': selectedCategory === 'shopping' }"
-          >
-            購物
-          </button>
-        </div>
-        <div class="mr-7 py-3 pl-3 text-sm">
-          <button
-            class="p-1 md:p-2 w-full md:w-auto text-center"
-            @click="selectCategory('travel')"
-            :class="{ 'bg-gray-300 rounded-md': selectedCategory === 'travel' }"
-          >
-            旅遊
-          </button>
-        </div>
-        <div class="mr-7 py-3 pl-3 text-sm">
-          <button
-            class="p-1 md:p-2 w-full md:w-auto text-center"
-            @click="selectCategory('sports')"
-            :class="{ 'bg-gray-300 rounded-md': selectedCategory === 'sports' }"
-          >
-            運動
-          </button>
-        </div>
-        <div class="mr-7 py-3 pl-3 text-sm">
-          <button
-            class="p-1 md:p-2 w-full md:w-auto text-center"
-            @click="selectCategory('education')"
-            :class="{ 'bg-gray-300 rounded-md': selectedCategory === 'education' }"
-          >
-            教育
-          </button>
-        </div>
-        <div class="mr-7 py-3 pl-3 text-sm">
-          <button
-            class="p-1 md:p-2 w-full md:w-auto text-center"
-            @click="selectCategory('others')"
-            :class="{ 'bg-gray-300 rounded-md': selectedCategory === 'others' }"
-          >
-            其他
-          </button>
+  <main id="activity-section" class="mx-auto py-5">
+    <div class="text-center text-[28px] text-gray-800 font-bold min-w-[120px] lg:text-[34px]">
+      揪團活動
+    </div>
+    <div class="flex justify-center mt-3 w-full">
+      <div class="flex flex-wrap gap-4 justify-start w-4/5 md:justify-center md:w-3/4 lg:w-4/5">
+        <div
+          v-for="category in ['', '美食', '購物', '旅遊', '運動', '教育', '其他']"
+          :key="category"
+          class="cursor-pointer hover:scale-110 transition-all duration-300 hover:font-bold"
+        >
+          <!-- 預設顯示全部 -->
+          <div class="text-sm text-center bg-green-600 text-white rounded-full hover:bg-green-500">
+            <button
+              class="p-1 px-7 py-2 h-10 w-full md:px-7 md:py-2 md:w-auto text-center"
+              @click="triggerCategory(category)"
+              :class="{ 'bg-green-700 rounded-full': isSelected(category) }"
+            >
+              {{ category || '全部' }}
+            </button>
+          </div>
         </div>
       </div>
     </div>
-    <hr />
     <!-- 篩選器 -->
-    <div class="mt-7 flex justify-between items-center">
-      <div class="text-xl flex items-center">
-        <span class="ml-1"></span>
-      </div>
-      <div class="text-xl flex items-center">
-        篩選日期
-        <span class="ml-1">
-          <input type="date" :min="todayString" @change="setStartDate($event.target.value)"
-        /></span>
-      </div>
-    </div>
 
     <!-- 卡片區域 -->
-    <div class="mt-7 mb-7">
-      <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-        <ActivityCard
-          v-for="item in filteredItems"
-          :key="item.id"
-          :title="item.name"
-          :actImgUrl="item.img_url"
-          :location="item.location"
-          :date-time="item.dateTime"
-          :participants="item.participants"
-          :host="item.user"
-          :id="item.id"
-        ></ActivityCard>
+    <div class="mt-5 mb-7 w-4/5 mx-auto md:w-3/4 lg:w-4/5">
+      <div
+        class="my-5 flex flex-col md:flex-row md:items-center md:justify-between w-full lg:justify-center lg:gap-5"
+      >
+        <div class="flex gap-3">
+          <div class="text-xl flex items-center">
+            <n-select
+              v-model:value="selectedRegions"
+              :options="regionOptions"
+              clearable
+              placeholder="選擇地區"
+              style="width: 150px"
+              @update:value="filterByRegion"
+            />
+          </div>
+          <div class="text-xl flex items-center">
+            <span class="p-1">
+              <input
+                class="cursor-pointer bg-white border border-gray-200 text-sm p-[5px] text-gray-400 rounded-sm hover:border-green-600"
+                type="date"
+                :min="todayString"
+                style="outline: none"
+                @change="setStartDate($event.target.value)"
+                placeholder="活動日期"
+              />
+            </span>
+          </div>
+        </div>
+        <div>
+          <n-button @click="handleClearFilters">清除篩選</n-button>
+        </div>
       </div>
-
-      <div v-if="isLoading" class="text-center my-5">加載中...</div>
-      <div id="load-more" style="height: 20px"></div>
-      <!-- 底部觸發點 -->
-      <div v-if="!hasMore" class="text-center my-5 text-gray-500"></div>
+      <div v-if="loading" class="text-center my-5">加載中...</div>
+      <div v-else-if="error" class="text-center my-5 text-red-500">{{ error }}</div>
+      <div v-else>
+        <div class="grid grid-cols-1 md:grid-cols-2 md:gap-4 lg:grid-cols-3">
+          <ActivityCard
+            v-for="activity in filteredActivities"
+            :key="activity.id"
+            :title="activity.name"
+            :actImgUrl="activity.img_url"
+            :location="activity.location"
+            :date-time="activity.dateTime"
+            :participants="activity.participants"
+            :host="activity.host"
+            :hostImgUrl="activity.userImg"
+            :id="activity.id"
+            :horizontal="horizontal"
+            class="border-b-2 pb-3 overflow-hidden md:border-none md:bg-gray-100 md:mb-3 md:rounded-md md:px-5 md:hover:bg-gray-200 md:shadow-md lg:mb-0 hover:scale-[1.05] transition-all duration-300"
+          ></ActivityCard>
+        </div>
+        <div class="pagination-container mt-5 flex justify-center">
+          <n-pagination
+            v-model:page="filters.page"
+            :page-size="filters.pageSize"
+            :page-count="Math.max(1, Math.ceil(pages))"
+            @update:page="handlePageChange"
+          />
+        </div>
+      </div>
     </div>
   </main>
 </template>

@@ -1,30 +1,37 @@
 <script setup>
-import { onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useMessage, useDialog, NRate, NSpace, NInput, NModal } from 'naive-ui'
 import { CheckCircle, CheckCircleSolid, HeartSolid } from '@iconoir/vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ratingGetDetailAPI, ratingSubmitAPI } from '@/apis/ratingApi'
+import { ratingGetDetailAPI, ratingSubmitAPI } from '@/apis/ratingAPIs'
 import dayjs from 'dayjs'
 import { useUserStore } from '@/stores/userStore'
-
+import { handleError } from '@/utils/handleError.js'
+import { formatDate } from '@/utils/useDateTime'
+import { userFollowersAddAPI, userGetFollowingAPI } from '@/apis/userAPIs'
+import { useSocketStore } from '@/stores/socketStore'
 dayjs.locale('zh-tw')
+const socketStore = useSocketStore()
 const userStore = useUserStore()
 const dialog = useDialog()
 const message = useMessage()
-const clickBtn = ref(false)
 const route = useRoute()
 const router = useRouter()
 const activityDetail = ref({})
 const hostInfo = ref({})
 const hostRatingAverage = ref({})
 const latestHostRating = ref()
-const FollowSuccess = () => {
-  clickBtn.value = true
-  message.success('您已成功追蹤團主啦~')
-}
+const checkFollowing = ref([])
+const applications = ref([])
+const isParticipant = computed(() => {
+  return applications.value.some((application) => {
+    return application.participant_id == userStore.user.uid && application.register_validated
+  })
+})
+
 
 const clickTheFollowBtn = () => {
-  dialog.info({
+  dialog.success({
     title: '確認追蹤',
     content: '您確定要追蹤團主嗎',
     negativeText: '取消',
@@ -33,15 +40,33 @@ const clickTheFollowBtn = () => {
       FollowSuccess()
     },
     onNegativeClick: () => {
-      message.info('已取消操作')
+      message.success('已取消操作')
     },
   })
+}
+const FollowSuccess = async () => {
+  await userFollowersAddAPI({
+    user_id: hostInfo.value.uid,
+    follower_id: userStore.user.uid,
+  })
+  checkFollowing.value = { isFollowing: true }
+  message.success('您已成功追蹤團主啦~')
+}
+const fetchFollowingData = async () => {
+  const response = await userGetFollowingAPI(userStore.user.uid)
+  if (response.length > 0) {
+    const matchingItem = response.find((item) => item.user_id == hostInfo.value.uid)
+    checkFollowing.value = matchingItem
+      ? { isFollowing: true, ...matchingItem }
+      : { isFollowing: false }
+  } else {
+    checkFollowing.value = { isFollowing: false }
+  }
 }
 
 const step = ref(0)
 
 const goStep1 = () => {
-  console.log(ratingForm)
   step.value = 1
 }
 
@@ -50,16 +75,40 @@ const backStep0 = () => {
 }
 
 const getDetailForRating = async () => {
-  const { activity_id } = route.params
-  const res = await ratingGetDetailAPI(activity_id)
-  activityDetail.value = res.activity
-  hostInfo.value = res.activity.users
-  hostRatingAverage.value = res.hostRatingAverage['_avg']
-  latestHostRating.value = res.latestHostRating
+  try {
+    const { activity_id } = route.params
+    const res = await ratingGetDetailAPI(activity_id)
+
+    if (!res || !res.activity) {
+      activityDetail.value = {}
+      hostInfo.value = {}
+      hostRatingAverage.value = {}
+      latestHostRating.value = null
+      return
+    }
+
+    activityDetail.value = res.activity
+    hostInfo.value = res.activity.users || {}
+    hostRatingAverage.value = res.hostRatingAverage['_avg'] || {}
+    latestHostRating.value = res.latestHostRating || null
+    applications.value = res.applications || []
+
+    if (!isParticipant.value) {
+      message.warning('您並未參與此活動，故無法進行評輪')
+    }
+  } catch (error) {
+    activityDetail.value = {}
+    hostInfo.value = {}
+    hostRatingAverage.value = {}
+    latestHostRating.value = null
+    applications.value = []
+    handleError(message, '無法加載活動資料，請稍後再試 🙏', error)
+  }
 }
 
 onMounted(async () => {
   await getDetailForRating()
+  await fetchFollowingData()
 })
 
 const ratingForm = reactive({
@@ -70,32 +119,100 @@ const ratingForm = reactive({
   credit: 0,
 })
 
+// 滑鼠懸停狀態
+const hoverStates = reactive({
+  overall: 0,
+  kindness: 0,
+  ability: 0,
+  credit: 0,
+})
+
 const submitRating = async () => {
-  const data = {
-    host_id: activityDetail.value.host_id,
-    user_id: userStore.user.uid,
-    user_comment: ratingForm.comment,
-    rating_heart: ratingForm.overall,
-    rating_kindness: ratingForm.kindness,
-    rating_credit: ratingForm.credit,
-    rating_ability: ratingForm.ability,
-    activity_id: parseInt(route.params.activity_id),
+  if (!isParticipant.value) {
+    return message.warning('您並未參與此活動，故無法進行評輪')
   }
-  const res = await ratingSubmitAPI(data)
-
-  if (res.message === '資料唯一性衝突') {
-    return message.error('你已評價過，無法重複評價')
-  }
-
-  if (res.status != 201) {
+  try {
+    const data = {
+      host_id: activityDetail.value.host_id,
+      user_id: userStore.user.uid,
+      user_comment: ratingForm.comment,
+      rating_heart: ratingForm.overall,
+      rating_kindness: ratingForm.kindness,
+      rating_credit: ratingForm.credit,
+      rating_ability: ratingForm.ability,
+      activity_id: parseInt(route.params.activity_id),
+    }
+    const res = await ratingSubmitAPI(data)
     showSubmitModal.value = false
-    return message.error('評價失敗')
+    message.success('評價成功！')
+
+    const notiData = {
+      actor_id: userStore.user.uid,
+      user_id: activityDetail.value.host_id,
+      target_id: res.data.rating_id,
+      action: 'rate',
+      target_type: 'rating',
+      message: '留下了活動的評價',
+      link: `/profile/${activityDetail.value.host_id}`,
+    }
+    // 送出提醒
+    socketStore.sendNotification(notiData)
+
+    step.value = 2
+  } catch (error) {
+    if (error.response?.data.message == '資料唯一性衝突') {
+      message.error('你已評價過，無法重複評價')
+    } else {
+      message.error('評價失敗')
+    }
   }
-  showSubmitModal.value = false
-  message.success('評價成功！')
-  step.value = 2
 }
 const showSubmitModal = ref(false)
+
+// 這裡是定義愛心
+// 定義 Props
+const props = defineProps({
+  score: {
+    type: Number,
+    default: 0,
+  },
+  maxHearts: {
+    type: Number,
+    default: 5,
+  },
+})
+
+// 當前評分的響應式狀態
+const currentScore = ref(props.score)
+
+// 方法：更新評分
+const setRating = (index, category) => {
+  ratingForm[category] = index
+}
+
+// 方法：設置 hover 狀態
+const setHover = (index, category) => {
+  hoverStates[category] = index
+}
+
+// 方法：重置 hover 狀態
+const resetHover = (category) => {
+  hoverStates[category] = 0
+}
+// 當父組件的 `score` 改變時，更新 `currentScore`
+watch(
+  () => props.score,
+  (newScore) => {
+    currentScore.value = newScore
+  },
+)
+
+watch(
+  () => route.params.activity_id,
+  () => {
+    getDetailForRating()
+  },
+)
 </script>
 
 <template>
@@ -106,21 +223,21 @@ const showSubmitModal = ref(false)
     >
       <div
         v-if="step == 0"
-        class="relative px-5 before:content-[''] before:absolute before:left-0 before:top-2 before:bottom-2 before:w-2 before: before:bg-blue-500"
+        class="relative px-5 before:content-[''] before:absolute before:left-0 before:top-2 before:bottom-2 before:w-2 before: before:bg-green-500"
       >
         <div class="text-sm xl:text-2xl md:text-xl">活動評價</div>
         <div class="text-gray-600 text-sm font-bold xl:text-3xl md:text-xl">團主評價</div>
       </div>
       <div
         v-else-if="step == 1"
-        class="relative px-5 before:content-[''] before:absolute before:left-0 before:top-2 before:bottom-2 before:w-2 before: before:bg-blue-500"
+        class="relative px-5 before:content-[''] before:absolute before:left-0 before:top-2 before:bottom-2 before:w-2 before: before:bg-green-500"
       >
         <div class="text-sm xl:text-2xl md:text-xl">活動評價</div>
         <div class="text-gray-600 text-sm font-bold xl:text-3xl md:text-xl">追蹤活動</div>
       </div>
       <div
         v-else-if="step == 2"
-        class="relative px-5 before:content-[''] before:absolute before:left-0 before:top-2 before:bottom-2 before:w-2 before: before:bg-blue-500"
+        class="relative px-5 before:content-[''] before:absolute before:left-0 before:top-2 before:bottom-2 before:w-2 before: before:bg-green-500"
       >
         <div class="text-sm xl:text-2xl md:text-xl">活動評價</div>
         <div class="text-gray-600 text-sm font-bold xl:text-3xl md:text-xl">完成評價</div>
@@ -133,7 +250,7 @@ const showSubmitModal = ref(false)
         <div>
           <!-- 團主評價到此頁面的進度顯示-->
           <div
-            :class="{ 'text-blue-600': step == 0, 'text-gray-300': step != 0 }"
+            :class="{ 'text-green-600': step == 0, 'text-gray-300': step != 0 }"
             class="flex justify-center items-center font-bold tracking-widest"
           >
             <CheckCircleSolid v-if="step == 0" class="mr-1" />團主評價
@@ -143,7 +260,7 @@ const showSubmitModal = ref(false)
         <div>
           <!-- 還沒到追蹤評價頁面的進度顯示-->
           <div
-            :class="{ 'text-blue-600': step == 1, 'text-gray-300': step != 1 }"
+            :class="{ 'text-green-600': step == 1, 'text-gray-300': step != 1 }"
             class="flex justify-center items-center font-bold tracking-widest"
           >
             <CheckCircleSolid v-if="step == 1" class="mr-1" />
@@ -151,18 +268,21 @@ const showSubmitModal = ref(false)
           </div>
           <!-- 到追蹤評價頁面的進度顯示-->
 
-          <!-- <div class="flex justify-center items-center text-blue-600 font-bold tracking-widest">
+          <!-- <div class="flex justify-center items-center text-green-600 font-bold tracking-widest">
             <CheckCircleSolid class="mr-1" />追蹤活動
           </div> -->
         </div>
         <div>
           <!-- 還沒到最後完成頁面的進度顯示 -->
-          <div class="flex justify-center items-center text-gray-300 font-bold tracking-widest">
+          <div
+            :class="{ 'text-green-600': step == 2, 'text-gray-300': step != 2 }"
+            class="flex justify-center items-center font-bold tracking-widest"
+          >
             <CheckCircleSolid v-if="step == 2" class="mr-1" />
             <CheckCircle v-if="step != 2" class="mr-1" />完成
           </div>
           <!-- 到完成介面的進度顯示 -->
-          <!-- <div class="flex justify-center items-center text-blue-600 font-bold tracking-widest"><CheckCircleSolid class="mr-1" />完成</div> -->
+          <!-- <div class="flex justify-center items-center text-green-600 font-bold tracking-widest"><CheckCircleSolid class="mr-1" />完成</div> -->
         </div>
       </div>
       <!-- 活動區域 -->
@@ -200,13 +320,14 @@ const showSubmitModal = ref(false)
             <div class="flex justify-between bg-gray-200 px-3 py-1 my-2 rounded-full">
               <div class="min-w-[60px] flex items-center xl:text-base xl:p-1">親切度</div>
               <div class="flex items-center">
-                <n-rate
-                  readonly
-                  :value="hostRatingAverage.rating_kindness"
-                  :default-value="5"
-                  color="#B91C1C"
-                  ><HeartSolid class="w-4"
-                /></n-rate>
+                <div class="static-heart-rating readonly">
+                  <span
+                    v-for="index in 5"
+                    :key="'kindness-' + index"
+                    class="static-heart"
+                    :class="{ filled: index <= hostRatingAverage.rating_kindness }"
+                  ></span>
+                </div>
                 <div class="mx-2 text-xs xl:text-base xl:p-1">
                   {{ hostRatingAverage.rating_kindness?.toFixed(1) || '0.0' }} / 5.0
                 </div>
@@ -215,13 +336,15 @@ const showSubmitModal = ref(false)
             <div class="flex justify-between bg-gray-200 px-3 py-1 mb-2 rounded-full">
               <div class="min-w-[60px] flex items-center xl:text-base xl:p-1">主辦能力</div>
               <div class="flex items-center">
-                <n-rate
-                  readonly
-                  :value="hostRatingAverage.rating_ability"
-                  :default-value="5"
-                  color="#B91C1C"
-                  ><HeartSolid class="w-4"
-                /></n-rate>
+                <div class="static-heart-rating readonly">
+                  <span
+                    v-for="index in 5"
+                    :key="'kindness-' + index"
+                    class="static-heart"
+                    :class="{ filled: index <= hostRatingAverage.rating_ability }"
+                  ></span>
+                </div>
+
                 <div class="min-w-[45px] mx-2 text-xs xl:text-base xl:p-1">
                   {{ hostRatingAverage.rating_ability?.toFixed(1) || '0.0' }} / 5.0
                 </div>
@@ -230,13 +353,15 @@ const showSubmitModal = ref(false)
             <div class="flex justify-between bg-gray-200 px-3 py-1 mb-2 rounded-full">
               <div class="min-w-[60px] flex items-center xl:text-base xl:p-1">信用度</div>
               <div class="flex items-center">
-                <n-rate
-                  readonly
-                  :value="hostRatingAverage.rating_credit"
-                  :default-value="5"
-                  color="#B91C1C"
-                  ><HeartSolid class="w-4"
-                /></n-rate>
+                <div class="static-heart-rating readonly">
+                  <span
+                    v-for="index in 5"
+                    :key="'kindness-' + index"
+                    class="static-heart"
+                    :class="{ filled: index <= hostRatingAverage.rating_credit }"
+                  ></span>
+                </div>
+
                 <div class="mx-2 text-xs xl:text-base xl:p-1">
                   {{ hostRatingAverage.rating_credit?.toFixed(1) || '0.0' }} / 5.0
                 </div>
@@ -246,34 +371,41 @@ const showSubmitModal = ref(false)
             <div class="mt-3 text-xs font-bold text-gray-600 xl:text-base xl:p-1">
               其他用戶對團主評價
             </div>
-            <div v-if="latestHostRating" class="mt-1 p-2 bg-gray-200 rounded-xl item">
-              <div class="flex items-center justify-between">
-                <div class="flex items-center">
-                  <img
-                    :src="latestHostRating.users_ratings_user_idTousers.photo_url"
-                    class="w-6 h-6 object-cover rounded-full"
-                  />
-                  <div class="mx-2 text-xs">
-                    {{ latestHostRating.users_ratings_user_idTousers.display_name }}
-                  </div>
-                </div>
-                <div class="flex flex-col items-center">
+            <div v-if="latestHostRating && latestHostRating.length > 0">
+              <div
+                v-for="(rating, index) in latestHostRating"
+                :key="index"
+                class="mt-1 p-2 bg-gray-200 rounded-xl item"
+              >
+                <div class="flex items-center justify-between">
                   <div class="flex items-center">
-                    <n-rate
-                      readonly
-                      v-model:value="latestHostRating.rating_heart"
-                      :default-value="5"
-                      color="#B91C1C"
-                      ><HeartSolid class="w-2"
-                    /></n-rate>
+                    <img
+                      :src="rating.users_ratings_user_idTousers.photo_url"
+                      class="w-6 h-6 object-cover rounded-full"
+                    />
+                    <div class="mx-2 text-xs">
+                      {{ rating.users_ratings_user_idTousers.display_name }}
+                    </div>
                   </div>
-                  <div class="mx-1 text-[10px]">2024/12/14</div>
+                  <div class="flex flex-col items-center">
+                    <div class="flex items-center">
+                      <n-rate
+                        readonly
+                        v-model:value="rating.rating_heart"
+                        :default-value="5"
+                        color="#B91C1C"
+                        ><HeartSolid class="w-2"
+                      /></n-rate>
+                    </div>
+                    <div class="mx-1 text-[10px]">{{ formatDate(rating.created_at) }}</div>
+                  </div>
                 </div>
-              </div>
-              <div class="text-xs tracking-wider truncate mt-2 xl:text-base xl:p-1">
-                {{ latestHostRating.user_comment }}
+                <div class="text-xs tracking-wider truncate mt-2 xl:text-base xl:p-1">
+                  {{ rating.user_comment }}
+                </div>
               </div>
             </div>
+
             <p v-else class="mt-2 xl:text-base xl:p-1">暫無用戶評價</p>
           </div>
         </div>
@@ -290,27 +422,55 @@ const showSubmitModal = ref(false)
         </div>
         <div class="flex mt-3 px-14">
           <div class="text-base w-full">您對於本次揪團的評價為</div>
-          <n-rate clearable v-model:value="ratingForm.overall" color="#B91C1C">
-            <HeartSolid class="w-5 h-5" />
-          </n-rate>
+          <div class="heart-rating" @mouseleave="resetHover('overall')">
+            <span
+              v-for="index in maxHearts"
+              :key="'overall-' + index"
+              class="heart"
+              :class="{ filled: index <= hoverStates.overall || index <= ratingForm.overall }"
+              @mouseenter="setHover(index, 'overall')"
+              @click="setRating(index, 'overall')"
+            ></span>
+          </div>
         </div>
         <div class="flex mt-3 px-14">
           <div class="text-base w-full">團主的親切度，您願意給到幾分呢？</div>
-          <n-rate clearable v-model:value="ratingForm.kindness" color="#B91C1C">
-            <HeartSolid class="w-5 h-5" />
-          </n-rate>
+          <div class="heart-rating" @mouseleave="resetHover('kindness')">
+            <span
+              v-for="index in maxHearts"
+              :key="'kindness-' + index"
+              class="heart"
+              :class="{ filled: index <= hoverStates.kindness || index <= ratingForm.kindness }"
+              @mouseenter="setHover(index, 'kindness')"
+              @click="setRating(index, 'kindness')"
+            ></span>
+          </div>
         </div>
         <div class="flex mt-3 px-14">
           <div class="text-base w-full">團主的主辦能力，您願意給到幾分呢？</div>
-          <n-rate clearable v-model:value="ratingForm.ability" color="#B91C1C">
-            <HeartSolid class="w-5 h-5" />
-          </n-rate>
+          <div class="heart-rating" @mouseleave="resetHover('ability')">
+            <span
+              v-for="index in maxHearts"
+              :key="'ability-' + index"
+              class="heart"
+              :class="{ filled: index <= hoverStates.ability || index <= ratingForm.ability }"
+              @mouseenter="setHover(index, 'ability')"
+              @click="setRating(index, 'ability')"
+            ></span>
+          </div>
         </div>
         <div class="flex mt-3 px-14">
           <div class="text-base w-full">團主的信用度，您願意給到幾分呢？</div>
-          <n-rate clearable v-model:value="ratingForm.credit" color="#B91C1C">
-            <HeartSolid class="w-5 h-5" />
-          </n-rate>
+          <div class="heart-rating" @mouseleave="resetHover('credit')">
+            <span
+              v-for="index in maxHearts"
+              :key="'credit-' + index"
+              class="heart"
+              :class="{ filled: index <= hoverStates.credit || index <= ratingForm.credit }"
+              @mouseenter="setHover(index, 'credit')"
+              @click="setRating(index, 'credit')"
+            ></span>
+          </div>
         </div>
 
         <div class="flex flex-col mt-5 xl:text-base">
@@ -334,7 +494,7 @@ const showSubmitModal = ref(false)
           ></textarea> -->
         </div>
         <div class="flex justify-end items-center mt-3">
-          <n-button type="info" @click="goStep1" class="px-5 tracking-widest">下一步</n-button>
+          <n-button type="success" @click="goStep1" class="px-5 tracking-widest">下一步</n-button>
         </div>
       </div>
       <!-- 追蹤團主介面 -->
@@ -356,24 +516,19 @@ const showSubmitModal = ref(false)
         </div> -->
         <div class="flex items-center mt-3">
           <div class="text-base w-full">如果這次活動滿意，您想追蹤此團主嗎？</div>
-          <!-- 還沒追蹤時的顯示 -->
-          <n-button @click="clickTheFollowBtn" strong secondary type="tertiary">追蹤</n-button>
-          <!-- 已經追蹤的顯示 -->
-          <n-button type="info">已追蹤</n-button>
-        </div>
-        <div class="flex items-center mt-3">
-          <div class="text-base w-full">您想要追蹤類似的活動嗎？</div>
-          <!-- 還沒追蹤時的顯示 -->
-          <n-button @click="clickTheFollowBtn" strong secondary type="tertiary">追蹤</n-button>
-          <!-- 已經追蹤的顯示 -->
-          <n-button type="info">已追蹤</n-button>
+          <n-button
+            :type="checkFollowing.isFollowing ? 'tertiary' : 'success'"
+            @click="clickTheFollowBtn(checkFollowing)"
+          >
+            {{ checkFollowing.isFollowing ? '已追蹤' : '追蹤' }}
+          </n-button>
         </div>
 
         <div class="flex justify-end items-center mt-10">
-          <n-button type="info" @click="backStep0" class="px-5 mx-6 tracking-widest"
+          <n-button type="success" @click="backStep0" class="px-5 mx-6 tracking-widest"
             >上一步</n-button
           >
-          <n-button type="info" @click="showSubmitModal = true" class="px-5 tracking-widest"
+          <n-button type="success" @click="showSubmitModal = true" class="px-5 tracking-widest"
             >送出評價</n-button
           >
         </div>
@@ -402,11 +557,49 @@ const showSubmitModal = ref(false)
         </div>
         <div class="flex items-center w-2/3 h-20 justify-evenly">
           <n-button @click="router.push({ name: 'home' })" type="info">返回首頁</n-button>
-          <n-button @click="router.push({ name: 'profile' })" type="info">前往個人頁</n-button>
-          <n-button type="info">前往任務中心</n-button>
+          <n-button
+            @click="router.push({ name: 'personInfo', params: { uid: userStore.user.uid } })"
+            type="info"
+            >前往個人頁</n-button
+          >
         </div>
       </div>
     </div>
   </body>
 </template>
-<style scoped></style>
+<style scoped>
+.static-heart-rating {
+  display: flex;
+  gap: 6px;
+}
+.static-heart {
+  width: 16px;
+  height: 16px;
+  background-image: url('https://firebasestorage.googleapis.com/v0/b/login-demo1-9d3cb.firebasestorage.app/o/activities%2Fheartnored.png?alt=media&token=fa9751f1-99dc-4a2a-a709-f6b4c7fe6f85');
+  background-repeat: no-repeat;
+  background-size: contain;
+  cursor: default;
+}
+.static-heart.filled {
+  background-image: url('https://firebasestorage.googleapis.com/v0/b/login-demo1-9d3cb.firebasestorage.app/o/activities%2Fheartred.png?alt=media&token=01bb392b-208c-4aac-b8aa-728b27a3b71d');
+}
+
+.heart-rating {
+  display: flex;
+  gap: 8px;
+}
+
+.heart {
+  width: 20px;
+  height: 20px;
+  background-image: url('https://firebasestorage.googleapis.com/v0/b/login-demo1-9d3cb.firebasestorage.app/o/activities%2Fheartnored.png?alt=media&token=fa9751f1-99dc-4a2a-a709-f6b4c7fe6f85');
+  background-repeat: no-repeat;
+  background-size: contain;
+  cursor: pointer;
+  transition: background-image 0.3s ease;
+}
+
+.heart.filled {
+  background-image: url('https://firebasestorage.googleapis.com/v0/b/login-demo1-9d3cb.firebasestorage.app/o/activities%2Fheartred.png?alt=media&token=01bb392b-208c-4aac-b8aa-728b27a3b71d');
+}
+</style>

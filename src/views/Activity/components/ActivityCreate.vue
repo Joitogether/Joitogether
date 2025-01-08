@@ -2,28 +2,38 @@
 import { Search, XmarkCircle, Clock, CreditCard, MoneySquare, Group, MapPin } from '@iconoir/vue'
 import { computed, ref, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import { useGoogleMaps } from '@/stores/useGoogleMaps'
-import { useAutocomplete } from '@/stores/useAutocomplete'
-import { usePreviewMode } from '@/stores/usePreviewMode'
 import { useMessage } from 'naive-ui'
 import dayjs from 'dayjs'
-import { taiwanTime, formatToISOWithTimezone } from '@/stores/useDateTime'
+import { taiwanTime, formatToISOWithTimezone } from '@/utils/useDateTime'
 import { useUserStore } from '@/stores/userStore'
-import { convertMarkdown } from '@/stores/useMarkdown'
+import { convertMarkdown } from '@/utils/useMarkdown'
 import { userGetAPI } from '@/apis/userAPIs'
-import { activityUserCreateAPI } from '@/apis/activityApi.js'
+import { activityUserCreateAPI } from '@/apis/activityAPIs.js'
+import { useAutocomplete } from '@/utils/useAutocomplete'
+import { useGoogleMaps } from '@/utils/useGoogleMaps'
+import { usePreviewMode } from '@/utils/usePreviewMode'
+import { handleError } from '@/utils/handleError'
+import { useSocketStore } from '@/stores/socketStore'
 
-const apiKey = import.meta.env.VITE_GOOGLE_KEY
-const {
-  searchQuery,
-  suggestions,
-  initializeAutocomplete,
-  triggerInputChange,
-  isLoading: loadingState,
-  isLoadOK: loadStateOK,
-} = useAutocomplete(apiKey)
-const { map, previewMap } = useGoogleMaps(apiKey)
-const { isPreviewMode, enterPreviewMode, exitPreviewMode } = usePreviewMode(previewMap, map)
+const socketStore = useSocketStore()
+const { previewMap } = useGoogleMaps()
+const { isPreviewMode, enterPreviewMode, exitPreviewMode } = usePreviewMode(previewMap)
+
+const message = useMessage()
+const { searchQuery, suggestions, triggerInputChange, isLoading, isLoadOK } = useAutocomplete()
+
+const clearSearch = () => {
+  searchQuery.value = ''
+  suggestions.value = []
+  isLoadOK.value = false
+}
+
+const selectSuggestion = (suggestion) => {
+  searchQuery.value = suggestion.description
+  suggestions.value = []
+  previewMap(suggestion.description)
+}
+
 const { minTime, maxTime } = taiwanTime()
 const selectedFile = ref(null)
 const isSubmitting = ref(false)
@@ -37,17 +47,22 @@ if (userStore.user.isLogin) {
       const result = await userGetAPI(userStore.user.uid)
 
       if (result) {
+        if (result.length === 0) {
+          user.value = {}
+          return
+        }
         user.value = result
-        return user.value
       }
-    } catch (err) {}
+      return result
+    } catch {
+      return
+    }
   }
   fetchUserData()
 }
 
 const markdownPreview = computed(() => convertMarkdown(inputValues.value.describe))
 
-const message = useMessage()
 dayjs.locale('zh-tw')
 
 const ActivityDataPush = async () => {
@@ -80,12 +95,27 @@ const ActivityDataPush = async () => {
   }
 
   try {
-    await activityUserCreateAPI(selectedFile.value || null, activityData)
+    const response = await activityUserCreateAPI(selectedFile.value || null, activityData)
+    message.success('活動建立成功了喔!!') // 成功訊息提示
+    if (response?.data?.id) {
+      const notiData = {
+        actor_id: response.data.host_id, // 觸發行為的使用者 ID
+        user_id: response.data.host_id, // 接收行為的使用者 ID (從 API 回傳資料取得)
+        target_id: response.data.id, // 被行為影響的目標 ID (從 API 回傳資料取得)
+        action: 'create', // 行為類型 (此處為 create)
+        target_type: 'activity', // 行為對象類型
+        message: `已成功建立活動：${response.data.name}`, // 通知訊息
+        link: `/activity/detail/${response.data.id}`, // 導向活動詳情頁面的連結
+      }
+
+      // 送出提醒通知
+      socketStore.sendNotification(notiData)
+    }
     router.replace('/')
-  } catch (err) {
-    console.error('錯誤回應:', err)
+  } catch (error) {
+    handleError(message, undefined, error)
   } finally {
-    isSubmitting.value = false // 完成後恢復按鈕可用狀態
+    isSubmitting.value = false
   }
 }
 
@@ -149,6 +179,9 @@ const updateParticipants = (value) => {
   if (newCount < 1) {
     participantsError.value = '人數不得低於 1 人'
     participants.value = 1
+  } else if (newCount > 99999) {
+    participantsError.value = '人數太多了'
+    participants.value = 99999
   } else {
     participantsError.value = ''
     participants.value = newCount
@@ -172,6 +205,9 @@ const validateInput = (event) => {
   value = value.replace(/[^0-9]/g, '')
   value = value.replace(/^0+/, '')
 
+  if (value > 99999) {
+    value = 99999
+  }
   event.target.value = value
 }
 
@@ -282,20 +318,6 @@ const removeImage = () => {
   uploadedImage.value = null
 }
 
-// 選擇建議
-const selectSuggestion = (suggestion) => {
-  searchQuery.value = suggestion.description
-  suggestions.value = []
-}
-
-// 清除輸入框
-const clearSearch = () => {
-  searchQuery.value = ''
-  suggestions.value = []
-  loadStateOK.value = false
-  loadingState.value = false
-}
-
 // 聚焦輸入框
 const inputElement = ref(null)
 const focusInput = () => {
@@ -387,18 +409,17 @@ const previewActivity = () => {
 
 <template>
   <section>
-    <div class="bg-gray-300">
+    <div class="bg-gray-100 w-screen">
       <form @submit.prevent>
-        <main class="max-w-xl mx-auto min-h-screen px-6 items-center justify-center">
+        <main class="mx-auto items-center justify-center md:w-3/4 lg:w-3/5">
           <!-- 圖片上傳 -->
           <div v-if="!isPreviewMode">
-            <h3 class="font-semibold text-lg mb-2 p-3">活動建立</h3>
-
             <div class="bg-white rounded-lg p-5 mb-3">
+              <h3 class="font-semibold text-3xl text-center border-b-2 pb-5">活動建立</h3>
               <div class="mb-6">
                 <div class="relative rounded-lg flex justify-center items-center p-6">
                   <label
-                    class="bg-gray-100 mt-6 rounded-md w-40 h-40 flex items-center justify-center"
+                    class="bg-gray-100 mt-6 rounded-md w-40 h-40 flex items-center justify-center hover:bg-gray-200"
                     :class="{ ' cursor-auto': !!uploadedImage, 'cursor-pointer': !uploadedImage }"
                   >
                     <img
@@ -418,7 +439,7 @@ const previewActivity = () => {
                   </label>
                   <span
                     v-if="uploadedImage"
-                    class="absolute top-0 right-0 bg-gray-300 text-white rounded-full px-2 py-1 text-xs cursor-pointer"
+                    class="absolute top-3 right-0 bg-gray-300 text-white rounded-full px-2 py-1 text-xs cursor-pointer"
                     @click="removeImage"
                     >X
                   </span>
@@ -436,7 +457,7 @@ const previewActivity = () => {
             </div>
 
             <!-- 活動名稱和描述 -->
-            <div class="bg-white p-5 px-4 mb-3 rounded-lg">
+            <div class="bg-white p-5 px-4 rounded-lg">
               <div class="mb-6 mt-6">
                 <label class="block font-medium mb-2 p-2 text-base"
                   >活動名稱
@@ -459,7 +480,7 @@ const previewActivity = () => {
                 <textarea
                   placeholder="請填活動描述"
                   rows="4"
-                  class="w-full p-3 border rounded-md focus:outline-none text-base"
+                  class="w-full p-3 border rounded-md focus:outline-none text-base resize-none"
                   v-model="inputValues.describe"
                   @blur="checkInput('describe')"
                 ></textarea>
@@ -482,7 +503,7 @@ const previewActivity = () => {
                       @input="triggerInputChange"
                       @focus="initializeAutocomplete"
                     />
-                    <button v-if="loadStateOK" class="p-3" @click="clearSearch">
+                    <button v-if="isLoadOK" class="p-3" @click="clearSearch">
                       <XmarkCircle />
                     </button>
                     <button class="p-3 border-l-2" @click="focusInput">
@@ -491,10 +512,10 @@ const previewActivity = () => {
                   </div>
                   <div>
                     <ul
-                      v-if="loadingState || suggestions.length"
+                      v-if="isLoading || suggestions.length"
                       class="border rounded-md mt-2 bg-white"
                     >
-                      <li v-if="loadingState" class="p-2 text-gray-500 text-sm">搜尋中...</li>
+                      <li v-if="isLoading" class="p-2 text-gray-500 text-sm">搜尋中...</li>
                       <li
                         v-else
                         v-for="(suggestion, index) in suggestions"
@@ -647,7 +668,7 @@ const previewActivity = () => {
               </div>
               <div class="my-6 flex items-center justify-center">
                 <button
-                  class="bg-yellow-200 rounded-md w-full mx-3 py-2 px-3 hover:bg-yellow-100"
+                  class="bg-green-600 rounded-full w-full mx-3 py-2 px-3 text-white hover:bg-green-700"
                   @click="handlePreviewClick"
                 >
                   預覽活動
@@ -656,33 +677,36 @@ const previewActivity = () => {
             </div>
           </div>
           <!-- 活動預覽區 -->
-          <div v-else>
-            <h3 class="font-semibold text-lg mb-2 p-3">活動預覽</h3>
-            <div class="bg-white rounded-lg p-5 mb-3">
+          <div v-else class="w-full">
+            <div class="bg-white rounded-lg p-5">
+              <h3 class="font-semibold text-3xl text-center border-b-2 pb-5 mb-5">活動預覽</h3>
               <!-- activityDetail.vue -->
-              <div class="flex h-full justify-start ml-[5%] w-full">
-                <img class="w-14 aspect-square rounded-full" :src="user.photo_url" alt="" />
-                <div class="ml-3 relative w-full h-14">
-                  <p class="font-bold text-lg absolute top-0">{{ user.display_name }}</p>
-                  <p class="absolute bottom-0">
-                    {{ user.city }} • {{ user.age }} • {{ user.career }}
-                  </p>
+              <div class="flex gap-3 items-center px-4">
+                <div class="w-14 h-14 rounded-full overflow-hidden">
+                  <img class="w-full h-full object-cover" :src="user.photo_url" alt="" />
+                </div>
+                <div class="flex flex-col">
+                  <p class="font-bold text-lg">{{ user.display_name }}</p>
+                  <p class="">{{ user.city }} • {{ user.age }} • {{ user.career }}</p>
                 </div>
               </div>
 
-              <div class="aspect-square overflow-hidden rounded-md p-4">
+              <div class="overflow-hidden rounded-md p-4">
                 <img class="w-full h-full object-cover rounded-md" :src="uploadedImage" alt="" />
               </div>
-              <div class="px-5 py-3">
-                <h3 class="font-bold text-2xl truncate">{{ inputValues.name }}</h3>
+              <div class="px-5 pb-3">
+                <p class="font-bold text-2xl truncate">{{ inputValues.name }}</p>
                 <div class="flex items-center text-gray-500">
-                  <Clock />
-                  <span class="pl-3">{{ formattedEventTime }}</span>
+                  <Clock class="w-5" />
+                  <span class="pl-1">{{ formattedEventTime }}</span>
                 </div>
                 <span v-if="inputValues.requireApproval" class="text-sm text-red-500">{{
                   `最後審核時間 ${formattedDeadLine}`
                 }}</span>
-                <p class="py-8 leading-6 markdown-content" v-html="markdownPreview"></p>
+                <p
+                  class="py-6 whitespace-pre-wrap leading-6 markdown-content"
+                  v-html="markdownPreview"
+                ></p>
                 <ul class="flex justify-around text-md border border-gray-200/100 rounded-lg p-2">
                   <li class="flex flex-col items-center">
                     <CreditCard height="35" width="35"></CreditCard>
@@ -698,8 +722,8 @@ const previewActivity = () => {
                   </li>
                 </ul>
                 <div class="flex items-center my-5">
-                  <MapPin height="32" width="32"></MapPin>
-                  <span class="text-lg ml-5">{{ inputElement.value }}</span>
+                  <MapPin height="24" width="24"></MapPin>
+                  <span class="text-base ml-2">{{ searchQuery }}</span>
                 </div>
                 <div
                   id="map"
@@ -712,18 +736,18 @@ const previewActivity = () => {
                   </div>
                 </div>
 
-                <div class="my-6 flex items-center justify-center">
+                <div class="my-8 flex items-center justify-center">
                   <button
-                    class="bg-yellow-200 rounded-md w-full mx-3 py-2 px-3 hover:bg-yellow-100"
+                    class="bg-green-600 rounded-full w-full py-2 px-3 text-white hover:bg-green-700"
                     :disabled="isSubmitting"
                     @click="ActivityDataPush"
                   >
                     {{ isSubmitting ? '送出中...' : '送出活動' }}
                   </button>
                 </div>
-                <div class="my-6 flex items-center justify-center">
+                <div class="flex items-center justify-center">
                   <button
-                    class="bg-yellow-200 rounded-md w-full mx-3 py-2 px-3 hover:bg-yellow-100"
+                    class="bg-green-600 rounded-full w-full py-2 px-3 text-white hover:bg-green-700"
                     @click="exitPreviewMode"
                   >
                     返回編輯

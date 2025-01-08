@@ -1,8 +1,17 @@
 <script setup>
 import { NButton } from 'naive-ui'
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
+import { useUserStore } from '@/stores/userStore'
+import { userFollowersAddAPI, userGetFollowingAPI, userUnfollowersAPI } from '@/apis/userAPIs'
+import { useSocketStore } from '@/stores/socketStore'
 
+const socketStore = useSocketStore()
+const userStore = useUserStore()
+const meFollowing = ref({ isFollowing: false })
 const props = defineProps({
+  id: {
+    type: String,
+  },
   display_name: {
     type: String,
   },
@@ -35,27 +44,103 @@ const openModal = () => {
   emit('edit', user.value)
 }
 
+const fetchFollowingData = async () => {
+  const response = await userGetFollowingAPI(userStore.user.uid)
+  const found = response.find((list) => list.user_id == props.id)
+  if (found) {
+    meFollowing.value = found
+    return meFollowing.value.isFollowing
+  }
+  return false
+}
+const toggleFollow = async (following) => {
+  if (following.isFollowing) {
+    await userUnfollowersAPI(following.id)
+    following.isFollowing = false
+    fetchFollowingData()
+  } else {
+    await userFollowersAddAPI({
+      user_id: props.id,
+      follower_id: userStore.user.uid,
+    })
+    const notiData = {
+      actor_id: userStore.user.uid,
+      user_id: props.id,
+      target_id: 0,
+      action: 'follow',
+      target_type: 'user',
+      message: '追蹤了你',
+      link: `/profile/${userStore.user.uid}`,
+    }
+
+    socketStore.sendNotification(notiData)
+
+    following.isFollowing = true
+    fetchFollowingData()
+  }
+}
+onMounted(async () => {
+  await fetchFollowingData()
+})
 const emit = defineEmits(['edit', 'close'])
 </script>
 <template>
-  <div class="card-container py-8 border rounded-lg overflow-hidden bg-white">
-    <div class="img-container w-full">
-      <img class="card-img w-full h-full object-cover" :src="props.photo_url" alt="personImg" />
-    </div>
-
-    <div class="card-content-container ml-5">
-      <h3 class="user-name text-2xl text-center font-bold">
-        {{ props.display_name || '大名還未填寫唷👀' }}
-      </h3>
-      <div class="user-detail text-md font-bold text-center">
-        <span>{{ props.city || '所在地還未填寫唷👀' }}</span>
-        <span> • {{ props.age || '年齡還未填寫唷👀' }}</span>
-        <span> • {{ props.career || '職業還未填寫唷👀' }}</span>
+  <div class="py-8 px-8 border border-gray-300 rounded-md md:flex md:justify-between md:gap-5">
+    <div class="md:w-1/3 md:flex md:items-center">
+      <div class="img-container w-40 h-40 rounded-full overflow-hidden mx-auto mb-3">
+        <img
+          v-if="props.photo_url"
+          class="card-img w-full h-full object-cover"
+          :src="props.photo_url"
+          alt="personImg"
+        />
+        <img
+          v-else
+          src="https://firebasestorage.googleapis.com/v0/b/login-demo1-9d3cb.firebasestorage.app/o/avatars%2Fcatavatar.png?alt=media&token=ccd02591-0c4f-435c-9a4a-34f219774558"
+          alt="default avatar"
+        />
       </div>
-      <p class="user-description text-2xl font-bold mt-1">
-        : {{ props.favorite_sentence || '座右銘還未填寫唷👀' }}
-      </p>
-      <div class="tag-container flex gap-3 flex-wrap my-4">
+    </div>
+    <div class="card-content-container flex flex-col gap-2 md:w-2/3 md:flex md:items-start">
+      <div class="md:w-full md:flex md:justify-between">
+        <h3 class="user-name text-2xl text-center font-bold text-green-600">
+          {{ props.display_name || '大名還沒填寫唷 👀' }}
+        </h3>
+        <n-button
+          v-if="userStore.user.uid == props.id"
+          @click="emit('edit')"
+          type="primary"
+          ghost
+          round
+          class="hidden md:block"
+          >編輯檔案
+        </n-button>
+        <n-button
+          v-else
+          :type="meFollowing.isFollowing ? 'default' : 'success'"
+          class="hidden md:block"
+          @click="
+            () => {
+              toggleFollow(meFollowing)
+            }
+          "
+        >
+          {{ meFollowing.isFollowing ? '追蹤中' : '追蹤' }}
+        </n-button>
+      </div>
+
+      <div class="user-detail text-md font-bold text-center">
+        <span>{{ props.city || '所在地還沒填寫唷👀' }}</span>
+        <span> • {{ props.age || '年齡還沒填寫唷👀' }}</span>
+        <span> • {{ props.career || '職業還沒填寫唷👀' }}</span>
+      </div>
+      <div
+        class="user-description w-full h-auto bg-gray-100 py-2 px-6 rounded-full flex justify-center relative md:justify-start"
+      >
+        <p class="text-md tracking-wide">：{{ props.favorite_sentence || '座右銘還未填寫唷👀' }}</p>
+      </div>
+
+      <div class="tag-container flex gap-3 flex-wrap my-3">
         <span v-if="!props.tags">還沒有標籤喔</span>
         <span
           v-else
@@ -67,69 +152,28 @@ const emit = defineEmits(['edit', 'close'])
         >
       </div>
       <n-button
+        v-if="userStore.user.uid == props.id"
         @click="emit('edit', 'close', user)"
         @open-modal="openModal"
         type="primary"
         ghost
         round
+        class="md:hidden"
         >編輯檔案
+      </n-button>
+      <n-button
+        v-else
+        :type="meFollowing.isFollowing ? 'default' : 'info'"
+        class="md:hidden"
+        @click="
+          () => {
+            toggleFollow(meFollowing)
+          }
+        "
+      >
+        {{ meFollowing.isFollowing ? '追蹤中' : '追蹤' }}
       </n-button>
     </div>
   </div>
 </template>
-<style scope>
-@media screen and (width >= 768px) {
-  .container {
-    max-width: 80%;
-  }
-
-  .card-container {
-    display: flex;
-    /* padding: 2rem; */
-  }
-
-  .img-container {
-    flex: 1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-
-  .card-img {
-    border-radius: 50%;
-    aspect-ratio: 1 / 1;
-    height: auto;
-  }
-
-  .card-content-container {
-    flex: 3;
-    padding: 0;
-    margin-left: 2rem;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-  }
-
-  .user-name,
-  .user-detail {
-    text-align: start;
-  }
-
-  .user-description {
-    font-size: 1rem;
-    margin-top: -0.1rem;
-  }
-}
-
-@media screen and (width >= 1024px) {
-  .container {
-    max-width: 880px;
-  }
-
-  .card-content-container {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-  }
-}
-</style>
+<style scope></style>

@@ -17,7 +17,7 @@ const props = defineProps({
   },
   imageHeight: {
     type: String,
-    default: '200px', // 預設高度
+    default: '200px',
   },
   id: {
     type: Number,
@@ -25,49 +25,56 @@ const props = defineProps({
 })
 </script>
 <template>
-  <div class="rounded-2xl bg-transparent overflow-hidden">
+  <div class="w-full break-words py-3">
     <router-link
       :to="{
         name: 'activityDetail',
         params: {
-          id: props.id,
+          id: props.id || 0,
         },
       }"
-      :class="{ ['flex']: props.horizontal }"
-      class="w-full h-full"
     >
       <div
-        :class="{ 'flex-1': props.horizontal }"
-        class="w-full h-28 md:h-72 overflow-hidden relative"
-        :style="{ height: imageHeight }"
+        class="gap-2 w-full overflow-hidden md:justify-start md:gap-4"
+        :class="{ ['flex']: props.horizontal }"
       >
-        <img
-          :class="{ 'horizontal-layout-img': true }"
-          class="w-full h-full absolute top-0 left-0 object-cover"
-          :src="props.actImgUrl"
-          alt="死圖"
-        />
-      </div>
-      <div
-        :class="{ 'horizontal-layout-container': props.horizontal }"
-        class="flex flex-col py-[3%] truncate"
-      >
-        <div class="text-lg font-semibold mb-2 truncate">活動名稱:{{ props.title }}</div>
-        <div class="text-sm mb-2 truncate">地點:{{ props.location }}</div>
-        <div class="text-sm text-gray-500 mb-2 truncate">時間:{{ props.dateTime }}</div>
-        <div class="flex items-center justify-between text-sm mt-auto">
-          <div class="flex items-center">
-            <img class="w-6 h-6 rounded-full mr-2" :src="props.hostImgUrl" alt="團主頭像" />
-            <span>{{ props.host }}</span>
+        <div
+          class="w-24 h-24 rounded-md overflow-hidden flex-shrink-0"
+          :class="{ 'w-full h-64': !props.horizontal }"
+        >
+          <img class="w-full h-full object-cover" :src="props.actImgUrl" alt="圖片不見了ＱＱ" />
+        </div>
+        <div
+          class="flex flex-col w-3/4 justify-between md:w-4/5 lg:w-2/3"
+          :class="{ 'md:w-full lg:w-full': !props.horizontal }"
+        >
+          <div class="flex flex-col" :class="{ 'mt-2 gap-1 w-full': !props.horizontal }">
+            <div class="text-base font-semibold truncate" :class="{ 'text-lg': !props.horizontal }">
+              {{ props.title }}
+            </div>
+            <div class="text-sm truncate">{{ props.location }}</div>
+            <div class="text-sm text-gray-500 truncate">時間:{{ props.dateTime }}</div>
           </div>
-          <div class="flex items-center">可報名人數:{{ props.participants }}</div>
+          <div
+            class="flex items-center justify-between text-sm"
+            :class="{ 'mt-2': !props.horizontal }"
+          >
+            <div class="flex items-center">
+              <div class="w-6 h-6 overflow-hidden rounded-full mr-1">
+                <img class="w-full h-full object-cover" :src="props.hostImgUrl" alt="團主頭像" />
+              </div>
+              <span>{{ props.host }}</span>
+            </div>
+            <div v-if="!props.horizontal" class="lg:flex">上限人數: {{ props.participants }}</div>
+            <div v-else class="hidden md:block lg:hidden">上限人數: {{ props.participants }}</div>
+          </div>
         </div>
       </div>
     </router-link>
   </div>
 </template>
 <style scoped>
-.horizontal-layout-img {
+/* .horizontal-layout-img {
   width: 100%;
   height: 100%;
 }
@@ -75,5 +82,5 @@ const props = defineProps({
 .horizontal-layout-container {
   padding: 2%;
   flex: 2;
-}
+} */
 </style>

@@ -1,38 +1,48 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { deleteUserCartDetailsAPI, getUserCartDetailsAPI } from '@/apis/userShoppingCartApi'
+import { useRouter } from 'vue-router'
+import * as PaymentAPIs from '../../../apis/paymentAPIs.js'
 import { useUserStore } from '@/stores/userStore'
+import { useMessage } from 'naive-ui'
+import { handleError } from '../../../utils/handleError.js'
 
-const cartItems = ref([]) // 存放購物車資料
-const isLoading = ref(true) // 載入狀態
+const cartItems = ref([])
+const isLoading = ref(true)
 const userStore = useUserStore()
+const message = useMessage()
+
 // 取得購物車資料並轉換格式
 const fetchCartItems = async () => {
+  isLoading.value = true
+  cartItems.value = []
   try {
-    isLoading.value = true
-    const data = await getUserCartDetailsAPI(userStore.user.uid)
+    const response = await PaymentAPIs.getUserCartDetailsAPI(userStore.user.uid)
+    if (!response || response.cartItems.length === 0) {
+      cartItems.value = []
+      message.info('🛒 購物車是空的，快去挑選你的商品吧！')
+      return
+    }
 
-    cartItems.value = data.map((item) => ({
-      cartActivityId: item.activityId,
-      name: item.activityName,
-      location: item.location,
-      time: new Date(item.eventTime).toLocaleString(), // 格式化時間
-      price: Number(item.price),
-      image: item.image || 'https://via.placeholder.com/200', // 預設圖片
-      // selected: false, // 初始未選中
+    const cartItemsData = response.cartItems
+    cartItems.value = cartItemsData.map((item) => ({
+      cartItemsId: item.id,
+      cartActivityId: item.activity_id,
+      name: item.activities.name,
+      location: item.activities.location,
+      time: new Date(item.activities.event_time).toLocaleString(),
+      price: Number(item.activities.price),
+      image: item.activities.img_url || 'https://via.placeholder.com/200',
+      selected: item.is_selected,
     }))
-  } catch {
-    return false
+  } catch (error) {
+    handleError(message, undefined, error)
   } finally {
     isLoading.value = false
   }
 }
 
-onMounted(() => {
-  fetchCartItems()
-})
-
-const selectAll = ref(false) // 全選控制
+// 全選控制
+const selectAll = ref(false)
 
 // 計算總金額
 const totalPrice = computed(() => {
@@ -50,33 +60,49 @@ const toggleSelectAll = () => {
 // 刪除所選項目
 const removeSelected = async () => {
   try {
-    // 1. 篩選出被選中的項目
     const selectedItems = cartItems.value.filter((item) => item.Selected)
-
-    // 2. 提取選中項目的 cartActivityId
     const selectedIds = selectedItems.map((item) => item.cartActivityId)
 
-    // 3. 打印所有的 cartActivityId（用於確認）
-    // console.log('Selected cartActivityIds:', selectedIds)
-
-    // 4. 使用 Promise.all 並行執行刪除請求
-    await Promise.all(selectedIds.map((id) => deleteUserCartDetailsAPI(userStore.user.uid, id)))
-
-    // 5. 更新本地 cartItems 列表，移除已刪除的項目
+    await Promise.all(
+      selectedIds.map((id) => PaymentAPIs.deleteUserCartDetailsAPI(userStore.user.uid, id)),
+    )
     cartItems.value = cartItems.value.filter((item) => !item.Selected)
-  } catch {
-    return false
+  } catch (error) {
+    handleError(message, undefined, error)
   }
 }
-// 模擬結帳動作
-const checkout = () => {
-  alert(`總金額 NT$${totalPrice.value}，前往結帳！`)
+
+// 將選中商品送往結帳頁面
+const router = useRouter()
+const goToCheckout = async () => {
+  const selectedItems = cartItems.value.filter((item) => item.Selected)
+  if (selectedItems.length === 0) {
+    message.info('🛒 請選擇你的商品，我們馬上幫你打包結帳！ 🎉✨')
+    return
+  }
+  try {
+    await Promise.all(
+      selectedItems.map((item) => PaymentAPIs.updateCartSelectionAPI(item.cartItemsId, true)),
+    )
+    goCheckoutPage()
+  } catch (error) {
+    handleError(message, undefined, error)
+  }
 }
+
+// 頁面跳轉
+const goCheckoutPage = () => {
+  router.push('/checkout')
+}
+
+onMounted(() => {
+  fetchCartItems()
+})
 </script>
 
 <template>
-  <div id="webcrumbs">
-    <div class="m-auto w-[1000px] bg-white shadow rounded-lg p-6 text-neutral-950">
+  <div id="webcrumbs" class="bg-gray-100">
+    <div class="m-auto w-full bg-white shadow rounded-lg p-6">
       <!-- Header -->
       <header class="text-center text-2xl font-bold mb-6">購物車</header>
 
@@ -99,17 +125,17 @@ const checkout = () => {
           class="border-solid flex items-start gap-4"
         >
           <input type="checkbox" v-model="item.Selected" class="mt-4" />
-          <div class="flex items-stretch gap-4 flex-1">
-            <div class="w-[200px] h-[200px] bg-neutral-200 rounded-md">
+          <div class="flex gap-1 bg-gray-200 w-full px-2">
+            <div class="w-14 h-14 bg-neutral-200 rounded-md overflow-hidden flex-shrink-0">
               <img :src="item.image" alt="商品圖片" class="w-full h-full object-cover" />
             </div>
-            <div class="flex-1 space-y-4">
-              <div class="w-full bg-slate-50 rounded-md px-3 py-2">{{ item.name }}</div>
-              <div class="w-full rounded-md px-3 py-2">{{ item.location }}</div>
-              <div class="w-full rounded-md px-3 py-2">{{ item.time }}</div>
-              <div class="w-full rounded-md px-3 py-2 font-bold text-red-500">
-                NT$ {{ item.price }}
+            <div class="flex-1">
+              <div class="w-full bg-slate-50 rounded-sm font-bold truncate">
+                {{ item.name }}
               </div>
+              <div class="w-full rounded-md truncate">{{ item.location }}</div>
+              <div class="w-full rounded-md">{{ item.time }}</div>
+              <div class="w-full rounded-md font-bold text-red-500">NT$ {{ item.price }}</div>
             </div>
           </div>
         </div>
@@ -122,7 +148,7 @@ const checkout = () => {
           <div class="text-lg font-bold">NT$ {{ totalPrice }}</div>
         </div>
         <div>
-          <button class="w-full bg-sky-500 text-white rounded-md py-3" @click="checkout">
+          <button @click="goToCheckout" class="w-full bg-sky-500 text-white rounded-md py-3">
             前往結帳
           </button>
         </div>

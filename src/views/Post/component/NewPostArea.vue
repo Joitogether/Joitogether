@@ -4,6 +4,8 @@ import { useUserStore } from '@/stores/userStore.js'
 import { createPostAPI } from '@/apis/postAPIs'
 import { useMessage, NButton, NModal } from 'naive-ui'
 import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage'
+import { handleError } from '@/utils/handleError.js'
+import { useSocketStore } from '@/stores/socketStore.js'
 
 // 版面欄位
 const showModal = ref(false)
@@ -23,8 +25,9 @@ const fileInput = ref(null)
 // 打進後端的資料
 const newPostTitle = ref('')
 const newPostContent = ref('')
-const newPostCategory = ref(null) // 不用 null 的話就不會顯示選擇文章分類
+const newPostCategory = ref(null)
 const imageUrl = ref(null)
+const socketStore = useSocketStore()
 
 const postCategories = [
   { label: '美食', value: 'food' },
@@ -34,6 +37,14 @@ const postCategories = [
   { label: '教育', value: 'education' },
   { label: '其他', value: 'others' },
 ]
+
+const handleNewPost = () => {
+  if (!userStore.user.isLogin) {
+    message.error('登入後就可以發廢文囉！')
+  } else {
+    showModal.value = true
+  }
+}
 
 // 新增文章
 const handleSubmit = async () => {
@@ -68,11 +79,25 @@ const handleSubmit = async () => {
     post_img: imageUrl.value || '',
   }
   try {
-    await createPostAPI(postData)
+    const response = await createPostAPI(postData)
+    const postId = response.data.post_id
+
     message.success('文章新增成功')
     emit('update')
-    console.log('傳送')
     showModal.value = true
+
+    const notiData = {
+      actor_id: userStore.user.uid,
+      user_id: postData.uid,
+      target_id: postId,
+      action: 'create',
+      target_type: 'post',
+      message: '發表了新文章',
+      link: `/post/${postId}`,
+    }
+
+    socketStore.sendNotification(notiData) // 送出提醒
+
     setTimeout(() => {
       showModal.value = false
       newPostTitle.value = ''
@@ -82,7 +107,7 @@ const handleSubmit = async () => {
       uploadedImage.value = null
     }, 1500) // 設置 1.5 秒後關閉
   } catch (error) {
-    console.log(error)
+    handleError(message, undefined, error)
   }
 }
 
@@ -99,12 +124,10 @@ const uploadFile = async (file) => {
     const fileRef = storageRef(storage, `postImages/${file.name}`)
     const result = await uploadBytes(fileRef, file) // 上傳檔案
     const downloadURL = await getDownloadURL(result.ref) // 獲取下載連結
-    console.log('上傳成功，下載連結:', downloadURL)
     imageUrl.value = downloadURL
     return downloadURL // 傳回下載連結
   } catch (error) {
-    console.error('圖片上傳失敗')
-    throw error
+    handleError(message, undefined, error)
   }
 }
 
@@ -132,8 +155,7 @@ const handleImageUpload = async (event) => {
     try {
       await uploadFile(file)
     } catch (error) {
-      console.error('圖片上傳失敗:', error)
-      message.error('圖片上傳失敗，請檢查檔案格式或網路連線')
+      handleError(message, '圖片上傳失敗，請檢查檔案格式或網路連線', error)
     }
   }
 }
@@ -195,10 +217,10 @@ watch(showModal, (newValue) => {
 
 <template>
   <div class="flex justify-between items-center p-4 border border-gray-300 rounded-md mt-3">
-    <div class="w-1/3 flex justify-center">
-      <div class="w-36 h-36 rounded-full object-cover">
+    <div class="flex justify-center">
+      <div class="w-28 h-28 aspect-square rounded-full overflow-hidden md:w-36 md:h-36">
         <img
-          class="w-full h-full object-cover rounded-full"
+          class="w-full h-full object-cover"
           :src="
             userStore.user.photo_url ||
             'https://i.pinimg.com/736x/20/3e/d7/203ed7d8550c2c1c145a2fb24b6fbca3.jpg'
@@ -208,12 +230,16 @@ watch(showModal, (newValue) => {
       </div>
     </div>
 
-    <div class="w-2/3 flex flex-col justify-center pl-4 mt-4">
+    <div class="w-3/4 flex flex-col justify-center mt-4 md:ml-3">
       <div class="mb-0 text-lg font-xl ml-5">
         (｡•̀ᴗ-)✧ {{ userStore.user.display_name || '訪客' }}
       </div>
-      <n-button @click="showModal = true" class="w-100 m-4 rounded-full">
-        📝 記錄一刻，分享所有 🐾
+      <n-button
+        :disabled="!userStore.user.isLogin"
+        @click="handleNewPost"
+        class="w-100 m-4 rounded-full"
+      >
+        {{ userStore.user.isLogin ? '📝 記錄一刻，分享所有 🐾' : '登入就可以發廢文囉💃' }}
       </n-button>
     </div>
   </div>

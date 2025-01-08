@@ -1,7 +1,7 @@
 let isAPILoaded = false
 let onLoadCallbacks = []
 
-// 動態載入 Google Maps API
+// 動態渲染 google 地圖
 export const loadGoogleMapsAPI = (apiKey, libraries = 'places', language = 'zh-TW') => {
   return new Promise((resolve, reject) => {
     if (isAPILoaded) {
@@ -17,14 +17,13 @@ export const loadGoogleMapsAPI = (apiKey, libraries = 'places', language = 'zh-T
       script.id = 'google-maps-script'
       script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=${libraries}&language=${language}`
       script.async = true
-      script.defer = true
       script.onload = () => {
         isAPILoaded = true
         onLoadCallbacks.forEach((callback) => callback(window.google.maps))
         onLoadCallbacks = []
       }
       script.onerror = () => {
-        reject(new Error('Failed to load Google Maps API'))
+        reject(new Error('Google Maps API 加載失敗'))
       }
       document.head.appendChild(script)
     }
