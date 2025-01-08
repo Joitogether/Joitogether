@@ -461,7 +461,7 @@ watch(
         <textarea
           v-else
           v-model="editPostTitle"
-          class="border p-2 rounded w-full focus:outline-none focus:ring-2 focus:ring-yellow-400"
+          class="border p-2 rounded w-full focus:outline-none focus:ring-2 focus:ring-green-500"
           rows="1"
           style="resize: none"
           :placeholder="postDetails.title"
@@ -502,7 +502,7 @@ watch(
           <textarea
             v-else
             v-model="editPostContent"
-            class="border p-2 rounded w-full focus:outline-none focus:ring-2 focus:ring-yellow-400"
+            class="border p-2 rounded w-full focus:outline-none focus:ring-2 focus:ring-green-500"
             rows="5"
             style="resize: none"
             :placeholder="postDetails.content"
@@ -518,7 +518,7 @@ watch(
             <!-- 上傳圖片按鈕 -->
             <div class="flex justify-center">
               <button
-                class="mt-2 bg-green-500 text-white py-2 px-4 rounded-full hover:bg-green-600 focus:outline-none"
+                class="mt-2 bg-green-600 text-white py-2 px-4 rounded-full hover:bg-green-500 focus:outline-none"
                 @click="triggerFileInput"
               >
                 上傳圖片
@@ -556,14 +556,17 @@ watch(
           </div>
 
           <!-- 功能操作區 -->
-          <div class="gap-4 items-center h-12 mb-4">
-            <button
-              class="w-full h-full flex justify-center items-center text-white bg-green-600 rounded-full hover:bg-green-500"
+          <div class="gap-4 items-center h-9 mb-4">
+            <n-button
+              :type="hasLiked ? 'tertiary' : 'primary'"
+              strong
+              round
+              class="w-full h-full"
               @click="toggleLike"
               :disabled="false"
             >
               {{ hasLiked ? '太廢了要收回按讚' : '這篇文章太讚了' }}
-            </button>
+            </n-button>
           </div>
 
           <!-- 留言區 -->
@@ -589,12 +592,15 @@ watch(
                   style="resize: none"
                 ></textarea>
                 <div class="">
-                  <button
+                  <n-button
+                    strong
+                    round
+                    type="primary"
                     @click="addComment"
-                    class="mt-2 px-6 py-2 bg-green-600 text-white rounded-full hover:bg-green-500 focus:outline-none mb-3"
+                    class="mt-2 px-6 py-1 mb-3"
                   >
                     送出
-                  </button>
+                  </n-button>
                 </div>
               </div>
             </div>

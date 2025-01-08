@@ -219,9 +219,13 @@ const handleLoginMenuClick = () => {
     class="fixed z-50 top-0 left-0 w-screen h-16 bg-white py-1 px-4 flex items-center justify-between shadow"
   >
     <div class="flex items-center">
-      <div class="hidden md:block w-16 md:h-9 md:overflow-hidden">
+      <div class="hidden md:block w-auto md:h-7 md:overflow-hidden">
         <RouterLink to="/">
-          <img src="../../../assets/Joi.png" alt="logo" class="w-full h-full object-contain" />
+          <img
+            src="https://firebasestorage.googleapis.com/v0/b/login-demo1-9d3cb.firebasestorage.app/o/banner%2FJoitogetherLOGO.png?alt=media&token=fe2e71e3-7b28-4a08-b920-8d944c93a188"
+            alt="logo"
+            class="w-full h-full object-contain"
+          />
         </RouterLink>
       </div>
       <div class="hidden lg:flex flex-row items-center gap-2 mx-3">
@@ -308,9 +312,15 @@ const handleLoginMenuClick = () => {
         </div>
       </div>
 
-      <div class="md:hidden w-16 h-9 overflow-hidden absolute left-1/2 transform -translate-x-1/2">
+      <div
+        class="md:hidden w-auto h-8 overflow-hidden absolute left-1/2 transform -translate-x-1/2"
+      >
         <RouterLink to="/">
-          <img src="../../../assets/Joi.png" alt="logo" class="w-full h-full object-contain" />
+          <img
+            src="https://firebasestorage.googleapis.com/v0/b/login-demo1-9d3cb.firebasestorage.app/o/banner%2FJoitogetherLOGO.png?alt=media&token=fe2e71e3-7b28-4a08-b920-8d944c93a188"
+            alt="logo"
+            class="w-full h-full object-contain"
+          />
         </RouterLink>
       </div>
 
@@ -352,7 +362,7 @@ const handleLoginMenuClick = () => {
       <n-popover
         ref="popoverRef"
         placement="bottom-end"
-        class="w-[300px] bellNotice"
+        class="w-[320px] bellNotice"
         trigger="manual"
         :show="showPopover"
         :style="{
@@ -386,7 +396,7 @@ const handleLoginMenuClick = () => {
                 <router-link :to="notification.link">
                   <div
                     :class="{ 'bg-gray-100': !notification.is_read }"
-                    class="group hover:bg-gray-200 px-3 overflow-hidden post-onepost-top flex py-2 rounded-md justify-between items-center cursor-pointer"
+                    class="group hover:bg-gray-200 px-3 overflow-hidden post-onepost-top flex py-2 rounded-md justify-between items-start cursor-pointer border-b border-gray-200"
                   >
                     <div class="w-14 h-14 aspect-square rounded-full overflow-hidden">
                       <img
@@ -403,20 +413,29 @@ const handleLoginMenuClick = () => {
                       <span class="font-bold text-base">
                         {{ notification.users_notifications_actor_idTousers.display_name }}
                       </span>
-                      <span class="text-base">
+                      <span class="text-sm line-clamp-3">
                         {{ notification.message }}
                       </span>
-                      <span v-if="notification.target_type === 'activity'" class="text-base">
+                      <span
+                        v-if="notification.target_type === 'activity'"
+                        class="text-sm line-clamp-1"
+                      >
                         {{ notification.target_detail.name }}
                       </span>
-                      <span v-else-if="notification.target_type === 'post'" class="text-base">
+                      <span
+                        v-else-if="notification.target_type === 'post'"
+                        class="text-sm line-clamp-1"
+                      >
                         {{ notification.target_detail.post_title }}
                       </span>
-                      <span v-else-if="notification.target_type === 'rating'" class="text-base">
+                      <span
+                        v-else-if="notification.target_type === 'rating'"
+                        class="text-sm line-clamp-1"
+                      >
                         {{ notification.target_detail.user_comment }}
                       </span>
 
-                      <p class="w-full text-md text-gray-400">
+                      <p class="w-full text-sm text-gray-400">
                         {{ dayjs(notification.created_at).fromNow() }}
                       </p>
                     </div>
