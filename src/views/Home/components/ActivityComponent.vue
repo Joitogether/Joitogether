@@ -4,7 +4,7 @@ import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { storeToRefs } from 'pinia'
 import { formatDate } from '@/utils/useDateTime'
 import { useActivityStore } from '@/stores/useActivityStore'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute, useRouter, onBeforeRouteLeave } from 'vue-router'
 import { NSelect } from 'naive-ui'
 
 const route = useRoute()
@@ -106,6 +106,9 @@ watch(
   (newQuery) => {
     if (Object.keys(newQuery).length > 0) {
       fetchAllActivities(newQuery)
+      setTimeout(() => {
+        scrollToActivityBlock()
+      }, 500)
     }
   },
   { immediate: true },
@@ -124,7 +127,7 @@ watch(
 )
 
 const pages = computed(() => {
-  return (totalActivities.value || 12) / 12
+  return Math.ceil((totalActivities.value || 0) / filters.value.pageSize)
 })
 
 const horizontal = ref(false)
@@ -138,9 +141,7 @@ onMounted(() => {
   updateScreenSize()
   window.addEventListener('resize', updateScreenSize)
 
-  clearFilters()
   fetchAllActivities()
-  router.push({ path: 'home' })
 })
 
 onUnmounted(() => {
@@ -167,6 +168,11 @@ const handleClearFilters = () => {
   fetchAllActivities() // 清除後重新加載活動列表
   router.push({ path: 'home', query: { ...filters.value } })
 }
+
+onBeforeRouteLeave((to, from, next) => {
+  clearFilters()
+  next()
+})
 </script>
 
 <template>
@@ -254,7 +260,7 @@ const handleClearFilters = () => {
           <n-pagination
             v-model:page="pageSelect"
             :page-size="filters.pageSize"
-            :page-count="Math.max(1, Math.ceil(pages))"
+            :page-count="pages"
             @update:page="handlePageChange"
           />
         </div>

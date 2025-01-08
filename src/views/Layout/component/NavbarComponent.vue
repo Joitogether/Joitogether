@@ -16,7 +16,7 @@ import { handleError } from '@/utils/handleError.js'
 import { useActivityStore } from '@/stores/useActivityStore'
 
 const activityStore = useActivityStore()
-const { filters } = storeToRefs(activityStore)
+const { filters, searchKeyword } = storeToRefs(activityStore)
 const { fetchAllActivities } = useActivityStore()
 const message = useMessage()
 const userStore = useUserStore()
@@ -169,7 +169,6 @@ const handleLoadClick = async () => {
   showLoading.value = false
 }
 const showLoading = ref(false)
-const searchKeyword = ref('')
 
 const handleSearchClick = (e) => {
   if (e.isComposing) return
@@ -183,7 +182,6 @@ const handleSearchClick = (e) => {
     page: 1,
   }
   router.push({ name: 'home', query: { ...filters.value } })
-  searchKeyword.value = ''
   isMenuOpen.value = false
 
   fetchAllActivities(filters.value)
