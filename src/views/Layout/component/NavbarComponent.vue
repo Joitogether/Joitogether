@@ -352,7 +352,7 @@ const handleLoginMenuClick = () => {
       <n-popover
         ref="popoverRef"
         placement="bottom-end"
-        class="w-[300px] bellNotice"
+        class="w-[320px] bellNotice"
         trigger="manual"
         :show="showPopover"
         :style="{
@@ -386,7 +386,7 @@ const handleLoginMenuClick = () => {
                 <router-link :to="notification.link">
                   <div
                     :class="{ 'bg-gray-100': !notification.is_read }"
-                    class="group hover:bg-gray-200 px-3 overflow-hidden post-onepost-top flex py-2 rounded-md justify-between items-center cursor-pointer"
+                    class="group hover:bg-gray-200 px-3 overflow-hidden post-onepost-top flex py-2 rounded-md justify-between items-start cursor-pointer border-b border-gray-200"
                   >
                     <div class="w-14 h-14 aspect-square rounded-full overflow-hidden">
                       <img
@@ -403,20 +403,29 @@ const handleLoginMenuClick = () => {
                       <span class="font-bold text-base">
                         {{ notification.users_notifications_actor_idTousers.display_name }}
                       </span>
-                      <span class="text-base">
+                      <span class="text-sm line-clamp-3">
                         {{ notification.message }}
                       </span>
-                      <span v-if="notification.target_type === 'activity'" class="text-base">
+                      <span
+                        v-if="notification.target_type === 'activity'"
+                        class="text-sm line-clamp-1"
+                      >
                         {{ notification.target_detail.name }}
                       </span>
-                      <span v-else-if="notification.target_type === 'post'" class="text-base">
+                      <span
+                        v-else-if="notification.target_type === 'post'"
+                        class="text-sm line-clamp-1"
+                      >
                         {{ notification.target_detail.post_title }}
                       </span>
-                      <span v-else-if="notification.target_type === 'rating'" class="text-base">
+                      <span
+                        v-else-if="notification.target_type === 'rating'"
+                        class="text-sm line-clamp-1"
+                      >
                         {{ notification.target_detail.user_comment }}
                       </span>
 
-                      <p class="w-full text-md text-gray-400">
+                      <p class="w-full text-sm text-gray-400">
                         {{ dayjs(notification.created_at).fromNow() }}
                       </p>
                     </div>
