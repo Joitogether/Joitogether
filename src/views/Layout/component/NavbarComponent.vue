@@ -219,9 +219,13 @@ const handleLoginMenuClick = () => {
     class="fixed z-50 top-0 left-0 w-screen h-16 bg-white py-1 px-4 flex items-center justify-between shadow"
   >
     <div class="flex items-center">
-      <div class="hidden md:block w-16 md:h-9 md:overflow-hidden">
+      <div class="hidden md:block w-auto md:h-7 md:overflow-hidden">
         <RouterLink to="/">
-          <img src="../../../assets/Joi.png" alt="logo" class="w-full h-full object-contain" />
+          <img
+            src="https://firebasestorage.googleapis.com/v0/b/login-demo1-9d3cb.firebasestorage.app/o/banner%2FJoitogetherLOGO.png?alt=media&token=fe2e71e3-7b28-4a08-b920-8d944c93a188"
+            alt="logo"
+            class="w-full h-full object-contain"
+          />
         </RouterLink>
       </div>
       <div class="hidden lg:flex flex-row items-center gap-2 mx-3">
@@ -308,9 +312,15 @@ const handleLoginMenuClick = () => {
         </div>
       </div>
 
-      <div class="md:hidden w-16 h-9 overflow-hidden absolute left-1/2 transform -translate-x-1/2">
+      <div
+        class="md:hidden w-auto h-8 overflow-hidden absolute left-1/2 transform -translate-x-1/2"
+      >
         <RouterLink to="/">
-          <img src="../../../assets/Joi.png" alt="logo" class="w-full h-full object-contain" />
+          <img
+            src="https://firebasestorage.googleapis.com/v0/b/login-demo1-9d3cb.firebasestorage.app/o/banner%2FJoitogetherLOGO.png?alt=media&token=fe2e71e3-7b28-4a08-b920-8d944c93a188"
+            alt="logo"
+            class="w-full h-full object-contain"
+          />
         </RouterLink>
       </div>
 
