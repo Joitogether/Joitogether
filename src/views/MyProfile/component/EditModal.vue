@@ -101,6 +101,7 @@ const fetchUserData = async () => {
       loading.value = false
     } else {
       user.value.tags = '未填寫'
+      tagsArray.value = []
       loading.value = false
     }
   } catch (err) {
