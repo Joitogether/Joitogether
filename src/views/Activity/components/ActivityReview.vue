@@ -579,10 +579,10 @@ const sendReplies = async () => {
                   ,
                 ]"
               >
-                <div class="mx-2 w-1/12">
+                <div class="mx-2 w-10 h-10 min-h-[40px] min-w-[40px]">
                   <img
                     :src="item.avatar || '/images/default-avatar.png'"
-                    class="w-full min-w-10 min-h-10 rounded-full object-cover"
+                    class="object-cover w-full h-full rounded-full"
                     alt="Avatar"
                     @error="(e) => (e.target.src = defaultAvatar)"
                   />
