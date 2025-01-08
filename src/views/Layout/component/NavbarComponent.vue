@@ -434,7 +434,9 @@ const handleLoginMenuClick = () => {
                       >
                         {{ notification.target_detail.user_comment }}
                       </span>
-
+                      <span v-else-if="notification.target_type === 'user'" class="text-sm line-clamp-1">
+                        {{ notification.target_detail.message }}
+                      </span>
                       <p class="w-full text-sm text-gray-400">
                         {{ dayjs(notification.created_at).fromNow() }}
                       </p>

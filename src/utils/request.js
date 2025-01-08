@@ -9,7 +9,14 @@ const apiAxios = axios.create({
   timeout: 10000,
 })
 
-const byPassPaths = ['/posts/likes', '/posts/like', '/posts/comments', '/posts/comment']
+const byPassPaths = [
+  '/posts/likes',
+  '/posts/like',
+  '/posts/comments',
+  '/posts/comment',
+  '/users/notifications',
+  '/users/summary',
+]
 
 let requestCount = 0
 
