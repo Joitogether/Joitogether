@@ -101,6 +101,7 @@ const fetchUserData = async () => {
       loading.value = false
     } else {
       user.value.tags = '未填寫'
+      tagsArray.value = []
       loading.value = false
     }
   } catch (err) {
@@ -108,7 +109,12 @@ const fetchUserData = async () => {
     loading.value = false
   }
 }
-
+watch(
+  () => route.params.uid,
+  () => {
+    fetchUserData()
+  },
+)
 const handleAvatarChange = async (fileListAva) => {
   if (fileListAva.length === 0) {
     message.error('沒有大頭照檔案被選中')
@@ -306,7 +312,7 @@ watch(
 )
 </script>
 <template>
-  <div class="btn-container flex gap-2 mt-8 mb-8">
+  <div class="flex gap-2 mt-4">
     <n-modal :show="showModal" @mask-click="closeModal">
       <n-card style="width: 600px" :bordered="false" size="huge" role="dialog" aria-modal="true">
         <p class="text-2xl font-bold text-center mb-4 text-gray-600">編輯檔案</p>
@@ -364,10 +370,15 @@ watch(
           </div>
 
           <div class="mt-5 w-full">
-            職業：<n-input v-model:value="user.career" placeholder="什麼領域的呢？" />
+            職業：<n-input
+              maxlength="45"
+              v-model:value="user.career"
+              placeholder="什麼領域的呢？"
+            />
           </div>
           <div class="mt-5 w-full">
             座右銘：<n-input
+              maxlength="45"
               v-model:value="user.favorite_sentence"
               placeholder="例如：我要發大財"
             />
@@ -443,7 +454,12 @@ watch(
             <n-space vertical>
               <div class="mt-4 w-full">
                 自我介紹：
-                <n-input placeholder="介紹一下你自己吧" v-model:value="user.self_introduction" />
+                <n-input
+                  maxlength="45"
+                  show-count
+                  placeholder="介紹一下你自己吧"
+                  v-model:value="user.self_introduction"
+                />
               </div>
               <div class="mt-3 w-full">
                 星座：
@@ -453,11 +469,19 @@ watch(
               </div>
               <div class="mt-3 w-full">
                 嗜好：
-                <n-input placeholder="放假喜歡做什麼呢？" v-model:value="user.hobby" />
+                <n-input
+                  maxlength="45"
+                  placeholder="放假喜歡做什麼呢？"
+                  v-model:value="user.hobby"
+                />
               </div>
               <div class="mt-3 w-full">
                 專長：
-                <n-input placeholder="很會睡也可以是專長（？" v-model:value="user.expertise" />
+                <n-input
+                  maxlength="45"
+                  placeholder="很會睡也可以是專長（？"
+                  v-model:value="user.expertise"
+                />
               </div>
               <div class="mt-3 w-full">
                 感興趣的活動：<n-input

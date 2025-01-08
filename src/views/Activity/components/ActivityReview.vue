@@ -89,6 +89,9 @@ const rejectCount = computed(() => {
 const userCancellation = computed(() => {
   return attendee.value.filter((item) => item.participant_cancelled).length
 })
+const userRegistered = computed(() => {
+  return attendee.value.filter((item) => item.registered).length
+})
 
 const refreshAttendees = async () => {
   try {
@@ -350,7 +353,7 @@ const handleCancelClick = async (id, activity_id) => {
 }
 
 const quickReplyVisible = ref(false)
-const selectedReplies = ref([])
+const selectedReplies = ref('')
 const currentAttendeeId = ref(null)
 const replyOptions = [
   '審核時間未到，請耐心等候',
@@ -371,7 +374,7 @@ const hideQuickReply = () => {
   message.info('已取消操作')
 }
 
-const deleteReply = (attendeeId, replyIndex) => {
+const deleteReply = (attendeeId) => {
   const attendeeToModify = attendee.value.find((item) => item.id === attendeeId)
   if (!attendeeToModify) {
     message.error('找不到該參加者！')
@@ -379,7 +382,7 @@ const deleteReply = (attendeeId, replyIndex) => {
   }
 
   // 刪除指定回覆
-  attendeeToModify.replies.splice(replyIndex, 1)
+  attendeeToModify.replies = ''
 
   // 更新 localStorage
   const storedReplies = JSON.parse(localStorage.getItem('attendeeReplies')) || {}
@@ -391,15 +394,18 @@ const deleteReply = (attendeeId, replyIndex) => {
 
 const sendReplies = async () => {
   const attendeeToReply = attendee.value.find((item) => item.id === currentAttendeeId.value)
+  if (!selectedReplies.value.length) {
+    return message.error('回覆內容不得為空')
+  }
   if (attendeeToReply) {
-    attendeeToReply.replies = [...selectedReplies.value]
+    attendeeToReply.replies = selectedReplies.value
     const notiData = {
       actor_id: userStore.user.uid, // 誰觸發了這個行為
       user_id: attendeeToReply.number.replace(/^@/, ''), // 這個行為對誰觸發
       target_id: Number(activity_id), // 被行為的受詞id
       action: 'review', // 行為 (目前僅有'create','register','like','comment','review', 'rate')
       target_type: 'activity', // 行為類型 (目前僅有'activity','post','rating')
-      message: '回覆了你的報名', // 要顯示在提醒欄位的敘述
+      message: `回覆了你的報名: ${attendeeToReply.replies}`, // 要顯示在提醒欄位的敘述
       link: `/activity/detail/${activity_id}`, // 這個提醒要導向哪個頁面
     }
 
@@ -435,9 +441,9 @@ const sendReplies = async () => {
                     params: { id: $route.params.activity_id },
                   })
                 "
-                class="hover:bg-yellow-300 rounded-full mr-2 transition-all"
+                class="hover:bg-green-600 hover:text-white rounded-full mr-2 transition-all duration-75 cursor-pointer"
               >
-                <NavArrowLeft width="32px" height="32" />
+                <NavArrowLeft width="32px" height="32" class="transition-all duration-0" />
               </div>
               <div class="text-2xl font-bold text-gray-700">檢視報名者列表</div>
             </div>
@@ -445,7 +451,7 @@ const sendReplies = async () => {
               class="flex items-center bg-gray-100 border-[1px] border-gray-200 rounded-xl p-3 my-4 text-sm font-semibold"
             >
               <img src="../../../assets/Screening.png" alt="" class="w-8 mr-1" />
-              共有 {{ attendee.length }} 位用戶報名 ({{ approvedCount }} 位用戶已經報名，{{
+              共有 {{ attendee.length }} 位用戶報名 ({{ userRegistered }} 位用戶已經報名，{{
                 userCancellation
               }}
               位用戶已經取消)
@@ -458,7 +464,7 @@ const sendReplies = async () => {
                 v-model="searchQuery"
                 type="text"
                 placeholder="🔍請輸入會員名稱進行搜尋"
-                class="bg-gray-100 h-10 w-full outline-none outline-[3px] focus:outline-yellow-400 p-2 rounded-full transition-all"
+                class="bg-gray-100 h-10 w-full outline-none outline-[3px] focus:outline-green-400 p-2 rounded-full transition-all"
               />
             </div>
 
@@ -534,13 +540,9 @@ const sendReplies = async () => {
                     params: { id: $route.params.activity_id },
                   })
                 "
-                class="hover:bg-green-600 rounded-full mr-2 transition-all duration-200"
+                class="hover:bg-green-600 hover:text-white rounded-full mr-2 transition-all duration-75 cursor-pointer"
               >
-                <NavArrowLeft
-                  width="32px"
-                  height="32"
-                  class="hover:text-white transition-all duration-[50mm]"
-                />
+                <NavArrowLeft width="32px" height="32" class="transition-all duration-0" />
               </div>
               <div class="text-2xl font-bold text-gray-800">審核列表</div>
             </div>
@@ -583,10 +585,10 @@ const sendReplies = async () => {
                   ,
                 ]"
               >
-                <div class="mx-2 w-1/12">
+                <div class="mx-2 w-10 h-10 min-h-[40px] min-w-[40px]">
                   <img
                     :src="item.avatar || '/images/default-avatar.png'"
-                    class="w-full min-w-10 min-h-10 rounded-full object-cover"
+                    class="object-cover w-full h-full rounded-full"
                     alt="Avatar"
                     @error="(e) => (e.target.src = defaultAvatar)"
                   />
@@ -703,8 +705,8 @@ const sendReplies = async () => {
                     刪除
                   </n-button>
                 </div>
-                <div v-for="(reply, idx) in item.replies" :key="idx" class="text-xs text-green-800">
-                  {{ reply }}
+                <div class="text-xs text-green-800">
+                  {{ item.replies }}
                 </div>
               </div>
             </div>
@@ -723,7 +725,7 @@ const sendReplies = async () => {
                     class="flex items-center mb-2 px-3 py-1 rounded-md cursor-pointer hover:bg-green-100 hover:scale-105 transition-all"
                   >
                     <input
-                      type="checkbox"
+                      type="radio"
                       v-model="selectedReplies"
                       :value="option"
                       class="mr-2 accent-green-400"

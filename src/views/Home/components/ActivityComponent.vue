@@ -4,7 +4,7 @@ import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { storeToRefs } from 'pinia'
 import { formatDate } from '@/utils/useDateTime'
 import { useActivityStore } from '@/stores/useActivityStore'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute, useRouter, onBeforeRouteLeave } from 'vue-router'
 import { NSelect } from 'naive-ui'
 
 const route = useRoute()
@@ -19,7 +19,9 @@ const {
   selectedRegions,
   regionOptions,
   filters,
+  pageSelect,
   totalActivities,
+  selectedStartDate,
 } = storeToRefs(activityStore)
 
 const { fetchAllActivities, triggerActivityAction, clearFilters } = activityStore
@@ -33,7 +35,7 @@ const filterByRegion = (region) => {
 
 const handlePageChange = (page) => {
   filters.value.page = page
-
+  pageSelect.value = page
   router.push({ path: '/home', query: { ...filters.value } })
 
   fetchAllActivities(filters.value)
@@ -41,7 +43,6 @@ const handlePageChange = (page) => {
 
 // 計算今天日期的字串
 const todayString = new Date().toISOString().split('T')[0]
-const selectedStartDate = ref('')
 
 const setStartDate = (date) => {
   selectedStartDate.value = date
@@ -73,16 +74,23 @@ const isSelected = (category) => {
 const filteredActivities = computed(() =>
   activities.value
     .filter((activity) => {
-      if (!selectedStartDate.value) return true
       const eventDate = new Date(activity.event_time)
-      const filterDate = new Date(selectedStartDate.value)
-      return eventDate >= filterDate
+      const today = new Date()
+      if (eventDate < today) return false
+
+      if (selectedStartDate.value) {
+        const filterDate = new Date(selectedStartDate.value)
+        return eventDate >= filterDate
+      }
+      return true
     })
     .map((activity) => {
       return {
         id: activity.id,
         name: activity.name,
-        img_url: activity.img_url || './src/assets/UserUpdata1.jpg',
+        img_url:
+          activity.img_url ||
+          'https://firebasestorage.googleapis.com/v0/b/login-demo1-9d3cb.firebasestorage.app/o/activities%2F1736165191190_default%20eventpicture.jpg?alt=media&token=21212afe-db96-49ee-873d-a3b604ac5c0a',
         location: activity.location || '未知地點',
         dateTime: formatDate(activity.event_time),
         participants: activity.max_participants,
@@ -96,7 +104,12 @@ const filteredActivities = computed(() =>
 watch(
   () => route.query,
   (newQuery) => {
-    fetchAllActivities(newQuery)
+    if (Object.keys(newQuery).length > 0) {
+      fetchAllActivities(newQuery)
+      setTimeout(() => {
+        scrollToActivityBlock()
+      }, 500)
+    }
   },
   { immediate: true },
 )
@@ -114,7 +127,7 @@ watch(
 )
 
 const pages = computed(() => {
-  return (totalActivities.value || 12) / 12
+  return Math.ceil((totalActivities.value || 0) / filters.value.pageSize)
 })
 
 const horizontal = ref(false)
@@ -127,6 +140,8 @@ const updateScreenSize = () => {
 onMounted(() => {
   updateScreenSize()
   window.addEventListener('resize', updateScreenSize)
+
+  fetchAllActivities()
 })
 
 onUnmounted(() => {
@@ -153,6 +168,11 @@ const handleClearFilters = () => {
   fetchAllActivities() // 清除後重新加載活動列表
   router.push({ path: 'home', query: { ...filters.value } })
 }
+
+onBeforeRouteLeave((to, from, next) => {
+  clearFilters()
+  next()
+})
 </script>
 
 <template>
@@ -196,6 +216,7 @@ const handleClearFilters = () => {
               placeholder="選擇地區"
               style="width: 150px"
               @update:value="filterByRegion"
+              @clear="handleClearFilters"
             />
           </div>
           <div class="text-xl flex items-center">
@@ -207,6 +228,7 @@ const handleClearFilters = () => {
                 style="outline: none"
                 @change="setStartDate($event.target.value)"
                 placeholder="活動日期"
+                v-model="selectedStartDate"
               />
             </span>
           </div>
@@ -236,9 +258,9 @@ const handleClearFilters = () => {
         </div>
         <div class="pagination-container mt-5 flex justify-center">
           <n-pagination
-            v-model:page="filters.page"
+            v-model:page="pageSelect"
             :page-size="filters.pageSize"
-            :page-count="Math.max(1, Math.ceil(pages))"
+            :page-count="pages"
             @update:page="handlePageChange"
           />
         </div>

@@ -223,7 +223,7 @@ watch(showModal, (newValue) => {
           class="w-full h-full object-cover"
           :src="
             userStore.user.photo_url ||
-            'https://i.pinimg.com/736x/20/3e/d7/203ed7d8550c2c1c145a2fb24b6fbca3.jpg'
+            'https://firebasestorage.googleapis.com/v0/b/login-demo1-9d3cb.firebasestorage.app/o/avatars%2Fcatavatar.png?alt=media&token=ccd02591-0c4f-435c-9a4a-34f219774558'
           "
           alt=""
         />
@@ -271,7 +271,14 @@ watch(showModal, (newValue) => {
       <div class="flex flex-row w-full">
         <div class="flex-shrink-0 hidden md:block md:mb-0 md:mr-8">
           <div class="w-36 h-36 rounded-full overflow-hidden">
-            <img class="w-full h-full object-cover" :src="userStore.user.photo_url" alt="" />
+            <img
+              class="w-full h-full object-cover"
+              :src="
+                userStore.user.photo_url ||
+                'https://firebasestorage.googleapis.com/v0/b/login-demo1-9d3cb.firebasestorage.app/o/avatars%2Fcatavatar.png?alt=media&token=ccd02591-0c4f-435c-9a4a-34f219774558'
+              "
+              alt=""
+            />
           </div>
         </div>
         <div class="flex flex-col justify-center gap-3">

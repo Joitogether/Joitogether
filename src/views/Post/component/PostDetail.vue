@@ -32,6 +32,7 @@ const editPostTitle = ref('')
 const editPostContent = ref('')
 const editPostImg = ref('')
 const socketStore = useSocketStore()
+
 // 留言打進後端的資料
 const newComment = ref('')
 const message = useMessage()
@@ -79,18 +80,6 @@ const fetchPostDetails = async () => {
         path: '/notFound',
       })
     }
-
-    // if (!post.data || Object.keys(post.data).length === 0) {
-    //   postDetails.category = '未分類'
-    //   postDetails.title = '查無此文章'
-    //   postDetails.content = '很抱歉，我們無法找到這篇文章的內容'
-    //   postDetails.time = ''
-    //   postDetails.img = null
-    //   postDetails.name = '未知用戶'
-    //   postDetails.avatar = null
-    //   postDetails.isPostAuthor = false
-    //   return
-    // }
 
     const user = post.data
 
@@ -472,7 +461,7 @@ watch(
         <textarea
           v-else
           v-model="editPostTitle"
-          class="border p-2 rounded w-full focus:outline-none focus:ring-2 focus:ring-yellow-400"
+          class="border p-2 rounded w-full focus:outline-none focus:ring-2 focus:ring-green-500"
           rows="1"
           style="resize: none"
           :placeholder="postDetails.title"
@@ -490,7 +479,7 @@ watch(
               alt=""
               :src="
                 postDetails.avatar ||
-                'https://i.pinimg.com/736x/20/3e/d7/203ed7d8550c2c1c145a2fb24b6fbca3.jpg'
+                'https://firebasestorage.googleapis.com/v0/b/login-demo1-9d3cb.firebasestorage.app/o/avatars%2Fcatavatar.png?alt=media&token=ccd02591-0c4f-435c-9a4a-34f219774558'
               "
             />
           </div>
@@ -506,14 +495,14 @@ watch(
         <div class="items-center">
           <div
             v-if="!isEditing"
-            class="mb-6 text-base text-gray-600 whitespace-pre-wrap tracking-wide"
+            class="mb-6 text-base text-gray-600 whitespace-pre-wrap tracking-wide break-words word-break: break-all"
           >
             {{ postDetails.content }}
           </div>
           <textarea
             v-else
             v-model="editPostContent"
-            class="border p-2 rounded w-full focus:outline-none focus:ring-2 focus:ring-yellow-400"
+            class="border p-2 rounded w-full focus:outline-none focus:ring-2 focus:ring-green-500"
             rows="5"
             style="resize: none"
             :placeholder="postDetails.content"
@@ -529,7 +518,7 @@ watch(
             <!-- 上傳圖片按鈕 -->
             <div class="flex justify-center">
               <button
-                class="mt-2 bg-green-500 text-white py-2 px-4 rounded-full hover:bg-green-600 focus:outline-none"
+                class="mt-2 bg-green-600 text-white py-2 px-4 rounded-full hover:bg-green-500 focus:outline-none"
                 @click="triggerFileInput"
               >
                 上傳圖片
@@ -567,14 +556,17 @@ watch(
           </div>
 
           <!-- 功能操作區 -->
-          <div class="gap-4 items-center h-12 mb-4">
-            <button
-              class="w-full h-full flex justify-center items-center text-white bg-green-600 rounded-full hover:bg-green-500"
+          <div class="gap-4 items-center h-9 mb-4">
+            <n-button
+              :type="hasLiked ? 'tertiary' : 'primary'"
+              strong
+              round
+              class="w-full h-full"
               @click="toggleLike"
               :disabled="false"
             >
               {{ hasLiked ? '太廢了要收回按讚' : '這篇文章太讚了' }}
-            </button>
+            </n-button>
           </div>
 
           <!-- 留言區 -->
@@ -586,7 +578,7 @@ watch(
                   alt="User Avatar"
                   :src="
                     userStore.user.photo_url ||
-                    'https://i.pinimg.com/736x/20/3e/d7/203ed7d8550c2c1c145a2fb24b6fbca3.jpg'
+                    'https://firebasestorage.googleapis.com/v0/b/login-demo1-9d3cb.firebasestorage.app/o/avatars%2Fcatavatar.png?alt=media&token=ccd02591-0c4f-435c-9a4a-34f219774558'
                   "
                   class="w-full h-full bg-yellow-200 object-cover"
                 />
@@ -600,12 +592,15 @@ watch(
                   style="resize: none"
                 ></textarea>
                 <div class="">
-                  <button
+                  <n-button
+                    strong
+                    round
+                    type="primary"
                     @click="addComment"
-                    class="mt-2 px-6 py-2 bg-green-600 text-white rounded-full hover:bg-green-500 focus:outline-none mb-3"
+                    class="mt-2 px-6 py-1 mb-3"
                   >
                     送出
-                  </button>
+                  </n-button>
                 </div>
               </div>
             </div>
@@ -625,14 +620,16 @@ watch(
                     alt="User Avatar"
                     :src="
                       comment.avatar ||
-                      'https://i.pinimg.com/736x/20/3e/d7/203ed7d8550c2c1c145a2fb24b6fbca3.jpg'
+                      'https://firebasestorage.googleapis.com/v0/b/login-demo1-9d3cb.firebasestorage.app/o/avatars%2Fcatavatar.png?alt=media&token=ccd02591-0c4f-435c-9a4a-34f219774558'
                     "
                     class="w-full h-full bg-yellow-200 object-cover"
                   />
                 </div>
                 <div>
                   <p class="font-semibold text-gray-800 text-sm">{{ comment.name }}</p>
-                  <p class="text-gray-600 text-sm whitespace-pre-wrap tracking-wide">
+                  <p
+                    class="text-gray-600 text-sm whitespace-pre-wrap tracking-wide break-words word-break: break-all"
+                  >
                     {{ comment.content }}
                   </p>
                   <p class="text-gray-400 text-sm">{{ dayjs(comment.time).fromNow() }}</p>

@@ -89,9 +89,10 @@ joitogether123@gmail.com
 [GitHub](https://github.com/Warmlatte)
 [Email](latte.0975582420@gmail.com)
 
-- 登入註冊系統
-- 資料庫管理 / 後端 API 編寫
-- 結帳系統
+- 登入註冊系統 ( 前端 + 串接 Firebase )
+- 結帳系統 ( 前端 + 後端 )
+- 後端 API 編寫 / Swagger 介面建立
+- 重構前後端 API 程式碼
 
 **林侑萱 / Yuka** -
 [GitHub](https://github.com/yucochann)

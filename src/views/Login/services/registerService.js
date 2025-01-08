@@ -25,7 +25,7 @@ const registerUser = async ({ email, password, fullName, displayName, phoneNumbe
     const backendResponse = await userRegisterAPI(userData)
 
     const actionCodeSettings = {
-      url: `https://joitogether-production.up.railway.app/signup-success`,
+      url: `https://joitogether.com/signup-success`,
       handleCodeInApp: true,
     }
 

@@ -6,25 +6,33 @@ import { auth } from './firebaseConfig'
 
 const apiAxios = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
-  timeout: 5000,
+  timeout: 10000,
 })
 
+const byPassPaths = [
+  '/posts/likes',
+  '/posts/like',
+  '/posts/comments',
+  '/posts/comment',
+  '/users/notifications',
+  '/users/summary',
+]
+
 let requestCount = 0
-let messageInstance
 
-// function showLoadingOverlay() {
-//   const overlay = document.getElementById('loading-overlay')
-//   if (overlay) {
-//     overlay.classList.add('active') // 顯示遮罩
-//   }
-// }
+function showLoadingOverlay() {
+  const overlay = document.getElementById('overlay')
+  if (overlay) {
+    overlay.classList.add('active') // 顯示遮罩
+  }
+}
 
-// function hideLoadingOverlay() {
-//   const overlay = document.getElementById('loading-overlay')
-//   if (overlay) {
-//     overlay.classList.remove('active') // 隱藏遮罩
-//   }
-// }
+function hideLoadingOverlay() {
+  const overlay = document.getElementById('overlay')
+  if (overlay) {
+    overlay.classList.remove('active') // 隱藏遮罩
+  }
+}
 
 apiAxios.interceptors.request.use(
   async function (config) {
@@ -34,11 +42,19 @@ apiAxios.interceptors.request.use(
         config.headers.Authorization = `Bearer ${token}`
       }
     }
-    // if (requestCount === 0) {
-    //   messageInstance = message.loading('請稍後...', { duration: 0 })
-    //   showLoadingOverlay()
-    // }
-    // requestCount++
+
+    if (
+      byPassPaths.some((path) => {
+        return config.url.includes(path)
+      })
+    ) {
+      return config
+    }
+
+    if (requestCount === 0) {
+      showLoadingOverlay()
+    }
+    requestCount++
     return config
   },
   function (error) {
@@ -48,20 +64,24 @@ apiAxios.interceptors.request.use(
 
 apiAxios.interceptors.response.use(
   function (response) {
-    requestCount--
-    if (requestCount === 0 && messageInstance) {
-      // hideLoadingOverlay()
-      messageInstance.destroy()
-      messageInstance = null
+    if (byPassPaths.some((path) => response.config.url.includes(path))) {
+      return response
+    }
+
+    if (requestCount > 0) {
+      requestCount--
+    }
+    if (requestCount === 0) {
+      hideLoadingOverlay()
     }
     return response
   },
   function (error) {
-    requestCount--
-    if (requestCount === 0 && messageInstance) {
-      // hideLoadingOverlay()
-      messageInstance.destroy()
-      messageInstance = null
+    if (requestCount > 0) {
+      requestCount--
+    }
+    if (requestCount === 0) {
+      hideLoadingOverlay()
     }
     return Promise.reject(error)
   },

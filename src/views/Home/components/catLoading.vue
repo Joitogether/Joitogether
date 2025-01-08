@@ -1,29 +1,13 @@
 <script setup>
-import { ref } from 'vue'
 import { DotLottieVue } from '@lottiefiles/dotlottie-vue'
-
-// 控制是否顯示 Loading
-const isVisible = ref(false)
-
-// 對外提供顯示/隱藏的方法
-function show() {
-  isVisible.value = true
-}
-
-function hide() {
-  isVisible.value = false
-}
-
-// 匯出顯示與隱藏方法
-defineExpose({ show, hide })
 </script>
 <template>
-  <div v-if="isVisible" class="loading-overlay">
+  <div class="loading-overlay">
     <dotLottieVue
       style="height: 300px; width: 300px; opacity: 0.8"
       autoplay
       loop
-      speed="1"
+      :speed="3"
       src="https://lottie.host/6aa57e00-66e4-44c2-b706-97398d52a474/VreoUPDW5c.json"
     />
   </div>
@@ -39,6 +23,6 @@ defineExpose({ show, hide })
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 9999;
+  z-index: 9999999;
 }
 </style>

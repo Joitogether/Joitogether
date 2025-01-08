@@ -186,7 +186,7 @@ const informPostUpdate = () => {
                         <img
                           :src="
                             post.avatar ||
-                            'https://i.pinimg.com/736x/20/3e/d7/203ed7d8550c2c1c145a2fb24b6fbca3.jpg'
+                            'https://firebasestorage.googleapis.com/v0/b/login-demo1-9d3cb.firebasestorage.app/o/avatars%2Fcatavatar.png?alt=media&token=ccd02591-0c4f-435c-9a4a-34f219774558'
                           "
                           class="w-full h-full object-cover"
                           alt="使用者大頭貼"
@@ -210,7 +210,7 @@ const informPostUpdate = () => {
                 v-if="post.img"
                 class="w-full md:w-3/12 aspect-square rounded-md overflow-hidden mt-4 md:mt-0"
               >
-                <img :src="post.img" class="w-full h-full object-cover" alt="文章圖片" />
+                <img v-lazy="post.img" class="w-full h-full object-cover" alt="文章圖片" />
               </div>
               <div class="flex space-x-8 text-sm text-gray-600 md:hidden">
                 <div>👍🏻 {{ post.likesCount }} 讚</div>
@@ -236,7 +236,6 @@ const informPostUpdate = () => {
     color: black;
     font-weight: bold;
     border-bottom: 2px solid rgb(44, 135, 77);
-    transition: border-color 0.15s ease-in-out;
   }
 }
 @media screen and (width >= 768px) {
@@ -244,7 +243,6 @@ const informPostUpdate = () => {
     color: white;
     border-bottom: none;
     background-color: rgb(44, 135, 77);
-    transition: border-color 0.15s ease-in-out;
   }
 }
 </style>

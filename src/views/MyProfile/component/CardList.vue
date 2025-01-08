@@ -1,6 +1,6 @@
 <script setup>
 import { NButton } from 'naive-ui'
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import { useUserStore } from '@/stores/userStore'
 import { userFollowersAddAPI, userGetFollowingAPI, userUnfollowersAPI } from '@/apis/userAPIs'
 import { useSocketStore } from '@/stores/socketStore'
@@ -31,7 +31,7 @@ const props = defineProps({
     type: String,
   },
   tags: {
-    type: Array,
+    type: String,
   },
 })
 
@@ -51,7 +51,7 @@ const fetchFollowingData = async () => {
     meFollowing.value = found
     return meFollowing.value.isFollowing
   }
-  return false
+  return (meFollowing.value.isFollowing = false)
 }
 const toggleFollow = async (following) => {
   if (following.isFollowing) {
@@ -79,6 +79,13 @@ const toggleFollow = async (following) => {
     fetchFollowingData()
   }
 }
+watch(
+  () => props.id,
+  async () => {
+    await fetchFollowingData()
+  },
+)
+
 onMounted(async () => {
   await fetchFollowingData()
 })
@@ -162,8 +169,11 @@ const emit = defineEmits(['edit', 'close'])
         >編輯檔案
       </n-button>
       <n-button
+        strong
+        secondary
+        round
         v-else
-        :type="meFollowing.isFollowing ? 'default' : 'info'"
+        :type="meFollowing.isFollowing ? 'default' : 'primary'"
         class="md:hidden"
         @click="
           () => {

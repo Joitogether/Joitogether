@@ -75,7 +75,7 @@ watch(isMobile, (newVal) => {
     ;(carouselData.value[0].src =
       'https://firebasestorage.googleapis.com/v0/b/login-demo1-9d3cb.firebasestorage.app/o/banner%2FgifMobile.gif?alt=media&token=8c56674d-2305-48f2-be00-69ac9134813f'),
       (carouselData.value[1].src =
-        'https://firebasestorage.googleapis.com/v0/b/login-demo1-9d3cb.firebasestorage.app/o/banner%2FJoiXmasMobile.jpg?alt=media&token=69ff233b-b739-47e1-a6cb-eac8329dbc82')
+        'https://firebasestorage.googleapis.com/v0/b/login-demo1-9d3cb.firebasestorage.app/o/banner%2FJoiXmasMobile.jpg?alt=media&token=db21e20e-48ca-4c42-b0af-f05f55d8981e')
   } else {
     carouselData.value[0].src =
       'https://firebasestorage.googleapis.com/v0/b/login-demo1-9d3cb.firebasestorage.app/o/banner%2Fjoitogether.gif?alt=media&token=7e8664e1-cd3c-4db7-9289-c313aa62706d'

@@ -11,12 +11,12 @@ import relativeTime from 'dayjs/plugin/relativeTime'
 import { useNotificationStore } from '@/stores/notificationStore'
 import { storeToRefs } from 'pinia'
 import { getUserSummaryAPI } from '@/apis/userAPIs'
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, watch, onUnmounted } from 'vue'
 import { handleError } from '@/utils/handleError.js'
 import { useActivityStore } from '@/stores/useActivityStore'
 
 const activityStore = useActivityStore()
-const { filters } = storeToRefs(activityStore)
+const { filters, searchKeyword } = storeToRefs(activityStore)
 const { fetchAllActivities } = useActivityStore()
 const message = useMessage()
 const userStore = useUserStore()
@@ -32,6 +32,63 @@ const followerNumber = ref(null)
 const activityNumber = ref(null)
 const userLogin = ref(false)
 const isLoginMenuOpen = ref(false)
+const loginMenuRef = ref(null)
+const toggleUserRef = ref(null)
+const popoverRef = ref(null)
+const triggerRef = ref(null)
+const loadMore = ref(null)
+const toggleMenuRef = ref(null)
+const menuRef = ref(null)
+const isMenuOpen = ref(false)
+const searchRef = ref(null)
+
+const handleMenuClickOutside = (event) => {
+  if (
+    menuRef.value &&
+    !menuRef.value.contains(event.target) &&
+    toggleMenuRef.value &&
+    !toggleMenuRef.value.contains(event.target)
+  ) {
+    isMenuOpen.value = false
+  }
+}
+const handleMenuClick = (event) => {
+  if (searchRef.value && !searchRef.value.contains(event.target)) {
+    isMenuOpen.value = false
+  }
+}
+const handleUserMenuClickOutside = (event) => {
+  if (
+    loginMenuRef.value &&
+    !loginMenuRef.value.contains(event.target) &&
+    toggleUserRef.value &&
+    !toggleUserRef.value.contains(event.target)
+  ) {
+    isLoginMenuOpen.value = false
+  }
+}
+
+const handleNotiClickOutside = (event) => {
+  const popoverEl = popoverRef.value?.$el
+  const triggerEl = triggerRef.value?.$el
+  const loadMoreEl = loadMore.value?.$el
+
+  if (
+    popoverEl &&
+    !popoverEl.contains(event.target) &&
+    triggerEl &&
+    !triggerEl.contains(event.target) &&
+    loadMoreEl &&
+    !loadMoreEl.contains(event.target)
+  ) {
+    showPopover.value = false
+  }
+}
+
+const handleNotificationClick = () => {
+  showPopover.value = false
+}
+
 const clearNumbers = () => {
   followerNumber.value = null
   activityNumber.value = null
@@ -57,11 +114,18 @@ onMounted(() => {
     userLogin.value = true
     fetUserSummary()
     userLogin.value = true
+    document.addEventListener('click', handleNotiClickOutside)
+    document.addEventListener('click', handleUserMenuClickOutside)
+    document.addEventListener('click', handleMenuClickOutside)
   } else {
     loading.value = false
   }
 })
-
+onUnmounted(() => {
+  document.removeEventListener('click', handleNotiClickOutside)
+  document.removeEventListener('click', handleUserMenuClickOutside)
+  document.removeEventListener('click', handleMenuClickOutside)
+})
 // 註冊/登入按鈕跳轉
 const navigateToLogin = () => {
   router.push({ name: 'login' })
@@ -105,7 +169,6 @@ const handleLoadClick = async () => {
   showLoading.value = false
 }
 const showLoading = ref(false)
-const searchKeyword = ref('')
 
 const handleSearchClick = (e) => {
   if (e.isComposing) return
@@ -118,8 +181,8 @@ const handleSearchClick = (e) => {
     ...filters.value,
     page: 1,
   }
-
   router.push({ name: 'home', query: { ...filters.value } })
+  isMenuOpen.value = false
 
   fetchAllActivities(filters.value)
 }
@@ -139,6 +202,15 @@ const handleTopUpClick = () => {
     message.warning('🚫 尚未登入，無法進入儲值頁面喔！💡')
   }
 }
+
+const handleLoginMenuClick = () => {
+  if (userStore.user.isLogin) {
+    router.push({ name: 'personInfo', params: { uid: userStore.user.uid } })
+    isLoginMenuOpen.value = false
+  } else {
+    message.warning('🚫 尚未登入，無法進入個人頁面喔！💡')
+  }
+}
 </script>
 
 <template>
@@ -147,18 +219,21 @@ const handleTopUpClick = () => {
     class="fixed z-50 top-0 left-0 w-screen h-16 bg-white py-1 px-4 flex items-center justify-between shadow"
   >
     <div class="flex items-center">
-      <div class="hidden md:block w-16 md:h-9 md:overflow-hidden">
+      <div class="hidden md:block w-auto md:h-7 md:overflow-hidden">
         <RouterLink to="/">
-          <img src="../../../assets/Joi.png" alt="logo" class="w-full h-full object-contain" />
+          <img
+            src="https://firebasestorage.googleapis.com/v0/b/login-demo1-9d3cb.firebasestorage.app/o/banner%2FJoitogetherLOGO.png?alt=media&token=fe2e71e3-7b28-4a08-b920-8d944c93a188"
+            alt="logo"
+            class="w-full h-full object-contain"
+          />
         </RouterLink>
       </div>
       <div class="hidden lg:flex flex-row items-center gap-2 mx-3">
-        <label for="search" class="cursor-pointer hover:text-green-600">找聚會</label>
+        <RouterLink to="/" class="cursor-pointer hover:text-green-600">找聚會</RouterLink>
         <div class="flex items-center gap-2">
           <input
             v-model="searchKeyword"
             type="text"
-            id="search"
             class="h-8 bg-gray-100 rounded-full p-3 focus:outline-green-600"
             placeholder="運動、美食、唱歌..."
             @keydown.enter="handleSearchClick"
@@ -176,15 +251,16 @@ const handleTopUpClick = () => {
       </div>
 
       <div class="md:hidden">
-        <input type="checkbox" id="menu-toggle" class="hidden" />
-        <label for="menu-toggle" class="text-gray-500 cursor-pointer">
+        <input type="checkbox" id="menu-toggle" class="hidden" v-model="isMenuOpen" />
+        <label ref="toggleMenuRef" for="menu-toggle" class="text-gray-500 cursor-pointer">
           <Menu class="hover:text-green-600 w-8 h-8" />
         </label>
         <!--選單內容-->
-        <div id="menu" class="w-full bg-gray-50 text-black p-6 space-y-4 rounded-md">
-          <ul>
+        <div ref="menuRef" id="menu" class="w-full bg-gray-50 text-black p-6 space-y-4 rounded-md">
+          <ul @click="handleMenuClick">
             <li class="flex gap-3">
               <input
+                ref="searchRef"
                 @keydown.enter="handleSearchClick"
                 v-model="searchKeyword"
                 type="text"
@@ -236,9 +312,15 @@ const handleTopUpClick = () => {
         </div>
       </div>
 
-      <div class="md:hidden w-16 h-9 overflow-hidden absolute left-1/2 transform -translate-x-1/2">
+      <div
+        class="md:hidden w-auto h-8 overflow-hidden absolute left-1/2 transform -translate-x-1/2"
+      >
         <RouterLink to="/">
-          <img src="../../../assets/Joi.png" alt="logo" class="w-full h-full object-contain" />
+          <img
+            src="https://firebasestorage.googleapis.com/v0/b/login-demo1-9d3cb.firebasestorage.app/o/banner%2FJoitogetherLOGO.png?alt=media&token=fe2e71e3-7b28-4a08-b920-8d944c93a188"
+            alt="logo"
+            class="w-full h-full object-contain"
+          />
         </RouterLink>
       </div>
 
@@ -278,8 +360,9 @@ const handleTopUpClick = () => {
         </router-link>
       </div>
       <n-popover
+        ref="popoverRef"
         placement="bottom-end"
-        class="w-[300px] bellNotice"
+        class="w-[320px] bellNotice"
         trigger="manual"
         :show="showPopover"
         :style="{
@@ -290,28 +373,38 @@ const handleTopUpClick = () => {
       >
         <template #trigger>
           <n-badge
+            ref="triggerRef"
             @click="showPopover = !showPopover"
             :max="15"
             :value="unreadCount"
             class="cursor-pointer"
           >
-            <BellNotification class="hover:text-green-600"></BellNotification>
+            <BellNotification
+              class="text-gray-600 hover:text-green-600 transition-all duration-200"
+            ></BellNotification>
           </n-badge>
         </template>
         <n-scrollbar style="max-height: 500px">
           <div class="flex flex-col">
             <p class="py-2 mb-2 text-xl text-center font-bold border-b-2 border-gray-200">通知</p>
             <div v-if="notifications.length > 0 && userStore.user.uid">
-              <div v-for="notification in notifications" :key="notification.id">
+              <div
+                v-for="notification in notifications"
+                :key="notification.id"
+                @click="handleNotificationClick()"
+              >
                 <router-link :to="notification.link">
                   <div
                     :class="{ 'bg-gray-100': !notification.is_read }"
-                    class="group hover:bg-gray-200 px-3 overflow-hidden post-onepost-top flex py-2 rounded-md justify-between items-center cursor-pointer"
+                    class="group hover:bg-gray-200 px-3 overflow-hidden post-onepost-top flex py-2 rounded-md justify-between items-start cursor-pointer border-b border-gray-200"
                   >
                     <div class="w-14 h-14 aspect-square rounded-full overflow-hidden">
                       <img
                         class="w-full h-full object-cover bg-gray-400"
-                        :src="notification.users_notifications_actor_idTousers.photo_url"
+                        :src="
+                          notification.users_notifications_actor_idTousers.photo_url ||
+                          'https://firebasestorage.googleapis.com/v0/b/login-demo1-9d3cb.firebasestorage.app/o/avatars%2Fcatavatar.png?alt=media&token=ccd02591-0c4f-435c-9a4a-34f219774558'
+                        "
                         alt=""
                       />
                     </div>
@@ -320,20 +413,31 @@ const handleTopUpClick = () => {
                       <span class="font-bold text-base">
                         {{ notification.users_notifications_actor_idTousers.display_name }}
                       </span>
-                      <span class="text-base">
+                      <span class="text-sm line-clamp-3">
                         {{ notification.message }}
                       </span>
-                      <span v-if="notification.target_type === 'activity'" class="text-base">
+                      <span
+                        v-if="notification.target_type === 'activity'"
+                        class="text-sm line-clamp-1"
+                      >
                         {{ notification.target_detail.name }}
                       </span>
-                      <span v-else-if="notification.target_type === 'post'" class="text-base">
+                      <span
+                        v-else-if="notification.target_type === 'post'"
+                        class="text-sm line-clamp-1"
+                      >
                         {{ notification.target_detail.post_title }}
                       </span>
-                      <span v-else-if="notification.target_type === 'rating'" class="text-base">
+                      <span
+                        v-else-if="notification.target_type === 'rating'"
+                        class="text-sm line-clamp-1"
+                      >
                         {{ notification.target_detail.user_comment }}
                       </span>
-
-                      <p class="w-full text-md text-gray-400">
+                      <span v-else-if="notification.target_type === 'user'" class="text-sm line-clamp-1">
+                        {{ notification.target_detail.message }}
+                      </span>
+                      <p class="w-full text-sm text-gray-400">
                         {{ dayjs(notification.created_at).fromNow() }}
                       </p>
                     </div>
@@ -344,7 +448,10 @@ const handleTopUpClick = () => {
             <div v-else-if="userStore.user.uid && notifications.length === 0">暫無通知</div>
             <div v-else>登入以查看通知</div>
             <n-spin v-if="!notificationStore.hideLoadBtn" :show="showLoading">
-              <n-button @click="handleLoadClick" class="w-full h-12 mt-2 text-lg font-bold"
+              <n-button
+                @click="handleLoadClick"
+                class="w-full h-12 mt-2 text-lg font-bold"
+                ref="loadMore"
                 >加載更多</n-button
               >
             </n-spin>
@@ -361,15 +468,17 @@ const handleTopUpClick = () => {
       <input type="checkbox" id="login-toggle" v-model="isLoginMenuOpen" />
       <label
         for="login-toggle"
+        ref="toggleUserRef"
         class="inline-flex items-center justify-center text-sm text-gray-500 cursor-pointer"
       >
-        <User class="w-7 h-7 hover:text-green-600" />
+        <User class="w-7 h-7 text-gray-500 hover:text-green-600" />
       </label>
       <div v-if="loading"></div>
 
       <div
         v-else
         id="login-menu"
+        ref="loginMenuRef"
         class="w-full rounded-md bg-gray-50 text-black px-6 py-10 space-y-4 shadow-md md:w-1/3 md:right-2 lg:w-1/4"
       >
         <div
@@ -399,13 +508,7 @@ const handleTopUpClick = () => {
         <div class="flex justify-center">
           <button
             class="border border-gray-600 text-gray-600 py-2 px-4 rounded-full hover:border-green-600 hover:text-green-600"
-            @click="
-              (isLoginMenuOpen = false),
-                router.push({
-                  name: 'personInfo',
-                  params: { uid: userStore.user.uid },
-                })
-            "
+            @click="handleLoginMenuClick"
           >
             查看個人頁面
           </button>

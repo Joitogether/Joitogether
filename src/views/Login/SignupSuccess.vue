@@ -102,7 +102,7 @@ const goHome = () => {
 
 // 前往個人頁面
 const goProfile = () => {
-  router.push('/profile')
+  router.push({ name: 'personInfo', params: { uid: userStore.user.uid } })
 }
 </script>
 

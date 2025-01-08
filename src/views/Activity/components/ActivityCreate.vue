@@ -349,6 +349,7 @@ const formattedDeadLine = computed(() =>
 )
 
 onMounted(() => {
+  window.scrollTo({ top: 0 })
   timeRange.value.minTime = minTime
   timeRange.value.maxTime = maxTime
 })
@@ -687,7 +688,6 @@ const previewActivity = () => {
                 </div>
                 <div class="flex flex-col">
                   <p class="font-bold text-lg">{{ user.display_name }}</p>
-                  <p class="">{{ user.city }} • {{ user.age }} • {{ user.career }}</p>
                 </div>
               </div>
 
