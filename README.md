@@ -1,20 +1,20 @@
-# JoiTogether
+# Joitogether
 
-[Website 網站]()
+[Website 網站](https://joitogether-production.up.railway.app/home)
 [Demo 發表影片]()
 
-![揪團去吧](/Joitogether/src/assets/jojoitogeter.png 'Joitogether<3')
+![揪團去吧](https://firebasestorage.googleapis.com/v0/b/login-demo1-9d3cb.firebasestorage.app/o/activities%2Fjoitogether.gif?alt=media&token=6f24e5aa-dbad-4d10-9441-3a00f1beb0f7)
 
-**JoiTogether 揪愛一起出去玩 - ReadMe**
+**Joitogether 揪愛一起出去玩 - ReadMe**
 
-![揪團去吧](/Joitogether/src/assets/Joi.png 'Joitogether<3')
+![揪團去吧](https://firebasestorage.googleapis.com/v0/b/login-demo1-9d3cb.firebasestorage.app/o/activities%2Fmainlogo.png?alt=media&token=d07156f1-137a-4964-9dad-1d790c18f8b1)
 
-[![Static Badge](https://img.shields.io/badge/JoiTogether-check-Turquoise?logo=github)](https://github.com/Joitogether)
+[![Static Badge](https://img.shields.io/badge/Joitogether-check-Turquoise?logo=github)](https://github.com/Joitogether)
 [![Static Badge](https://img.shields.io/badge/FaceBook-ABOUT_ME-Turquoise?logo=facebook)](https://www.facebook.com/profile.php?id=61569158736978) ![Static Badge](https://img.shields.io/badge/%F0%9F%93%85Last_updete-January_01_2025-Turquoise)
 
-歡迎來到 JoiTogether！讓我們一起放下生活瑣事，揪愛和你一起玩！
+歡迎來到 Joitogether！讓我們一起放下生活瑣事，揪愛和你一起玩！
 
-## 關於 JoiTogether
+## 關於 Joitogether
 
 創作者是一群喜歡大家一起出去玩的人。  
  因為現代人出社會久了，學生時代的朋友也都有各自的事業  
@@ -24,7 +24,7 @@
 
 ## 讓我們開始吧！
 
-1. **註冊帳戶：** 在 JoiTogether 官方網站上，點擊註冊按鈕並填寫您的個人資料。
+1. **註冊帳戶：** 在 Joitogether 官方網站上，點擊註冊按鈕並填寫您的個人資料。
 
 2. **建立個人檔案：** 登錄後，您可以建立您的個人檔案，介紹您的興趣、技能和專長。這將有助於其他朋友更好地了解您，並可以尋找到與您興趣相投的朋友。
 
@@ -40,7 +40,7 @@
 
 joitogether123@gmail.com
 
-讓我們 JoiTogether 揪愛和你出去玩！
+讓我們 Joitogether 揪愛和你出去玩！
 
 ## 開發團隊
 
@@ -60,7 +60,7 @@ joitogether123@gmail.com
 - 首頁活動區 / 活動建立功能
 - 購物車 後端API
 
-**蔡庚志 / Even** -
+**蔡庚志 / Evan** -
 [GitHub](https://github.com/ggps9924114)
 [Email](ggps9924114@gmail.com)
 
@@ -74,7 +74,7 @@ joitogether123@gmail.com
 
 - 個人頁面API串接
 - 購物車功能 / 前後端串接
-- 切版
+- 追蹤功能
 - README
 
 **李佳樺 / Helen** -
@@ -89,9 +89,10 @@ joitogether123@gmail.com
 [GitHub](https://github.com/Warmlatte)
 [Email](latte.0975582420@gmail.com)
 
-- 登入註冊系統
-- 資料庫管理 / 後端 API 編寫
-- 結帳系統
+- 登入註冊系統 ( 前端 + 串接 Firebase )
+- 結帳系統 ( 前端 + 後端 )
+- 後端 API 編寫 / Swagger 介面建立
+- 重構前後端 API 程式碼
 
 **林侑萱 / Yuka** -
 [GitHub](https://github.com/yucochann)
