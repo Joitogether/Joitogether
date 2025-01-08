@@ -393,7 +393,10 @@ const handleLoginMenuClick = () => {
                     <div class="w-14 h-14 aspect-square rounded-full overflow-hidden">
                       <img
                         class="w-full h-full object-cover bg-gray-400"
-                        :src="notification.users_notifications_actor_idTousers.photo_url"
+                        :src="
+                          notification.users_notifications_actor_idTousers.photo_url ||
+                          'https://firebasestorage.googleapis.com/v0/b/login-demo1-9d3cb.firebasestorage.app/o/avatars%2Fcatavatar.png?alt=media&token=ccd02591-0c4f-435c-9a4a-34f219774558'
+                        "
                         alt=""
                       />
                     </div>
