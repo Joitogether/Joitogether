@@ -461,7 +461,7 @@ watch(
         <textarea
           v-else
           v-model="editPostTitle"
-          class="border p-2 rounded w-full focus:outline-none focus:ring-2 focus:ring-yellow-400"
+          class="border p-2 rounded w-full focus:outline-none focus:ring-2 focus:ring-green-500"
           rows="1"
           style="resize: none"
           :placeholder="postDetails.title"
@@ -502,7 +502,7 @@ watch(
           <textarea
             v-else
             v-model="editPostContent"
-            class="border p-2 rounded w-full focus:outline-none focus:ring-2 focus:ring-yellow-400"
+            class="border p-2 rounded w-full focus:outline-none focus:ring-2 focus:ring-green-500"
             rows="5"
             style="resize: none"
             :placeholder="postDetails.content"
@@ -518,7 +518,7 @@ watch(
             <!-- 上傳圖片按鈕 -->
             <div class="flex justify-center">
               <button
-                class="mt-2 bg-green-500 text-white py-2 px-4 rounded-full hover:bg-green-600 focus:outline-none"
+                class="mt-2 bg-green-600 text-white py-2 px-4 rounded-full hover:bg-green-500 focus:outline-none"
                 @click="triggerFileInput"
               >
                 上傳圖片
