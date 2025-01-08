@@ -353,7 +353,7 @@ const handleCancelClick = async (id, activity_id) => {
 }
 
 const quickReplyVisible = ref(false)
-const selectedReplies = ref([])
+const selectedReplies = ref('')
 const currentAttendeeId = ref(null)
 const replyOptions = [
   '審核時間未到，請耐心等候',
@@ -374,7 +374,7 @@ const hideQuickReply = () => {
   message.info('已取消操作')
 }
 
-const deleteReply = (attendeeId, replyIndex) => {
+const deleteReply = (attendeeId) => {
   const attendeeToModify = attendee.value.find((item) => item.id === attendeeId)
   if (!attendeeToModify) {
     message.error('找不到該參加者！')
@@ -382,7 +382,7 @@ const deleteReply = (attendeeId, replyIndex) => {
   }
 
   // 刪除指定回覆
-  attendeeToModify.replies.splice(replyIndex, 1)
+  attendeeToModify.replies = ''
 
   // 更新 localStorage
   const storedReplies = JSON.parse(localStorage.getItem('attendeeReplies')) || {}
@@ -394,15 +394,18 @@ const deleteReply = (attendeeId, replyIndex) => {
 
 const sendReplies = async () => {
   const attendeeToReply = attendee.value.find((item) => item.id === currentAttendeeId.value)
+  if (!selectedReplies.value.length) {
+    return message.error('回覆內容不得為空')
+  }
   if (attendeeToReply) {
-    attendeeToReply.replies = [...selectedReplies.value]
+    attendeeToReply.replies = selectedReplies.value
     const notiData = {
       actor_id: userStore.user.uid, // 誰觸發了這個行為
       user_id: attendeeToReply.number.replace(/^@/, ''), // 這個行為對誰觸發
       target_id: Number(activity_id), // 被行為的受詞id
       action: 'review', // 行為 (目前僅有'create','register','like','comment','review', 'rate')
       target_type: 'activity', // 行為類型 (目前僅有'activity','post','rating')
-      message: '回覆了你的報名', // 要顯示在提醒欄位的敘述
+      message: `回覆了你的報名: ${attendeeToReply.replies}`, // 要顯示在提醒欄位的敘述
       link: `/activity/detail/${activity_id}`, // 這個提醒要導向哪個頁面
     }
 
@@ -702,8 +705,8 @@ const sendReplies = async () => {
                     刪除
                   </n-button>
                 </div>
-                <div v-for="(reply, idx) in item.replies" :key="idx" class="text-xs text-green-800">
-                  {{ reply }}
+                <div class="text-xs text-green-800">
+                  {{ item.replies }}
                 </div>
               </div>
             </div>
@@ -722,7 +725,7 @@ const sendReplies = async () => {
                     class="flex items-center mb-2 px-3 py-1 rounded-md cursor-pointer hover:bg-green-100 hover:scale-105 transition-all"
                   >
                     <input
-                      type="checkbox"
+                      type="radio"
                       v-model="selectedReplies"
                       :value="option"
                       class="mr-2 accent-green-400"
