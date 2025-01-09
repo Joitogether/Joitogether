@@ -389,7 +389,7 @@ watch(
 
 <template>
   <div class="bg-gray-100 w-full p-4">
-    <div class="flex items-center relative w-full md:w-3/4 lg:w-1/2 mx-auto lg:max-w-[1000px]">
+    <div class="flex items-center relative w-full md:w-3/4 lg:w-3/5 mx-auto lg:max-w-[1000px]">
       <NavArrowLeft
         stroke-width="2"
         class="w-6 h-6 cursor-pointer"
@@ -453,7 +453,7 @@ watch(
     </div>
   </div>
   <div class="bg-gray-100">
-    <div class="p-6 md:mx-auto md:w-3/4 lg:w-1/2 bg-white">
+    <div class="p-6 md:mx-auto md:w-3/4 lg:w-3/5 bg-white">
       <div class="">
         <p v-if="!isEditing" class="text-2xl font-bold text-gray-700 tracking-wide">
           {{ postDetails.title }}
