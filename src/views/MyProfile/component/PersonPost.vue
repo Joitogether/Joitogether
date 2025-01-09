@@ -81,7 +81,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div v-if="userPostList.length > 0">
+  <div v-if="userPostList.length > 0" class="min-h-screen">
     <div
       v-for="post in userPostList"
       :key="post.post_id"

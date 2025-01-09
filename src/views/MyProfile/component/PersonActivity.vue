@@ -112,7 +112,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="flex flex-col gap-5">
+  <div class="flex flex-col gap-5 min-h-screen">
     <div class="text-xl flex items-center justify-end">
       <n-select
         v-model:value="selectedValue"

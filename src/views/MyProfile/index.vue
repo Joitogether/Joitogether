@@ -66,7 +66,7 @@ const currentPage = ref('PersonInfo')
 </script>
 
 <template>
-  <div class="container mx-auto p-4">
+  <div class="container mx-auto p-4 min-h-screen">
     <CardList
       :id="route.params.uid"
       :display_name="user.display_name"

@@ -92,7 +92,7 @@ onMounted(() => {
 
 <template>
   <div class="px-5 md:flex md:justify-between md:gap-10 md:px-2">
-    <div class="md:w-1/2">
+    <div class="md:w-1/2 min-h-screen">
       <div class="py-2">
         <div class="flex justify-center">
           <div class="flex flex-row items-center gap-1">
