@@ -233,14 +233,12 @@
                 class="w-full h-full rounded-full overflow-hidden border border-gray-300 bg-gray-100 flex items-center justify-center"
               >
                 <img
-                  v-if="formValue.avatar"
-                  :src="formValue.avatar"
+                  :src="
+                    formValue.avatar ||
+                    'https://firebasestorage.googleapis.com/v0/b/login-demo1-9d3cb.firebasestorage.app/o/avatars%2Fcatavatar.png?alt=media&token=ccd02591-0c4f-435c-9a4a-34f219774558'
+                  "
                   alt="Avatar Preview"
                   class="w-full h-full object-cover"
-                />
-                <img
-                  v-else
-                  src="https://firebasestorage.googleapis.com/v0/b/login-demo1-9d3cb.firebasestorage.app/o/avatars%2Fcatavatar.png?alt=media&token=ccd02591-0c4f-435c-9a4a-34f219774558"
                 />
               </div>
             </div>
