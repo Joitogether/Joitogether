@@ -3,7 +3,7 @@ npm# Joitogether
 [Website 網站](https://joitogether-production.up.railway.app/home)
 [Demo 發表影片]()
 
-![揪團去吧](https://firebasestorage.googleapis.com/v0/b/login-demo1-9d3cb.firebasestorage.app/o/activities%2Fjoitogether.gif?alt=media&token=6f24e5aa-dbad-4d10-9441-3a00f1beb0f7)
+![揪團去吧](https://firebasestorage.googleapis.com/v0/b/login-demo1-9d3cb.firebasestorage.app/o/banner%2Fjoitogether.gif?alt=media&token=7e8664e1-cd3c-4db7-9289-c313aa62706d)
 
 **Joitogether 揪愛一起出去玩 - ReadMe**
 
