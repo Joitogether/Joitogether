@@ -219,7 +219,7 @@ const handleLoginMenuClick = () => {
     class="fixed z-50 top-0 left-0 w-screen h-16 bg-white py-1 px-4 flex items-center justify-between shadow"
   >
     <div class="flex items-center">
-      <div class="hidden md:block w-auto md:h-7 md:overflow-hidden">
+      <div class="hidden md:block md:w-32 md:overflow-hidden">
         <RouterLink to="/">
           <img
             src="https://firebasestorage.googleapis.com/v0/b/login-demo1-9d3cb.firebasestorage.app/o/banner%2FJoitogetherLOGO.png?alt=media&token=fe2e71e3-7b28-4a08-b920-8d944c93a188"
@@ -434,7 +434,10 @@ const handleLoginMenuClick = () => {
                       >
                         {{ notification.target_detail.user_comment }}
                       </span>
-                      <span v-else-if="notification.target_type === 'user'" class="text-sm line-clamp-1">
+                      <span
+                        v-else-if="notification.target_type === 'user'"
+                        class="text-sm line-clamp-1"
+                      >
                         {{ notification.target_detail.message }}
                       </span>
                       <p class="w-full text-sm text-gray-400">
