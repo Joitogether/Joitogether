@@ -4,7 +4,7 @@ import { DotLottieVue } from '@lottiefiles/dotlottie-vue'
 <template>
   <div class="loading-overlay">
     <dotLottieVue
-      style="height: 300px; width: 300px; opacity: 0.8"
+      class="lottie"
       autoplay
       loop
       :speed="3"
@@ -13,6 +13,11 @@ import { DotLottieVue } from '@lottiefiles/dotlottie-vue'
   </div>
 </template>
 <style scoped>
+.lottie {
+  height: 250px;
+  width: 250px;
+  opacity: 0.8;
+}
 .loading-overlay {
   position: fixed;
   top: 0;
@@ -24,5 +29,17 @@ import { DotLottieVue } from '@lottiefiles/dotlottie-vue'
   justify-content: center;
   align-items: center;
   z-index: 9999999;
+}
+@media screen and (width < 768px) {
+  .lottie {
+    height: 150px;
+    width: 150px;
+  }
+}
+@media screen and (768px < width < 1024px) {
+  .lottie {
+    height: 200px;
+    width: 200px;
+  }
 }
 </style>
