@@ -15,7 +15,10 @@
                 alt="Avatar Preview"
                 class="w-full h-full object-cover"
               />
-              <span v-else class="text-gray-500">無圖片</span>
+              <img
+                v-else
+                src="https://firebasestorage.googleapis.com/v0/b/login-demo1-9d3cb.firebasestorage.app/o/avatars%2Fcatavatar.png?alt=media&token=ccd02591-0c4f-435c-9a4a-34f219774558"
+              />
             </div>
           </div>
         </div>

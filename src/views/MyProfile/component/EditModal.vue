@@ -325,12 +325,13 @@ watch(
               <div class="relative w-44 h-44">
                 <div class="w-full h-full aspect-square rounded-full overflow-hidden">
                   <img
-                    v-if="user.photo_url"
-                    :src="user.photo_url"
+                    :src="
+                      user.photo_url ||
+                      'https://firebasestorage.googleapis.com/v0/b/login-demo1-9d3cb.firebasestorage.app/o/avatars%2Fcatavatar.png?alt=media&token=ccd02591-0c4f-435c-9a4a-34f219774558'
+                    "
                     alt="avatar"
                     class="w-full h-full object-cover"
                   />
-                  <span v-else class="text-gray-500">無圖片</span>
                 </div>
                 <div class="absolute bottom-2 right-2">
                   <n-upload
