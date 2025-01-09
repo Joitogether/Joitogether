@@ -247,7 +247,7 @@ const onReviewPositiveClick = () => {
   if (!userStore.user.uid) {
     return message.error('您尚未登入，請先登入才能繼續此操作')
   }
-  router.push({ name: 'activityReview', params: { activity_id: activityId } })
+  router.push({ name: 'activityReview', params: { activity_id: activity.value.id } })
 }
 
 const onReviewNegativeClick = () => {
