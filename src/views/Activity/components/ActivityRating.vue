@@ -3,7 +3,7 @@ import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useMessage, useDialog, NRate, NSpace, NInput, NModal } from 'naive-ui'
 import { CheckCircle, CheckCircleSolid, HeartSolid, PeopleTag, Group, HandCard } from '@iconoir/vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ratingGetDetailAPI, ratingSubmitAPI } from '@/apis/ratingAPIs'
+import { ratingGetDetailAPI, ratingSubmitAPI, getRatingRecordAPI } from '@/apis/ratingAPIs'
 import dayjs from 'dayjs'
 import { useUserStore } from '@/stores/userStore'
 import { handleError } from '@/utils/handleError.js'
@@ -79,6 +79,8 @@ const getDetailForRating = async () => {
   try {
     const { activity_id } = route.params
     const res = await ratingGetDetailAPI(activity_id)
+    const found_rate = await getRatingRecordAPI(activity_id, userStore.user.uid)
+    const user_rated = found_rate.hasRated
 
     if (!res || !res.activity) {
       activityDetail.value = {}
@@ -99,17 +101,14 @@ const getDetailForRating = async () => {
       setTimeout(() => {
         router.push(`/`)
       }, 1500)
-    } else {
-      if (applications.value) {
-        const found = latestHostRating.value.find((rate) => rate.user_id == userStore.user.uid)
-
-        if (found) {
-          message.warning('您已經評價過囉！')
-          setTimeout(() => {
-            router.push(`/`)
-          }, 1500)
-        }
-      }
+      return
+    }
+    if (user_rated) {
+      message.warning('您已經評價過囉！')
+      setTimeout(() => {
+        router.push(`/`)
+      }, 1500)
+      return
     }
   } catch (error) {
     activityDetail.value = {}
