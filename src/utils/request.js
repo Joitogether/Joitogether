@@ -16,6 +16,7 @@ const byPassPaths = [
   '/posts/comment',
   '/users/notifications',
   '/users/summary',
+  '/activities/autocomplete',
 ]
 
 let requestCount = 0
