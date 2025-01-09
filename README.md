@@ -1,4 +1,4 @@
-# Joitogether
+npm# Joitogether
 
 [Website 網站](https://joitogether-production.up.railway.app/home)
 [Demo 發表影片]()
@@ -7,7 +7,7 @@
 
 **Joitogether 揪愛一起出去玩 - ReadMe**
 
-![揪團去吧](https://firebasestorage.googleapis.com/v0/b/login-demo1-9d3cb.firebasestorage.app/o/activities%2Fmainlogo.png?alt=media&token=d07156f1-137a-4964-9dad-1d790c18f8b1)
+![揪團去吧](https://firebasestorage.googleapis.com/v0/b/login-demo1-9d3cb.firebasestorage.app/o/banner%2FJoitogetherLOGO.png?alt=media&token=fe2e71e3-7b28-4a08-b920-8d944c93a188)
 
 [![Static Badge](https://img.shields.io/badge/Joitogether-check-Turquoise?logo=github)](https://github.com/Joitogether)
 [![Static Badge](https://img.shields.io/badge/FaceBook-ABOUT_ME-Turquoise?logo=facebook)](https://www.facebook.com/profile.php?id=61569158736978) ![Static Badge](https://img.shields.io/badge/%F0%9F%93%85Last_updete-January_01_2025-Turquoise)
